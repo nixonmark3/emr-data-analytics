@@ -1,4 +1,3 @@
-
 var analyticsApp = angular.module('analyticsApp', ['ngRoute', 'ngSanitize'])
     .config(function ($routeProvider, $locationProvider) {
         $routeProvider.when('/studio', {
