@@ -1,7 +1,25 @@
-@(message: String)
+@(title: String)
 
-@main("Welcome to Play") {
+@styles = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/diagram.css")">
+}
 
-    @play20.welcome(message, style = "Java")
+@scripts = {
 
+}
+
+@main(title)(styles)(scripts){
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">@title</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <ng-view></ng-view>
+        </div>
+    </div>
 }

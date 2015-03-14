@@ -1,0 +1,30 @@
+
+
+/*
+ * Diagram
+ */
+
+#diagram{
+    position: relative;
+    min-height: 800px;
+}
+
+.block-item{
+    border: #c0c0c0 1px solid;
+    z-index: 1000;
+    cursor: move;
+    background-color: #ffffff;
+    position: absolute;
+}
+
+.block-header{
+    border-bottom: #c0c0c0 1px solid;
+    width: 100%;
+    background-color: #1f77b4;
+    color: #f0f0f0;
+    cursor: move;
+    text-align: center;
+    font-size: 1.1em;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
