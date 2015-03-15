@@ -1,30 +1,31 @@
 
 
 /*
- * Diagram
+ * Blocks
  */
 
-#diagram{
-    position: relative;
-    min-height: 800px;
-}
+.block-group{ cursor: move; }
 
-.block-item{
-    border: #c0c0c0 1px solid;
-    z-index: 1000;
-    cursor: move;
-    background-color: #ffffff;
-    position: absolute;
-}
+.block-rect{ fill: #ffffff; stroke: #d8d8d8; stroke-width: 1; }
 
-.block-header{
-    border-bottom: #c0c0c0 1px solid;
-    width: 100%;
-    background-color: #1f77b4;
-    color: #f0f0f0;
-    cursor: move;
-    text-align: center;
-    font-size: 1.1em;
-    padding-top: 5px;
-    padding-bottom: 5px;
-}
+.block-header{ stroke: #d8d8d8; stroke-width: 1; }
+rect.block-config{ fill: #1f77b4; }
+
+.block-name{ fill: #e8e8e8; font-size: 1.1em; }
+.block-definition{ fill: #b8b8b8; }
+
+.block-icon { font-family: FontAwesome; fill: #b8b8b8; }
+
+/*
+ * Connectors
+ */
+
+.connector{ stroke-width: 1; }
+circle.block-config{ stroke: #1f77b4; fill: #aec7e8; }
+
+/*
+ * Wires
+ */
+
+.wire { stroke: #989898; stroke-width: 4; fill: transparent; }
+.wire-endpoint { fill: #989898; }

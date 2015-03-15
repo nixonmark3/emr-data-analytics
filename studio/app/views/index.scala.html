@@ -5,7 +5,12 @@
 }
 
 @scripts = {
+    <script type="text/javascript" src="@routes.Assets.at("scripts/app.js")"></script>
 
+    <script type="text/javascript" src="@routes.Assets.at("scripts/components/diagram/diagramViewModel.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("scripts/components/diagram/diagram.js")"></script>
+
+    <script type="text/javascript" src="@routes.Assets.at("scripts/services/diagramService.js")"></script>
 }
 
 @main(title)(styles)(scripts){
@@ -17,9 +22,13 @@
         </div>
     </nav>
 
-    <div class="container-fluid">
+    <div class="container-fluid"
+        ng-app="analyticsApp"
+        ng-controller="analyticsController">
+
         <div class="row">
             <ng-view></ng-view>
         </div>
+
     </div>
 }
