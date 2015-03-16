@@ -24,9 +24,9 @@ angular.module('diagramApp', ['draggableApp'])
                     return $(element);
                 }
 
-                var wireClass = 'wire';
-                var connectorClass = 'connector';
-                var blockClass = 'block';
+                var wireClass = 'wire-group';
+                var connectorClass = 'connector-group';
+                var blockClass = 'block-group';
 
                 var hasClassSVG = function(obj, has) {
                     var classes = obj.attr('class');
