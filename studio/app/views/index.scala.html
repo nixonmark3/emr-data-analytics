@@ -5,11 +5,13 @@
 }
 
 @scripts = {
-    <script type="text/javascript" src="@routes.Assets.at("scripts/app.js")"></script>
+
+    <script type="text/javascript" src="@routes.Assets.at("scripts/shared/draggable.js")"></script>
 
     <script type="text/javascript" src="@routes.Assets.at("scripts/components/diagram/diagramViewModel.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("scripts/components/diagram/diagram.js")"></script>
 
+    <script type="text/javascript" src="@routes.Assets.at("scripts/app.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("scripts/services/diagramService.js")"></script>
 }
 
@@ -26,7 +28,7 @@
         ng-app="analyticsApp"
         ng-controller="analyticsController">
 
-        <div class="row">
+        <div class="row" draggable>
             <ng-view></ng-view>
         </div>
 

@@ -1,15 +1,14 @@
 
-<svg class="draggable-container"
-        xmlns="http://www.w3.org/2000/svg">
-        <!--ng-mousedown="mouseDown($event)"
-        ng-mousemove="mouseMove($event)"-->
+<svg xmlns="http://www.w3.org/2000/svg"
+        ng-mousedown="mouseDown($event)"
+        ng-mousemove="mouseMove($event)">
 
-    <g class="block-group"
+    <g class="block"
             ng-repeat="block in diagram.blocks"
             ng-mousedown="blockMouseDown($event, block)"
             ng-attr-transform="translate({{block.x()}}, {{block.y()}})">
 
-        <rect ng-attr-class="{{block.selected() && 'selected-block-rect' || (block == mouseOverNode && 'mouseover-block-rect' || 'block-rect')}}"
+        <rect ng-attr-class="{{block.selected() && 'block-selected' || (block == mouseOverNode && 'block-mouseover' || 'block-rect')}}"
               ry="6"
               rx="6"
               x="0"
@@ -66,7 +65,8 @@
               text-anchor="end"
               alignment-baseline="bottom">&#xf080</text>
 
-        <g ng-repeat="connector in block.inputConnectors">
+        <g class="connector"
+                ng-repeat="connector in block.inputConnectors">
                 <!--ng-mousedown="connectorMouseDown($event, block, connector, $index, true)"-->
 
             <!--<text ng-attr-x="{{connector.x() + 20}}"
@@ -78,15 +78,16 @@
             </text>-->
 
             <circle
-                    ng-attr-class="{{connector == mouseOverConnector && 'mouseover-connector' || 'connector'}} {{block.stateClass()}}"
-                    ng-attr-r="{{block.connectorRadius}}"
+                    ng-attr-class="{{connector == mouseOverConnector && 'mouseover-connector' || 'connector-circle'}} {{block.stateClass()}}"
+                    ng-attr-r="{{connectorRadius}}"
                     ng-attr-cx="{{connector.x()}}"
                     ng-attr-cy="{{connector.y()}}"
                     />
 
         </g>
 
-        <g ng-repeat="connector in block.outputConnectors">
+        <g class="connector"
+                ng-repeat="connector in block.outputConnectors">
                 <!--ng-mousedown="connectorMouseDown($event, block, connector, $index, false)"-->
 
             <!--<text
@@ -99,8 +100,8 @@
             </text>-->
 
             <circle
-                    ng-attr-class="{{connector == mouseOverConnector && 'mouseover-connector' || 'connector'}} {{block.stateClass()}}"
-                    ng-attr-r="{{block.connectorRadius}}"
+                    ng-attr-class="{{connector == mouseOverConnector && 'mouseover-connector' || 'connector-circle'}} {{block.stateClass()}}"
+                    ng-attr-r="{{connectorRadius}}"
                     ng-attr-cx="{{connector.x()}}"
                     ng-attr-cy="{{connector.y()}}"
                     />
@@ -108,10 +109,11 @@
     </g>
 
     <g>
-        <g ng-repeat="wire in diagram.wires">
+        <g class="wire"
+                ng-repeat="wire in diagram.wires">
                 <!--ng-mousedown="wireMouseDown($event, wire)"-->
             <path
-                    ng-attr-class="{{connection.selected() && 'selected-wire' || (wire == mouseOverWire && 'mouseover-wire' || 'wire')}}"
+                    ng-attr-class="{{connection.selected() && 'selected-wire' || (wire == mouseOverWire && 'mouseover-wire' || 'wire-line')}}"
                     ng-attr-d="M {{wire.sourceCoordX()}}, {{wire.sourceCoordY()}}
                      C {{wire.sourceTangentX()}}, {{wire.sourceTangentY()}}
                        {{wire.targetTangentX()}}, {{wire.targetTangentY()}}

@@ -4,9 +4,10 @@
  * Blocks
  */
 
-.block-group{ cursor: move; }
+.block { cursor: move; }
 
 .block-rect{ fill: #ffffff; stroke: #d8d8d8; stroke-width: 1; }
+.block-selected{ fill: #ffffff; stroke: #7f7f7f; stroke-width: 1; }
 
 .block-header{ stroke: #d8d8d8; stroke-width: 1; }
 rect.block-config{ fill: #1f77b4; }
@@ -20,12 +21,12 @@ rect.block-config{ fill: #1f77b4; }
  * Connectors
  */
 
-.connector{ stroke-width: 1; }
+.connector-circle { stroke-width: 1; }
 circle.block-config{ stroke: #1f77b4; fill: #aec7e8; }
 
 /*
  * Wires
  */
 
-.wire { stroke: #989898; stroke-width: 4; fill: transparent; }
+.wire-line { stroke: #989898; stroke-width: 4; fill: transparent; }
 .wire-endpoint { fill: #989898; }

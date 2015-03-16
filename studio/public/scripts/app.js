@@ -1,4 +1,4 @@
-var analyticsApp = angular.module('analyticsApp', ['ngRoute', 'ngSanitize'])
+var analyticsApp = angular.module('analyticsApp', ['diagramApp', 'ngRoute', 'ngSanitize'])
 
     .config(function ($routeProvider, $locationProvider) {
         $routeProvider.when('/studio', {

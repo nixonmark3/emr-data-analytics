@@ -50,11 +50,6 @@ viewmodels.blockViewModel = function (data) {
     this._blockHeight = 80;
 
     //
-    // Hardcoded radius of each connector
-    //
-    this.connectorRadius = 6;
-
-    //
     // Set to true when the block is selected
     //
     this._selected = false;
@@ -353,14 +348,14 @@ viewmodels.wireViewModel = function (data, sourceConnector, targetConnector) {
     };
 
     //
-    // Select the connection.
+    // Select the wire.
     //
     this.select = function () {
         this._selected = true;
     };
 
     //
-    // Deselect the connection.
+    // Deselect the wire.
     //
     this.deselect = function () {
         this._selected = false;
@@ -593,8 +588,8 @@ viewmodels.diagramViewModel = function(data) {
         }
 
         var wires = this.wires;
-        for (var j = 0; j < connections.length; ++j) {
-            var wire = wires[i];
+        for (var j = 0; j < wires.length; ++j) {
+            var wire = wires[j];
             wire.deselect();
         }
     };
@@ -616,15 +611,10 @@ viewmodels.diagramViewModel = function(data) {
     //
     // Handle mouse click on a particular block.
     //
-    this.handleBlockClicked = function (block, ctrlKey) {
+    this.handleBlockClicked = function (block) {
 
-        if (ctrlKey) {
-            block.toggleSelected();
-        }
-        else {
-            this.deselectAll();
-            block.select();
-        }
+        this.deselectAll();
+        block.select();
 
         // Move node to the end of the list so it is rendered after all the other.
         // This is the way Z-order is done in SVG.
