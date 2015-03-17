@@ -1,0 +1,42 @@
+
+
+/*
+ * Blocks
+ */
+
+.block-group { cursor: move; }
+
+.block{ fill: #ffffff; stroke: #d8d8d8; stroke-width: 1; }
+.block-selected{ fill: #ffffff; stroke: #7f7f7f; stroke-width: 1; }
+.block-mouseover{ fill: #ffffff; stroke: #7f7f7f; stroke-width: 1; }
+
+.block-header{ stroke: #d8d8d8; stroke-width: 1; }
+rect.block-config{ fill: #1f77b4; }
+
+.block-name{ fill: #e8e8e8; font-size: 1.1em; }
+.block-definition{ fill: #b8b8b8; }
+
+.block-icon { font-family: FontAwesome; fill: #b8b8b8; }
+
+/*
+ * Connectors
+ */
+
+.connector { stroke-width: 1; }
+.connector-mouseover { stroke-width: 1; }
+circle.block-config{ stroke: #1f77b4; fill: #aec7e8; }
+
+/*
+ * Wires
+ */
+
+.wire { stroke-width: 4; fill: transparent; }
+.wire-unselected { stroke: #989898; }
+.wire-selected { stroke: #989898; }
+.wire-mouseover { stroke: #989898; }
+
+.wire-endpoint { fill: #989898; }
+.wire-endpoint-selected { fill: #989898; }
+.wire-endpoint-mouseover { fill: #989898; }
+
+

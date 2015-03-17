@@ -7,8 +7,8 @@ import views.html.*;
 
 public class Application extends Controller {
 
-    public static Result index() {
-        return ok(index.render("Studio is now ready to go!"));
-    }
+    public static Result index(String any) {
 
+        return ok(index.render("Data Analytics Studio"));
+    }
 }

@@ -1,0 +1,165 @@
+{
+  "name" : "test",
+  "description" : "description",
+  "owner" : "test@test.com",
+  "blocks" : [
+    {
+      "name" : "LoadDB1",
+      "definition" : "LoadDB",
+      "state": 0,
+      "x" : 100,
+      "y" : 80,
+      "w": 200,
+      "inputConnectors": [],
+      "outputConnectors": [
+        {
+          "position": "BottomCenter",
+          "name": "out",
+          "type": "frame"
+        }
+      ],
+      "parameters" : [
+        {
+          "name" : "Project",
+          "value" : "FLINT_HILLS_20150211"
+        },
+        {
+          "name" : "DataSet",
+          "value" : "Clean-97"
+        }
+      ]
+    },
+    {
+      "name" : "WeightedAverage1",
+      "definition" : "WeightedAverage",
+      "state": 0,
+      "x" : 230,
+      "y" : 540,
+      "w": 200,
+      "inputConnectors": [
+        {
+          "position": "TopCenter",
+          "name": "in",
+          "type": "frame"
+        }
+      ],
+      "outputConnectors": [
+        {
+          "position": "BottomCenter",
+          "name": "out",
+          "type": "frame"
+        }
+      ],
+      "parameters" : [
+        {
+          "name" : "Weight",
+          "value" : "20"
+        }
+      ]
+    },
+    {
+      "name" : "LoadDB2",
+      "definition" : "LoadDB",
+      "state": 0,
+      "x" : 360,
+      "y" : 80,
+      "w": 200,
+      "inputConnectors": [],
+      "outputConnectors": [
+        {
+          "position": "BottomCenter",
+          "name": "out",
+          "type": "frame"
+        }
+      ],
+      "parameters" : [
+        {
+          "name" : "Project",
+          "value" : "none"
+        },
+        {
+          "name" : "DataSet",
+          "value" : "none"
+        }
+      ]
+    },
+    {
+      "name" : "Merge1",
+      "definition" : "Merge",
+      "state": 0,
+      "x" : 230,
+      "y" : 230,
+      "w": 200,
+      "inputConnectors": [
+        {
+          "position": "TopCenter",
+          "name": "in",
+          "type": "frame"
+        }
+      ],
+      "outputConnectors": [
+        {
+          "position": "BottomCenter",
+          "name": "out",
+          "type": "frame"
+        }
+      ],
+      "parameters" : []
+    },
+    {
+      "name" : "Columns1",
+      "definition" : "Columns",
+      "state": 0,
+      "x" : 230,
+      "y" : 380,
+      "w": 200,
+      "inputConnectors": [
+        {
+          "position": "TopCenter",
+          "name": "in",
+          "type": "frame"
+        }
+      ],
+      "outputConnectors": [
+        {
+          "position": "BottomCenter",
+          "name": "out",
+          "type": "frame"
+        }
+      ],
+      "parameters" : [
+        {
+          "name" : "Columns",
+          "value" : ""
+        }
+      ]
+    }
+  ],
+  "wires" : [
+    {
+      "from_node" : "LoadDB1",
+      "from_connectorIndex" : 0,
+      "to_node" : "Merge1",
+      "to_connectorIndex" : 0
+    },
+    {
+      "from_node" : "LoadDB2",
+      "from_connectorIndex" : 0,
+      "to_node" : "Merge1",
+      "to_connectorIndex" : 0
+    },
+    {
+      "from_node" : "Merge1",
+      "from_connectorIndex" : 0,
+      "to_node" : "Columns1",
+      "to_connectorIndex" : 0
+    },
+    {
+      "from_node" : "Columns1",
+      "from_connectorIndex" : 0,
+      "to_node" : "WeightedAverage1",
+      "to_connectorIndex" : 0
+    }
+  ],
+  "__v" : 46
+}

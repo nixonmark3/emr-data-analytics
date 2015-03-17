@@ -1,7 +1,36 @@
-@(message: String)
+@(title: String)
 
-@main("Welcome to Play") {
+@styles = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/diagram.css")">
+}
 
-    @play20.welcome(message, style = "Java")
+@scripts = {
 
+    <script type="text/javascript" src="@routes.Assets.at("scripts/shared/draggable.js")"></script>
+
+    <script type="text/javascript" src="@routes.Assets.at("scripts/components/diagram/diagramViewModel.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("scripts/components/diagram/diagram.js")"></script>
+
+    <script type="text/javascript" src="@routes.Assets.at("scripts/app.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("scripts/services/diagramService.js")"></script>
+}
+
+@main(title)(styles)(scripts){
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">@title</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid"
+        ng-app="analyticsApp"
+        ng-controller="analyticsController">
+
+        <div class="row" draggable>
+            <ng-view></ng-view>
+        </div>
+
+    </div>
 }
