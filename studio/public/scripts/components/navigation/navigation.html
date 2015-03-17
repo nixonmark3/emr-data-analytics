@@ -1,0 +1,19 @@
+
+<div class="navigation-page"
+     ng-repeat="page in pages"
+     ng-hide="!isCurrentPage($index)">
+
+    <div class="navigation-item navigation-categories"
+         ng-repeat="category in page.categories"
+         ng-click="pageForward(category);">
+
+        <i class="fa fa-folder"></i><span>{{category.name}}</span>
+    </div>
+
+    <div class="navigation-item navigation-definitions"
+         ng-repeat="definition in page.definitions">
+
+        <i class="fa fa-th"></i><span>{{definition.name}}</span>
+    </div>
+
+</div>

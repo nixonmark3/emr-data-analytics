@@ -1,12 +1,16 @@
 @(title: String)
 
 @styles = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/animate.css")">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/diagram.css")">
 }
 
 @scripts = {
 
     <script type="text/javascript" src="@routes.Assets.at("scripts/shared/draggable.js")"></script>
+
+    <script type="text/javascript" src="@routes.Assets.at("scripts/components/navigation/navigationController.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("scripts/components/navigation/navigation.js")"></script>
 
     <script type="text/javascript" src="@routes.Assets.at("scripts/components/diagram/diagramViewModel.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("scripts/components/diagram/diagram.js")"></script>

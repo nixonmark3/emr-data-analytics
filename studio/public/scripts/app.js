@@ -1,4 +1,8 @@
-var analyticsApp = angular.module('analyticsApp', ['diagramApp', 'ngRoute', 'ngSanitize'])
+var analyticsApp = angular.module('analyticsApp',
+    ['diagramApp',
+        'navigationApp',
+        'ngRoute',
+        'ngSanitize'])
 
     .config(function ($routeProvider, $locationProvider) {
         $routeProvider.when('/studio', {
@@ -11,6 +15,19 @@ var analyticsApp = angular.module('analyticsApp', ['diagramApp', 'ngRoute', 'ngS
     })
     .controller('analyticsController', function($scope, diagramService) {
 
+        diagramService.listDefinitions().then(
+            function (data) {
+
+                $scope.definitions = data;
+            },
+            function (code) {
+
+                // todo: show exception
+                console.log(code);
+            }
+        );
+
+        // temporarily load default diagram
         diagramService.item().then(
             function (data) {
 
@@ -22,5 +39,7 @@ var analyticsApp = angular.module('analyticsApp', ['diagramApp', 'ngRoute', 'ngS
                 console.log(code);
             }
         );
+
+
     });
 

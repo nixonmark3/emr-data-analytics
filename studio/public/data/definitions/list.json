@@ -1,0 +1,66 @@
+
+[{"name": "Data Sources",
+
+    "definitions": [
+
+      { "name": "LoadDB",
+        "parameters" : [
+          {
+            "name" : "Project",
+            "value" : ""
+          },
+          {
+            "name" : "DataSet",
+            "value" : ""
+          }
+        ]
+      },
+      { "name": "Streaming",
+        "parameters" : [
+          {
+            "name" : "Source",
+            "value" : ""
+          },
+          {
+            "name" : "Rate",
+            "value" : ""
+          }
+        ]
+      }
+    ]
+  },
+
+  {"name": "Calculations",
+
+    "definitions": [
+
+      { "name": "Weighted Average",
+        "parameters": [
+          {
+            "name": "Weight",
+            "value": ""
+          }
+        ]
+      }
+    ]
+  },
+
+  {"name": "Filters",
+
+    "definitions": [
+
+      { "name": "Columns",
+        "parameters": [
+          {
+            "name": "Columns",
+            "value": ""
+          }
+        ]
+      },
+
+      { "name": "Merge",
+        "parameters": []
+      }
+    ]
+  }
+]
