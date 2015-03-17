@@ -32,8 +32,11 @@ public class Application extends Controller {
         // Remove all the definitions as we will recreate all of them
         definitions.drop();
 
-        // Need to ensure that the name is a unique key so we don't get duplicates
+        // Need to ensure that each category has a unique name
         definitions.ensureIndex("{name: 1}","{unique:true}");
+
+        // Need to ensure that each definition in a category has a unique  name
+        definitions.ensureIndex("{definitions.name: 1}","{unique:true}");
 
         DefinitionGenerator generator = new DefinitionGenerator();
 
@@ -52,7 +55,7 @@ public class Application extends Controller {
         // Remove all the diagrams as we will recreate all of them
         diagrams.drop();
 
-        // Need to ensure that the name is a unique key so we don't get duplicates
+        // Need to ensure that each diagram has a unique name
         diagrams.ensureIndex("{name: 1}","{unique:true}");
 
         TestDiagramGenerator generator = new TestDiagramGenerator();
