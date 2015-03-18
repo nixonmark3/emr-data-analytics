@@ -4,7 +4,7 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 
-import plugins.MongoDBPlugin;
+import plugins.MongoDbPlugin;
 
 import org.jongo.*;
 
@@ -19,7 +19,7 @@ public class Diagrams extends Controller {
      * @return Json representing requested diagram
      */
     public static Result getDiagram(String diagramName) {
-        MongoDBPlugin mongoPlugin = MongoDBPlugin.getMongoDbPlugin();
+        MongoDbPlugin mongoPlugin = MongoDbPlugin.getMongoDbPlugin();
 
         Jongo db = mongoPlugin.getJongoDBInstance(mongoPlugin.getStudioDatabaseName());
 

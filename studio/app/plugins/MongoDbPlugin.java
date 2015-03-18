@@ -13,11 +13,22 @@ import play.Plugin;
 import java.net.UnknownHostException;
 import java.util.List;
 
+/**
+ * Plugin that abstracts connection to Mongo Database.
+ */
 public class MongoDbPlugin extends Plugin {
+
+    /**
+     * Constructor for MongoDB plugin.
+     * @param application the application instance
+     */
     public MongoDbPlugin(Application application) {
         this.application = application;
     }
 
+    /**
+     * Override of plugin startup method.
+     */
     @Override
     public void onStart() {
         Configuration config = Configuration.root().getConfig("mongo");
@@ -31,6 +42,10 @@ public class MongoDbPlugin extends Plugin {
         }
     }
 
+    /**
+     * Returns an instance of the MongoDB plugin.
+     * @return MongoDBPlugin
+     */
     public static MongoDbPlugin getMongoDbPlugin() {
         play.Application app = Play.application();
 
@@ -43,19 +58,61 @@ public class MongoDbPlugin extends Plugin {
         return mongoDbPlugin;
     }
 
+    /**
+     * Returns an instance of the requested database through Jongo.
+     * @param databaseName The name of the database to use
+     * @return Jongo instance
+     */
     public Jongo getJongoDBInstance(String databaseName) {
-        return new Jongo(mongoClient.getDB(databaseName));
+        return new Jongo(this.getMongoDBInstance(databaseName));
     }
 
+    /**
+     * Returns an instance of the requested database.
+     * @param databaseName The name of the database to use
+     * @return MongoDB instance
+     */
     public DB getMongoDBInstance(String databaseName) {
-        return mongoClient.getDB(databaseName);
+        DB db = null;
+
+        try {
+            db = mongoClient.getDB(databaseName);
+        }
+        catch (Exception exception) {
+            System.out.println(exception.getMessage()); // TODO
+        }
+
+        return db;
     }
 
+    /**
+     * Returns a list of the available databases in MongoDB.
+     * @return list of database names
+     */
     public List<String> getDatabaseNames() {
-        List<String> databaseNames = mongoClient.getDatabaseNames();
+        List<String> databaseNames = null;
+
+        try {
+            databaseNames = mongoClient.getDatabaseNames();
+        }
+        catch (Exception exception) {
+            System.out.println(exception.getMessage()); // TODO
+        }
+
         return databaseNames;
     }
 
+    /**
+     * Return the name of the studio database
+     * @return studio database name
+     */
+    public String getStudioDatabaseName() {
+        return Configuration.root().getConfig("mongo").getString("database.name");
+    }
+
+    /**
+     * Private members
+     */
     private Application application;
     private MongoClient mongoClient;
 }
