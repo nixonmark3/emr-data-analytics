@@ -11,7 +11,7 @@ import org.jongo.*;
 import models.diagram.Diagram;
 
 /**
- * Diagrams controller.
+ * Diagrams Controller.
  */
 public class Diagrams extends Controller {
     /**

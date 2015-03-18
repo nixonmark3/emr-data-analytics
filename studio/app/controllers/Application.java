@@ -5,7 +5,7 @@ import play.mvc.*;
 import views.html.*;
 
 /**
- * Main application controller
+ * Main Application Controller.
  */
 public class Application extends Controller {
     public static Result index(String any) {
