@@ -7,11 +7,11 @@ analyticsApp.factory('diagramService', function ($http, $q) {
 
             var deferred = $q.defer();
 
-            $http({ method: 'GET', url: '/assets/data/diagram/1.json' })
+            $http.get('/getDiagram')
                 .success(function (data, status, headers, config) {
                     deferred.resolve(data);
                 })
-                .error(function (data, status, headers, config){
+                .error(function (data, status, headers, config) {
                     deferred.reject(status);
                 });
 

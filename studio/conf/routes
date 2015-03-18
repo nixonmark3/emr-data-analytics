@@ -3,10 +3,11 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index(any = "")
+GET        /                    controllers.Application.index(any = "")
+GET        /getDiagram          controllers.Diagrams.getDiagram(any = "test")
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET        /assets/*file        controllers.Assets.at(path="/public", file)
 
 # Map any other route to main index page
-GET     /*any                       controllers.Application.index(any)
+GET        /*any                controllers.Application.index(any)
