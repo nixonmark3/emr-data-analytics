@@ -16,13 +16,13 @@ import java.util.List;
 /**
  * Plugin that abstracts connection to Mongo Database.
  */
-public class MongoDbPlugin extends Plugin {
+public class MongoDBPlugin extends Plugin {
 
     /**
      * Constructor for MongoDB plugin.
      * @param application the application instance
      */
-    public MongoDbPlugin(Application application) {
+    public MongoDBPlugin(Application application) {
         this.application = application;
     }
 
@@ -46,16 +46,16 @@ public class MongoDbPlugin extends Plugin {
      * Returns an instance of the MongoDB plugin.
      * @return MongoDBPlugin
      */
-    public static MongoDbPlugin getMongoDbPlugin() {
+    public static MongoDBPlugin getMongoDbPlugin() {
         play.Application app = Play.application();
 
-        MongoDbPlugin mongoDbPlugin = app.plugin(MongoDbPlugin.class);
+        MongoDBPlugin mongoDBPlugin = app.plugin(MongoDBPlugin.class);
 
-        if (mongoDbPlugin == null) {
+        if (mongoDBPlugin == null) {
             throw new RuntimeException("Unable to obtain MongoDb Plugin!");
         }
 
-        return mongoDbPlugin;
+        return mongoDBPlugin;
     }
 
     /**
