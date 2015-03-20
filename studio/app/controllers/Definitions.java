@@ -20,7 +20,13 @@ public class Definitions  extends ControllerBase {
 
         try {
             MongoCollection definitions = getMongoCollection(DEFINITIONS_COLLECTION);
-            definitionCategories = definitions.find().as(Category.class);
+
+            if (definitions != null) {
+                definitionCategories = definitions.find().as(Category.class);
+            }
+            else {
+                return internalServerError(String.format("'%s' collection could not be found!", DEFINITIONS_COLLECTION));
+            }
         }
         catch (Exception exception) {
             exception.printStackTrace();

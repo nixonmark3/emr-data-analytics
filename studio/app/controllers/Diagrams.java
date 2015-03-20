@@ -25,7 +25,13 @@ public class Diagrams extends ControllerBase {
 
         try {
             MongoCollection diagrams = getMongoCollection(DIAGRAMS_COLLECTION);
-            diagram = diagrams.findOne(String.format(QUERY_BY_UNIQUE_ID, diagramName)).as(Diagram.class);
+
+            if (diagrams != null) {
+                diagram = diagrams.findOne(String.format(QUERY_BY_UNIQUE_ID, diagramName)).as(Diagram.class);
+            }
+            else {
+                return internalServerError(String.format(COLLECTION_NOT_FOUND, DIAGRAMS_COLLECTION));
+            }
         }
         catch (Exception exception) {
             exception.printStackTrace();
@@ -33,7 +39,7 @@ public class Diagrams extends ControllerBase {
         }
 
         if (diagram == null) {
-            return notFound("The diagram '%s' could not br found.", diagramName);
+            return notFound("The diagram '%s' could not be found.", diagramName);
         }
 
         return ok(Json.toJson(diagram));
@@ -51,12 +57,18 @@ public class Diagrams extends ControllerBase {
             Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
 
             MongoCollection diagrams = getMongoCollection(DIAGRAMS_COLLECTION);
-            // Need to ensure that each diagram has a unique name.
-            diagrams.ensureIndex(DIAGRAM_INDEX, UNIQUE_IS_TRUE);
-            // Update the Diagram document in MongoDB. If it does not exist create a new Diagram document.
-            diagrams.update(String.format(QUERY_BY_UNIQUE_ID, diagram.getName())).upsert().with(diagram);
-            // After we successfully update the diagram bump the version.
-            diagrams.update(String.format(QUERY_BY_UNIQUE_ID, diagram.getName())).with(VERSION_INCREMENT);
+
+            if (diagrams != null) {
+                // Need to ensure that each diagram has a unique name.
+                diagrams.ensureIndex(DIAGRAM_INDEX, UNIQUE_IS_TRUE);
+                // Update the Diagram document in MongoDB. If it does not exist create a new Diagram document.
+                diagrams.update(String.format(QUERY_BY_UNIQUE_ID, diagram.getName())).upsert().with(diagram);
+                // After we successfully update the diagram bump the version.
+                diagrams.update(String.format(QUERY_BY_UNIQUE_ID, diagram.getName())).with(VERSION_INCREMENT);
+            }
+            else {
+                return internalServerError(String.format(COLLECTION_NOT_FOUND, DIAGRAMS_COLLECTION));
+            }
         }
         catch (Exception exception) {
             exception.printStackTrace();
@@ -75,7 +87,13 @@ public class Diagrams extends ControllerBase {
 
         try {
             MongoCollection diagramsCollection = getMongoCollection(DIAGRAMS_COLLECTION);
-            diagrams = diagramsCollection.find().projection(DIAGRAM_PROJECTION).sort(SORT_BY_NAME).as(BasicDiagram.class);
+
+            if (diagramsCollection != null) {
+                diagrams = diagramsCollection.find().projection(DIAGRAM_PROJECTION).sort(SORT_BY_NAME).as(BasicDiagram.class);
+            }
+            else {
+                return internalServerError(String.format(COLLECTION_NOT_FOUND, DIAGRAMS_COLLECTION));
+            }
         }
         catch (Exception exception) {
             exception.printStackTrace();
@@ -93,7 +111,13 @@ public class Diagrams extends ControllerBase {
     public static Result removeDiagram(String diagramName) {
         try {
             MongoCollection diagrams = getMongoCollection(DIAGRAMS_COLLECTION);
-            diagrams.remove(String.format(QUERY_BY_UNIQUE_ID, diagramName));
+
+            if (diagrams != null) {
+                diagrams.remove(String.format(QUERY_BY_UNIQUE_ID, diagramName));
+            }
+            else {
+                return internalServerError(String.format(COLLECTION_NOT_FOUND, DIAGRAMS_COLLECTION));
+            }
         }
         catch (Exception exception) {
             exception.printStackTrace();
@@ -121,4 +145,5 @@ public class Diagrams extends ControllerBase {
     private static final String DIAGRAMS_COLLECTION = "diagrams";
     private static final String QUERY_BY_UNIQUE_ID = "{name: '%s'}";
     private static final String SORT_BY_NAME = "{name: 1}";
+    private static final String COLLECTION_NOT_FOUND = "'%s' collection could not be found!";
 }

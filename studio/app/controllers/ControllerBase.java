@@ -18,6 +18,9 @@ public abstract class ControllerBase extends Controller {
     protected static MongoCollection getMongoCollection(String collectionName) {
         MongoDBPlugin mongoPlugin = MongoDBPlugin.getMongoDbPlugin();
         Jongo db = mongoPlugin.getJongoDBInstance(mongoPlugin.getStudioDatabaseName());
+        if (db == null) {
+            return null;
+        }
         return db.getCollection(collectionName);
     }
 }

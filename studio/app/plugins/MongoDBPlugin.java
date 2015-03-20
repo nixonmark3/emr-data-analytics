@@ -11,10 +11,11 @@ import play.Play;
 import play.Plugin;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Plugin that abstracts connection to Mongo Database.
+ * Plugin that abstracts connection to MongoDB.
  */
 public class MongoDBPlugin extends Plugin {
 
@@ -27,18 +28,32 @@ public class MongoDBPlugin extends Plugin {
     }
 
     /**
-     * Override of plugin startup method.
+     * Override of plugin start method.
+     * Open connection to MongoDB.
      */
     @Override
     public void onStart() {
-        Configuration config = Configuration.root().getConfig("mongo");
+        Configuration config = Configuration.root().getConfig(MONGODB_CONFIG);
 
-        String host = config.getString("mongodb.host");
+        String host = config.getString(MONGODB_HOST_NAME);
 
         try {
             mongoClient = new MongoClient(host);
-        } catch (UnknownHostException e) {
-            throw new RuntimeException("Unable to create Mongo instance.", e);
+        }
+        catch (UnknownHostException exception) {
+            exception.printStackTrace();
+            throw new RuntimeException("Unable to create MongoDB instance!", exception);
+        }
+    }
+
+    /**
+     * Override the plugin stop method.
+     * Close connection to MongoDB.
+     */
+    @Override
+    public void onStop() {
+        if (mongoClient != null) {
+            mongoClient.close();
         }
     }
 
@@ -52,7 +67,7 @@ public class MongoDBPlugin extends Plugin {
         MongoDBPlugin mongoDBPlugin = app.plugin(MongoDBPlugin.class);
 
         if (mongoDBPlugin == null) {
-            throw new RuntimeException("Unable to obtain MongoDb Plugin!");
+            throw new RuntimeException("Unable to get MongoDB Plugin!");
         }
 
         return mongoDBPlugin;
@@ -79,7 +94,7 @@ public class MongoDBPlugin extends Plugin {
             db = mongoClient.getDB(databaseName);
         }
         catch (Exception exception) {
-            System.out.println(exception.getMessage()); // TODO
+            exception.printStackTrace();
         }
 
         return db;
@@ -90,29 +105,36 @@ public class MongoDBPlugin extends Plugin {
      * @return list of database names
      */
     public List<String> getDatabaseNames() {
-        List<String> databaseNames = null;
+        List<String> databaseNames = new ArrayList<String>();
 
         try {
             databaseNames = mongoClient.getDatabaseNames();
         }
         catch (Exception exception) {
-            System.out.println(exception.getMessage()); // TODO
+            exception.printStackTrace();
         }
 
         return databaseNames;
     }
 
     /**
-     * Return the name of the studio database
+     * Returns the name of the studio application database.
      * @return studio database name
      */
     public String getStudioDatabaseName() {
-        return Configuration.root().getConfig("mongo").getString("database.name");
+        return Configuration.root().getConfig(MONGODB_CONFIG).getString(MONGODB_DB_NAME);
     }
 
     /**
-     * Private members
+     * Private members.
      */
     private Application application;
     private MongoClient mongoClient;
+
+    /**
+     * Private constants.
+     */
+    private static final String MONGODB_CONFIG = "mongo";
+    private static final String MONGODB_HOST_NAME = "mongodb.host";
+    private static final String MONGODB_DB_NAME = "database.name";
 }

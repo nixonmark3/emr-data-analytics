@@ -17,7 +17,7 @@ public class DefinitionsTest extends TestBase {
     public void getDefinitions() {
         running(fakeApplication(getSettings()), new Runnable() {
             public void run() {
-                Result result = controllers.Definitions.getDefinitions();
+                Result result = route(fakeRequest(GET, "/getDefinitions"));
                 assertThat(status(result)).isEqualTo(OK);
                 assertThat(contentType(result)).isEqualTo("application/json");
                 assertThat(charset(result)).isEqualTo("utf-8");
