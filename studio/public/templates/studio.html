@@ -1,10 +1,30 @@
-<div class="col-sm-3 col-md-2 sidebar">
+
+<div id="ghost"
+     ng-if="draggingGhost"
+     ng-style="{top: ghostPosition.y, left: ghostPosition.x, width: 200, height: 80}"
+     ng-cloak>
+
+
 
 </div>
-<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 
-    <diagram view-model="diagramViewModel"
-             style="margin: 5px; width: 100%; height: 1000px;">
-    </diagram>
+<div id="studio-canvas">
+
+    <div class="container-fluid">
+
+        <div class="row">
+
+            <diagram view-model="diagramViewModel"
+                     style="width: 100%; height: 1000px;">
+            </diagram>
+
+            <script id="template.html" type="text/ng-template">
+                Popup!!!
+            </script>
+
+        </div>
+    </div>
 
 </div>
+
+

@@ -1,0 +1,43 @@
+
+<div id="navigation">
+
+    <div class="navigation-page"
+         ng-repeat="page in pages"
+         ng-hide="!isCurrentPage($index)">
+
+        <div class="navigation-item navigation-header"
+             ng-hide="{{pageIndex===0}}"
+             ng-click="pageBack();">
+
+            <i class="fa fa-arrow-left"></i><span>{{pageHeader[(pageIndex - 1)]}}</span>
+        </div>
+
+        <div class="navigation-item navigation-categories"
+             ng-repeat="category in page.categories"
+             ng-click="pageForward(category);">
+
+            <i class="fa fa-folder"></i><span>{{category.name}}</span>
+        </div>
+
+        <div class="navigation-item navigation-definitions"
+             ng-repeat="definition in page.definitions"
+             ng-mousedown="mouseDown($event, definition);">
+
+            <i class="fa fa-th"></i><span>{{definition.name}}</span>
+        </div>
+
+        <div class="navigation-definition"
+             ng-show="{{page.definition}}">
+
+            <div class="navigation-parameter"
+                 ng-repeat="parameter in page.definition.parameters">
+                <span>{{parameter.name}}</span>
+                <input type="text" />
+            </div>
+
+            <button type="button" class="btn btn-primary pull-right">Add</button>
+        </div>
+
+    </div>
+
+</div>

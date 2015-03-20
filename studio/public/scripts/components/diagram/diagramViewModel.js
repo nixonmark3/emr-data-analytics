@@ -55,6 +55,11 @@ viewmodels.blockViewModel = function (data) {
     this._selected = false;
 
     //
+    // Set to true when the mouse is hovering over the block
+    //
+    this._hover = false;
+
+    //
     // block type
     //
     this.definition = function () {
@@ -97,6 +102,27 @@ viewmodels.blockViewModel = function (data) {
     };
 
     //
+    // Flag block as hovering
+    //
+    this.hover = function () {
+        this._hover = true;
+    };
+
+    //
+    // Flag block as not hovering
+    //
+    this.leaveHover = function () {
+        this._hover = false;
+    };
+
+    //
+    // Is the block hovering
+    //
+    this.hovering = function(){
+        return this._hover;
+    };
+
+    //
     // Select this block
     //
     this.select = function () {
@@ -122,6 +148,10 @@ viewmodels.blockViewModel = function (data) {
     //
     this.selected = function () {
         return this._selected;
+    };
+
+    this.settings = function(){
+        return "test";
     };
 
     //
@@ -233,9 +263,10 @@ viewmodels.blockViewModel = function (data) {
         false);
 };
 
-viewmodels.wireViewModel = function (data, sourceConnector, targetConnector) {
+viewmodels.wireViewModel = function (data, parent, sourceConnector, targetConnector) {
 
     this.data = data;
+    this.parent = parent;
     this.source = sourceConnector;
     this.target = targetConnector;
 
@@ -258,11 +289,11 @@ viewmodels.wireViewModel = function (data, sourceConnector, targetConnector) {
     };
 
     this.sourceTangentX = function () {
-        return this.computeConnectionSourceTangentX(this.sourceCoord(), this.targetCoord());
+        return this.parent.computeWireSourceTangentX(this.sourceCoord(), this.targetCoord());
     };
 
     this.sourceTangentY = function () {
-        return this.computeConnectionSourceTangentY(this.sourceCoord(), this.targetCoord());
+        return this.parent.computeWireSourceTangentY(this.sourceCoord(), this.targetCoord());
     };
 
     this.targetCoordX = function () {
@@ -281,70 +312,13 @@ viewmodels.wireViewModel = function (data, sourceConnector, targetConnector) {
     };
 
     this.targetTangentX = function () {
-        return this.computeConnectionTargetTangentX(this.sourceCoord(),
+        return this.parent.computeWireTargetTangentX(this.sourceCoord(),
             this.targetCoord());
     };
 
     this.targetTangentY = function () {
-        return this.computeConnectionTargetTangentY(this.sourceCoord(),
+        return this.parent.computeWireTargetTangentY(this.sourceCoord(),
             this.targetCoord());
-    };
-
-    //
-    // Compute the tangent for the bezier curve.
-    //
-    this.computeConnectionSourceTangentX = function (pt1, pt2) {
-
-        return pt1.x + this.computeConnectionTangentOffset(pt1, pt2);
-    };
-
-    //
-    // Compute the tangent for the bezier curve.
-    //
-    this.computeConnectionSourceTangentY = function (pt1, pt2) {
-
-        return pt1.y;
-    };
-
-    //
-    // Compute the tangent for the bezier curve.
-    //
-    this.computeConnectionSourceTangent = function(pt1, pt2) {
-        return {
-            x: this.computeConnectionSourceTangentX(pt1, pt2),
-            y: this.computeConnectionSourceTangentY(pt1, pt2)
-        };
-    };
-
-    //
-    // Compute the tangent for the bezier curve.
-    //
-    this.computeConnectionTargetTangentX = function (pt1, pt2) {
-
-        return pt2.x - this.computeConnectionTangentOffset(pt1, pt2);
-    };
-
-    //
-    // Compute the tangent for the bezier curve.
-    //
-    this.computeConnectionTargetTangentY = function (pt1, pt2) {
-
-        return pt2.y;
-    };
-
-    //
-    // Compute the tangent for the bezier curve.
-    //
-    this.computeConnectionTargetTangent = function(pt1, pt2) {
-        return {
-            x: this.computeConnectionTargetTangentX(pt1, pt2),
-            y: this.computeConnectionTargetTangentY(pt1, pt2)
-        };
-    };
-
-    this.computeConnectionTangentOffset = function (pt1, pt2) {
-
-        return (pt2.x - pt1.x) / 2;
     };
 
     //
@@ -381,11 +355,16 @@ viewmodels.diagramViewModel = function(data) {
     // reference the diagram data model
     this.data = data;
 
+    var blockNames = {};
+
     this.createBlockViewModels = function (blocksData) {
         var models = [];
 
         if (blocksData) {
             for (var i = 0; i < blocksData.length; ++i) {
+
+                blockNames[blocksData[i].name] = true;
+
                 models.push(new viewmodels.blockViewModel(blocksData[i]));
             }
         }
@@ -455,6 +434,7 @@ viewmodels.diagramViewModel = function(data) {
             wireData.to_connectorIndex);
 
         return new viewmodels.wireViewModel(wireData,
+            this,
             sourceConnector,
             destConnector);
     };
@@ -479,9 +459,66 @@ viewmodels.diagramViewModel = function(data) {
     this.wires = this.createWireViewModels(this.data.wires);
 
     //
+    // Compute the tangent for the bezier curve.
+    //
+    this.computeWireSourceTangentX = function (pt1, pt2) {
+
+        return pt1.x + this.computeWireTangentOffset(pt1, pt2);
+    };
+
+    //
+    // Compute the tangent for the bezier curve.
+    //
+    this.computeWireSourceTangentY = function (pt1, pt2) {
+
+        return pt1.y;
+    };
+
+    //
+    // Compute the tangent for the bezier curve.
+    //
+    this.computeWireSourceTangent = function(pt1, pt2) {
+        return {
+            x: this.computeWireSourceTangentX(pt1, pt2),
+            y: this.computeWireSourceTangentY(pt1, pt2)
+        };
+    };
+
+    //
+    // Compute the tangent for the bezier curve.
+    //
+    this.computeWireTargetTangentX = function (pt1, pt2) {
+
+        return pt2.x - this.computeWireTangentOffset(pt1, pt2);
+    };
+
+    //
+    // Compute the tangent for the bezier curve.
+    //
+    this.computeWireTargetTangentY = function (pt1, pt2) {
+
+        return pt2.y;
+    };
+
+    //
+    // Compute the tangent for the bezier curve.
+    //
+    this.computeWireTargetTangent = function(pt1, pt2) {
+        return {
+            x: this.computeWireTargetTangentX(pt1, pt2),
+            y: this.computeWireTargetTangentY(pt1, pt2)
+        };
+    };
+
+    this.computeWireTangentOffset = function (pt1, pt2) {
+
+        return (pt2.x - pt1.x) / 2;
+    };
+
+    //
     // Create a view model for a new wire
     //
-    this.createNewWire = function (startConnector, endConnector) {
+    this.createWire = function (startConnector, endConnector) {
 
         var wiresData = this.data.wires;
         if (!wiresData) {
@@ -534,28 +571,57 @@ viewmodels.diagramViewModel = function(data) {
         var outputConnector = startConnectorType == 'output' ? startConnector : endConnector;
         var inputConnector = startConnectorType == 'output' ? endConnector : startConnector;
 
-        var wireViewModel = new viewmodels.wireViewModel(wiresData, outputConnector, inputConnector);
+        var wireViewModel = new viewmodels.wireViewModel(wiresData,
+            this,
+            outputConnector,
+            inputConnector);
         wiresViewModels.push(wireViewModel);
     };
 
     //
     // Add a block to the view model.
     //
-    this.addBlock = function (blockData) {
+    this.createBlock = function (x, y, definition) {
 
         if (!this.data.blocks) {
             this.data.blocks = [];
         }
 
+        var block = new DataBlock(x, y, definition);
+
         //
         // Update the data model.
         //
-        this.data.blocks.push(blockData);
+        this.data.blocks.push(block);
 
         //
         // Update the view model.
         //
-        this.blocks.push(new viewmodels.blockViewModel(blockData));
+        this.blocks.push(new viewmodels.blockViewModel(block));
+    };
+
+    var DataBlock = function(x, y, definition){
+
+        // generate unique block name
+        var index = 1;
+        var name;
+        do{
+            name = definition.name + index;
+            index++;
+        }
+        while(name in blockNames);
+        // capture new block name
+        blockNames[name] = true;
+
+        this.name = name;
+        this.definition = definition.name;
+        this.state = 0;
+        this.w = definition.w;
+        this.x = x;
+        this.y = y;
+        this.inputConnectors = definition.inputConnectors;
+        this.outputConnectors = definition.outputConnectors;
+        this.parameters = definition.parameters;
     };
 
     //

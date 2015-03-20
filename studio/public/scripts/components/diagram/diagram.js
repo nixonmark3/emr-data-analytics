@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('diagramApp', ['draggableApp'])
-    .directive('diagram', ['draggableService', function (draggableService) {
+var diagramApp = angular.module('diagramApp', ['draggableApp'])
+    .directive('diagram', ['$compile', function ($compile) {
 
         return {
             restrict: 'E',
@@ -22,11 +22,41 @@ angular.module('diagramApp', ['draggableApp'])
 
                 var jQuery = function (element) {
                     return $(element);
-                }
+                };
 
                 var wireClass = 'wire-group';
                 var connectorClass = 'connector-group';
                 var blockClass = 'block-group';
+
+                var beginDragEvent = function(x, y, config){
+
+                    $scope.$root.$broadcast("beginDrag", {
+                        x: x,
+                        y: y,
+                        config: config
+                    });
+                };
+
+                $scope.$on("createBlock", function (event, args) {
+
+                    var point = translateCoordinates(args.x, args.y, args.evt);
+                    $scope.diagram.createBlock(point.x, point.y, args.definition);
+                });
+
+                $scope.$on("deleteSelected", function (event) {
+
+                    $scope.diagram.deleteSelected();
+                });
+
+                $scope.$on("deselectAll", function (event) {
+
+                    $scope.diagram.deselectAll();
+                });
+
+                $scope.$on("selectAll", function (event) {
+
+                    $scope.diagram.selectAll();
+                });
 
                 var hasClassSVG = function(obj, has) {
                     var classes = obj.attr('class');
@@ -118,12 +148,10 @@ angular.module('diagramApp', ['draggableApp'])
 
                     $scope.diagram.deselectAll();
 
-                    draggableService.startDrag(evt, {
+                    beginDragEvent(evt.pageX, evt.pageY, {
 
-                        //
-                        // Commence dragging... setup variables to display the drag selection rect.
-                        //
                         dragStarted: function (x, y) {
+
                             $scope.dragSelecting = true;
                             var startPoint = translateCoordinates(x, y, evt);
                             $scope.dragSelectionStartPoint = startPoint;
@@ -135,10 +163,8 @@ angular.module('diagramApp', ['draggableApp'])
                             };
                         },
 
-                        //
-                        // Update the drag selection rect while dragging continues.
-                        //
                         dragging: function (x, y) {
+
                             var startPoint = $scope.dragSelectionStartPoint;
                             var curPoint = translateCoordinates(x, y, evt);
 
@@ -150,16 +176,12 @@ angular.module('diagramApp', ['draggableApp'])
                             };
                         },
 
-                        //
-                        // Dragging has ended... select all that are within the drag selection rect.
-                        //
                         dragEnded: function () {
                             $scope.dragSelecting = false;
                             $scope.diagram.applySelectionRect($scope.dragSelectionRect);
                             delete $scope.dragSelectionStartPoint;
                             delete $scope.dragSelectionRect;
                         }
-
                     });
                 };
 
@@ -211,14 +233,13 @@ angular.module('diagramApp', ['draggableApp'])
                 $scope.blockMouseDown = function (evt, block) {
 
                     var diagram = $scope.diagram;
-                    var lastMouseCoords;
+                    var coords;
 
-                    draggableService.startDrag(evt, {
+                    beginDragEvent(evt.pageX, evt.pageY, {
 
-                        // called when drag has started (exceeded threshold)
                         dragStarted: function (x, y) {
 
-                            lastMouseCoords = translateCoordinates(x, y, evt);
+                            coords = translateCoordinates(x, y, evt);
 
                             // if necessary - select the block
                             if (!block.selected()) {
@@ -227,30 +248,91 @@ angular.module('diagramApp', ['draggableApp'])
                             }
                         },
 
-                        //
-                        // Dragging selected blocks... update their x,y coordinates
-                        //
                         dragging: function (x, y) {
 
                             var curCoords = translateCoordinates(x, y, evt);
-                            var deltaX = curCoords.x - lastMouseCoords.x;
-                            var deltaY = curCoords.y - lastMouseCoords.y;
+                            var deltaX = curCoords.x - coords.x;
+                            var deltaY = curCoords.y - coords.y;
 
                             diagram.updateSelectedBlocksLocation(deltaX, deltaY);
 
-                            lastMouseCoords = curCoords;
+                            coords = curCoords;
                         },
 
-                        //
-                        // The block wasn't dragged... it was clicked
-                        //
                         clicked: function () {
-                            diagram.handleBlockClicked(block);
+                            $scope.$apply(diagram.handleBlockClicked(block));
                         }
-
                     });
+
+                    evt.stopPropagation();
+                    evt.preventDefault();
                 };
 
+                $scope.connectorMouseDown = function (evt, block, connector, connectorIndex, isInputConnector) {
+
+                    var diagram = $scope.diagram;
+
+                    // broadcast a drag event
+                    beginDragEvent(evt.pageX, evt.pageY, {
+
+                        dragStarted: function (x, y, evt) {
+
+                            var coords = translateCoordinates(x, y, evt);
+
+                            $scope.draggingWire = true;
+                            $scope.dragPoint1 = diagram.computeConnectorPos(block, connectorIndex, isInputConnector);
+                            $scope.dragPoint2 = {
+                                x: coords.x,
+                                y: coords.y
+                            };
+                            $scope.dragTangent1 = diagram.computeWireSourceTangent($scope.dragPoint1, $scope.dragPoint2);
+                            $scope.dragTangent2 = diagram.computeWireTargetTangent($scope.dragPoint1, $scope.dragPoint2);
+                        },
+
+                        dragging: function (x, y, evt) {
+
+                            var coords = translateCoordinates(x, y, evt);
+
+                            $scope.dragPoint1 = diagram.computeConnectorPos(block, connectorIndex, isInputConnector);
+                            $scope.dragPoint2 = {
+                                x: coords.x,
+                                y: coords.y
+                            };
+                            $scope.dragTangent1 = diagram.computeWireSourceTangent($scope.dragPoint1, $scope.dragPoint2);
+                            $scope.dragTangent2 = diagram.computeWireTargetTangent($scope.dragPoint1, $scope.dragPoint2);
+                        },
+
+                        dragEnded: function () {
+
+                            if ($scope.mouseOverConnector &&
+                                $scope.mouseOverConnector !== connector) {
+
+                                // dragging is complete and the new wire is over a valid connector
+                                // create a new wire
+                                diagram.createWire(connector, $scope.mouseOverConnector);
+                            }
+
+                            $scope.draggingWire = false;
+                            delete $scope.dragPoint1;
+                            delete $scope.dragTangent1;
+                            delete $scope.dragPoint2;
+                            delete $scope.dragTangent2;
+                        }
+                    });
+
+                    evt.stopPropagation();
+                    evt.preventDefault();
+                };
+
+                $scope.deleteBlock = function(){
+                    $scope.diagram.deleteSelected();
+
+                };
+
+                $scope.showProperties = function(block){
+
+                    return "<span style='color: red;'>{{block.name}}</span>";
+                };
             }
         }
 
