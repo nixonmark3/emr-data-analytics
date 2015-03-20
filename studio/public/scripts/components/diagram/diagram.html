@@ -1,197 +1,217 @@
 
-<svg xmlns="http://www.w3.org/2000/svg"
-     ng-mousemove="mouseMove($event)">
-     <!--ng-mousedown="mouseDown($event)"-->
+<div id="diagram-container">
 
-    <g class="block-group"
-            ng-repeat="block in diagram.blocks"
-            ng-attr-transform="translate({{block.x()}}, {{block.y()}})"
-            ng-mouseover="block.hover()"
-            ng-mouseout="block.leaveHover()">
+    <div id="block-configuration"
+         ng-show="configuringBlock"
+         ng-style="{top: (configurationBlock.y), left: (configurationBlock.x - 212), height: (configurationBlock.block.data.parameters.length*60)}"
+         ng-cloak>
 
-        <g ng-mousedown="blockMouseDown($event, block)">
+        <div class="arrowUpper"></div>
+        <div class="arrowLower"></div>
 
-            <rect ng-attr-class="{{block.selected() && 'block-selected' || (block == mouseOverNode && 'block-mouseover' || 'block')}}"
-                  ry="6"
-                  rx="6"
-                  x="0"
-                  y="0"
-                  ng-attr-width="{{block.width()}}"
-                  ng-attr-height="{{block.height()}}">
+        <div class="block-configuration-content">
+            <div class="configuration-parameter"
+                 ng-repeat="parameter in configurationBlock.block.data.parameters">
+                <span>{{parameter.name}}</span>
+                <input type="text" value="{{parameter.value}}" />
+            </div>
+        </div>
 
-            </rect>
+    </div>
 
-            <!--block header-->
-            <rect ng-attr-class="block-header {{block.stateClass()}}"
-                  ry="6"
-                  rx="6"
-                  x="4"
-                  y="4"
-                  ng-attr-width="{{block.width() - 8}}"
-                  ng-attr-height="{{(block.height() / 2) - 4}}">
+    <svg id="diagram"
+         xmlns="http://www.w3.org/2000/svg"
+         ng-mousemove="mouseMove($event)">
+         <!--ng-mousedown="mouseDown($event)"-->
 
-            </rect>
+        <g class="block-group"
+                ng-repeat="block in diagram.blocks"
+                ng-attr-transform="translate({{block.x()}}, {{block.y()}})"
+                ng-mouseover="block.hover()"
+                ng-mouseout="block.leaveHover()">
 
-            <!--block name-->
-            <text ng-attr-x="{{(block.width())/2}}"
-                  y="25"
-                  class="block-name"
-                  text-anchor="middle"
-                  alignment-baseline="middle">
+            <g ng-mousedown="blockMouseDown($event, block)">
 
-                {{block.name()}}
+                <rect ng-attr-class="{{block.selected() && 'block-selected' || (block == mouseOverNode && 'block-mouseover' || 'block')}}"
+                      ry="6"
+                      rx="6"
+                      x="0"
+                      y="0"
+                      ng-attr-width="{{block.width()}}"
+                      ng-attr-height="{{block.height()}}">
 
-            </text>
+                </rect>
 
-            <!--block definition-->
-            <text ng-attr-x="{{(block.width())/2}}"
-                  ng-attr-y="{{block.height() - 18}}"
-                  class="block-definition"
-                  text-anchor="middle"
-                  alignment-baseline="middle">
+                <!--block header-->
+                <rect ng-attr-class="block-header {{block.stateClass()}}"
+                      ry="6"
+                      rx="6"
+                      x="4"
+                      y="4"
+                      ng-attr-width="{{block.width() - 8}}"
+                      ng-attr-height="{{(block.height() / 2) - 4}}">
 
-                {{block.definition()}}
+                </rect>
 
-            </text>
+                <!--block name-->
+                <text ng-attr-x="{{(block.width())/2}}"
+                      y="25"
+                      class="block-name"
+                      text-anchor="middle"
+                      alignment-baseline="middle">
 
+                    {{block.name()}}
+
+                </text>
+
+                <!--block definition-->
+                <text ng-attr-x="{{(block.width())/2}}"
+                      ng-attr-y="{{block.height() - 18}}"
+                      class="block-definition"
+                      text-anchor="middle"
+                      alignment-baseline="middle">
+
+                    {{block.definition()}}
+
+                </text>
+
+            </g>
+
+            <g ng-if="block.hovering() || block.selected()"
+               ng-mouseover="block.hover()"
+               ng-click="deleteBlock()">
+
+                <circle class="block-delete"
+                      r="10"
+                      ng-attr-cx="{{(block.width())}}"
+                      cy="0">
+
+                </circle>
+
+                <text class="block-icon block-delete-text"
+                      ng-attr-x="{{(block.width())}}"
+                      y="0"
+                      text-anchor="middle"
+                      alignment-baseline="middle">
+                    &#xf00d
+                </text>
+
+            </g>
+
+            <!--property configuration icon-->
+            <text x="6"
+                  ng-attr-y="{{block.height() - 8}}"
+                  class="block-icon fa-2x"
+                  text-anchor="start"
+                  alignment-baseline="bottom"
+                  ng-click="toggleConfiguration(block)">&#xf013</text>
+
+            <!--charting icon-->
+            <text ng-attr-x="{{block.width() - 6}}"
+                  ng-attr-y="{{block.height() - 8}}"
+                  class="block-icon fa-2x"
+                  text-anchor="end"
+                  alignment-baseline="bottom">&#xf080</text>
+
+            <g class="connector-group"
+                    ng-repeat="connector in block.inputConnectors"
+                    ng-mousedown="connectorMouseDown($event, block, connector, $index, true)">
+
+                <!--<text ng-attr-x="{{connector.x() + 20}}"
+                        ng-attr-y="{{connector.y()}}"
+                        text-anchor="left"
+                        alignment-baseline="middle"
+                        >
+                    {{connector.name()}}
+                </text>-->
+
+                <circle
+                        ng-attr-class="{{connector == mouseOverConnector && 'connector-mouseover' || 'connector'}} {{block.stateClass()}}"
+                        ng-attr-r="{{connectorRadius}}"
+                        ng-attr-cx="{{connector.x()}}"
+                        ng-attr-cy="{{connector.y()}}"
+                        />
+
+            </g>
+
+            <g class="connector-group"
+                    ng-repeat="connector in block.outputConnectors"
+                    ng-mousedown="connectorMouseDown($event, block, connector, $index, false)">
+
+                <!--<text
+                        ng-attr-x="{{connector.x() - 20}}"
+                        ng-attr-y="{{connector.y()}}"
+                        text-anchor="end"
+                        alignment-baseline="middle"
+                        >
+                    {{connector.name()}}
+                </text>-->
+
+                <circle
+                        ng-attr-class="{{connector == mouseOverConnector && 'connector-mouseover' || 'connector'}} {{block.stateClass()}}"
+                        ng-attr-r="{{connectorRadius}}"
+                        ng-attr-cx="{{connector.x()}}"
+                        ng-attr-cy="{{connector.y()}}"
+                        />
+            </g>
         </g>
 
-        <g ng-if="block.hovering() || block.selected()"
-           ng-mouseover="block.hover()"
-           ng-click="deleteBlock()">
+        <g>
+            <g class="wire-group"
+                    ng-repeat="wire in diagram.wires">
+                    <!--ng-mousedown="wireMouseDown($event, wire)"-->
+                <path
+                        ng-attr-class="wire {{connection.selected() && 'wire-selected' || (wire == mouseOverWire && 'wire-mouseover' || 'wire-unselected')}}"
+                        ng-attr-d="M {{wire.sourceCoordX()}}, {{wire.sourceCoordY()}}
+                         C {{wire.sourceTangentX()}}, {{wire.sourceTangentY()}}
+                           {{wire.targetTangentX()}}, {{wire.targetTangentY()}}
+                           {{wire.targetCoordX()}}, {{wire.targetCoordY()}}">
+                </path>
+                <circle ng-attr-class="{{wire.selected() && 'wire-endpoint-selected' || (wire == mouseOverWire && 'wire-endpoint-mouseover' || 'wire-endpoint')}}"
+                        r="4"
+                        ng-attr-cx="{{wire.sourceCoordX()}}"
+                        ng-attr-cy="{{wire.sourceCoordY()}}">
+                </circle>
 
-            <circle class="block-delete"
-                  r="10"
-                  ng-attr-cx="{{(block.width())}}"
-                  cy="0">
-
-            </circle>
-
-            <text class="block-icon block-delete-text"
-                  ng-attr-x="{{(block.width())}}"
-                  y="0"
-                  text-anchor="middle"
-                  alignment-baseline="middle">
-                &#xf00d
-            </text>
-
+                <circle ng-attr-class="{{wire.selected() && 'wire-endpoint-selected' || (wire == mouseOverWire && 'wire-endpoint-mouseover' || 'wire-endpoint')}}"
+                        r="4"
+                        ng-attr-cx="{{wire.targetCoordX()}}"
+                        ng-attr-cy="{{wire.targetCoordY()}}">
+                </circle>
+            </g>
         </g>
 
-        <!--settings icon-->
-        <text x="6"
-              ng-attr-y="{{block.height() - 8}}"
-              class="block-icon fa-2x"
-              text-anchor="start"
-              alignment-baseline="bottom"
-              popover="<span style='font-weight: bold;'>{{block.name()}}</span>"
-              popover-placement="left"
-              popover-append-to-body="true">&#xf013</text>
+        <g ng-if="draggingWire">
 
-        <!--charting icon-->
-        <text ng-attr-x="{{block.width() - 6}}"
-              ng-attr-y="{{block.height() - 8}}"
-              class="block-icon fa-2x"
-              text-anchor="end"
-              alignment-baseline="bottom">&#xf080</text>
-
-        <g class="connector-group"
-                ng-repeat="connector in block.inputConnectors"
-                ng-mousedown="connectorMouseDown($event, block, connector, $index, true)">
-
-            <!--<text ng-attr-x="{{connector.x() + 20}}"
-                    ng-attr-y="{{connector.y()}}"
-                    text-anchor="left"
-                    alignment-baseline="middle"
-                    >
-                {{connector.name()}}
-            </text>-->
-
-            <circle
-                    ng-attr-class="{{connector == mouseOverConnector && 'connector-mouseover' || 'connector'}} {{block.stateClass()}}"
-                    ng-attr-r="{{connectorRadius}}"
-                    ng-attr-cx="{{connector.x()}}"
-                    ng-attr-cy="{{connector.y()}}"
-                    />
-
-        </g>
-
-        <g class="connector-group"
-                ng-repeat="connector in block.outputConnectors"
-                ng-mousedown="connectorMouseDown($event, block, connector, $index, false)">
-
-            <!--<text
-                    ng-attr-x="{{connector.x() - 20}}"
-                    ng-attr-y="{{connector.y()}}"
-                    text-anchor="end"
-                    alignment-baseline="middle"
-                    >
-                {{connector.name()}}
-            </text>-->
-
-            <circle
-                    ng-attr-class="{{connector == mouseOverConnector && 'connector-mouseover' || 'connector'}} {{block.stateClass()}}"
-                    ng-attr-r="{{connectorRadius}}"
-                    ng-attr-cx="{{connector.x()}}"
-                    ng-attr-cy="{{connector.y()}}"
-                    />
-        </g>
-    </g>
-
-    <g>
-        <g class="wire-group"
-                ng-repeat="wire in diagram.wires">
-                <!--ng-mousedown="wireMouseDown($event, wire)"-->
-            <path
-                    ng-attr-class="wire {{connection.selected() && 'wire-selected' || (wire == mouseOverWire && 'wire-mouseover' || 'wire-unselected')}}"
-                    ng-attr-d="M {{wire.sourceCoordX()}}, {{wire.sourceCoordY()}}
-                     C {{wire.sourceTangentX()}}, {{wire.sourceTangentY()}}
-                       {{wire.targetTangentX()}}, {{wire.targetTangentY()}}
-                       {{wire.targetCoordX()}}, {{wire.targetCoordY()}}">
+            <path class="dragging-wire wire"
+                    ng-attr-d="M {{dragPoint1.x}}, {{dragPoint1.y}}
+                     C {{dragTangent1.x}}, {{dragTangent1.y}}
+                       {{dragTangent2.x}}, {{dragTangent2.y}}
+                       {{dragPoint2.x}}, {{dragPoint2.y}}">
             </path>
-            <circle ng-attr-class="{{wire.selected() && 'wire-endpoint-selected' || (wire == mouseOverWire && 'wire-endpoint-mouseover' || 'wire-endpoint')}}"
+
+            <circle class="dragging-wire wire-endpoint"
                     r="4"
-                    ng-attr-cx="{{wire.sourceCoordX()}}"
-                    ng-attr-cy="{{wire.sourceCoordY()}}">
+                    ng-attr-cx="{{dragPoint1.x}}"
+                    ng-attr-cy="{{dragPoint1.y}}">
             </circle>
 
-            <circle ng-attr-class="{{wire.selected() && 'wire-endpoint-selected' || (wire == mouseOverWire && 'wire-endpoint-mouseover' || 'wire-endpoint')}}"
+            <circle class="dragging-wire wire-endpoint"
                     r="4"
-                    ng-attr-cx="{{wire.targetCoordX()}}"
-                    ng-attr-cy="{{wire.targetCoordY()}}">
+                    ng-attr-cx="{{dragPoint2.x}}"
+                    ng-attr-cy="{{dragPoint2.y}}">
             </circle>
         </g>
-    </g>
 
-    <g ng-if="draggingWire">
+        <!--<rect
+                ng-if="dragSelecting"
+                class="drag-selection-rect"
+                ng-attr-x="{{dragSelectionRect.x}}"
+                ng-attr-y="{{dragSelectionRect.y}}"
+                ng-attr-width="{{dragSelectionRect.width}}"
+                ng-attr-height="{{dragSelectionRect.height}}"
+                >
+        </rect>-->
 
-        <path class="dragging-wire wire"
-                ng-attr-d="M {{dragPoint1.x}}, {{dragPoint1.y}}
-                 C {{dragTangent1.x}}, {{dragTangent1.y}}
-                   {{dragTangent2.x}}, {{dragTangent2.y}}
-                   {{dragPoint2.x}}, {{dragPoint2.y}}">
-        </path>
-
-        <circle class="dragging-wire wire-endpoint"
-                r="4"
-                ng-attr-cx="{{dragPoint1.x}}"
-                ng-attr-cy="{{dragPoint1.y}}">
-        </circle>
-
-        <circle class="dragging-wire wire-endpoint"
-                r="4"
-                ng-attr-cx="{{dragPoint2.x}}"
-                ng-attr-cy="{{dragPoint2.y}}">
-        </circle>
-    </g>
-
-    <!--<rect
-            ng-if="dragSelecting"
-            class="drag-selection-rect"
-            ng-attr-x="{{dragSelectionRect.x}}"
-            ng-attr-y="{{dragSelectionRect.y}}"
-            ng-attr-width="{{dragSelectionRect.width}}"
-            ng-attr-height="{{dragSelectionRect.height}}"
-            >
-    </rect>-->
-
-</svg>
+    </svg>
+</div>

@@ -15,7 +15,7 @@ body { font-family: Roboto, arial, sans-serif; background-color: #e5e5e5; overfl
 
 #studio-wrapper.show-nav { -webkit-transform: translateX(200px); transform: translateX(200px); }
 
-#diagrams-menu { position: absolute; left: -200px; top: 0px; background-color: red; width:200px; height: 100% }
+#diagrams-menu { position: absolute; left: -200px; top: 0px; background-color: #d9d9d9; width:200px; height: 100% }
 
 
 #navigation {

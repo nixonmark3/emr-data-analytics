@@ -15,6 +15,8 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
                 $scope.draggingWire = false;
                 $scope.connectorRadius = 6;
                 $scope.dragSelecting = false;
+                $scope.configuringBlock = false;
+                $scope.configurationBlock = {};
 
                 $scope.mouseOverConnector = null;
                 $scope.mouseOverWire = null;
@@ -133,12 +135,21 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
                 // Translate the coordinates so they are relative to the svg element
                 //
                 var translateCoordinates = function(x, y, evt) {
-                    var svg_elem =  element.get(0);
-                    var matrix = svg_elem.getScreenCTM();
-                    var point = svg_elem.createSVGPoint();
+                    var diagram = document.getElementById('diagram');
+                    var matrix = diagram.getScreenCTM();
+                    var point = diagram.createSVGPoint();
                     point.x = x - evt.view.scrollX;
                     point.y = y - evt.view.scrollY;
                     return point.matrixTransform(matrix.inverse());
+                };
+
+                var inverseCoordinates = function(x, y){
+                    var diagram = document.getElementById('diagram');
+                    var matrix = diagram.getScreenCTM().translate(x, y);
+
+                    return {
+                        x: matrix.e, y: matrix.f
+                    };
                 };
 
                 //
@@ -329,9 +340,32 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
 
                 };
 
-                $scope.showProperties = function(block){
+                $scope.toggleConfiguration = function(evt, block){
 
-                    return "<span style='color: red;'>{{block.name}}</span>";
+                    if ($scope.configuringBlock){
+                        endBlockConfiguration();
+                    }
+                    else{
+                        beginBlockConfiguration(evt, block);
+                    }
+                };
+
+                var beginBlockConfiguration = function(block){
+
+                    var point = inverseCoordinates(block.x(), block.y());
+
+                    $scope.configurationBlock = {
+                        x: point.x,
+                        y: point.y,
+                        block: block
+                    };
+
+                    $scope.configuringBlock = true;
+                };
+
+                var endBlockConfiguration = function(){
+                    $scope.configuringBlock = false;
+                    delete $scope.configurationBlock;
                 };
             }
         }

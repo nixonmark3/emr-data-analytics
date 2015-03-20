@@ -115,10 +115,6 @@ var analyticsApp = angular.module('analyticsApp',
 
         $scope.draggingGhost = false;
 
-        $scope.ghostPosition = {
-           x: 0, y: 0
-        };
-
         // initialize the page index
         $scope.pageIndex = 0;
 
@@ -190,10 +186,9 @@ var analyticsApp = angular.module('analyticsApp',
 
                 dragEnded: function (x, y, evt) {
 
-                    $scope.ghostPosition = { x: x, y: y };
-
                     createBlockEvent(x, y, evt, item);
 
+                    delete $scope.ghostPosition;
                     $scope.$apply($scope.draggingGhost = false);
                 }
 

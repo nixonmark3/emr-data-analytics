@@ -1,6 +1,13 @@
 
 
 /*
+ * Diagram
+ */
+
+#diagram-container {  }
+#diagram { width: 100%; height: 1000px; }
+
+/*
  * Blocks
  */
 
@@ -17,11 +24,55 @@ rect.block-config{ fill: #1f77b4; }
 .block-definition{ fill: #b8b8b8; }
 
 .block-icon { font-family: FontAwesome; fill: #b8b8b8; }
-.block-icon:hover { cursor: pointer; fill: red; }
+.block-icon:hover { cursor: pointer; fill: #d62728; }
 
 
 .block-delete { cursor: pointer; fill: #ffffff; stroke: #7f7f7f; stroke-width: 1; }
 .block-delete-text { cursor: pointer; }
+
+/*
+ * Block Configuration
+ */
+
+#block-configuration { position: absolute;
+    width: 200px;
+    min-height: 60px;
+    background-color: white;
+    border-radius: 10px;
+    border: 1px solid #989898;
+    margin-right: 10px;
+    box-shadow: 0px 6px 12px rgba(0,0,0,0.175);
+}
+
+.block-configuration-content { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 8px; }
+
+.arrowUpper { position: absolute;
+    top: 25px;
+    right: -10px;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 10px solid #ffffff;
+    display: block;
+    width: 0;
+    height: 0;
+    z-index: 1;
+}
+
+.arrowLower { position: absolute;
+    top: 25px;
+    right: -11px;
+    border-top: 11px solid transparent;
+    border-bottom: 11px solid transparent;
+    border-left: 11px solid #989898;
+    display: block;
+    width: 0;
+    height: 0;
+    z-index: 0;
+}
+
+.configuration-parameter { margin-bottom: 8px; }
+.configuration-parameter span { display: block; }
+.configuration-parameter input { display: block; width: 100%; }
 
 /*
  * Connectors
@@ -45,8 +96,4 @@ circle.block-config{ stroke: #1f77b4; fill: #aec7e8; }
 .wire-endpoint-mouseover { fill: #989898; }
 
 .dragging-wire { pointer-events: none; stroke: #989898; }
-
-/*
- * Navigation
- */
 
