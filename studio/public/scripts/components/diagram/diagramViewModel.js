@@ -566,12 +566,13 @@ viewmodels.diagramViewModel = function(data) {
             to_node: (startConnectorType == 'output') ? endBlock.data.name : startBlock.data.name,
             to_connectionIndex: (startConnectorType == 'output') ? endConnectorIndex : startConnectorIndex
         };
+
         wiresData.push(wireDataModel);
 
         var outputConnector = startConnectorType == 'output' ? startConnector : endConnector;
         var inputConnector = startConnectorType == 'output' ? endConnector : startConnector;
 
-        var wireViewModel = new viewmodels.wireViewModel(wiresData,
+        var wireViewModel = new viewmodels.wireViewModel(wireDataModel,
             this,
             outputConnector,
             inputConnector);
