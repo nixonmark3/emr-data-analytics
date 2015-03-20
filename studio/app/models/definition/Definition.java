@@ -8,18 +8,6 @@ import java.util.List;
  */
 public class Definition {
     /**
-     * Definition constructor.
-     * @param name definition name
-     */
-    public Definition(String name) {
-        this.name = name;
-        this.width = 200;
-        this.parameterDefinitions = new ArrayList<ParameterDefinition>();
-        this.inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        this.outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();;
-    }
-
-    /**
      * Returns the width of a Definition instance graphic.
      * @return definition instance graphic width
      */
@@ -116,7 +104,7 @@ public class Definition {
     private int width;
     private String description;
     private String name;
-    private List<ParameterDefinition> parameterDefinitions;
-    private List<ConnectorDefinition> inputConnectorDefinitions;
-    private List<ConnectorDefinition> outputConnectorDefinitions;
+    private List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
+    private List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
+    private List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
 }

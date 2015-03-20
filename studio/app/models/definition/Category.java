@@ -9,15 +9,6 @@ import java.util.*;
  */
 public class Category {
     /**
-     * Category constructor.
-     * @param name category name
-     */
-    public Category(String name) {
-        this.name = name;
-        this.definitions = new ArrayList<Definition>();
-    }
-
-    /**
      * Returns the name of this Category.
      * @return category name
      */
@@ -75,5 +66,5 @@ public class Category {
      */
     private ObjectId _id;
     private String name;
-    private List<Definition> definitions;
+    private List<Definition> definitions = new ArrayList<Definition>();
 }

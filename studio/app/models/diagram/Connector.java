@@ -5,18 +5,6 @@ package models.diagram;
  */
 public class Connector {
     /**
-     * Connector constructor.
-     * @param name name of connector
-     * @param type specifies the direction of the connector
-     * @param position determines the position of a connector
-     */
-    public Connector(String name, String type, String position) {
-        this.name = name;
-        this.type = type;
-        this.position = position;
-    }
-
-    /**
      * Returns the name of this Connector.
      * @return connector name
      */

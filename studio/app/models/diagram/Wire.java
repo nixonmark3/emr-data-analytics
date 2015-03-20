@@ -5,20 +5,6 @@ package models.diagram;
  */
 public class Wire {
     /**
-     * Wire constructor.
-     * @param from_node
-     * @param from_connectorIndex
-     * @param to_node
-     * @param to_connectorIndex
-     */
-    public Wire(String from_node, int from_connectorIndex, String to_node, int to_connectorIndex) {
-        this.from_node = from_node;
-        this.from_connectorIndex = from_connectorIndex;
-        this.to_node = to_node;
-        this.to_connectorIndex = to_connectorIndex;
-    }
-
-    /**
      * Returns the name of the from node of this Wire.
      * @return name of from node
      */

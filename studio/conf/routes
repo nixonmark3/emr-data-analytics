@@ -1,14 +1,16 @@
 # Routes
-# This file defines all application routes (Higher priority routes first)
-# ~~~~
 
-# Home page
-GET        /                    controllers.Application.index(any = "")
-GET        /getDiagram          controllers.Diagrams.getDiagram(any = "test")
-GET        /getDefinitions      controllers.Definitions.getDefinitions()
+GET         /                           controllers.Application.index(any = "")
+GET         /getDefinitions             controllers.Definitions.getDefinitions()
+GET         /getDiagram/item/:name      controllers.Diagrams.getDiagram(name: String)
+GET         /getDiagram/item            controllers.Diagrams.getBlankDiagram()
+GET         /getDiagrams                controllers.Diagrams.getDiagrams()
+GET         /removeDiagram/:name        controllers.Diagrams.removeDiagram(name: String)
+
+POST        /saveDiagram                controllers.Diagrams.saveDiagram()
 
 # Map static resources from the /public folder to the /assets URL path
-GET        /assets/*file        controllers.Assets.at(path="/public", file)
+GET         /assets/*file               controllers.Assets.at(path="/public", file)
 
 # Map any other route to main index page
-GET        /*any                controllers.Application.index(any)
+GET         /*any                       controllers.Application.index(any)

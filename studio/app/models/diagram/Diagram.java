@@ -10,16 +10,6 @@ import java.util.List;
  */
 public class Diagram {
     /**
-     * Diagram constructor.
-     * @param name name of the diagram
-     */
-    public Diagram(String name) {
-        this.name = name;
-        this.wires = new ArrayList<Wire>();
-        this.blocks = new ArrayList<Block>();
-    }
-
-    /**
      * Returns the unique object id that is available to each Mongo Document.
      * @return id of diagram document
      */
@@ -116,6 +106,22 @@ public class Diagram {
     }
 
     /**
+     * Returns the version of this Diagram.
+     * @return diagram version
+     */
+    public int getVersion() {
+        return version;
+    }
+
+    /**
+     * Sets the version of this Diagram.
+     * @param version diagram version
+     */
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
+    /**
      * Hidden Jackson constructor.
      */
     private Diagram() {}
@@ -127,6 +133,7 @@ public class Diagram {
     private String name;
     private String description;
     private String owner;
-    private List<Wire> wires;
-    private List<Block> blocks;
+    private List<Wire> wires = new ArrayList<Wire>();
+    private List<Block> blocks = new ArrayList<Block>();
+    private int version = 0;
 }

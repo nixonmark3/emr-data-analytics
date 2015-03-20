@@ -5,16 +5,6 @@ package models.diagram;
  */
 public class Parameter {
     /**
-     * Parameter constructor.
-     * @param name name of the parameter
-     * @param value the current value of the parameter
-     */
-    public Parameter(String name, String value) {
-        this.name = name;
-        this.value = value;
-    }
-
-    /**
      * Returns the name of this Parameter.
      * @return parameter name
      */

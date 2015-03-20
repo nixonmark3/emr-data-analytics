@@ -5,18 +5,6 @@ package models.definition;
  */
 public class ParameterDefinition {
     /**
-     * Parameter Definition constructor.
-     * @param name parameter definition name
-     * @param dataType parameter definition data type
-     * @param defaultValue parameter definition default value
-     */
-    public ParameterDefinition(String name, String dataType, String defaultValue) {
-        this.name = name;
-        this.dataType = dataType;
-        this.defaultValue = defaultValue;
-    }
-
-    /**
      * Returns the name of this Parameter Definition.
      * @return parameter definition name
      */

@@ -5,45 +5,33 @@ import models.definition.*;
 import org.jongo.*;
 
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
-
-import plugins.MongoDBPlugin;
-
-import java.util.*;
 
 /**
  * Definitions Controller.
  */
-public class Definitions  extends Controller {
+public class Definitions  extends ControllerBase {
     /**
      * Returns all the Definitions and Categories.
      * @return Json representing requested definition and categories
      */
     public static Result getDefinitions() {
-        MongoDBPlugin mongoPlugin = MongoDBPlugin.getMongoDbPlugin();
-
-        Jongo db = mongoPlugin.getJongoDBInstance(mongoPlugin.getStudioDatabaseName());
-
         MongoCursor<Category> definitionCategories = null;
 
         try {
-            MongoCollection definitions = db.getCollection("definitions");
-
-            definitionCategories = definitions.find("{}").as(Category.class);
+            MongoCollection definitions = getMongoCollection(DEFINITIONS_COLLECTION);
+            definitionCategories = definitions.find().as(Category.class);
         }
         catch (Exception exception) {
-            return internalServerError(exception.getMessage());
+            exception.printStackTrace();
+            return internalServerError("Failed to get definitions.");
         }
 
-        List<Category> categoryList = new ArrayList<Category>();
-
-        if (definitionCategories != null){
-            for (Category category : definitionCategories) {
-                categoryList.add(category);
-            }
-        }
-
-        return ok(Json.toJson(categoryList));
+        return ok(Json.toJson(definitionCategories));
     }
+
+    /**
+     * Private constants.
+     */
+    private static final String DEFINITIONS_COLLECTION = "definitions";
 }

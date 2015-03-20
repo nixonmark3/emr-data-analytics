@@ -5,16 +5,6 @@ package models.definition;
  */
 public class ConnectorDefinition {
     /**
-     * Connector Definition constructor.
-     * @param name connector name
-     * @param dataType connector data type
-     */
-    public ConnectorDefinition(String name, String dataType) {
-        this.name = name;
-        this.dataType = dataType;
-    }
-
-    /**
      * Returns the name of this Connector Definition.
      * @return connector name
      */

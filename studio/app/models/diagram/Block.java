@@ -8,19 +8,6 @@ import java.util.List;
  */
 public class Block {
     /**
-     * Block constructor.
-     * @param name name of the block
-     * @param definition the name of the definition that the block is based on
-     */
-    public Block(String name, String definition) {
-        this.name = name;
-        this.definition = definition;
-        this.inputConnectors = new ArrayList<Connector>();
-        this.outputConnectors = new ArrayList<Connector>();
-        this.parameters = new ArrayList<Parameter>();
-    }
-
-    /**
      * Returns the name of this Block.
      * @return block name
      */
@@ -178,7 +165,7 @@ public class Block {
     private int x;
     private int y;
     private int w;
-    private List<Connector> inputConnectors;
-    private List<Connector> outputConnectors;
-    private List<Parameter> parameters;
+    private List<Connector> inputConnectors = new ArrayList<Connector>();
+    private List<Connector> outputConnectors = new ArrayList<Connector>();
+    private List<Parameter> parameters = new ArrayList<Parameter>();
 }
