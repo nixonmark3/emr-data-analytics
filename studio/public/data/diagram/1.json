@@ -7,13 +7,12 @@
       "name" : "LoadDB1",
       "definition" : "LoadDB",
       "state": 0,
-      "x" : 100,
+      "x" : 300,
       "y" : 80,
       "w": 200,
       "inputConnectors": [],
       "outputConnectors": [
         {
-          "position": "BottomCenter",
           "name": "out",
           "type": "frame"
         }
@@ -33,19 +32,17 @@
       "name" : "WeightedAverage1",
       "definition" : "WeightedAverage",
       "state": 0,
-      "x" : 230,
+      "x" : 430,
       "y" : 540,
       "w": 200,
       "inputConnectors": [
         {
-          "position": "TopCenter",
           "name": "in",
           "type": "frame"
         }
       ],
       "outputConnectors": [
         {
-          "position": "BottomCenter",
           "name": "out",
           "type": "frame"
         }
@@ -61,13 +58,12 @@
       "name" : "LoadDB2",
       "definition" : "LoadDB",
       "state": 0,
-      "x" : 360,
+      "x" : 560,
       "y" : 80,
       "w": 200,
       "inputConnectors": [],
       "outputConnectors": [
         {
-          "position": "BottomCenter",
           "name": "out",
           "type": "frame"
         }
@@ -87,19 +83,17 @@
       "name" : "Merge1",
       "definition" : "Merge",
       "state": 0,
-      "x" : 230,
+      "x" : 430,
       "y" : 230,
       "w": 200,
       "inputConnectors": [
         {
-          "position": "TopCenter",
           "name": "in",
           "type": "frame"
         }
       ],
       "outputConnectors": [
         {
-          "position": "BottomCenter",
           "name": "out",
           "type": "frame"
         }
@@ -110,19 +104,17 @@
       "name" : "Columns1",
       "definition" : "Columns",
       "state": 0,
-      "x" : 230,
+      "x" : 430,
       "y" : 380,
       "w": 200,
       "inputConnectors": [
         {
-          "position": "TopCenter",
           "name": "in",
           "type": "frame"
         }
       ],
       "outputConnectors": [
         {
-          "position": "BottomCenter",
           "name": "out",
           "type": "frame"
         }

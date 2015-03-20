@@ -1,7 +1,6 @@
 @(title: String)
 
 @styles = {
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/animate.css")">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/diagram.css")">
 }
 
@@ -9,32 +8,84 @@
 
     <script type="text/javascript" src="@routes.Assets.at("scripts/shared/draggable.js")"></script>
 
-    <script type="text/javascript" src="@routes.Assets.at("scripts/components/navigation/navigationController.js")"></script>
-    <script type="text/javascript" src="@routes.Assets.at("scripts/components/navigation/navigation.js")"></script>
-
     <script type="text/javascript" src="@routes.Assets.at("scripts/components/diagram/diagramViewModel.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("scripts/components/diagram/diagram.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("scripts/components/diagram/properties.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("scripts/components/diagram/popover.js")"></script>
 
     <script type="text/javascript" src="@routes.Assets.at("scripts/app.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("scripts/services/diagramService.js")"></script>
 }
 
 @main(title)(styles)(scripts){
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="#">@title</a>
+
+    <div id="studio-wrapper"
+        ng-app="analyticsApp"
+        ng-controller="analyticsController"
+        ng-class="{'show-nav': showNav}"
+        draggable>
+
+        <div id="diagrams-menu">
+
+            <h2>Diagrams</h2>
+
+        </div>
+
+        <div class="navbar">
+            <div class="container-fluid">
+                <button type="button" class="btn btn-default navbar-btn" ng-click="toggleDiagrams()"><i class="fa fa-bars"></i></button>
+                <button type="button" class="btn btn-default navbar-btn" ng-click="toggleLibrary()">
+                    <i class="fa fa-th"></i><span class="navbar-btn-text">Library</span><i class="fa fa-caret-down"></i>
+                </button>
             </div>
         </div>
-    </nav>
 
-    <div class="container-fluid"
-        ng-app="analyticsApp"
-        ng-controller="analyticsController">
+        <div id="navigation" ng-show="showLibrary" ng-cloak>
 
-        <div class="row" draggable>
-            <ng-view></ng-view>
+            <div class="navigation-page"
+                ng-repeat="page in pages"
+                ng-hide="!isCurrentPage($index)">
+
+                <div class="navigation-item navigation-header"
+                    ng-hide="{{pageIndex===0}}"
+                    ng-click="pageBack();">
+
+                    <i class="fa fa-arrow-left"></i><span>{{pageHeader[(pageIndex - 1)]}}</span>
+                </div>
+
+                <div class="navigation-item navigation-categories"
+                ng-repeat="category in page.categories"
+                ng-click="pageForward(category);">
+
+                    <i class="fa fa-folder"></i><span>{{category.name}}</span>
+                </div>
+
+                <div class="navigation-item navigation-definitions"
+                ng-repeat="definition in page.definitions"
+                ng-mousedown="mouseDown($event, definition);">
+
+                    <i class="fa fa-th"></i><span>{{definition.name}}</span>
+                </div>
+
+                <div class="navigation-definition"
+                ng-show="{{page.definition}}">
+
+                    <div class="navigation-parameter"
+                    ng-repeat="parameter in page.definition.parameters">
+                        <span>{{parameter.name}}</span>
+                        <input type="text" />
+                    </div>
+
+                    <button type="button" class="btn btn-primary pull-right">Add</button>
+                </div>
+
+            </div>
+
         </div>
 
+        <ng-view></ng-view>
+
     </div>
+
+
 }

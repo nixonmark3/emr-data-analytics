@@ -4,6 +4,14 @@
     "definitions": [
 
       { "name": "LoadDB",
+        "w": 200,
+        "inputConnectors": [],
+        "outputConnectors": [
+          {
+            "name": "out",
+            "type": "frame"
+          }
+        ],
         "parameters" : [
           {
             "name" : "Project",
@@ -16,6 +24,14 @@
         ]
       },
       { "name": "Streaming",
+        "w": 200,
+        "inputConnectors": [],
+        "outputConnectors": [
+          {
+            "name": "out",
+            "type": "frame"
+          }
+        ],
         "parameters" : [
           {
             "name" : "Source",
@@ -35,6 +51,19 @@
     "definitions": [
 
       { "name": "Weighted Average",
+        "w": 200,
+        "inputConnectors": [
+          {
+            "name": "in",
+            "type": "frame"
+          }
+        ],
+        "outputConnectors": [
+          {
+            "name": "out",
+            "type": "frame"
+          }
+        ],
         "parameters": [
           {
             "name": "Weight",
@@ -50,6 +79,19 @@
     "definitions": [
 
       { "name": "Columns",
+        "w": 200,
+        "inputConnectors": [
+          {
+            "name": "in",
+            "type": "frame"
+          }
+        ],
+        "outputConnectors": [
+          {
+            "name": "out",
+            "type": "frame"
+          }
+        ],
         "parameters": [
           {
             "name": "Columns",
@@ -59,6 +101,19 @@
       },
 
       { "name": "Merge",
+        "w": 200,
+        "inputConnectors": [
+          {
+            "name": "in",
+            "type": "frame"
+          }
+        ],
+        "outputConnectors": [
+          {
+            "name": "out",
+            "type": "frame"
+          }
+        ],
         "parameters": []
       }
     ]

@@ -1,96 +1,102 @@
 
 angular.module('draggableApp', [])
-    .factory('draggableService', ['$document', function ($document) {
+    .controller('draggableController', ['$scope', '$element', '$attrs', function($scope, $element, $attrs){
 
-        var _element = $document;
+        $scope.dragging = false;
 
-        var threshold = 5;
+        $scope.coords = {
+            x: 0, y: 0
+        };
 
-        return {
-            registerElement: function(element) {
+        var threshold = 5,
+            config = null;
 
-                _element = element;
-            },
+        $scope.$on("beginDrag", function (event, args) {
 
-            startDrag: function (evt, config) {
+            beginDrag(args);
+        });
 
-                var dragging = false;
-                var x = evt.pageX;
-                var y = evt.pageY;
+        var beginDrag = function(args){
 
-                var mouseMove = function (evt) {
+            config = args.config;
+            $scope.coords.x = args.x;
+            $scope.coords.y = args.y;
 
-                    if (!dragging) {
-                        if (Math.abs(evt.pageX - x) > threshold ||
-                            Math.abs(evt.pageY - y) > threshold) {
-                            dragging = true;
+            $element.mousemove(mouseMove);
+            $element.mouseup(mouseUp);
+        };
 
-                            if (config.dragStarted) {
-                                config.dragStarted(x, y, evt);
-                            }
+        var mouseMove = function (evt) {
 
-                            if (config.dragging) {
-                                // First 'dragging' call to take into account that we have
-                                // already moved the mouse by a 'threshold' amount.
-                                config.dragging(evt.pageX, evt.pageY, evt);
-                            }
-                        }
-                    }
-                    else {
-                        if (config.dragging) {
-                            config.dragging(evt.pageX, evt.pageY, evt);
-                        }
+            $scope.$apply(function(){
 
-                        x = evt.pageX;
-                        y = evt.pageY;
-                    }
-                };
+            if (!$scope.dragging) {
+                if (Math.abs(evt.pageX - $scope.coords.x) > threshold ||
+                    Math.abs(evt.pageY - $scope.coords.y) > threshold) {
+                    $scope.dragging = true;
 
-                var released = function () {
-
-                    if (dragging) {
-                        if (config.dragEnded) {
-                            config.dragEnded();
-                        }
-                    }
-                    else {
-                        if (config.clicked) {
-                            config.clicked();
-                        }
+                    if (config.dragStarted) {
+                        config.dragStarted($scope.coords.x, $scope.coords.y, evt);
                     }
 
-                    _element.unbind("mousemove", mouseMove);
-                    _element.unbind("mouseup", mouseUp);
-                };
+                    $scope.coords.x = evt.pageX;
+                    $scope.coords.y = evt.pageY;
 
-                var mouseUp = function (evt) {
-
-                    released();
-
-                    evt.stopPropagation();
-                    evt.preventDefault();
-                };
-
-                // configure
-                _element.mousemove(mouseMove);
-                _element.mouseup(mouseUp);
-
-                evt.stopPropagation();
-                evt.preventDefault();
+                    if (config.dragging) {
+                        // First 'dragging' call to take into account that we have
+                        // already moved the mouse by a 'threshold' amount.
+                        config.dragging($scope.coords.x, $scope.coords.y, evt);
+                    }
+                }
             }
-        }
+            else {
+                $scope.coords.x = evt.pageX;
+                $scope.coords.y = evt.pageY;
+
+                if (config.dragging) {
+                    config.dragging($scope.coords.x, $scope.coords.y, evt);
+                }
+
+
+            }});
+
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
+
+        var mouseUp = function (evt) {
+
+            $scope.coords.x = evt.pageX;
+            $scope.coords.y = evt.pageY;
+
+            // release
+
+            if ($scope.dragging) {
+                if (config.dragEnded) {
+                    config.dragEnded($scope.coords.x, $scope.coords.y, evt);
+                }
+            }
+            else {
+                if (config.clicked) {
+                    config.clicked();
+                }
+            }
+
+            $scope.dragging = false;
+
+            config = null;
+
+            $element.unbind("mousemove", mouseMove);
+            $element.unbind("mouseup", mouseUp);
+
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
     }])
     .directive('draggable', function () {
         return {
             restrict: 'A',
-            controller: function($scope, $element, $attrs, draggableService) {
-
-                //
-                // Register the directives element as the draggable
-                //
-                draggableService.registerElement($element);
-
-            }
+            controller: 'draggableController'
         };
     });
 

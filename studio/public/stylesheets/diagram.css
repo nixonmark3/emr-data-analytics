@@ -17,6 +17,11 @@ rect.block-config{ fill: #1f77b4; }
 .block-definition{ fill: #b8b8b8; }
 
 .block-icon { font-family: FontAwesome; fill: #b8b8b8; }
+.block-icon:hover { cursor: pointer; fill: red; }
+
+
+.block-delete { cursor: pointer; fill: #ffffff; stroke: #7f7f7f; stroke-width: 1; }
+.block-delete-text { cursor: pointer; }
 
 /*
  * Connectors
@@ -39,15 +44,9 @@ circle.block-config{ stroke: #1f77b4; fill: #aec7e8; }
 .wire-endpoint-selected { fill: #989898; }
 .wire-endpoint-mouseover { fill: #989898; }
 
+.dragging-wire { pointer-events: none; stroke: #989898; }
+
 /*
  * Navigation
  */
 
-.navigation-page { position: absolute; width: 100%; top: 0; left: 0; }
-.navigation-item { cursor: pointer; background-color: #ffffff; margin-bottom: 5px; padding: 8px 6px 8px 6px; border: 1px solid #d8d8d8; }
-
-.navigation-item span { margin-left: 10px; }
-.navigation-item i { color: #989898; }
-
-.navigation-page.ng-enter { -webkit-animation: slideInRight 0.4s; }
-.navigation-page.ng-hide-add { -webkit-animation: slideOutLeft 0.4s; }
