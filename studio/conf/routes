@@ -5,7 +5,7 @@ GET         /getDefinitions             controllers.Definitions.getDefinitions()
 GET         /getDiagram/item/:name      controllers.Diagrams.getDiagram(name: String)
 GET         /getDiagram/item            controllers.Diagrams.getBlankDiagram()
 GET         /getDiagrams                controllers.Diagrams.getDiagrams()
-GET         /removeDiagram/:name        controllers.Diagrams.removeDiagram(name: String)
+GET         /deleteDiagram/item/:name   controllers.Diagrams.deleteDiagram(name: String)
 
 POST        /saveDiagram                controllers.Diagrams.saveDiagram()
 

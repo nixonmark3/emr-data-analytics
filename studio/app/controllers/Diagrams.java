@@ -108,7 +108,7 @@ public class Diagrams extends ControllerBase {
      * @param diagramName name of diagram
      * @return success of failure result
      */
-    public static Result removeDiagram(String diagramName) {
+    public static Result deleteDiagram(String diagramName) {
         try {
             MongoCollection diagrams = getMongoCollection(DIAGRAMS_COLLECTION);
 

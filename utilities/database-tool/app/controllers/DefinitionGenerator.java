@@ -14,12 +14,13 @@ public class DefinitionGenerator {
 
     public void generate(MongoCollection definitionsCollection)
     {
-        Category loadBlocks = new Category("Load Blocks");
+        Category loadBlocks = new Category("Data Sources");
         List<Definition> loadBlockDefinitions = new ArrayList<Definition>();
         loadBlockDefinitions.add(createLoadDBBlock());
+        loadBlockDefinitions.add(createSaveDBBlock());
         loadBlocks.setDefinitions(loadBlockDefinitions);
 
-        Category transformBlocks = new Category("Transform Blocks");
+        Category transformBlocks = new Category("Transformers");
         List<Definition> transformBlockDefinitions = new ArrayList<Definition>();
         transformBlockDefinitions.add(createColumnsBlock());
         transformBlockDefinitions.add(createTimeSelectionBlock());
@@ -29,12 +30,7 @@ public class DefinitionGenerator {
         transformBlockDefinitions.add(createLagCorrelateBlock());
         transformBlocks.setDefinitions(transformBlockDefinitions);
 
-        Category saveBlocks = new Category("Save Blocks");
-        List<Definition> saveBlockDefinitions = new ArrayList<Definition>();
-        saveBlockDefinitions.add(createSaveDBBlock());
-        saveBlocks.setDefinitions(saveBlockDefinitions);
-
-        Category filteringBlocks = new Category("Filtering Blocks");
+        Category filteringBlocks = new Category("Filters");
         List<Definition> filteringBlockDefinitions = new ArrayList<Definition>();
         filteringBlockDefinitions.add(createRollingAverageBlock());
         filteringBlockDefinitions.add(createRollingDeviationBlock());
@@ -45,7 +41,7 @@ public class DefinitionGenerator {
         filteringBlockDefinitions.add(createStepwiseAverageBlock());
         filteringBlocks.setDefinitions(filteringBlockDefinitions);
 
-        Category cleaningBlocks = new Category("Cleaning Blocks");
+        Category cleaningBlocks = new Category("Cleaners");
         List<Definition> cleaningBlockDefinitions = new ArrayList<Definition>();
         cleaningBlockDefinitions.add(createThreeSigmaBlock());
         cleaningBlockDefinitions.add(createOutlierScrubberBlock());
@@ -56,15 +52,12 @@ public class DefinitionGenerator {
         {
             definitionsCollection.save(loadBlocks);
             definitionsCollection.save(transformBlocks);
-            definitionsCollection.save(saveBlocks);
             definitionsCollection.save(filteringBlocks);
             definitionsCollection.save(cleaningBlocks);
         }
         catch (MongoException exception)
         {
-            // TODO return failure status and message to the client
-            // TODO specifically handle duplicate key error
-            System.out.println("MongoException: " + exception.getMessage());
+            exception.printStackTrace();
         }
     }
 
@@ -76,14 +69,14 @@ public class DefinitionGenerator {
 
         loadDB.setDescription("Loads a data set from a given project");
 
-        List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        outputConnectorDefinitions.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        loadDB.setOutputConnectorDefinitions(outputConnectorDefinitions);
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        loadDB.setOutputConnectors(outputConnectors);
 
-        List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
-        parameterDefinitions.add(new ParameterDefinition("Project", DataType.STRING.toString(), "None"));
-        parameterDefinitions.add(new ParameterDefinition("DataSet", DataType.STRING.toString(), "None"));
-        loadDB.setParameterDefinitions(parameterDefinitions);
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("Project", DataType.STRING.toString(), "None"));
+        parameters.add(new ParameterDefinition("DataSet", DataType.STRING.toString(), "None"));
+        loadDB.setParameters(parameters);
 
         return loadDB;
     }
@@ -96,17 +89,17 @@ public class DefinitionGenerator {
 
         columns.setDescription("Selects columns from a given data frame");
 
-        List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        inputConnectorDefinitions.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-        columns.setInputConnectorDefinitions(inputConnectorDefinitions);
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+        columns.setInputConnectors(inputConnectors);
 
-        List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        outputConnectorDefinitions.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        columns.setOutputConnectorDefinitions(outputConnectorDefinitions);
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        columns.setOutputConnectors(outputConnectors);
 
-        List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
-        parameterDefinitions.add(new ParameterDefinition("Columns", DataType.STRING.toString(), "None"));
-        columns.setParameterDefinitions(parameterDefinitions);
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("Columns", DataType.STRING.toString(), "None"));
+        columns.setParameters(parameters);
 
         return columns;
     }
@@ -119,18 +112,18 @@ public class DefinitionGenerator {
 
         timeSelection.setDescription("Selects time range of data from a given data frame");
 
-        List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        inputConnectorDefinitions.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-        timeSelection.setInputConnectorDefinitions(inputConnectorDefinitions);
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+        timeSelection.setInputConnectors(inputConnectors);
 
-        List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        outputConnectorDefinitions.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        timeSelection.setOutputConnectorDefinitions(outputConnectorDefinitions);
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        timeSelection.setOutputConnectors(outputConnectors);
 
-        List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
-        parameterDefinitions.add(new ParameterDefinition("From", DataType.TIMESTAMP.toString(), "None"));
-        parameterDefinitions.add(new ParameterDefinition("To", DataType.TIMESTAMP.toString(), "None"));
-        timeSelection.setParameterDefinitions(parameterDefinitions);
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("From", DataType.TIMESTAMP.toString(), "None"));
+        parameters.add(new ParameterDefinition("To", DataType.TIMESTAMP.toString(), "None"));
+        timeSelection.setParameters(parameters);
 
         return timeSelection;
     }
@@ -143,13 +136,13 @@ public class DefinitionGenerator {
 
         merge.setDescription("Merge data frames into one data frame");
 
-        List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        inputConnectorDefinitions.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-        merge.setInputConnectorDefinitions(inputConnectorDefinitions);
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+        merge.setInputConnectors(inputConnectors);
 
-        List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        outputConnectorDefinitions.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        merge.setOutputConnectorDefinitions(outputConnectorDefinitions);
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        merge.setOutputConnectors(outputConnectors);
 
         return merge;
     }
@@ -162,13 +155,13 @@ public class DefinitionGenerator {
 
         scale.setDescription("Normalize a given data frame");
 
-        List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        inputConnectorDefinitions.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-        scale.setInputConnectorDefinitions(inputConnectorDefinitions);
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+        scale.setInputConnectors(inputConnectors);
 
-        List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        outputConnectorDefinitions.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        scale.setOutputConnectorDefinitions(outputConnectorDefinitions);
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        scale.setOutputConnectors(outputConnectors);
 
         return scale;
     }
@@ -181,18 +174,18 @@ public class DefinitionGenerator {
 
         downSample.setDescription("Down sample a given data frame");
 
-        List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        inputConnectorDefinitions.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-        downSample.setInputConnectorDefinitions(inputConnectorDefinitions);
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+        downSample.setInputConnectors(inputConnectors);
 
-        List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        outputConnectorDefinitions.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        downSample.setOutputConnectorDefinitions(outputConnectorDefinitions);
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        downSample.setOutputConnectors(outputConnectors);
 
-        List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
-        parameterDefinitions.add(new ParameterDefinition("SampleSize", DataType.INT.toString(), Integer.toString(100)));
-        parameterDefinitions.add(new ParameterDefinition("To", DataType.STRING.toString(), "last"));
-        downSample.setParameterDefinitions(parameterDefinitions);
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("SampleSize", DataType.INT.toString(), Integer.toString(100)));
+        parameters.add(new ParameterDefinition("To", DataType.STRING.toString(), "last"));
+        downSample.setParameters(parameters);
 
         return downSample;
     }
@@ -206,17 +199,17 @@ public class DefinitionGenerator {
 
         lagCorrelate.setDescription("Performs a lag correlation a given data frame");
 
-        List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        inputConnectorDefinitions.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-        lagCorrelate.setInputConnectorDefinitions(inputConnectorDefinitions);
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+        lagCorrelate.setInputConnectors(inputConnectors);
 
-        List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        outputConnectorDefinitions.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        lagCorrelate.setOutputConnectorDefinitions(outputConnectorDefinitions);
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        lagCorrelate.setOutputConnectors(outputConnectors);
 
-        List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
-        parameterDefinitions.add(new ParameterDefinition("lag", DataType.INT.toString(), Integer.toString(60)));
-        lagCorrelate.setParameterDefinitions(parameterDefinitions);
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("lag", DataType.INT.toString(), Integer.toString(60)));
+        lagCorrelate.setParameters(parameters);
 
         return lagCorrelate;
     }
@@ -229,14 +222,14 @@ public class DefinitionGenerator {
 
         saveDB.setDescription("Saves a given data frame");
 
-        List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        inputConnectorDefinitions.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-        saveDB.setInputConnectorDefinitions(inputConnectorDefinitions);
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+        saveDB.setInputConnectors(inputConnectors);
 
-        List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
-        parameterDefinitions.add(new ParameterDefinition("Project", DataType.STRING.toString(), "None"));
-        parameterDefinitions.add(new ParameterDefinition("DataSet", DataType.STRING.toString(), "None"));
-        saveDB.setParameterDefinitions(parameterDefinitions);
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("Project", DataType.STRING.toString(), "None"));
+        parameters.add(new ParameterDefinition("DataSet", DataType.STRING.toString(), "None"));
+        saveDB.setParameters(parameters);
 
         return saveDB;
     }
@@ -250,17 +243,17 @@ public class DefinitionGenerator {
 
         rollingAverage.setDescription("Determines the rolling average of a given data frame");
 
-        List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        inputConnectorDefinitions.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-        rollingAverage.setInputConnectorDefinitions(inputConnectorDefinitions);
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+        rollingAverage.setInputConnectors(inputConnectors);
 
-        List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        outputConnectorDefinitions.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        rollingAverage.setOutputConnectorDefinitions(outputConnectorDefinitions);
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        rollingAverage.setOutputConnectors(outputConnectors);
 
-        List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
-        parameterDefinitions.add(new ParameterDefinition("WindowSize", DataType.INT.toString(), Integer.toString(60)));
-        rollingAverage.setParameterDefinitions(parameterDefinitions);
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("WindowSize", DataType.INT.toString(), Integer.toString(60)));
+        rollingAverage.setParameters(parameters);
 
         return rollingAverage;
     }
@@ -273,17 +266,17 @@ public class DefinitionGenerator {
 
         rollingDeviation.setDescription("Determines the rolling deviation of a given data frame");
 
-        List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        inputConnectorDefinitions.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-        rollingDeviation.setInputConnectorDefinitions(inputConnectorDefinitions);
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+        rollingDeviation.setInputConnectors(inputConnectors);
 
-        List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        outputConnectorDefinitions.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        rollingDeviation.setOutputConnectorDefinitions(outputConnectorDefinitions);
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        rollingDeviation.setOutputConnectors(outputConnectors);
 
-        List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
-        parameterDefinitions.add(new ParameterDefinition("WindowSize", DataType.INT.toString(), Integer.toString(60)));
-        rollingDeviation.setParameterDefinitions(parameterDefinitions);
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("WindowSize", DataType.INT.toString(), Integer.toString(60)));
+        rollingDeviation.setParameters(parameters);
 
         return rollingDeviation;
     }
@@ -296,17 +289,17 @@ public class DefinitionGenerator {
 
         weightedAverage.setDescription("Determines the weighted average of a given data frame");
 
-        List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        inputConnectorDefinitions.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-        weightedAverage.setInputConnectorDefinitions(inputConnectorDefinitions);
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+        weightedAverage.setInputConnectors(inputConnectors);
 
-        List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        outputConnectorDefinitions.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        weightedAverage.setOutputConnectorDefinitions(outputConnectorDefinitions);
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        weightedAverage.setOutputConnectors(outputConnectors);
 
-        List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
-        parameterDefinitions.add(new ParameterDefinition("Weight", DataType.INT.toString(), Integer.toString(20)));
-        weightedAverage.setParameterDefinitions(parameterDefinitions);
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("Weight", DataType.INT.toString(), Integer.toString(20)));
+        weightedAverage.setParameters(parameters);
 
         return weightedAverage;
     }
@@ -319,17 +312,17 @@ public class DefinitionGenerator {
 
         weightedDeviation.setDescription("Determines the weighted deviation of a given data frame");
 
-        List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        inputConnectorDefinitions.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
-        weightedDeviation.setInputConnectorDefinitions(inputConnectorDefinitions);
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
+        weightedDeviation.setInputConnectors(inputConnectors);
 
-        List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        outputConnectorDefinitions.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
-        weightedDeviation.setOutputConnectorDefinitions(outputConnectorDefinitions);
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
+        weightedDeviation.setOutputConnectors(outputConnectors);
 
-        List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
-        parameterDefinitions.add(new ParameterDefinition("Weight", DataType.INT.toString().toString(), Integer.toString(20)));
-        weightedDeviation.setParameterDefinitions(parameterDefinitions);
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("Weight", DataType.INT.toString().toString(), Integer.toString(20)));
+        weightedDeviation.setParameters(parameters);
 
         return weightedDeviation;
     }
@@ -342,19 +335,19 @@ public class DefinitionGenerator {
 
         savitskyGolayFilter.setDescription("Apply Savitsky-Golay filter to a given data frame");
 
-        List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        inputConnectorDefinitions.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
-        savitskyGolayFilter.setInputConnectorDefinitions(inputConnectorDefinitions);
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
+        savitskyGolayFilter.setInputConnectors(inputConnectors);
 
-        List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        outputConnectorDefinitions.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
-        savitskyGolayFilter.setOutputConnectorDefinitions(outputConnectorDefinitions);
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
+        savitskyGolayFilter.setOutputConnectors(outputConnectors);
 
-        List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
-        parameterDefinitions.add(new ParameterDefinition("PointsToLeft", DataType.INT.toString().toString(), Integer.toString(10)));
-        parameterDefinitions.add(new ParameterDefinition("PointsToRight", DataType.INT.toString().toString(), Integer.toString(10)));
-        parameterDefinitions.add(new ParameterDefinition("PolynomialOrder", DataType.INT.toString().toString(), Integer.toString(3)));
-        savitskyGolayFilter.setParameterDefinitions(parameterDefinitions);
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("PointsToLeft", DataType.INT.toString().toString(), Integer.toString(10)));
+        parameters.add(new ParameterDefinition("PointsToRight", DataType.INT.toString().toString(), Integer.toString(10)));
+        parameters.add(new ParameterDefinition("PolynomialOrder", DataType.INT.toString().toString(), Integer.toString(3)));
+        savitskyGolayFilter.setParameters(parameters);
 
         return savitskyGolayFilter;
     }
@@ -367,18 +360,18 @@ public class DefinitionGenerator {
 
         exponentialFilter.setDescription("Apply exponential filter to a given data frame");
 
-        List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        inputConnectorDefinitions.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
-        exponentialFilter.setInputConnectorDefinitions(inputConnectorDefinitions);
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
+        exponentialFilter.setInputConnectors(inputConnectors);
 
-        List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        outputConnectorDefinitions.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
-        exponentialFilter.setOutputConnectorDefinitions(outputConnectorDefinitions);
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
+        exponentialFilter.setOutputConnectors(outputConnectors);
 
-        List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
-        parameterDefinitions.add(new ParameterDefinition("Alpha", DataType.FLOAT.toString(), Double.toString(0.8)));
-        parameterDefinitions.add(new ParameterDefinition("Order", DataType.INT.toString().toString(), Integer.toString(1)));
-        exponentialFilter.setParameterDefinitions(parameterDefinitions);
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("Alpha", DataType.FLOAT.toString(), Double.toString(0.8)));
+        parameters.add(new ParameterDefinition("Order", DataType.INT.toString().toString(), Integer.toString(1)));
+        exponentialFilter.setParameters(parameters);
 
         return exponentialFilter;
     }
@@ -391,17 +384,17 @@ public class DefinitionGenerator {
 
         stepwiseAverage.setDescription("Apply stepwise average filter to a given data frame");
 
-        List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        inputConnectorDefinitions.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
-        stepwiseAverage.setInputConnectorDefinitions(inputConnectorDefinitions);
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
+        stepwiseAverage.setInputConnectors(inputConnectors);
 
-        List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        outputConnectorDefinitions.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
-        stepwiseAverage.setOutputConnectorDefinitions(outputConnectorDefinitions);
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
+        stepwiseAverage.setOutputConnectors(outputConnectors);
 
-        List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
-        parameterDefinitions.add(new ParameterDefinition("WindowSize", DataType.INT.toString().toString(), Integer.toString(20)));
-        stepwiseAverage.setParameterDefinitions(parameterDefinitions);
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("WindowSize", DataType.INT.toString().toString(), Integer.toString(20)));
+        stepwiseAverage.setParameters(parameters);
 
         return stepwiseAverage;
     }
@@ -414,18 +407,18 @@ public class DefinitionGenerator {
 
         threeSigma.setDescription("Apply three sigma algorithm to a given data frame");
 
-        List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        inputConnectorDefinitions.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
-        threeSigma.setInputConnectorDefinitions(inputConnectorDefinitions);
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
+        threeSigma.setInputConnectors(inputConnectors);
 
-        List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        outputConnectorDefinitions.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
-        threeSigma.setOutputConnectorDefinitions(outputConnectorDefinitions);
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
+        threeSigma.setOutputConnectors(outputConnectors);
 
-        List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
-        parameterDefinitions.add(new ParameterDefinition("MovingWindow", DataType.INT.toString().toString(), Double.toString(20)));
-        parameterDefinitions.add(new ParameterDefinition("Order", DataType.FLOAT.toString(), Double.toString(3)));
-        threeSigma.setParameterDefinitions(parameterDefinitions);
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("MovingWindow", DataType.INT.toString().toString(), Double.toString(20)));
+        parameters.add(new ParameterDefinition("Order", DataType.FLOAT.toString(), Double.toString(3)));
+        threeSigma.setParameters(parameters);
 
         return threeSigma;
     }
@@ -438,13 +431,13 @@ public class DefinitionGenerator {
 
         nullScrubber.setDescription("Removes NaN values from a given data frame");
 
-        List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        inputConnectorDefinitions.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
-        nullScrubber.setInputConnectorDefinitions(inputConnectorDefinitions);
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
+        nullScrubber.setInputConnectors(inputConnectors);
 
-        List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        outputConnectorDefinitions.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
-        nullScrubber.setOutputConnectorDefinitions(outputConnectorDefinitions);
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
+        nullScrubber.setOutputConnectors(outputConnectors);
 
         return nullScrubber;
     }
@@ -457,17 +450,17 @@ public class DefinitionGenerator {
 
         outlierScrubber.setDescription("Removes outlier values from a given data frame");
 
-        List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        inputConnectorDefinitions.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
-        outlierScrubber.setInputConnectorDefinitions(inputConnectorDefinitions);
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
+        outlierScrubber.setInputConnectors(inputConnectors);
 
-        List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        outputConnectorDefinitions.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
-        outlierScrubber.setOutputConnectorDefinitions(outputConnectorDefinitions);
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
+        outlierScrubber.setOutputConnectors(outputConnectors);
 
-        List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
-        parameterDefinitions.add(new ParameterDefinition("Algorithm", DataType.STRING.toString().toString(), "3Sigma"));
-        outlierScrubber.setParameterDefinitions(parameterDefinitions);
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("Algorithm", DataType.STRING.toString().toString(), "3Sigma"));
+        outlierScrubber.setParameters(parameters);
 
         return outlierScrubber;
     }

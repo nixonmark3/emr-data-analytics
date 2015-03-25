@@ -24,16 +24,16 @@ public class ConnectorDefinition {
      * Returns the data type of this Connector Definition.
      * @return connector data type
      */
-    public String getDataType() {
-        return dataType;
+    public String getType() {
+        return type;
     }
 
     /**
      * Sets the data type of this Connector Definition.
-     * @param dataType connector data type
+     * @param type connector data type
      */
-    public void setDataType(String dataType) {
-        this.dataType = dataType;
+    public void setType(String type) {
+        this.type = type;
     }
 
     /**
@@ -45,5 +45,5 @@ public class ConnectorDefinition {
      * Private members.
      */
     private String name;
-    private String dataType;
+    private String type;
 }

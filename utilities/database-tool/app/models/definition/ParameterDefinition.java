@@ -1,10 +1,10 @@
 package models.definition;
 
 public class ParameterDefinition {
-    public ParameterDefinition(String name, String dataType, String defaultValue) {
+    public ParameterDefinition(String name, String type, String value) {
         this.name = name;
-        this.dataType = dataType;
-        this.defaultValue = defaultValue;
+        this.type = type;
+        this.value = value;
     }
 
     public String getName() {
@@ -15,23 +15,23 @@ public class ParameterDefinition {
         this.name = name;
     }
 
-    public String getDataType() {
-        return dataType;
+    public String getType() {
+        return this.type;
     }
 
-    public void setDataType(String dataType) {
-        this.dataType = dataType;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public String getDefaultValue() {
-        return defaultValue;
+    public String getValue() {
+        return this.value;
     }
 
-    public void setDefaultValue(String defaultValue) {
-        this.defaultValue = defaultValue;
+    public void setValue(String value) {
+        this.value = value;
     }
 
     private String name;
-    private String dataType;
-    private String defaultValue;
+    private String type;
+    private String value;
 }

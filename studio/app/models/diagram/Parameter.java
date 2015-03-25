@@ -37,6 +37,22 @@ public class Parameter {
     }
 
     /**
+     * Returns the type of this Parameter.
+     * @return parameter type
+     */
+    public String getType() {
+        return type;
+    }
+
+    /**
+     * Sets the type of this Parameter.
+     * @param type parameter type
+     */
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    /**
      * Hidden Jackson constructor
      */
     private Parameter() {}
@@ -46,4 +62,5 @@ public class Parameter {
      */
     private String name;
     private String value;
+    private String type;
 }

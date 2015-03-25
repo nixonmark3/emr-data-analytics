@@ -24,32 +24,32 @@ public class ParameterDefinition {
      * Returns the data type of this Parameter Definition.
      * @return parameter definition data type
      */
-    public String getDataType() {
-        return dataType;
+    public String getType() {
+        return type;
     }
 
     /**
      * Sets the data type of this Parameter Definition.
-     * @param dataType parameter definition data type
+     * @param type parameter definition data type
      */
-    public void setDataType(String dataType) {
-        this.dataType = dataType;
+    public void setType(String type) {
+        this.type = type;
     }
 
     /**
      * Returns the default value of this Parameter Definition.
      * @return parameter definition default value
      */
-    public String getDefaultValue() {
-        return defaultValue;
+    public String getValue() {
+        return value;
     }
 
     /**
      * Sets the default value of this Parameter Definition.
-     * @param defaultValue parameter definition default value
+     * @param value parameter definition default value
      */
-    public void setDefaultValue(String defaultValue) {
-        this.defaultValue = defaultValue;
+    public void setValue(String value) {
+        this.value = value;
     }
 
     /**
@@ -61,6 +61,6 @@ public class ParameterDefinition {
      * Private members.
      */
     private String name;
-    private String dataType;
-    private String defaultValue;
+    private String type;
+    private String value;
 }

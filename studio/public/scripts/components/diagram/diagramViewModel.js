@@ -562,9 +562,9 @@ viewmodels.diagramViewModel = function(data) {
 
         var wireDataModel = {
             from_node: (startConnectorType == 'output') ? startBlock.data.name : endBlock.data.name,
-            from_connectionIndex: (startConnectorType == 'output') ? startConnectorIndex : endConnectorIndex,
+            from_connectorIndex: (startConnectorType == 'output') ? startConnectorIndex : endConnectorIndex,
             to_node: (startConnectorType == 'output') ? endBlock.data.name : startBlock.data.name,
-            to_connectionIndex: (startConnectorType == 'output') ? endConnectorIndex : startConnectorIndex
+            to_connectorIndex: (startConnectorType == 'output') ? endConnectorIndex : startConnectorIndex
         };
 
         wiresData.push(wireDataModel);

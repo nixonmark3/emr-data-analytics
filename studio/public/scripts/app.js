@@ -28,7 +28,6 @@ var analyticsApp = angular.module('analyticsApp',
         // load the list of definition blocks
         diagramService.listDefinitions().then(
             function (data) {
-
                 // initialize the pages
                 $scope.pages = [{
                     "categories" : data,
@@ -37,20 +36,29 @@ var analyticsApp = angular.module('analyticsApp',
                 }];
             },
             function (code) {
-
                 // todo: show exception
                 console.log(code);
             }
         );
 
+        $scope.canShowMenuItems = false;
+
         // load the specified diagram
         diagramService.item().then(
             function (data) {
-
                 $scope.diagramViewModel = new viewmodels.diagramViewModel(data);
+
+                // watch diagram name so that we can disable features if the diagram has not been given a name
+                $scope.$watch('diagramViewModel.data.name', function() {
+                    if ($scope.diagramViewModel.data.name != 'Untitled') {
+                        $scope.canShowMenuItems = true;
+                    }
+                    else {
+                        $scope.canShowMenuItems = false;
+                    }
+                });
             },
             function (code) {
-
                 // todo: show exception
                 console.log(code);
             }
@@ -97,9 +105,24 @@ var analyticsApp = angular.module('analyticsApp',
         };
 
         $scope.showNav = false;
+        $scope.showProps = false;
 
-        $scope.toggleDiagrams = function(){
-           $scope.showNav = !$scope.showNav;
+        $scope.toggleDiagrams = function() {
+            diagramService.listDiagrams().then(
+                function (data) {
+                    $scope.diagrams = data;
+                },
+                function (code) {
+
+                    // todo: show exception
+                    console.log(code);
+                }
+            );
+            $scope.showNav = !$scope.showNav;
+        };
+
+        $scope.toggleDiagramProperties = function() {
+            $scope.showProps = !$scope.showProps;
         };
 
         $scope.showLibrary = false;
@@ -107,6 +130,79 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.toggleLibrary = function(){
 
             $scope.showLibrary = !$scope.showLibrary;
+        };
+
+        // load an existing diagram
+        $scope.loadDiagram = function(name) {
+            diagramService.item(name).then(
+                function (data) {
+                    $scope.toggleDiagrams();
+                    $scope.diagramViewModel = new viewmodels.diagramViewModel(data);
+                },
+                function (code) {
+                    console.log(code); // TODO show exception
+                }
+            );
+        };
+
+        // create a blank diagram
+        $scope.createDiagram = function() {
+            diagramService.item().then(
+                function (data) {
+                    $scope.toggleDiagrams();
+                    $scope.diagramViewModel = new viewmodels.diagramViewModel(data);
+                },
+                function (code) {
+                    console.log(code); // TODO show exception
+                }
+            );
+        };
+
+        // save the current diagram
+        $scope.saveDiagram = function() {
+            var data = $scope.diagramViewModel.data;
+            // we need to delete the object id or the save will not work
+            // TODO need a better solution for this
+            delete data._id;
+            diagramService.saveDiagram(data).then(
+                function (data) {
+                    // TODO report success back to the user
+                },
+                function (code) {
+                    console.log(code); // TODO show exception
+                }
+            );
+        };
+
+        // evaluate the current diagram
+        $scope.evaluateDiagram = function() {
+            console.log("evaluate selected");
+        };
+
+        // download the current diagram
+        $scope.downloadDiagram = function() {
+            console.log("download selected");
+        };
+
+        // delete the current diagram
+        $scope.deleteDiagram = function() {
+            diagramService.deleteDiagram($scope.diagramViewModel.data.name).then(
+                function (data) {
+                    // TODO report success back to the user
+                    diagramService.item().then(
+                        function (data) {
+                            $scope.diagramViewModel = new viewmodels.diagramViewModel(data);
+                        },
+                        function (code) {
+                            console.log(code); // TODO show exception
+                        }
+                    );
+
+                },
+                function (code) {
+                    console.log(code); // TODO show exception
+                }
+            );
         };
 
         //

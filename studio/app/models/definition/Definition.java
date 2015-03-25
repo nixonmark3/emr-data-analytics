@@ -11,13 +11,13 @@ public class Definition {
      * Returns the width of a Definition instance graphic.
      * @return definition instance graphic width
      */
-    public int getWidth() { return width; }
+    public int getW() { return w; }
 
     /**
      * Sets the width of a Definition instance graphic.
      * @param width definition instance graphic width
      */
-    public void setWidth(int width) { this.width = width; }
+    public void setW(int width) { this.w = width; }
 
     /**
      * Returns the name of this Definition.
@@ -55,42 +55,42 @@ public class Definition {
      * Returns the list of Parameter Definitions that belong to this Definition.
      * @return list of parameter definitions
      */
-    public List<ParameterDefinition> getParameterDefinitions() { return parameterDefinitions; }
+    public List<ParameterDefinition> getParameters() { return parameters; }
 
     /**
      * Sets the list of Parameter Definitions that belong to this Definition.
-     * @param parameterDefinitions list of parameter definitions
+     * @param parameters list of parameter definitions
      */
-    public void setParameterDefinitions(List<ParameterDefinition> parameterDefinitions) {
-        this.parameterDefinitions = parameterDefinitions;
+    public void setParameters(List<ParameterDefinition> parameters) {
+        this.parameters = parameters;
     }
 
     /**
      * Retruns the list of Input Connectors that belong to this Definition.
      * @return list of input connectors
      */
-    public List<ConnectorDefinition> getInputConnectorDefinitions() { return inputConnectorDefinitions; }
+    public List<ConnectorDefinition> getInputConnectors() { return inputConnectors; }
 
     /**
      * Sets the list of Input Connectors tha belong to this Definition.
-     * @param inputConnectorDefinitions list of input connectors
+     * @param inputConnectors list of input connectors
      */
-    public void setInputConnectorDefinitions(List<ConnectorDefinition> inputConnectorDefinitions) {
-        this.inputConnectorDefinitions = inputConnectorDefinitions;
+    public void setInputConnectors(List<ConnectorDefinition> inputConnectors) {
+        this.inputConnectors = inputConnectors;
     }
 
     /**
      * Returns the list of Output Connectors that belong to this Definition.
      * @return list of output connectors
      */
-    public List<ConnectorDefinition> getOutputConnectorDefinitions() { return outputConnectorDefinitions; }
+    public List<ConnectorDefinition> getOutputConnectors() { return outputConnectors; }
 
     /**
      * Sets the list of Output Connectors that belong to this Definition.
-     * @param outputConnectorDefinitions list of output connectors
+     * @param outputConnectors list of output connectors
      */
-    public void setOutputConnectorDefinitions(List<ConnectorDefinition> outputConnectorDefinitions) {
-        this.outputConnectorDefinitions = outputConnectorDefinitions;
+    public void setOutputConnectors(List<ConnectorDefinition> outputConnectors) {
+        this.outputConnectors = outputConnectors;
     }
 
     /**
@@ -101,10 +101,10 @@ public class Definition {
     /**
      * Private members.
      */
-    private int width;
+    private int w;
     private String description;
     private String name;
-    private List<ParameterDefinition> parameterDefinitions = new ArrayList<ParameterDefinition>();
-    private List<ConnectorDefinition> inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-    private List<ConnectorDefinition> outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
+    private List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+    private List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+    private List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
 }

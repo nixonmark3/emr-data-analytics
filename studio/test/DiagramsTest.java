@@ -79,7 +79,7 @@ public class DiagramsTest extends TestBase{
     public void removeDiagramTest() {
         running(fakeApplication(getSettings()), new Runnable() {
             public void run() {
-                Result result = route(fakeRequest(GET, "/removeDiagram/test101"));
+                Result result = route(fakeRequest(GET, "/deleteDiagram/item/test101"));
                 assertThat(status(result)).isEqualTo(OK);
                 System.out.println(contentAsString(result));
             }

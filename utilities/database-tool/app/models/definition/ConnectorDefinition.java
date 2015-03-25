@@ -1,9 +1,9 @@
 package models.definition;
 
 public class ConnectorDefinition {
-    public ConnectorDefinition(String name, String dataType) {
+    public ConnectorDefinition(String name, String type) {
         this.name = name;
-        this.dataType = dataType;
+        this.type = type;
     }
 
     public String getName() {
@@ -14,14 +14,14 @@ public class ConnectorDefinition {
         this.name = name;
     }
 
-    public String getDataType() {
-        return dataType;
+    public String getType() {
+        return type;
     }
 
-    public void setDataType(String dataType) {
-        this.dataType = dataType;
+    public void setType(String type) {
+        this.type = type;
     }
 
     private String name;
-    private String dataType;
+    private String type;
 }

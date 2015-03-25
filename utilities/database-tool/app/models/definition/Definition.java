@@ -5,15 +5,15 @@ import java.util.*;
 public class Definition {
     public Definition(String name) {
         this.name = name;
-        this.width = 200;
-        this.parameterDefinitions = new ArrayList<ParameterDefinition>();
-        this.inputConnectorDefinitions = new ArrayList<ConnectorDefinition>();
-        this.outputConnectorDefinitions = new ArrayList<ConnectorDefinition>();;
+        this.w = 200;
+        this.parameters = new ArrayList<ParameterDefinition>();
+        this.inputConnectors = new ArrayList<ConnectorDefinition>();
+        this.outputConnectors = new ArrayList<ConnectorDefinition>();;
     }
 
-    public int getWidth() { return width; }
+    public int getW() { return w; }
 
-    public void setWidth(int width) { this.width = width; }
+    public void setW(int width) { this.w = width; }
 
     public String getName() {
         return name;
@@ -31,28 +31,28 @@ public class Definition {
         this.description = description;
     }
 
-    public List<ParameterDefinition> getParameterDefinitions() { return parameterDefinitions; }
+    public List<ParameterDefinition> getParameters() { return parameters; }
 
-    public void setParameterDefinitions(List<ParameterDefinition> parameterDefinitions) {
-        this.parameterDefinitions = parameterDefinitions;
+    public void setParameters(List<ParameterDefinition> parameters) {
+        this.parameters = parameters;
     }
 
-    public List<ConnectorDefinition> getInputConnectorDefinitions() { return inputConnectorDefinitions; }
+    public List<ConnectorDefinition> getInputConnectors() { return inputConnectors; }
 
-    public void setInputConnectorDefinitions(List<ConnectorDefinition> inputConnectorDefinitions) {
-        this.inputConnectorDefinitions = inputConnectorDefinitions;
+    public void setInputConnectors(List<ConnectorDefinition> inputConnectors) {
+        this.inputConnectors = inputConnectors;
     }
 
-    public List<ConnectorDefinition> getOutputConnectorDefinitions() { return outputConnectorDefinitions; }
+    public List<ConnectorDefinition> getOutputConnectors() { return outputConnectors; }
 
-    public void setOutputConnectorDefinitions(List<ConnectorDefinition> outputConnectorDefinitions) {
-        this.outputConnectorDefinitions = outputConnectorDefinitions;
+    public void setOutputConnectors(List<ConnectorDefinition> outputConnectors) {
+        this.outputConnectors = outputConnectors;
     }
 
-    private int width;
+    private int w;
     private String description;
     private String name;
-    private List<ParameterDefinition> parameterDefinitions;
-    private List<ConnectorDefinition> inputConnectorDefinitions;
-    private List<ConnectorDefinition> outputConnectorDefinitions;
+    private List<ParameterDefinition> parameters;
+    private List<ConnectorDefinition> inputConnectors;
+    private List<ConnectorDefinition> outputConnectors;
 }

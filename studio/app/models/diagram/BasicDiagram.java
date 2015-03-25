@@ -52,6 +52,6 @@ public class BasicDiagram {
     /**
      * Private members.
      */
-    private String name = "";
+    private String name = "Untitled";
     private String description = "";
 }
