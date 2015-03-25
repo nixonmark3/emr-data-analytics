@@ -13,7 +13,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
             link: function($scope, element, attrs){
 
                 $scope.draggingWire = false;
-                $scope.connectorRadius = 6;
+                $scope.overConnector = null;
                 $scope.dragSelecting = false;
                 $scope.configuringBlock = false;
                 $scope.configurationBlock = {};
@@ -229,8 +229,17 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
                     var scope = checkForHit(mouseOverElement, connectorClass);
                     $scope.mouseOverConnector = (scope && scope.connector) ? scope.connector : null;
                     if ($scope.mouseOverConnector) {
-                        // Don't attempt to mouse over anything else.
+                        // Expand the radius of the connector to make it easier to use.
+                        scope.connector.radius = scope.connector.expandedRadius();
+                        $scope.overConnector = scope.connector;
                         return;
+                    }
+                    else {
+                        if ($scope.overConnector) {
+                            // If we have expanded a connector reduce the radius to normal.
+                            $scope.overConnector.radius = $scope.overConnector.normalRadius();
+                            $scope.overConnector = null;
+                        }
                     }
 
                     // Figure out if the mouse is over a node.

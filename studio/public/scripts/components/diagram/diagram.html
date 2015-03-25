@@ -127,7 +127,7 @@
 
                 <circle
                         ng-attr-class="{{connector == mouseOverConnector && 'connector-mouseover' || 'connector'}} {{block.stateClass()}}"
-                        ng-attr-r="{{connectorRadius}}"
+                        ng-attr-r="{{connector.radius}}"
                         ng-attr-cx="{{connector.x()}}"
                         ng-attr-cy="{{connector.y()}}"
                         />
@@ -149,7 +149,7 @@
 
                 <circle
                         ng-attr-class="{{connector == mouseOverConnector && 'connector-mouseover' || 'connector'}} {{block.stateClass()}}"
-                        ng-attr-r="{{connectorRadius}}"
+                        ng-attr-r="{{connector.radius}}"
                         ng-attr-cx="{{connector.x()}}"
                         ng-attr-cy="{{connector.y()}}"
                         />

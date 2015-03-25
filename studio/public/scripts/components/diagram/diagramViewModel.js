@@ -3,17 +3,41 @@ var viewmodels = viewmodels || {};
 
 viewmodels.connectorViewModel = function (data, x, y, parent) {
 
+    //
+    // private properties
+    //
     this.data = data;
     this._parent = parent;
     this._x = x;
     this._y = y;
+    this._normalRadius = 6.5;
+    this._expandedRadius = 12;
+
+    //
+    // public properties
+    //
+    this.radius = this._normalRadius;
+
+    //
+    // The normal radius of the connector.
+    //
+    this.normalRadius = function () {
+        return this._normalRadius;
+    };
+
+    //
+    // The expanded radius of the connector.
+    //
+    this.expandedRadius = function () {
+        return this._expandedRadius;
+    };
 
     //
     // The name of the connector.
     //
     this.name = function () {
         return this.data.name;
-    }
+    };
 
     //
     // X coordinate of the connector.
