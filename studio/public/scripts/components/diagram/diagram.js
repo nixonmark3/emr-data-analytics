@@ -1,7 +1,7 @@
 'use strict';
 
 var diagramApp = angular.module('diagramApp', ['draggableApp'])
-    .directive('diagram', ['$compile', function ($compile) {
+    .directive('diagram', ['$compile', function ($compile, $timeout) {
 
         return {
             restrict: 'E',
@@ -21,6 +21,8 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
                 $scope.mouseOverConnector = null;
                 $scope.mouseOverWire = null;
                 $scope.mouseOverBlock = null;
+
+                $scope.renamingBlock = false;
 
                 var jQuery = function (element) {
                     return $(element);
@@ -351,13 +353,13 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
 
                 };
 
-                $scope.toggleConfiguration = function(evt, block){
+                $scope.toggleConfiguration = function(evt){
 
                     if ($scope.configuringBlock){
                         endBlockConfiguration();
                     }
                     else{
-                        beginBlockConfiguration(evt, block);
+                        beginBlockConfiguration(evt);
                     }
                 };
 
@@ -378,7 +380,34 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
                     $scope.configuringBlock = false;
                     delete $scope.configurationBlock;
                 };
+
+                $scope.renameClick = function(evt) {
+                    var point = inverseCoordinates(evt.x(), evt.y());
+
+                    $scope.renameBlock = {
+                        x: point.x,
+                        y: point.y,
+                        block: evt
+                    };
+
+                    $scope.renamingBlock = true;
+
+                    // We need to set the focus on the rename input element but we must
+                    // wait a while as the element has not been created yet.
+                    setInterval(function() { $('#rename-input').focus() }, 10);
+                };
+
+                $scope.diagramClick = function() {
+                    $scope.renamingBlock = false;
+                    delete $scope.renameBlock;
+                };
+
+                $scope.endRenameOnEnter = function() {
+                    if(event.keyCode == 13) {
+                        $scope.diagramClick();
+                    }
+                };
             }
         }
-
-    }]);
+    }]
+);

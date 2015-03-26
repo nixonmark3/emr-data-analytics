@@ -13,15 +13,25 @@
             <div class="configuration-parameter"
                  ng-repeat="parameter in configurationBlock.block.data.parameters">
                 <span>{{parameter.name}}</span>
-                <input type="text" ng-model="parameter.value" />
+                <input type="text" ng-model="parameter.value"/>
             </div>
         </div>
 
     </div>
 
+    <div id="block-rename"
+         ng-show="renamingBlock"
+         ng-cloak
+         ng-style="{top: renameBlock.y + 8, left: renameBlock.x + 5}">
+        <div>
+            <input id="rename-input" type="text" ng-keyup="endRenameOnEnter()" ng-model="renameBlock.block.data.name" />
+        </div>
+    </div>
+
     <svg id="diagram"
          xmlns="http://www.w3.org/2000/svg"
-         ng-mousemove="mouseMove($event)">
+         ng-mousemove="mouseMove($event)"
+         ng-click="diagramClick()">
          <!--ng-mousedown="mouseDown($event)"-->
 
         <g class="block-group"
@@ -58,7 +68,8 @@
                       y="25"
                       class="block-name"
                       text-anchor="middle"
-                      alignment-baseline="middle">
+                      alignment-baseline="middle"
+                      ng-dblclick="renameClick(block)">
 
                     {{block.name()}}
 
