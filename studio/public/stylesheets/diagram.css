@@ -1,5 +1,4 @@
 
-
 /*
  * Diagram
  */
@@ -25,7 +24,6 @@ rect.block-config{ fill: #1f77b4; }
 
 .block-icon { font-family: FontAwesome; fill: #b8b8b8; }
 .block-icon:hover { cursor: pointer; fill: #d62728; }
-
 
 .block-delete { cursor: pointer; fill: #ffffff; stroke: #7f7f7f; stroke-width: 1; }
 .block-delete-text { cursor: pointer; }
@@ -80,6 +78,8 @@ rect.block-config{ fill: #1f77b4; }
 
 .connector { stroke-width: 1; }
 .connector-mouseover { stroke-width: 1; }
+.connector-text { stroke: #1f77b4; }
+
 circle.block-config{ stroke: #1f77b4; fill: #aec7e8; }
 
 /*

@@ -117,13 +117,12 @@
                     ng-repeat="connector in block.inputConnectors"
                     ng-mousedown="connectorMouseDown($event, block, connector, $index, true)">
 
-                <!--<text ng-attr-x="{{connector.x() + 20}}"
-                        ng-attr-y="{{connector.y()}}"
-                        text-anchor="left"
-                        alignment-baseline="middle"
-                        >
+                <text ng-if="connector.showName"
+                      ng-attr-x="{{connector.x() - ((connector.name().length * 6) / 2)}}"
+                      ng-attr-y="{{connector.y() - connector.radius - 5}}"
+                      class="connector-text">
                     {{connector.name()}}
-                </text>-->
+                </text>
 
                 <circle
                         ng-attr-class="{{connector == mouseOverConnector && 'connector-mouseover' || 'connector'}} {{block.stateClass()}}"
@@ -131,21 +130,18 @@
                         ng-attr-cx="{{connector.x()}}"
                         ng-attr-cy="{{connector.y()}}"
                         />
-
             </g>
 
             <g class="connector-group"
                     ng-repeat="connector in block.outputConnectors"
                     ng-mousedown="connectorMouseDown($event, block, connector, $index, false)">
 
-                <!--<text
-                        ng-attr-x="{{connector.x() - 20}}"
-                        ng-attr-y="{{connector.y()}}"
-                        text-anchor="end"
-                        alignment-baseline="middle"
-                        >
+                <text ng-if="connector.showName"
+                      ng-attr-x="{{connector.x() - ((connector.name().length * 6) / 2)}}"
+                      ng-attr-y="{{connector.y() + connector.radius + 12}}"
+                      class="connector-text">
                     {{connector.name()}}
-                </text>-->
+                </text>
 
                 <circle
                         ng-attr-class="{{connector == mouseOverConnector && 'connector-mouseover' || 'connector'}} {{block.stateClass()}}"

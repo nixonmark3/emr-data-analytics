@@ -17,6 +17,7 @@ viewmodels.connectorViewModel = function (data, x, y, parent) {
     // public properties
     //
     this.radius = this._normalRadius;
+    this.showName = false;
 
     //
     // The normal radius of the connector.

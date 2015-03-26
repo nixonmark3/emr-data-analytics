@@ -13,7 +13,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
             link: function($scope, element, attrs){
 
                 $scope.draggingWire = false;
-                $scope.overConnector = null;
+                $scope.currentHoverConnector = null;
                 $scope.dragSelecting = false;
                 $scope.configuringBlock = false;
                 $scope.configurationBlock = {};
@@ -231,14 +231,16 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
                     if ($scope.mouseOverConnector) {
                         // Expand the radius of the connector to make it easier to use.
                         scope.connector.radius = scope.connector.expandedRadius();
-                        $scope.overConnector = scope.connector;
+                        scope.connector.showName = true;
+                        $scope.currentHoverConnector = scope.connector;
                         return;
                     }
                     else {
-                        if ($scope.overConnector) {
+                        if ($scope.currentHoverConnector) {
                             // If we have expanded a connector reduce the radius to normal.
-                            $scope.overConnector.radius = $scope.overConnector.normalRadius();
-                            $scope.overConnector = null;
+                            $scope.currentHoverConnector.radius = $scope.currentHoverConnector.normalRadius();
+                            $scope.currentHoverConnector.showName = false;
+                            $scope.currentHoverConnector = null;
                         }
                     }
 
