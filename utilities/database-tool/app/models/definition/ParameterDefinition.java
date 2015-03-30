@@ -1,10 +1,11 @@
 package models.definition;
 
 public class ParameterDefinition {
-    public ParameterDefinition(String name, String type, String value) {
+    public ParameterDefinition(String name, String type, String value, ParameterOptions options) {
         this.name = name;
         this.type = type;
         this.value = value;
+        this.options = options;
     }
 
     public String getName() {
@@ -32,6 +33,16 @@ public class ParameterDefinition {
     }
 
     private String name;
+
+    public ParameterOptions getOptions() {
+        return options;
+    }
+
+    public void setOptions(ParameterOptions options) {
+        this.options = options;
+    }
+
     private String type;
     private String value;
+    private ParameterOptions options;
 }

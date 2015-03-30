@@ -1,16 +1,18 @@
 # Routes
 
-GET         /                           controllers.Application.index(any = "")
-GET         /getDefinitions             controllers.Definitions.getDefinitions()
-GET         /getDiagram/item/:name      controllers.Diagrams.getDiagram(name: String)
-GET         /getDiagram/item            controllers.Diagrams.getBlankDiagram()
-GET         /getDiagrams                controllers.Diagrams.getDiagrams()
-GET         /deleteDiagram/item/:name   controllers.Diagrams.deleteDiagram(name: String)
+GET         /                                controllers.Application.index(any = "")
+GET         /getDefinitions                  controllers.Definitions.getDefinitions()
+GET         /getProjects                     controllers.Projects.getProjects()
+GET         /getDiagram/item/:name           controllers.Diagrams.getDiagram(name: String)
+GET         /getDiagram/item                 controllers.Diagrams.getBlankDiagram()
+GET         /getDiagrams                     controllers.Diagrams.getDiagrams()
+GET         /deleteDiagram/item/:name        controllers.Diagrams.deleteDiagram(name: String)
+GET         /getDataSet/item/:name           controllers.Projects.getDataSet(name: String)
 
-POST        /saveDiagram                controllers.Diagrams.saveDiagram()
+POST        /saveDiagram                     controllers.Diagrams.saveDiagram()
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file               controllers.Assets.at(path="/public", file)
+GET         /assets/*file                    controllers.Assets.at(path="/public", file)
 
 # Map any other route to main index page
-GET         /*any                       controllers.Application.index(any)
+GET         /*any                            controllers.Application.index(any)

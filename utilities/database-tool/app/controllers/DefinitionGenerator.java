@@ -28,6 +28,7 @@ public class DefinitionGenerator {
         transformBlockDefinitions.add(createScaleBlock());
         transformBlockDefinitions.add(createDownSampleBlock());
         transformBlockDefinitions.add(createLagCorrelateBlock());
+        transformBlockDefinitions.add(createTest1Block());
         transformBlocks.setDefinitions(transformBlockDefinitions);
 
         Category filteringBlocks = new Category("Filters");
@@ -74,8 +75,29 @@ public class DefinitionGenerator {
         loadDB.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("Project", DataType.STRING.toString(), "None"));
-        parameters.add(new ParameterDefinition("DataSet", DataType.STRING.toString(), "None"));
+
+        ParameterOptions projOptions = new ParameterOptions();
+        projOptions.setIsDependent(false);
+        List<String> dependants = new ArrayList<String>();
+        dependants.add("Data Set");
+        projOptions.setDependants(dependants);
+        projOptions.setInputType("DropDown");
+        projOptions.setDynamic(true);
+        List<String> projOpts = new ArrayList<String>();
+        projOpts.add("findProjects");
+        projOptions.setFieldOptions(projOpts);
+
+        parameters.add(new ParameterDefinition("Project", DataType.STRING.toString(), "None", projOptions));
+
+        ParameterOptions dsOptions = new ParameterOptions();
+        dsOptions.setIsDependent(true);
+        dsOptions.setInputType("DropDown");
+        dsOptions.setDynamic(true);
+        List<String> dsOpts = new ArrayList<String>();
+        dsOpts.add("findDataSets");
+        dsOptions.setFieldOptions(dsOpts);
+
+        parameters.add(new ParameterDefinition("Data Set", DataType.STRING.toString(), "None", dsOptions));
         loadDB.setParameters(parameters);
 
         return loadDB;
@@ -98,7 +120,7 @@ public class DefinitionGenerator {
         columns.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("Columns", DataType.STRING.toString(), "None"));
+        parameters.add(new ParameterDefinition("Columns", DataType.STRING.toString(), "None", new ParameterOptions()));
         columns.setParameters(parameters);
 
         return columns;
@@ -121,8 +143,8 @@ public class DefinitionGenerator {
         timeSelection.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("From", DataType.TIMESTAMP.toString(), "None"));
-        parameters.add(new ParameterDefinition("To", DataType.TIMESTAMP.toString(), "None"));
+        parameters.add(new ParameterDefinition("From", DataType.TIMESTAMP.toString(), "None", new ParameterOptions()));
+        parameters.add(new ParameterDefinition("To", DataType.TIMESTAMP.toString(), "None", new ParameterOptions()));
         timeSelection.setParameters(parameters);
 
         return timeSelection;
@@ -183,8 +205,18 @@ public class DefinitionGenerator {
         downSample.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("SampleSize", DataType.INT.toString(), Integer.toString(100)));
-        parameters.add(new ParameterDefinition("To", DataType.STRING.toString(), "last"));
+        parameters.add(new ParameterDefinition("SampleSize", DataType.INT.toString(), Integer.toString(100), new ParameterOptions()));
+
+        ParameterOptions options = new ParameterOptions();
+        options.setIsDependent(false);
+        options.setInputType("DropDown");
+        options.setDynamic(false);
+        List<String> opts = new ArrayList<String>();
+        opts.add("First");
+        opts.add("Last");
+        opts.add("Mean");
+        options.setFieldOptions(opts);
+        parameters.add(new ParameterDefinition("Interpolation", DataType.STRING.toString(), "Last", options));
         downSample.setParameters(parameters);
 
         return downSample;
@@ -208,7 +240,7 @@ public class DefinitionGenerator {
         lagCorrelate.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("lag", DataType.INT.toString(), Integer.toString(60)));
+        parameters.add(new ParameterDefinition("lag", DataType.INT.toString(), Integer.toString(60), new ParameterOptions()));
         lagCorrelate.setParameters(parameters);
 
         return lagCorrelate;
@@ -227,8 +259,8 @@ public class DefinitionGenerator {
         saveDB.setInputConnectors(inputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("Project", DataType.STRING.toString(), "None"));
-        parameters.add(new ParameterDefinition("DataSet", DataType.STRING.toString(), "None"));
+        parameters.add(new ParameterDefinition("Project", DataType.STRING.toString(), "None", new ParameterOptions()));
+        parameters.add(new ParameterDefinition("DataSet", DataType.STRING.toString(), "None", new ParameterOptions()));
         saveDB.setParameters(parameters);
 
         return saveDB;
@@ -252,7 +284,7 @@ public class DefinitionGenerator {
         rollingAverage.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("WindowSize", DataType.INT.toString(), Integer.toString(60)));
+        parameters.add(new ParameterDefinition("WindowSize", DataType.INT.toString(), Integer.toString(60), new ParameterOptions()));
         rollingAverage.setParameters(parameters);
 
         return rollingAverage;
@@ -275,7 +307,7 @@ public class DefinitionGenerator {
         rollingDeviation.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("WindowSize", DataType.INT.toString(), Integer.toString(60)));
+        parameters.add(new ParameterDefinition("WindowSize", DataType.INT.toString(), Integer.toString(60), new ParameterOptions()));
         rollingDeviation.setParameters(parameters);
 
         return rollingDeviation;
@@ -298,7 +330,7 @@ public class DefinitionGenerator {
         weightedAverage.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("Weight", DataType.INT.toString(), Integer.toString(20)));
+        parameters.add(new ParameterDefinition("Weight", DataType.INT.toString(), Integer.toString(20), new ParameterOptions()));
         weightedAverage.setParameters(parameters);
 
         return weightedAverage;
@@ -321,7 +353,7 @@ public class DefinitionGenerator {
         weightedDeviation.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("Weight", DataType.INT.toString().toString(), Integer.toString(20)));
+        parameters.add(new ParameterDefinition("Weight", DataType.INT.toString().toString(), Integer.toString(20), new ParameterOptions()));
         weightedDeviation.setParameters(parameters);
 
         return weightedDeviation;
@@ -344,9 +376,9 @@ public class DefinitionGenerator {
         savitskyGolayFilter.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("PointsToLeft", DataType.INT.toString().toString(), Integer.toString(10)));
-        parameters.add(new ParameterDefinition("PointsToRight", DataType.INT.toString().toString(), Integer.toString(10)));
-        parameters.add(new ParameterDefinition("PolynomialOrder", DataType.INT.toString().toString(), Integer.toString(3)));
+        parameters.add(new ParameterDefinition("PointsToLeft", DataType.INT.toString().toString(), Integer.toString(10), new ParameterOptions()));
+        parameters.add(new ParameterDefinition("PointsToRight", DataType.INT.toString().toString(), Integer.toString(10), new ParameterOptions()));
+        parameters.add(new ParameterDefinition("PolynomialOrder", DataType.INT.toString().toString(), Integer.toString(3), new ParameterOptions()));
         savitskyGolayFilter.setParameters(parameters);
 
         return savitskyGolayFilter;
@@ -369,8 +401,8 @@ public class DefinitionGenerator {
         exponentialFilter.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("Alpha", DataType.FLOAT.toString(), Double.toString(0.8)));
-        parameters.add(new ParameterDefinition("Order", DataType.INT.toString().toString(), Integer.toString(1)));
+        parameters.add(new ParameterDefinition("Alpha", DataType.FLOAT.toString(), Double.toString(0.8), new ParameterOptions()));
+        parameters.add(new ParameterDefinition("Order", DataType.INT.toString().toString(), Integer.toString(1), new ParameterOptions()));
         exponentialFilter.setParameters(parameters);
 
         return exponentialFilter;
@@ -393,7 +425,7 @@ public class DefinitionGenerator {
         stepwiseAverage.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("WindowSize", DataType.INT.toString().toString(), Integer.toString(20)));
+        parameters.add(new ParameterDefinition("WindowSize", DataType.INT.toString().toString(), Integer.toString(20), new ParameterOptions()));
         stepwiseAverage.setParameters(parameters);
 
         return stepwiseAverage;
@@ -416,8 +448,8 @@ public class DefinitionGenerator {
         threeSigma.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("MovingWindow", DataType.INT.toString().toString(), Double.toString(20)));
-        parameters.add(new ParameterDefinition("Order", DataType.FLOAT.toString(), Double.toString(3)));
+        parameters.add(new ParameterDefinition("MovingWindow", DataType.INT.toString().toString(), Double.toString(20), new ParameterOptions()));
+        parameters.add(new ParameterDefinition("Order", DataType.FLOAT.toString(), Double.toString(3), new ParameterOptions()));
         threeSigma.setParameters(parameters);
 
         return threeSigma;
@@ -459,9 +491,30 @@ public class DefinitionGenerator {
         outlierScrubber.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("Algorithm", DataType.STRING.toString().toString(), "3Sigma"));
+        parameters.add(new ParameterDefinition("Algorithm", DataType.STRING.toString().toString(), "3Sigma", new ParameterOptions()));
         outlierScrubber.setParameters(parameters);
 
         return outlierScrubber;
+    }
+
+    private Definition createTest1Block() {
+        Definition test = new Definition("Test1");
+
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in1", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("in2", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("in3", DataType.FRAME.toString()));
+        test.setInputConnectors(inputConnectors);
+
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out1", DataType.FRAME.toString()));
+        outputConnectors.add(new ConnectorDefinition("out2", DataType.FRAME.toString()));
+        test.setOutputConnectors(outputConnectors);
+
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("Prop1", DataType.INT.toString(), Integer.toString(0), new ParameterOptions()));
+        test.setParameters(parameters);
+
+        return test;
     }
 }

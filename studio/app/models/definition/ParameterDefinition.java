@@ -53,6 +53,22 @@ public class ParameterDefinition {
     }
 
     /**
+     * Returns the parameter configuration options.
+     * @return parameter configuration options.
+     */
+    public ParameterOptions getOptions() {
+        return options;
+    }
+
+    /**
+     * Sets the parameter configuration options.
+     * @param options parameter configuration options
+     */
+    public void setOptions(ParameterOptions options) {
+        this.options = options;
+    }
+
+    /**
      * Hidden Jackson constructor.
      */
     private ParameterDefinition() {}
@@ -63,4 +79,5 @@ public class ParameterDefinition {
     private String name;
     private String type;
     private String value;
+    private ParameterOptions options;
 }

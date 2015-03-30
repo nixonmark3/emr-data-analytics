@@ -62,5 +62,5 @@ public class Parameter {
      */
     private String name;
     private String value;
-    private String type;
+    private String type; // todo remove this property as it is not required on instance
 }

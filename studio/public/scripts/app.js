@@ -34,12 +34,18 @@ var analyticsApp = angular.module('analyticsApp',
                     "definitions" : [],
                     "definition" : null
                 }];
+
+                // Convenience for use by diagram directive
+                $scope.definitions = data;
             },
             function (code) {
                 // todo: show exception
                 console.log(code);
             }
         );
+
+        // Convenience for use by diagram directive
+        $scope.service = diagramService; // todo is there a way to pass this to the diagram directive?
 
         $scope.canShowMenuItems = false;
 

@@ -35,6 +35,21 @@ analyticsApp.factory('diagramService', function ($http, $q) {
             return deferred.promise;
         },
 
+        listProjects: function () {
+
+            var deferred = $q.defer();
+
+            $http.get('/getProjects')
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
+
         listDiagrams: function () {
 
             var deferred = $q.defer();
@@ -70,6 +85,21 @@ analyticsApp.factory('diagramService', function ($http, $q) {
             var deferred = $q.defer();
 
             $http.get('/deleteDiagram/item/' + name)
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
+
+        getDataSet: function (name) {
+
+            var deferred = $q.defer();
+
+            $http.get('/getDataSet/item/' + name)
                 .success(function (data, status, headers, config) {
                     deferred.resolve(data);
                 })

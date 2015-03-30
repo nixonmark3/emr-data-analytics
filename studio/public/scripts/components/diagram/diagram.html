@@ -3,20 +3,44 @@
 
     <div id="block-configuration"
          ng-show="configuringBlock"
-         ng-style="{top: (configurationBlock.y), left: (configurationBlock.x - 212), height: (configurationBlock.block.data.parameters.length*60)}"
+         ng-style="{top: (configurationBlock.y), left: (configurationBlock.x - 212), height: (configurationBlock.block.data.parameters.length*90)}"
          ng-cloak>
-
         <div class="arrowUpper"></div>
         <div class="arrowLower"></div>
-
         <div class="block-configuration-content">
-            <div class="configuration-parameter"
-                 ng-repeat="parameter in configurationBlock.block.data.parameters">
-                <span>{{parameter.name}}</span>
-                <input type="text" ng-model="parameter.value"/>
+            <div ng-repeat="parameter in configurationBlock.parameters">
+                <div ng-switch='parameter.inputType'>
+                    <span>{{parameter.name}}</span>
+                    <div ng-switch-when='DropDown' class="dropdown dropdown-scroll">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" style="width: 100%;text-align: left;">
+                            <span>{{parameter.value}}</span>
+                            <i class="fa fa-caret-down"></i>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li >
+                                <div class="input-group input-group-sm search-control">
+                                    <span class="input-group-addon">
+                                        <span class="glyphicon glyphicon-search" />
+                                    </span>
+                                    <input class="form-control" type="text" placeholder="Query" ng-model="query" ng-click="$event.stopPropagation();"/>
+                                </div>
+                            </li>
+                            <li ng-model="parameter.options" ng-repeat="choice in parameter.options | filter:query" ng-click="parameter.value = choice;handleDropDownPropertyClick(parameter)">
+                                <a href="#">{{choice}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div ng-switch-default>
+                        <input class="form-control" type="text" ng-model="parameter.value" style="width: 100%" />
+                    </div>
+                </div>
+            </div>
+            <div>
+                <br>
+                <button style="margin-left:10px;" type="button" class="btn btn-default pull-right" ng-click="toggleConfiguration(null, true)">Save</button>
+                <button type="button" class="btn btn-default pull-right" ng-click="toggleConfiguration(null, false)">Cancel</button>
             </div>
         </div>
-
     </div>
 
     <div id="block-rename"
@@ -115,7 +139,7 @@
                   class="block-icon fa-2x"
                   text-anchor="start"
                   alignment-baseline="bottom"
-                  ng-click="toggleConfiguration(block)">&#xf013</text>
+                  ng-click="toggleConfiguration(block, false)">&#xf013</text>
 
             <!--charting icon-->
             <text ng-attr-x="{{block.width() - 6}}"

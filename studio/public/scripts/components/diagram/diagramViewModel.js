@@ -645,9 +645,16 @@ viewmodels.diagramViewModel = function(data) {
         this.w = definition.w;
         this.x = x;
         this.y = y;
-        this.inputConnectors = definition.inputConnectors;
-        this.outputConnectors = definition.outputConnectors;
-        this.parameters = definition.parameters;
+        this.inputConnectors = definition.inputConnectors; // todo copy over only what we need from definition
+        this.outputConnectors = definition.outputConnectors; // todo copy over only what we need from definition
+
+        var parameters = [];
+
+        definition.parameters.forEach(function(parameterDefinition){
+            parameters.push({name:parameterDefinition.name, value:parameterDefinition.value});
+        });
+
+        this.parameters = parameters;
     };
 
     //
