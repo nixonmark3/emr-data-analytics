@@ -1,6 +1,7 @@
 # Routes
 
 GET         /                                controllers.Application.index(any = "")
+GET         /evaluate                        controllers.Diagrams.evaluate()
 GET         /getDefinitions                  controllers.Definitions.getDefinitions()
 GET         /getProjects                     controllers.Projects.getProjects()
 GET         /getDiagram/item/:name           controllers.Diagrams.getDiagram(name: String)

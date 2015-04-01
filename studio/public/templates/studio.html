@@ -3,9 +3,18 @@
      ng-if="draggingGhost"
      ng-style="{top: ghostPosition.y, left: ghostPosition.x, width: 200, height: 80}"
      ng-cloak>
+</div>
 
-
-
+<div id="studio-controls" class="btn-group">
+    <button type="button" class="btn btn-default">
+        <i class="fa fa-refresh"></i>
+    </button>
+    <button type="button" class="btn btn-default" ng-click="evaluate()">
+        <i class="fa fa-play"></i>
+    </button>
+    <button type="button" class="btn btn-default">
+        <i class="fa fa-cogs"></i>
+    </button>
 </div>
 
 <div id="studio-canvas">

@@ -3,6 +3,21 @@
 analyticsApp.factory('diagramService', function ($http, $q) {
 
     return {
+        evaluate: function () {
+
+            var deferred = $q.defer();
+
+            $http.get('/evaluate')
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config) {
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
+
         item: function (name) {
 
             var deferred = $q.defer();

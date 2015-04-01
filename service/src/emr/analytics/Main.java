@@ -8,5 +8,7 @@ public class Main {
         PythonTask task = new PythonTask(source);
 
         System.out.println(task.execute());
+
+        new Thread(new listener()).start();
     }
 }

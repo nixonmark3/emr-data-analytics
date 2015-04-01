@@ -1,5 +1,7 @@
 package controllers;
 
+import actors.JobProducer;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import models.diagram.BasicDiagram;
@@ -16,6 +18,20 @@ import models.diagram.Diagram;
  * Diagrams Controller.
  */
 public class Diagrams extends ControllerBase {
+
+    static JobProducer producer = new JobProducer();
+
+    /**
+     * Evaluates the specified diagram
+     * @return temporarily return success message
+     */
+    public static Result evaluate(){
+
+        producer.send("Telling producer to evaluate");
+
+        return ok("Evaluated!");
+    }
+
     /**
      * Returns the specified diagram
      * @return Json representing requested diagram or failure

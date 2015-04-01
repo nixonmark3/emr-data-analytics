@@ -181,6 +181,20 @@ var analyticsApp = angular.module('analyticsApp',
         };
 
         // evaluate the current diagram
+        $scope.evaluate = function() {
+
+            diagramService.evaluate().then(
+                function (data) {
+                    // TODO report success back to the user
+                    console.log(data);
+                },
+                function (code) {
+                    console.log(code); // TODO show exception
+                }
+            );
+        };
+
+        // evaluate the current diagram
         $scope.evaluateDiagram = function() {
             console.log("evaluate selected");
         };
