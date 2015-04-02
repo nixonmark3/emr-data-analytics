@@ -1,7 +1,6 @@
 # Routes
 
 GET         /                                controllers.Application.index(any = "")
-GET         /evaluate                        controllers.Diagrams.evaluate()
 GET         /getDefinitions                  controllers.Definitions.getDefinitions()
 GET         /getProjects                     controllers.Projects.getProjects()
 GET         /getDiagram/item/:name           controllers.Diagrams.getDiagram(name: String)
@@ -11,6 +10,7 @@ GET         /deleteDiagram/item/:name        controllers.Diagrams.deleteDiagram(
 GET         /getDataSet/item/:name           controllers.Projects.getDataSet(name: String)
 
 POST        /saveDiagram                     controllers.Diagrams.saveDiagram()
+POST        /evaluate                        controllers.Diagrams.evaluate()
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                    controllers.Assets.at(path="/public", file)

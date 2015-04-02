@@ -182,8 +182,9 @@ var analyticsApp = angular.module('analyticsApp',
 
         // evaluate the current diagram
         $scope.evaluate = function() {
+            var data = $scope.diagramViewModel.data;
 
-            diagramService.evaluate().then(
+            diagramService.evaluate(data).then(
                 function (data) {
                     // TODO report success back to the user
                     console.log(data);

@@ -4,7 +4,7 @@ import actors.JobProducer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import models.diagram.BasicDiagram;
+import emr.analytics.models.diagram.*;
 
 import play.libs.Json;
 import play.mvc.BodyParser;
@@ -12,24 +12,29 @@ import play.mvc.Result;
 
 import org.jongo.*;
 
-import models.diagram.Diagram;
-
 /**
  * Diagrams Controller.
  */
 public class Diagrams extends ControllerBase {
 
+    // initialize evaluation socket
     static JobProducer producer = new JobProducer();
 
     /**
-     * Evaluates the specified diagram
+     * Evaluates the diagram specified in the request body
      * @return temporarily return success message
      */
+    @BodyParser.Of(BodyParser.Json.class)
     public static Result evaluate(){
 
-        producer.send("Telling producer to evaluate");
+        // Deserialize json sent by client to Diagram model object.
+        ObjectMapper objectMapper = new ObjectMapper();
+        Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
 
-        return ok("Evaluated!");
+        // send diagram to evaluation service
+        producer.send(diagram);
+
+        return ok("Diagram evaluation initiated.");
     }
 
     /**
