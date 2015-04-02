@@ -3,6 +3,7 @@ package emr.analytics.models.diagram;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Jackson schema for Diagram.
@@ -118,4 +119,29 @@ public class Diagram implements Serializable {
     private List<Wire> wires = new ArrayList<Wire>();
     private List<Block> blocks = new ArrayList<Block>();
     private int version = 0;
+
+    /**
+     * Retrieve a list of root level blocks
+     */
+    public List<Block> getRoot(){
+
+        return this.blocks.stream()
+                .filter(b -> b.getInputConnectors().isEmpty())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieve the next set of blocks that spawn from the name of specified block
+     */
+    public List<Block> getNext(String name){
+
+        List<String> names = this.wires.stream()
+                .filter(w -> w.getFrom_node() == name)
+                .map(w -> w.getTo_node())
+                .collect(Collectors.toList());
+
+        return this.blocks.stream()
+                .filter(b -> names.contains(b.getName()))
+                .collect(Collectors.toList());
+    }
 }

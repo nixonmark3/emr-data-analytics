@@ -169,4 +169,15 @@ public class Block implements Serializable {
     private List<Connector> inputConnectors = new ArrayList<Connector>();
     private List<Connector> outputConnectors = new ArrayList<Connector>();
     private List<Parameter> parameters = new ArrayList<Parameter>();
+
+    /**
+     * Verifies that this block has been configured
+     */
+    public boolean isConfigured(){
+
+        // todo: enhance configuration criteria
+        // configuration criteria is that all parameters have a value
+
+        return (!this.parameters.stream().anyMatch(p -> p.getValue().isEmpty()));
+    }
 }

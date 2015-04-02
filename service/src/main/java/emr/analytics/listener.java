@@ -1,6 +1,8 @@
 package emr.analytics;
 
 import java.io.*;
+import java.util.*;
+
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.Socket;
@@ -46,6 +48,29 @@ public class listener implements Runnable {
 
             System.out.println(String.format("Evaluation Request Received for Diagram: %s.",
                     diagram.getName()));
+
+            // todo: refactor by passing this routine to a dedicated worker thread
+
+            // compile a list of blocks to execute
+            List<Block> compiled = new ArrayList<Block>();
+
+            // Initialize queue of blocks to compile
+            Queue<Block> queue = new LinkedList<Block>();
+            for (Block block : diagram.getRoot())
+                queue.add(block);
+
+            //
+            while (!queue.isEmpty()){
+
+                Block block = queue.remove();
+                if (block.isConfigured()){
+
+                    compiled.add(block);
+
+                    for (Block next : diagram.getNext(block.getName()))
+                        queue.add(block);
+                }
+            }
         }
 
         _socket.close();
