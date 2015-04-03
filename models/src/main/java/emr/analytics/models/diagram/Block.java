@@ -152,6 +152,10 @@ public class Block implements Serializable {
         this.parameters = parameters;
     }
 
+    public void setConfigured(boolean configured) {
+        this.configured = configured;
+    }
+
     /**
      * Hidden Jackson constructor.
      */
@@ -160,6 +164,7 @@ public class Block implements Serializable {
     /**
      * Private members.
      */
+    private boolean configured;
     private String name;
     private String definition;
     private int state;

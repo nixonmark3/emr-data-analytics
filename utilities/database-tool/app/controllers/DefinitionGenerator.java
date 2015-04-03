@@ -66,7 +66,7 @@ public class DefinitionGenerator {
     // Load Block Definition
     //
     private Definition createLoadDBBlock() {
-        Definition loadDB = new Definition("Load DB");
+        Definition loadDB = new Definition("LoadDB", "Load DB");
 
         loadDB.setDescription("Loads a data set from a given project");
 
@@ -107,7 +107,7 @@ public class DefinitionGenerator {
     // Columns Block Definition
     //
     private Definition createColumnsBlock() {
-        Definition columns = new Definition("Columns");
+        Definition columns = new Definition("Columns", "Columns");
 
         columns.setDescription("Selects columns from a given data frame");
 
@@ -130,7 +130,7 @@ public class DefinitionGenerator {
     // Time Selection Block Definition
     //
     private Definition createTimeSelectionBlock() {
-        Definition timeSelection = new Definition("Time Selection");
+        Definition timeSelection = new Definition("TimeSelection", "Time Selection");
 
         timeSelection.setDescription("Selects time range of data from a given data frame");
 
@@ -154,7 +154,7 @@ public class DefinitionGenerator {
     // Merge Block Definition
     //
     private Definition createMergeBlock() {
-        Definition merge = new Definition("Merge");
+        Definition merge = new Definition("Merge", "Merge");
 
         merge.setDescription("Merge data frames into one data frame");
 
@@ -173,7 +173,7 @@ public class DefinitionGenerator {
     // Scale Block Definition
     //
     private Definition createScaleBlock() {
-        Definition scale = new Definition("Scale");
+        Definition scale = new Definition("Scale", "Scale");
 
         scale.setDescription("Normalize a given data frame");
 
@@ -192,7 +192,7 @@ public class DefinitionGenerator {
     // Down Sample Block Definition
     //
     private Definition createDownSampleBlock() {
-        Definition downSample = new Definition("Down Sample");
+        Definition downSample = new Definition("DownSample", "Down Sample");
 
         downSample.setDescription("Down sample a given data frame");
 
@@ -227,7 +227,7 @@ public class DefinitionGenerator {
     // Lag Correlate Block Definition
     //
     private Definition createLagCorrelateBlock() {
-        Definition lagCorrelate = new Definition("Lag Correlate");
+        Definition lagCorrelate = new Definition("LagCorrelate", "Lag Correlate");
 
         lagCorrelate.setDescription("Performs a lag correlation a given data frame");
 
@@ -250,7 +250,7 @@ public class DefinitionGenerator {
     // Save Block Definition
     //
     private Definition createSaveDBBlock() {
-        Definition saveDB = new Definition("Save DB");
+        Definition saveDB = new Definition("SaveDB", "Save DB");
 
         saveDB.setDescription("Saves a given data frame");
 
@@ -271,7 +271,7 @@ public class DefinitionGenerator {
     // Rolling Average Block Definition
     //
     private Definition createRollingAverageBlock() {
-        Definition rollingAverage = new Definition("Rolling Average");
+        Definition rollingAverage = new Definition("RollingAverage", "Rolling Average");
 
         rollingAverage.setDescription("Determines the rolling average of a given data frame");
 
@@ -294,7 +294,7 @@ public class DefinitionGenerator {
     // Rolling Deviation Block Definition
     //
     private Definition createRollingDeviationBlock() {
-        Definition rollingDeviation = new Definition("Rolling Deviation");
+        Definition rollingDeviation = new Definition("RollingDeviation", "Rolling Deviation");
 
         rollingDeviation.setDescription("Determines the rolling deviation of a given data frame");
 
@@ -317,7 +317,7 @@ public class DefinitionGenerator {
     // Weighted Average Block Definition
     //
     private Definition createWeightedAverageBlock() {
-        Definition weightedAverage = new Definition("Weighted Average");
+        Definition weightedAverage = new Definition("WeightedAverage", "Weighted Average");
 
         weightedAverage.setDescription("Determines the weighted average of a given data frame");
 
@@ -340,7 +340,7 @@ public class DefinitionGenerator {
     // Weighted Deviation Block Definition
     //
     private Definition createWeightedDeviationBlock() {
-        Definition weightedDeviation = new Definition("Weighted Deviation");
+        Definition weightedDeviation = new Definition("WeightedDeviation", "Weighted Deviation");
 
         weightedDeviation.setDescription("Determines the weighted deviation of a given data frame");
 
@@ -363,7 +363,7 @@ public class DefinitionGenerator {
     // Savitsky Golay Filter Block Definition
     //
     private Definition createSavitskyGolayFilterBlock() {
-        Definition savitskyGolayFilter = new Definition("Savitsky-Golay Filter");
+        Definition savitskyGolayFilter = new Definition("SavitskyGolayFilter", "Savitsky-Golay Filter");
 
         savitskyGolayFilter.setDescription("Apply Savitsky-Golay filter to a given data frame");
 
@@ -388,7 +388,7 @@ public class DefinitionGenerator {
     // Exponential Filter Block Definition
     //
     private Definition createExponentialFilterBlock() {
-        Definition exponentialFilter = new Definition("Exponential Filter");
+        Definition exponentialFilter = new Definition("ExponentialFilter", "Exponential Filter");
 
         exponentialFilter.setDescription("Apply exponential filter to a given data frame");
 
@@ -412,7 +412,7 @@ public class DefinitionGenerator {
     // Stepwise Average Block Definition
     //
     private Definition createStepwiseAverageBlock() {
-        Definition stepwiseAverage = new Definition("Stepwise Average");
+        Definition stepwiseAverage = new Definition("StepwiseAverage", "Stepwise Average");
 
         stepwiseAverage.setDescription("Apply stepwise average filter to a given data frame");
 
@@ -435,7 +435,7 @@ public class DefinitionGenerator {
     // Three Sigma Block Definition
     //
     private Definition createThreeSigmaBlock() {
-        Definition threeSigma = new Definition("Three Sigma");
+        Definition threeSigma = new Definition("ThreeSigma", "Three Sigma");
 
         threeSigma.setDescription("Apply three sigma algorithm to a given data frame");
 
@@ -459,7 +459,7 @@ public class DefinitionGenerator {
     // Null Scrubber Block Definition
     //
     private Definition createNullScrubberBlock() {
-        Definition nullScrubber = new Definition("Null Scrubber");
+        Definition nullScrubber = new Definition("NullScrubber", "Null Scrubber");
 
         nullScrubber.setDescription("Removes NaN values from a given data frame");
 
@@ -478,7 +478,7 @@ public class DefinitionGenerator {
     // Outlier Scrubber Definition
     //
     private Definition createOutlierScrubberBlock() {
-        Definition outlierScrubber = new Definition("Outlier Scrubber");
+        Definition outlierScrubber = new Definition("OutlierScrubber", "Outlier Scrubber");
 
         outlierScrubber.setDescription("Removes outlier values from a given data frame");
 
@@ -498,7 +498,7 @@ public class DefinitionGenerator {
     }
 
     private Definition createTest1Block() {
-        Definition test = new Definition("Test1");
+        Definition test = new Definition("Test1", "Test1");
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
         inputConnectors.add(new ConnectorDefinition("in1", DataType.FRAME.toString()));

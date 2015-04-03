@@ -29,10 +29,26 @@ public class Definition {
 
     /**
      * Sets the name of this Definition.
-     * @param name
+     * @param name definition name
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * Returns the friendly name of this Definition.
+     * @return definition friendly name
+     */
+    public String getFriendlyName() {
+        return friendlyName;
+    }
+
+    /**
+     * Sets the friendly name of this Definition.
+     * @param friendlyName friendly definition name
+     */
+    public void setFriendlyName(String friendlyName) {
+        this.friendlyName = friendlyName;
     }
 
     /**
@@ -104,6 +120,7 @@ public class Definition {
     private int w;
     private String description;
     private String name;
+    private String friendlyName;
     private List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
     private List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
     private List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
