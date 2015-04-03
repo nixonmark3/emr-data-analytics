@@ -1,5 +1,6 @@
-/Users/jkidd/Projects/PSSAppliedResearch/emr-data-analytics/models/src/main/java/emr/analytics/models/diagram/Connector.java
-/Users/jkidd/Projects/PSSAppliedResearch/emr-data-analytics/models/src/main/java/emr/analytics/models/diagram/Diagram.java
-/Users/jkidd/Projects/PSSAppliedResearch/emr-data-analytics/models/src/main/java/emr/analytics/models/diagram/Block.java
-/Users/jkidd/Projects/PSSAppliedResearch/emr-data-analytics/models/src/main/java/emr/analytics/models/diagram/Parameter.java
-/Users/jkidd/Projects/PSSAppliedResearch/emr-data-analytics/models/src/main/java/emr/analytics/models/diagram/Wire.java
+/Users/BigDataAnalytics/IdeaProjects/emr-data-analytics/models/src/main/java/emr/analytics/models/diagram/Connector.java
+/Users/BigDataAnalytics/IdeaProjects/emr-data-analytics/models/src/main/java/emr/analytics/models/diagram/Wire.java
+/Users/BigDataAnalytics/IdeaProjects/emr-data-analytics/models/src/main/java/emr/analytics/models/diagram/Block.java
+/Users/BigDataAnalytics/IdeaProjects/emr-data-analytics/models/src/main/java/emr/analytics/models/diagram/Parameter.java
+/Users/BigDataAnalytics/IdeaProjects/emr-data-analytics/models/src/main/java/emr/analytics/models/diagram/BasicDiagram.java
+/Users/BigDataAnalytics/IdeaProjects/emr-data-analytics/models/src/main/java/emr/analytics/models/diagram/Diagram.java

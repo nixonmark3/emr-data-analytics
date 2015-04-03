@@ -3,8 +3,9 @@ package models.definition;
 import java.util.*;
 
 public class Definition {
-    public Definition(String name) {
+    public Definition(String name, String friendlyName) {
         this.name = name;
+        this.friendlyName = friendlyName;
         this.w = 200;
         this.parameters = new ArrayList<ParameterDefinition>();
         this.inputConnectors = new ArrayList<ConnectorDefinition>();
@@ -21,6 +22,14 @@ public class Definition {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getFriendlyName() {
+        return friendlyName;
+    }
+
+    public void setFriendlyName(String friendlyName) {
+        this.friendlyName = friendlyName;
     }
 
     public String getDescription() {
@@ -52,6 +61,7 @@ public class Definition {
     private int w;
     private String description;
     private String name;
+    private String friendlyName;
     private List<ParameterDefinition> parameters;
     private List<ConnectorDefinition> inputConnectors;
     private List<ConnectorDefinition> outputConnectors;
