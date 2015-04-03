@@ -136,12 +136,22 @@ public class Diagram implements Serializable {
     public List<Block> getNext(String name){
 
         List<String> names = this.wires.stream()
-                .filter(w -> w.getFrom_node() == name)
+                .filter(w -> w.getFrom_node().equals(name))
                 .map(w -> w.getTo_node())
                 .collect(Collectors.toList());
 
         return this.blocks.stream()
                 .filter(b -> names.contains(b.getName()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieve the wires that lead to the specified block
+     */
+    public List<Wire> getLeadingWires(String name){
+
+        return this.wires.stream()
+                .filter(w -> w.getTo_node().equals(name))
                 .collect(Collectors.toList());
     }
 }

@@ -1,0 +1,19 @@
+{{=<% %>=}}
+
+from blocks import <%definitions%>
+
+blocks_to_execute = []
+
+<%#blocks%>
+<%name%> = <%definition%>('<%name%>')
+<%name%>.parameters = {<%& parameters%>}
+<%name%>.input_connectors = {<%& inputs%>}
+blocks_to_execute.append(<%name%>)
+
+<%/blocks%>
+
+results_table = {}
+
+for block in blocks_to_execute:
+    results_table.update(block.execute(results_table))
+

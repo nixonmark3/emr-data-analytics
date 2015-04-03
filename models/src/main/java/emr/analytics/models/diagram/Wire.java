@@ -71,6 +71,38 @@ public class Wire implements Serializable {
     }
 
     /**
+     * Returns the name of the from node connector of this Wire.
+     * @return name of from node connector
+     */
+    public String getFrom_connector() {
+        return from_connector;
+    }
+
+    /**
+     * Sets the name of the from node connector of this Wire.
+     * @param from_connector name of from node connector
+     */
+    public void setFrom_connector(String from_connector) {
+        this.from_connector = from_connector;
+    }
+
+    /**
+     * Returns the name of the to node connector of this Wire.
+     * @return name of to node connector
+     */
+    public String getTo_connector() {
+        return to_connector;
+    }
+
+    /**
+     * Sets the name of the to node connector of this Wire.
+     * @param to_connector name of to node connector
+     */
+    public void setTo_connector(String to_connector) {
+        this.to_connector = to_connector;
+    }
+
+    /**
      * Hidden Jackson constructor.
      */
     private Wire() {}
@@ -80,6 +112,8 @@ public class Wire implements Serializable {
      */
     private String from_node;
     private int from_connectorIndex;
+    private String from_connector;
     private String to_node;
     private int to_connectorIndex;
+    private String to_connector;
 }

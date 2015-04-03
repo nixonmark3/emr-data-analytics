@@ -9,6 +9,8 @@ import org.zeromq.ZMQ.Socket;
 
 import emr.analytics.models.diagram.*;
 
+import javax.xml.transform.Source;
+
 public class listener implements Runnable {
     private ZContext _context;
     private Socket _socket;
@@ -49,32 +51,54 @@ public class listener implements Runnable {
             System.out.println(String.format("Evaluation Request Received for Diagram: %s.",
                     diagram.getName()));
 
-            // todo: refactor by passing this routine to a dedicated worker thread
-
-            // compile a list of blocks to execute
-            List<Block> compiled = new ArrayList<Block>();
-
-            // Initialize queue of blocks to compile
-            Queue<Block> queue = new LinkedList<Block>();
-            for (Block block : diagram.getRoot())
-                queue.add(block);
-
-            //
-            while (!queue.isEmpty()){
-
-                Block block = queue.remove();
-                if (block.isConfigured()){
-
-                    compiled.add(block);
-
-                    for (Block next : diagram.getNext(block.getName()))
-                        queue.add(block);
-                }
-            }
+            // todo: refactor evaluate on non-blocking thread
+            evaluate(diagram);
         }
 
         _socket.close();
         _context.destroy();
+    }
+
+    public void evaluate(Diagram diagram){
+        // compile a list of blocks to execute
+        SourceBlocks sourceBlocks = new SourceBlocks(diagram);
+
+        // Initialize queue of blocks to compile
+        Queue<Block> queue = new LinkedList<Block>();
+        for (Block block : diagram.getRoot())
+            queue.add(block);
+
+        // Capture all configured blocks in order
+        while (!queue.isEmpty()){
+
+            Block block = queue.remove();
+
+            // Capture configured blocks and queue descending blocks
+            if (block.isConfigured()){
+
+                sourceBlocks.add(block, diagram.getLeadingWires(block.getName()));
+
+                for (Block next : diagram.getNext(block.getName()))
+                    queue.add(next);
+            }
+        }
+
+        // compile and execute configured blocks
+        if (!sourceBlocks.isEmpty()) {
+
+            String source = "";
+            try {
+                source = sourceBlocks.compile("python_driver.mustache");
+            } catch (IOException ex) {
+                System.err.println(String.format("IOException: %s.", ex.toString()));
+            }
+
+            // todo: temporarily print generated python code
+            System.out.println(source);
+
+            PythonTask task = new PythonTask(source);
+            task.execute();
+        }
     }
 
     public static Object deserialize(byte[] bytes) throws IOException, ClassNotFoundException {

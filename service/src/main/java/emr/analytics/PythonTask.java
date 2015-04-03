@@ -20,9 +20,7 @@ public class PythonTask {
 
     public PythonTask(String code) { this(UUID.randomUUID(), code); }
 
-    public String execute(){
-
-        String result = "";
+    public void execute(){
 
         this.compile();
 
@@ -31,15 +29,34 @@ public class PythonTask {
             Process process = builder.start();
 
             BufferedReader out = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            result = out.readLine();
+            BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+
+            String lineRead;
+            while ((lineRead = out.readLine()) != null) {
+                System.out.println(lineRead);
+            }
+
+            try {
+                int complete = process.waitFor();
+                if (complete != 0){
+                    System.err.println("Python script failed!");
+
+                    while ((lineRead = err.readLine()) != null) {
+                        System.err.println(lineRead);
+                    }
+                }
+            }
+            catch(InterruptedException ex){
+                System.err.println(String.format("InterruptedException: %s.", ex.toString()));
+            }
+
+            // TODO error handling for non-zero rc
         }
         catch(IOException ex){
             System.err.println("IO Exception occurred.");
         }
 
         this.cleanup();
-
-        return result;
     }
 
     private String getFileName(){
