@@ -45,6 +45,10 @@ public class PythonTask {
                         System.err.println(lineRead);
                     }
                 }
+                else {
+
+                    System.out.println("Python Task Complete!");
+                }
             }
             catch(InterruptedException ex){
                 System.err.println(String.format("InterruptedException: %s.", ex.toString()));

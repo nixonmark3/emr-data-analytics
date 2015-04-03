@@ -1,5 +1,6 @@
 {{=<% %>=}}
 
+import time
 from blocks import <%definitions%>
 
 blocks_to_execute = []
@@ -16,4 +17,5 @@ results_table = {}
 
 for block in blocks_to_execute:
     results_table.update(block.execute(results_table))
+    time.sleep(5)
 
