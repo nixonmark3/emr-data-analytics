@@ -1,7 +1,10 @@
 package controllers;
 
+import actors.ClientActor;
+
 import play.mvc.*;
-import play.Logger.ALogger;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import views.html.*;
 
@@ -10,8 +13,11 @@ import views.html.*;
  */
 public class Application extends Controller {
     public static Result index(String any) {
-//        ALogger log = play.Logger.of("application");
-//        log.info("Data Analytics Studio application started.");
         return ok(index.render("Data Analytics Studio"));
     }
+
+    public static WebSocket<JsonNode> clientSocket() {
+        return WebSocket.withActor(ClientActor::props);
+    }
+
 }

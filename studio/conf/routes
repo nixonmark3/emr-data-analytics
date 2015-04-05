@@ -8,6 +8,7 @@ GET         /getDiagram/item                 controllers.Diagrams.getBlankDiagra
 GET         /getDiagrams                     controllers.Diagrams.getDiagrams()
 GET         /deleteDiagram/item/:name        controllers.Diagrams.deleteDiagram(name: String)
 GET         /getDataSet/item/:name           controllers.Projects.getDataSet(name: String)
+GET         /socket                          controllers.Application.clientSocket()
 
 POST        /saveDiagram                     controllers.Diagrams.saveDiagram()
 POST        /evaluate                        controllers.Diagrams.evaluate()
