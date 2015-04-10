@@ -11,38 +11,40 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 /**
  * The actor we use when a client opens a web socket
  */
-public class ClientActor extends UntypedActor {
+public class ClientActor extends UntypedActor
+{
+    private final UUID _clientId;
+    private final ActorRef _out;
 
-    public static Props props(ActorRef out) {
-        return Props.create(ClientActor.class, out, UUID.randomUUID().toString());
+    public static Props props(ActorRef out)
+    {
+        return Props.create(ClientActor.class, out, UUID.randomUUID());
     }
 
-    public ClientActor(ActorRef out, String clientId) {
-        this.out = out;
-        this.clientId = clientId;
+    public ClientActor(ActorRef out, UUID clientId)
+    {
+        this._out = out;
+        this._clientId = clientId;
 
-        // Send client id back to the client
-        ObjectNode id = Json.newObject();
-        id.put("id", this.clientId);
-        this.out.tell(id, self());
+        ObjectNode clientRegistrationMsg = Json.newObject();
+        clientRegistrationMsg.put("messageType", "ClientRegistration");
+        clientRegistrationMsg.put("id", this._clientId.toString());
+        this._out.tell(clientRegistrationMsg, self());
     }
 
     @Override
     public void preStart() {
-        ClientActorManager.getInstance().addClientActorPath(this.clientId, this.out.path());
+        System.out.println("Pre-Starting Client Actor");
+        ClientActorManager.getInstance().addClientActorPath(this._clientId, this._out.path());
     }
 
     @Override
     public void postStop() throws Exception {
-        ClientActorManager.getInstance().removeClientActorPath(this.clientId);
+        System.out.println("Pre-Stopping Client Actor");
+        ClientActorManager.getInstance().removeClientActorPath(this._clientId);
     }
 
-    public void onReceive(Object message) throws Exception {
-        // todo handle messages that this actor receives
-
-        // todo can we use akka actors to make this asynchronous?
+    public void onReceive(Object message) throws Exception
+    {
     }
-
-    private final String clientId;
-    private final ActorRef out;
 }

@@ -6,6 +6,12 @@ import java.io.Serializable;
  * Jackson schema for Diagram Parameter.
  */
 public class Parameter implements Serializable {
+    private String name = "";
+    private String value = "";
+    private boolean collected = false;
+
+    private Parameter() {}
+
     /**
      * Returns the name of this Parameter.
      * @return parameter name
@@ -39,30 +45,18 @@ public class Parameter implements Serializable {
     }
 
     /**
-     * Returns the type of this Parameter.
-     * @return parameter type
+     * Determines if this parameter has been collected.
+     * @return boolean is collected
      */
-    public String getType() {
-        return type;
+    public boolean isCollected() {
+        return collected;
     }
 
     /**
-     * Sets the type of this Parameter.
-     * @param type parameter type
+     * Sets the collected field of a parameter.
+     * @param collected boolean is collected
      */
-    public void setType(String type) {
-        this.type = type;
+    public void setCollected(boolean collected) {
+        this.collected = collected;
     }
-
-    /**
-     * Hidden Jackson constructor
-     */
-    private Parameter() {}
-
-    /**
-     * Private members.
-     */
-    private String name;
-    private String value;
-    private String type; // todo remove this property as it is not required on instance
 }

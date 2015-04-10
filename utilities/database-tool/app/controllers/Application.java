@@ -35,12 +35,9 @@ public class Application extends Controller {
         // Need to ensure that each category has a unique name
         definitions.ensureIndex("{name: 1}","{unique:true}");
 
-        // Need to ensure that each definition in a category has a unique  name
-        definitions.ensureIndex("{definitions.name: 1}","{unique:true}");
+        DefinitionGenerator generator = new DefinitionGenerator(definitions);
 
-        DefinitionGenerator generator = new DefinitionGenerator();
-
-        generator.generate(definitions);
+        generator.generate();
 
         return ok();
     }

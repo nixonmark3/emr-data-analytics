@@ -1,120 +1,676 @@
-
-[{"name": "Data Sources",
-
-    "definitions": [
-
-      { "name": "LoadDB",
-        "w": 200,
-        "inputConnectors": [],
-        "outputConnectors": [
-          {
-            "name": "out",
-            "type": "frame"
-          }
-        ],
-        "parameters" : [
-          {
-            "name" : "Project",
-            "value" : ""
-          },
-          {
-            "name" : "DataSet",
-            "value" : ""
-          }
-        ]
+[
+  {
+    "w": 200,
+    "description": "Loads a data set from a given project",
+    "name": "Load DB",
+    "category": "Data Sources",
+    "friendlyName": null,
+    "parameters": [
+      {
+        "name": "Project",
+        "type": "list",
+        "value": "None",
+        "options": {
+          "dynamic": true,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": "findProjects"
+        }
       },
-      { "name": "Streaming",
-        "w": 200,
-        "inputConnectors": [],
-        "outputConnectors": [
-          {
-            "name": "out",
-            "type": "frame"
-          }
-        ],
-        "parameters" : [
-          {
-            "name" : "Source",
-            "value" : ""
-          },
-          {
-            "name" : "Rate",
-            "value" : ""
-          }
-        ]
+      {
+        "name": "Data Set",
+        "type": "list",
+        "value": "None",
+        "options": {
+          "dynamic": true,
+          "dependencies": [
+            "Project"
+          ],
+          "fieldOptions": [],
+          "method": "findDataSets"
+        }
+      }
+    ],
+    "inputConnectors": [
+
+    ],
+    "outputConnectors": [
+      {
+        "name": "out",
+        "type": "frame"
       }
     ]
   },
+  {
+    "w": 200,
+    "description": "Saves a given data frame",
+    "name": "Save DB",
+    "category": "Data Sources",
+    "friendlyName": null,
+    "parameters": [
+      {
+        "name": "Project",
+        "type": "string",
+        "value": "None",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      },
+      {
+        "name": "DataSet",
+        "type": "string",
+        "value": "None",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      }
+    ],
+    "inputConnectors": [
+      {
+        "name": "in",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
 
-  {"name": "Calculations",
-
-    "definitions": [
-
-      { "name": "Weighted Average",
-        "w": 200,
-        "inputConnectors": [
-          {
-            "name": "in",
-            "type": "frame"
-          }
-        ],
-        "outputConnectors": [
-          {
-            "name": "out",
-            "type": "frame"
-          }
-        ],
-        "parameters": [
-          {
-            "name": "Weight",
-            "value": ""
-          }
-        ]
+    ]
+  },
+  {"w": 200,
+    "description": "Selects columns from a given data frame",
+    "name": "Columns",
+    "category": "Transformers",
+    "friendlyName": null,
+    "parameters": [
+      {
+        "name": "Columns",
+        "type": "string",
+        "value": "None",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      }
+    ],
+    "inputConnectors": [
+      {
+        "name": "in",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
+      {
+        "name": "out",
+        "type": "frame"
       }
     ]
   },
-
-  {"name": "Filters",
-
-    "definitions": [
-
-      { "name": "Columns",
-        "w": 200,
-        "inputConnectors": [
-          {
-            "name": "in",
-            "type": "frame"
-          }
-        ],
-        "outputConnectors": [
-          {
-            "name": "out",
-            "type": "frame"
-          }
-        ],
-        "parameters": [
-          {
-            "name": "Columns",
-            "value": ""
-          }
-        ]
+  {
+    "w": 200,
+    "description": "Selects time range of data from a given data frame",
+    "name": "Time Selection",
+    "category": "Transformers",
+    "friendlyName": null,
+    "parameters": [
+      {
+        "name": "From",
+        "type": "timestamp",
+        "value": "None",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
       },
+      {
+        "name": "To",
+        "type": "timestamp",
+        "value": "None",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      }
+    ],
+    "inputConnectors": [
+      {
+        "name": "in",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
+      {
+        "name": "out",
+        "type": "frame"
+      }
+    ]
+  },
+  {
+    "w": 200,
+    "description": "Merge data frames into one data frame",
+    "name": "Merge",
+    "category": "Transformers",
+    "friendlyName": null,
+    "parameters": [
 
-      { "name": "Merge",
-        "w": 200,
-        "inputConnectors": [
-          {
-            "name": "in",
-            "type": "frame"
-          }
-        ],
-        "outputConnectors": [
-          {
-            "name": "out",
-            "type": "frame"
-          }
-        ],
-        "parameters": []
+    ],
+    "inputConnectors": [
+      {
+        "name": "in",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
+      {
+        "name": "out",
+        "type": "frame"
+      }
+    ]
+  },
+  {
+    "w": 200,
+    "description": "Normalize a given data frame",
+    "name": "Scale",
+    "category": "Transformers",
+    "friendlyName": null,
+    "parameters": [
+
+    ],
+    "inputConnectors": [
+      {
+        "name": "in",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
+      {
+        "name": "out",
+        "type": "frame"
+      }
+    ]
+  },
+  {
+    "w": 200,
+    "description": "Down sample a given data frame",
+    "name": "Down Sample",
+    "category": "Transformers",
+    "friendlyName": null,
+    "parameters": [
+      {
+        "name": "SampleSize",
+        "type": "int",
+        "value": "100",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      },
+      {
+        "name": "Interpolation",
+        "type": "list",
+        "value": "Last",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [
+            "First",
+            "Last",
+            "Mean"
+          ],
+          "method": ""
+        }
+      }
+    ],
+    "inputConnectors": [
+      {
+        "name": "in",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
+      {
+        "name": "out",
+        "type": "frame"
+      }
+    ]
+  },
+  {
+    "w": 200,
+    "description": "Performs a lag correlation a given data frame",
+    "name": "Lag Correlate",
+    "category": "Transformers",
+    "friendlyName": null,
+    "parameters": [
+      {
+        "name": "lag",
+        "type": "int",
+        "value": "60",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      }
+    ],
+    "inputConnectors": [
+      {
+        "name": "in",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
+      {
+        "name": "out",
+        "type": "frame"
+      }
+    ]
+  },
+  {
+    "w": 200,
+    "description": null,
+    "name": "Test1",
+    "category": "Transformers",
+    "friendlyName": null,
+    "parameters": [
+      {
+        "name": "Prop1",
+        "type": "int",
+        "value": "0",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      }
+    ],
+    "inputConnectors": [
+      {
+        "name": "in1",
+        "type": "frame"
+      },
+      {
+        "name": "in2",
+        "type": "frame"
+      },
+      {
+        "name": "in3",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
+      {
+        "name": "out1",
+        "type": "frame"
+      },
+      {
+        "name": "out2",
+        "type": "frame"
+      }
+    ]
+  },
+  {
+    "w": 200,
+    "description": "Determines the rolling average of a given data frame",
+    "name": "Rolling Average",
+    "category": "Filters",
+    "friendlyName": null,
+    "parameters": [
+      {
+        "name": "WindowSize",
+        "type": "int",
+        "value": "60",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      }
+    ],
+    "inputConnectors": [
+      {
+        "name": "in",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
+      {
+        "name": "out",
+        "type": "frame"
+      }
+    ]
+  },
+  {
+    "w": 200,
+    "description": "Determines the rolling deviation of a given data frame",
+    "name": "Rolling Deviation",
+    "category": "Filters",
+    "friendlyName": null,
+    "parameters": [
+      {
+        "name": "WindowSize",
+        "type": "int",
+        "value": "60",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      }
+    ],
+    "inputConnectors": [
+      {
+        "name": "in",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
+      {
+        "name": "out",
+        "type": "frame"
+      }
+    ]
+  },
+  {
+    "w": 200,
+    "description": "Determines the weighted average of a given data frame",
+    "name": "Weighted Average",
+    "category": "Filters",
+    "friendlyName": null,
+    "parameters": [
+      {
+        "name": "Weight",
+        "type": "int",
+        "value": "20",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      }
+    ],
+    "inputConnectors": [
+      {
+        "name": "in",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
+      {
+        "name": "out",
+        "type": "frame"
+      }
+    ]
+  },
+  {
+    "w": 200,
+    "description": "Determines the weighted deviation of a given data frame",
+    "name": "Weighted Deviation",
+    "category": "Filters",
+    "friendlyName": null,
+    "parameters": [
+      {
+        "name": "Weight",
+        "type": "int",
+        "value": "20",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      }
+    ],
+    "inputConnectors": [
+      {
+        "name": "in",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
+      {
+        "name": "out",
+        "type": "frame"
+      }
+    ]
+  },
+  {
+    "w": 200,
+    "description": "Apply Savitsky-Golay filter to a given data frame",
+    "name": "Savitsky-Golay Filter",
+    "category": "Filters",
+    "friendlyName": null,
+    "parameters": [
+      {
+        "name": "PointsToLeft",
+        "type": "int",
+        "value": "10",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      },
+      {
+        "name": "PointsToRight",
+        "type": "int",
+        "value": "10",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      },
+      {
+        "name": "PolynomialOrder",
+        "type": "int",
+        "value": "3",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      }
+    ],
+    "inputConnectors": [
+      {
+        "name": "in",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
+      {
+        "name": "out",
+        "type": "frame"
+      }
+    ]
+  },
+  {
+    "w": 200,
+    "description": "Apply exponential filter to a given data frame",
+    "name": "Exponential Filter",
+    "category": "Filters",
+    "friendlyName": null,
+    "parameters": [
+      {
+        "name": "Alpha",
+        "type": "float",
+        "value": "0.8",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      },
+      {
+        "name": "Order",
+        "type": "int",
+        "value": "1",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      }
+    ],
+    "inputConnectors": [
+      {
+        "name": "in",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
+      {
+        "name": "out",
+        "type": "frame"
+      }
+    ]
+  },
+  {
+    "w": 200,
+    "description": "Apply stepwise average filter to a given data frame",
+    "name": "Stepwise Average",
+    "category": "Filters",
+    "friendlyName": null,
+    "parameters": [
+      {
+        "name": "WindowSize",
+        "type": "int",
+        "value": "20",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      }
+    ],
+    "inputConnectors": [
+      {
+        "name": "in",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
+      {
+        "name": "out",
+        "type": "frame"
+      }
+    ]
+  },
+  {
+    "w": 200,
+    "description": "Apply three sigma algorithm to a given data frame",
+    "name": "Three Sigma",
+    "category": "Cleaners",
+    "friendlyName": null,
+    "parameters": [
+      {
+        "name": "MovingWindow",
+        "type": "int",
+        "value": "20.0",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      },
+      {
+        "name": "Order",
+        "type": "float",
+        "value": "3.0",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      }
+    ],
+    "inputConnectors": [
+      {
+        "name": "in",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
+      {
+        "name": "out",
+        "type": "frame"
+      }
+    ]
+  },
+  {
+    "w": 200,
+    "description": "Removes outlier values from a given data frame",
+    "name": "Outlier Scrubber",
+    "category": "Cleaners",
+    "friendlyName": null,
+    "parameters": [
+      {
+        "name": "Algorithm",
+        "type": "string",
+        "value": "3Sigma",
+        "options": {
+          "dynamic": false,
+          "dependencies": [],
+          "fieldOptions": [],
+          "method": ""
+        }
+      }
+    ],
+    "inputConnectors": [
+      {
+        "name": "in",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
+      {
+        "name": "out",
+        "type": "frame"
+      }
+    ]
+  },
+  {
+    "w": 200,
+    "description": "Removes NaN values from a given data frame",
+    "name": "Null Scrubber",
+    "category": "Cleaners",
+    "friendlyName": null,
+    "parameters": [],
+    "inputConnectors": [
+      {
+        "name": "in",
+        "type": "frame"
+      }
+    ],
+    "outputConnectors": [
+      {
+        "name": "out",
+        "type": "frame"
       }
     ]
   }

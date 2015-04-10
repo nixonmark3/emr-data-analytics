@@ -1,0 +1,32 @@
+<div>
+    <div class="block-parameter"
+         ng-repeat="parameter in block.parameters">
+        <span>{{parameter.name}}</span>
+
+        <div class="input-group" ng-switch on="parameter.type">
+
+            <span class="input-group-addon">
+                <i ng-attr-class="fa {{parameter.loading && 'fa-spinner fa-spin' || parameter.type=='list' && 'fa-list-ul' || parameter.type=='int' && 'fa-list-ol' || 'fa-file-text-o'}}"></i>
+            </span>
+
+            <!--ng-options="option as option for option in parameter.options.fieldOptions"-->
+            <select ng-switch-when="list"
+                    class="form-control"
+                    ng-model="parameter.value"
+                    ng-disabled="!parameter.loaded"
+                    ng-change="setValue(parameter);">
+
+                <option ng-repeat="option in parameter.options.fieldOptions" ng-selected="{{option==parameter.value}}" value="{{option}}">
+                    {{option}}
+                </option>
+
+            </select>
+
+            <input ng-switch-when="int" class="form-control" type="number" />
+
+            <input ng-switch-default class="form-control" type="text" />
+
+        </div>
+
+    </div>
+</div>

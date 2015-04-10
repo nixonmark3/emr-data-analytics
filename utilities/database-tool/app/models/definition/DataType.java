@@ -5,7 +5,8 @@ public enum DataType {
     INT("int"),
     FLOAT("float"),
     STRING("string"),
-    TIMESTAMP("timestamp");
+    TIMESTAMP("timestamp"),
+    LIST("list");
 
     private final String stringValue;
 

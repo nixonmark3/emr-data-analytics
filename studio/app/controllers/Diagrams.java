@@ -12,27 +12,42 @@ import play.mvc.Result;
 
 import org.jongo.*;
 
+import java.util.Map;
+import java.util.HashMap;
+import java.util.UUID;
+
 /**
  * Diagrams Controller.
  */
 public class Diagrams extends ControllerBase {
+    private static JobProducer _producer = new JobProducer();
+    private static Map<UUID, UUID> _mapJobIdToClientId = new HashMap<UUID, UUID>();
 
-    // initialize evaluation socket
-    static JobProducer producer = new JobProducer();
+    public static UUID getClientIdForJob(UUID jobId) {
+        return _mapJobIdToClientId.get(jobId);
+    }
 
     /**
      * Evaluates the diagram specified in the request body
      * @return temporarily return success message
      */
     @BodyParser.Of(BodyParser.Json.class)
-    public static Result evaluate(){
-
-        // Deserialize json sent by client to Diagram model object.
+    public static Result evaluate(String clientId) {
         ObjectMapper objectMapper = new ObjectMapper();
         Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
 
-        // send diagram to evaluation service
-        producer.send(diagram);
+        saveDiagram(diagram);
+
+        UUID jobId = _producer.sendEvaluationRequest(diagram);
+
+        if (jobId != null) {
+            _mapJobIdToClientId.put(jobId, UUID.fromString(clientId));
+
+            DiagramStates.createDiagramState(diagram, jobId);
+        }
+        else {
+            return internalServerError("Error requesting evaluation.");
+        }
 
         return ok("Diagram evaluation initiated.");
     }
@@ -76,20 +91,8 @@ public class Diagrams extends ControllerBase {
             // Deserialize json sent by client to Diagram model object.
             ObjectMapper objectMapper = new ObjectMapper();
             Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
+            saveDiagram(diagram);
 
-            MongoCollection diagrams = getMongoCollection(DIAGRAMS_COLLECTION);
-
-            if (diagrams != null) {
-                // Need to ensure that each diagram has a unique name.
-                diagrams.ensureIndex(DIAGRAM_INDEX, UNIQUE_IS_TRUE);
-                // Update the Diagram document in MongoDB. If it does not exist create a new Diagram document.
-                diagrams.update(String.format(QUERY_BY_UNIQUE_ID, diagram.getName())).upsert().with(diagram);
-                // After we successfully update the diagram bump the version.
-                diagrams.update(String.format(QUERY_BY_UNIQUE_ID, diagram.getName())).with(VERSION_INCREMENT);
-            }
-            else {
-                return internalServerError(String.format(COLLECTION_NOT_FOUND, DIAGRAMS_COLLECTION));
-            }
         }
         catch (Exception exception) {
             exception.printStackTrace();
@@ -97,6 +100,20 @@ public class Diagrams extends ControllerBase {
         }
 
         return ok("Diagram saved successfully.");
+    }
+
+    private static void saveDiagram(Diagram diagram)
+    {
+        MongoCollection diagrams = getMongoCollection(DIAGRAMS_COLLECTION);
+
+        if (diagrams != null) {
+            // Need to ensure that each diagram has a unique name.
+            diagrams.ensureIndex(DIAGRAM_INDEX, UNIQUE_IS_TRUE);
+            // Update the Diagram document in MongoDB. If it does not exist create a new Diagram document.
+            diagrams.update(String.format(QUERY_BY_UNIQUE_ID, diagram.getName())).upsert().with(diagram);
+            // After we successfully update the diagram bump the version.
+            diagrams.update(String.format(QUERY_BY_UNIQUE_ID, diagram.getName())).with(VERSION_INCREMENT);
+        }
     }
 
     /**

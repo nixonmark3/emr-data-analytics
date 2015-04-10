@@ -1,10 +1,13 @@
+'use strict';
+
 var analyticsApp = angular.module('analyticsApp',
     ['diagramApp',
+        'browserApp',
+        'popupApp',
         'ngRoute',
         'ngSanitize',
         'ngAnimate',
         'ui.bootstrap'])
-
     .config(function ($routeProvider, $locationProvider) {
         $routeProvider.when('/studio', {
             templateUrl: "/assets/templates/studio.html"
@@ -19,49 +22,70 @@ var analyticsApp = angular.module('analyticsApp',
             return $sce.trustAsHtml(val);
         };
     }])
-    .controller('analyticsController', function($scope, diagramService) {
+    .controller('analyticsController', function($scope, diagramService, popupService) {
+
+        var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket
+        var sock = new WS("ws://localhost:9000/getClientSocket")
+
+        $scope.send = function() {
+            console.log("send!");
+            sock.send("hello");
+        };
+
+        var receiveEvent = function(event) {
+            var data = JSON.parse(event.data);
+
+            if (data['messageType']) {
+                if (data.messageType == 'ClientRegistration') {
+                    $scope.clientId = data.id;
+                }
+            }
+            else {
+                $scope.$apply( function() {
+                    console.log('job id: ' + data.jobId);
+                    console.log('evaluation state: ' + data.state);
+                    $scope.diagramViewModel.updateStatusOfBlocks(data['blockStates']);
+                });
+            }
+        }
+
+        sock.onmessage = receiveEvent
 
         //
-        // get data from service
+        // initialize scope level properties
+        //
+
+        // controls whether the off-canvas sidebar is displayed
+        $scope.showSidebar = false;
+        // controls whether the library is displayed
+        $scope.showLibrary = false;
+
+        //
+        // load data from the service
         //
 
         // load the list of definition blocks
         diagramService.listDefinitions().then(
             function (data) {
-                // initialize the pages
-                $scope.pages = [{
-                    "categories" : data,
-                    "definitions" : [],
-                    "definition" : null
-                }];
 
-                // Convenience for use by diagram directive
-                $scope.definitions = data;
-            },
-            function (code) {
-                // todo: show exception
-                console.log(code);
-            }
-        );
+                // build a library of definitions and a nested list of nodes for browsing
+                $scope.library = {};
+                $scope.nodes = [];
+                var categoryName;
+                var category;
+                data.forEach(function(item){
 
-        // Convenience for use by diagram directive
-        $scope.service = diagramService; // todo is there a way to pass this to the diagram directive?
-
-        $scope.canShowMenuItems = false;
-
-        // load the specified diagram
-        diagramService.item().then(
-            function (data) {
-                $scope.diagramViewModel = new viewmodels.diagramViewModel(data);
-
-                // watch diagram name so that we can disable features if the diagram has not been given a name
-                $scope.$watch('diagramViewModel.data.name', function() {
-                    if ($scope.diagramViewModel.data.name != 'Untitled') {
-                        $scope.canShowMenuItems = true;
+                    if (!category || category.name != item.category) {
+                        category = {
+                            name: item.category,
+                            definitions: []
+                        };
+                        $scope.nodes.push(category);
                     }
-                    else {
-                        $scope.canShowMenuItems = false;
-                    }
+
+                    category.definitions.push({name: item.name});
+
+                    $scope.library[item.name] = item;
                 });
             },
             function (code) {
@@ -70,68 +94,44 @@ var analyticsApp = angular.module('analyticsApp',
             }
         );
 
-        //
-        // Events
-        //
+        // load the specified diagram
+        diagramService.item().then(
+            function (data) {
+                $scope.diagramViewModel = new viewmodels.diagramViewModel(data);
+            },
+            function (code) {
+                // todo: show exception
+                console.log(code);
+            }
+        );
 
-        // fire the event to begin dragging an element
-        var beginDragEvent = function(x, y, config){
+        // load diagrams
+        diagramService.listDiagrams().then(
+            function (data) {
+                $scope.diagrams = data;
+            },
+            function (code) {
 
-            $scope.$root.$broadcast("beginDrag", {
-                x: x,
-                y: y,
-                config: config
-            });
-        };
+                // todo: show exception
+                console.log(code);
+            }
+        );
 
         // fire the event to create a new block given a definition
-        var createBlockEvent = function(x, y, evt, definition){
+        $scope.createBlock = function(x, y, evt, definitionName){
 
             $scope.$root.$broadcast("createBlock", {
                 x: x,
                 y: y,
                 evt: evt,
-                definition: definition
+                definitionName: definitionName
             });
         };
 
-        var deleteSelectedEvent = function(){
-
-            $scope.$root.$broadcast("deleteSelected");
-        };
-
-        var deselectAllEvent = function(){
-
-            $scope.$root.$broadcast("deselectAll");
-        };
-
-        var selectAllEvent = function(){
-
-            $scope.$root.$broadcast("selectAll");
-        };
-
-        $scope.showNav = false;
-        $scope.showProps = false;
-
         $scope.toggleDiagrams = function() {
-            diagramService.listDiagrams().then(
-                function (data) {
-                    $scope.diagrams = data;
-                },
-                function (code) {
 
-                    // todo: show exception
-                    console.log(code);
-                }
-            );
-            $scope.showNav = !$scope.showNav;
+            $scope.showSidebar = !$scope.showSidebar;
         };
-
-        $scope.toggleDiagramProperties = function() {
-            $scope.showProps = !$scope.showProps;
-        };
-
-        $scope.showLibrary = false;
 
         $scope.toggleLibrary = function(){
 
@@ -144,6 +144,19 @@ var analyticsApp = angular.module('analyticsApp',
                 function (data) {
                     $scope.toggleDiagrams();
                     $scope.diagramViewModel = new viewmodels.diagramViewModel(data);
+                },
+                function (code) {
+                    console.log(code); // TODO show exception
+                }
+            );
+        };
+
+        $scope.loadSources = function(request, success){
+
+            diagramService.loadSources(request).then(
+                function (response) {
+
+                    success(response);
                 },
                 function (code) {
                     console.log(code); // TODO show exception
@@ -181,10 +194,10 @@ var analyticsApp = angular.module('analyticsApp',
         };
 
         // evaluate the current diagram
-        $scope.evaluate = function() {
+        $scope.evaluate = function(evt) {
             var data = $scope.diagramViewModel.data;
 
-            diagramService.evaluate(data).then(
+            diagramService.evaluate($scope.clientId, data).then(
                 function (data) {
                     // TODO report success back to the user
                     console.log(data);
@@ -193,6 +206,9 @@ var analyticsApp = angular.module('analyticsApp',
                     console.log(code); // TODO show exception
                 }
             );
+
+            evt.stopPropagation();
+            evt.preventDefault();
         };
 
         // evaluate the current diagram
@@ -226,93 +242,40 @@ var analyticsApp = angular.module('analyticsApp',
             );
         };
 
-        //
-        // Navigation variable and functions
-        //
+        $scope.toggleDiagramConfiguration = function(evt){
 
-        $scope.draggingGhost = false;
-
-        // initialize the page index
-        $scope.pageIndex = 0;
-
-        $scope.pageHeader = [];
-
-        // set page index
-        $scope.setPage = function(index){
-            $scope.pageIndex = index;
-        };
-
-        // identify whether index is current page
-        $scope.isCurrentPage = function(index){
-            return $scope.pageIndex === index;
-        };
-
-        // page the navigation panel back
-        $scope.pageBack = function(){
-
-            $scope.pages.splice($scope.pageIndex);
-            $scope.pageIndex = $scope.pageIndex - 1;
-            $scope.pageHeader.splice($scope.pageIndex);
-        };
-
-        // page the navigation panel forward
-        $scope.pageForward = function(item){
-
-            $scope.pageHeader.push(item.name);
-
-            var index = $scope.pageIndex + 1;
-            $scope.pages.push({
-                    "categories" : item.categories,
-                    "definitions" : item.definitions,
-                    "definition" : null
-                }
-            );
-
-            $scope.pageIndex = index;
-        };
-
-        // display a definition for configuration
-        $scope.show = function(item){
-
-            $scope.pageHeader.push(item.name);
-
-            var index = $scope.pageIndex + 1;
-            $scope.pages.push({
-                    "categories" : [],
-                    "definitions" : [],
-                    "definition" : item
-                }
-            );
-
-            $scope.pageIndex = index;
-        };
-
-        $scope.mouseDown = function(evt, item){
-
-            beginDragEvent(evt.pageX, evt.pageY, {
-
-                dragStarted: function (x, y) {
-                    // flip dragging ghost flag
-                    $scope.draggingGhost = true;
-                },
-
-                dragging: function (x, y) {
-                    // update ghost position
-                    $scope.ghostPosition = { x: x, y: y };
-                },
-
-                dragEnded: function (x, y, evt) {
-
-                    createBlockEvent(x, y, evt, item);
-
-                    delete $scope.ghostPosition;
-                    $scope.$apply($scope.draggingGhost = false);
-                }
-
-            });
+            if ($scope.configuringDiagram){
+                endDiagramConfiguration();
+            }
+            else{
+                beginDiagramConfiguration();
+            }
 
             evt.stopPropagation();
             evt.preventDefault();
+        };
+
+        var beginDiagramConfiguration = function(){
+
+            var result = popupService.show({
+                templateUrl: '/assets/scripts/components/diagram/diagramProperties.html',
+                controller: 'diagramConfigController',
+                inputs: {
+                    diagram: $scope.diagram
+                }}).then(function(popup){
+
+                $scope.configuringDiagram = true;
+                $scope.diagramConfiguration = popup;
+            });
+        };
+
+        var endDiagramConfiguration = function(){
+
+            $scope.diagramConfiguration.controller.close();
+
+
+            $scope.configuringDiagram = false;
+            delete $scope.diagramConfiguration;
         };
     });
 

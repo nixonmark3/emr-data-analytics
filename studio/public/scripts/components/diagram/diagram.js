@@ -1,7 +1,8 @@
 'use strict';
 
-var diagramApp = angular.module('diagramApp', ['draggableApp'])
-    .directive('diagram', ['$compile', function ($compile) {
+var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAnimate', 'ui.bootstrap'])
+    .directive('diagram', ['$compile', '$modal', '$window', '$location', 'popupService',
+        function ($compile, $modal, $window, $location, popupService) {
 
         return {
             restrict: 'E',
@@ -9,28 +10,34 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
             templateUrl: '/assets/scripts/components/diagram/diagram.html',
             scope: {
                 diagram: '=viewModel',
-                definitions: '=definitions',
-                service: '=service'
+                nodes: '=',
+                library: '=',
+                loadSources: "="
             },
             link: function($scope, element, attrs){
 
                 $scope.draggingWire = false;
-                $scope.currentHoverConnector = null;
-                $scope.dragSelecting = false;
-                $scope.configuringBlock = false;
-                $scope.configurationBlock = {};
                 $scope.mouseOverConnector = null;
-                $scope.mouseOverWire = null;
-                $scope.mouseOverBlock = null;
-                $scope.renamingBlock = false;
+                $scope.configuringBlock = false;
+                $scope.configuringDiagram = false;
+
+                // capture the diagram's width
+                $scope.diagramWidth = element.width();
+
+                $scope.absUrl = $location.absUrl();
+
+                //
+                // listen for window resizes
+                //
+                angular.element($window).bind("resize", function () {
+
+                    // update the width property on window resize
+                    $scope.$apply($scope.diagramWidth = element.width());
+                });
 
                 var jQuery = function (element) {
                     return $(element);
                 };
-
-                var wireClass = 'wire-group';
-                var connectorClass = 'connector-group';
-                var blockClass = 'block-group';
 
                 var beginDragEvent = function(x, y, config){
 
@@ -43,23 +50,13 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
 
                 $scope.$on("createBlock", function (event, args) {
 
+                    // translate diagram (svg) coordinates into application coordinates
                     var point = translateCoordinates(args.x, args.y, args.evt);
-                    $scope.diagram.createBlock(point.x, point.y, args.definition);
-                });
 
-                $scope.$on("deleteSelected", function (event) {
+                    var configBlock = getConfigBlock(point.x, point.y, args.definitionName);
 
-                    $scope.diagram.deleteSelected();
-                });
-
-                $scope.$on("deselectAll", function (event) {
-
-                    $scope.diagram.deselectAll();
-                });
-
-                $scope.$on("selectAll", function (event) {
-
-                    $scope.diagram.selectAll();
+                    // create the block
+                    $scope.diagram.createBlock(configBlock);
                 });
 
                 var hasClassSVG = function(obj, has) {
@@ -154,101 +151,36 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
                     };
                 };
 
-                //
-                // Called on mouse down in the diagram
-                //
-                $scope.mouseDown = function (evt) {
+                var getConfigBlock = function(x, y, definitionName){
 
-                    $scope.diagram.deselectAll();
+                    // retrieve definition
+                    var definition = getDefinition(definitionName);
 
-                    beginDragEvent(evt.pageX, evt.pageY, {
+                    // get block description
+                    var block = $scope.diagram.getBlockDescription(x, y, definition);
 
-                        dragStarted: function (x, y) {
-
-                            $scope.dragSelecting = true;
-                            var startPoint = translateCoordinates(x, y, evt);
-                            $scope.dragSelectionStartPoint = startPoint;
-                            $scope.dragSelectionRect = {
-                                x: startPoint.x,
-                                y: startPoint.y,
-                                width: 0,
-                                height: 0
-                            };
-                        },
-
-                        dragging: function (x, y) {
-
-                            var startPoint = $scope.dragSelectionStartPoint;
-                            var curPoint = translateCoordinates(x, y, evt);
-
-                            $scope.dragSelectionRect = {
-                                x: curPoint.x > startPoint.x ? startPoint.x : curPoint.x,
-                                y: curPoint.y > startPoint.y ? startPoint.y : curPoint.y,
-                                width: curPoint.x > startPoint.x ? curPoint.x - startPoint.x : startPoint.x - curPoint.x,
-                                height: curPoint.y > startPoint.y ? curPoint.y - startPoint.y : startPoint.y - curPoint.y
-                            };
-                        },
-
-                        dragEnded: function () {
-                            $scope.dragSelecting = false;
-                            $scope.diagram.applySelectionRect($scope.dragSelectionRect);
-                            delete $scope.dragSelectionStartPoint;
-                            delete $scope.dragSelectionRect;
-                        }
-                    });
+                    // create config block
+                    return new viewmodels.configuringBlockViewModel(definition, block);
                 };
 
-                //
-                // Called for each mouse move on the svg element.
-                //
+                var getDefinition = function(definitionName){
+
+                    return $scope.library[definitionName];
+                };
+
                 $scope.mouseMove = function (evt) {
 
-                    //
-                    // Clear out all cached mouse over elements.
-                    //
-                    $scope.mouseOverWire = null;
-                    $scope.mouseOverConnector = null;
-                    $scope.mouseOverBlock = null;
-
                     var mouseOverElement = hitTest(evt.clientX, evt.clientY);
+
                     if (mouseOverElement == null) {
                         // Mouse isn't over anything, just clear all.
                         return;
                     }
 
-                    if (!$scope.draggingWire) { // Only allow 'connection mouse over' when not dragging out a connection.
-
-                        // Figure out if the mouse is over a connection.
-                        var scope = checkForHit(mouseOverElement, wireClass);
-                        $scope.mouseOverWire = (scope && scope.wire) ? scope.wire : null;
-                        if ($scope.mouseOverWire) {
-                            // Don't attempt to mouse over anything else.
-                            return;
-                        }
-                    }
-
                     // Figure out if the mouse is over a connector.
-                    var scope = checkForHit(mouseOverElement, connectorClass);
-                    $scope.mouseOverConnector = (scope && scope.connector) ? scope.connector : null;
-                    if ($scope.mouseOverConnector) {
-                        // Expand the radius of the connector to make it easier to use.
-                        scope.connector.radius = scope.connector.expandedRadius();
-                        scope.connector.showName = true;
-                        $scope.currentHoverConnector = scope.connector;
-                        return;
-                    }
-                    else {
-                        if ($scope.currentHoverConnector) {
-                            // If we have expanded a connector reduce the radius to normal.
-                            $scope.currentHoverConnector.radius = $scope.currentHoverConnector.normalRadius();
-                            $scope.currentHoverConnector.showName = false;
-                            $scope.currentHoverConnector = null;
-                        }
-                    }
+                    var scope = checkForHit(mouseOverElement, 'connector-group');
 
-                    // Figure out if the mouse is over a node.
-                    var scope = checkForHit(mouseOverElement, blockClass);
-                    $scope.mouseOverBlock = (scope && scope.block) ? scope.block : null;
+                    $scope.mouseOverConnector = (scope && scope.connector) ? scope.connector : null;
                 };
 
                 //
@@ -284,6 +216,8 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
                         },
 
                         clicked: function () {
+
+                            block.advanceProgress();
                             $scope.$apply(diagram.handleBlockClicked(block));
                         }
                     });
@@ -292,7 +226,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
                     evt.preventDefault();
                 };
 
-                $scope.connectorMouseDown = function (evt, block, connector, connectorIndex, isInputConnector) {
+                $scope.connectorMouseDown = function(evt, block, connector, connectorIndex, isInputConnector) {
 
                     var diagram = $scope.diagram;
 
@@ -326,7 +260,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
                             $scope.dragTangent2 = diagram.computeWireTargetTangent($scope.dragPoint1, $scope.dragPoint2);
                         },
 
-                        dragEnded: function () {
+                        dragEnded: function (evt) {
 
                             if ($scope.mouseOverConnector &&
                                 $scope.mouseOverConnector !== connector) {
@@ -341,6 +275,13 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
                             delete $scope.dragTangent1;
                             delete $scope.dragPoint2;
                             delete $scope.dragTangent2;
+
+                            $scope.$apply();
+                        },
+
+                        clicked: function () {
+
+                            $scope.showLibraryModal();
                         }
                     });
 
@@ -348,233 +289,122 @@ var diagramApp = angular.module('diagramApp', ['draggableApp'])
                     evt.preventDefault();
                 };
 
-                $scope.deleteBlock = function(){
+                $scope.deleteBlock = function(evt, block){
+
                     // If the configuration box is open close it!
                     if ($scope.configuringBlock){
                         endBlockConfiguration(false);
                     }
 
-                    $scope.diagram.deleteSelected();
+                    // select the specified block
+                    $scope.diagram.deleteBlock(block);
+
+                    evt.stopPropagation();
+                    evt.preventDefault();
                 };
 
-                $scope.toggleConfiguration = function(evt, save){
+                $scope.toggleBlockConfiguration = function(evt, block){
 
                     if ($scope.configuringBlock){
-                        endBlockConfiguration(save);
+                        endBlockConfiguration(true);
                     }
                     else{
-                        beginBlockConfiguration(evt);
+                        beginBlockConfiguration(block);
                     }
+
+                    evt.stopPropagation();
+                    evt.preventDefault();
                 };
 
                 var beginBlockConfiguration = function(block){
 
-                    var point = inverseCoordinates(block.x(), block.y());
+                    // capture the block coordinates and set the popup's width and height
+                    var position = inverseCoordinates(block.x(), block.y());
+                    position.width = 250;
+                    position.height = 300;
 
-                    var editParameters = determineEditParameters(block.data);
+                    // retrieve definition
+                    var definition = getDefinition(block.definition());
 
-                    $scope.configurationBlock = {
-                        x: point.x,
-                        y: point.y,
-                        block: block,
-                        parameters: editParameters
-                    };
+                    // convert to config block
+                    var configBlock = new viewmodels.configuringBlockViewModel(definition, block.data);
 
-                    // If there are dynamic enumerations we need to ensure that any dependants are loaded
-                    $scope.configurationBlock.parameters.forEach(function(editParameter) {
-                        if (editParameter.dynamic) {
-                            $scope.fireDependants(editParameter, false);
-                        }
-                    });
+                    var result = popupService.show({
+                        templateUrl: '/assets/scripts/components/diagram/blockProperties.html',
+                        controller: 'blockConfigController',
+                        inputs: {
+                            block: configBlock,
+                            position: position,
+                            loadSources: $scope.loadSources
+                        }}).then(function(popup){
 
-                    $scope.configuringBlock = true;
-                };
-
-                // Create a structure that will be used by the UI to display and edit parameters
-                var determineEditParameters = function(block) {
-                    var editParameters = [];
-
-                    var blockDefinition = getBlockDefinition(block.definition);
-                    if (blockDefinition) {
-
-                        block.parameters.forEach(function(parameter) {
-
-                            var parameterDefinition = getParameterDefinition(blockDefinition, parameter.name);
-
-                            var fieldOptions = [];
-                            var methodName = "";
-
-                            if (parameterDefinition.options.dynamic) {
-
-                                if (parameterDefinition.options.fieldOptions.length == 1) {
-
-                                    if (!parameterDefinition.options.dependent) {
-                                        fieldOptions = $scope[parameterDefinition.options.fieldOptions[0]]();
-                                    }
-                                    else {
-                                        methodName = parameterDefinition.options.fieldOptions[0];
-                                    }
-                                }
-                            }
-                            else {
-                                fieldOptions = parameterDefinition.options.fieldOptions;
-                            }
-
-                            editParameters.push({
-                                name:parameter.name,
-                                value:parameter.value,
-                                dynamic:parameterDefinition.options.dynamic,
-                                inputType:parameterDefinition.options.inputType,
-                                dependants:parameterDefinition.options.dependants,
-                                method:methodName,
-                                oldValue:parameter.value,
-                                options:fieldOptions});
+                            $scope.configuringBlock = true;
+                            $scope.blockConfiguration = popup;
                         });
-                    }
-
-                    return editParameters;
-                };
-
-                // If a click occurs on a property during configuration we need to take action
-                $scope.handleDropDownPropertyClick = function(parameter) {
-                    // We only need to act if the value has actually changed
-                    if (parameter.value != parameter.oldValue) {
-                        $scope.fireDependants(parameter, true);
-                    }
-                };
-
-                // Trigger any dependants of this parameter to reload their field options
-                $scope.fireDependants = function(parameter, resetDependantValue) {
-                    if (parameter.value != 'None') {
-                        parameter.dependants.forEach(function (dependant) {
-                            $scope.configurationBlock.parameters.some(function (editParameter) {
-                                if (editParameter.name == dependant) {
-                                    if (resetDependantValue) {
-                                        editParameter.value = 'None';
-                                    }
-                                    editParameter.options = $scope[editParameter.method](parameter.value);
-                                    return true;
-                                }
-                            })
-                        });
-                    }
-                };
-
-                // Gets all the available project names
-                $scope.findProjects = function() {
-                    var fieldOptions = [];
-                    $scope.service.listProjects().then(
-                        function (data) {
-                            data.forEach(function (projectName) {
-                                fieldOptions.push(projectName);
-                            });
-                        }
-                    );
-                    return fieldOptions;
-                };
-
-                // Gets all the available data sets names for a project
-                $scope.findDataSets = function(name) {
-                    var fieldOptions = [];
-                    $scope.service.getDataSet(name).then(
-                        function (data) {
-                            data.forEach(function (dataSet) {
-                                fieldOptions.push(dataSet.name);
-                            });
-                        }
-                    );
-                    return fieldOptions;
-                };
-
-                // Iterates through definitions and returns the name definition
-                var getBlockDefinition = function(definitionName) {
-                    var definitionToReturn = null;
-
-                    $scope.definitions.some(function(category) {
-                        category.definitions.some(function(definition) {
-                            if (definition.name == definitionName) {
-                                definitionToReturn = definition;
-                                return true;
-                            }
-                        });
-
-                        if (definitionToReturn) {
-                            return true;
-                        }
-                    });
-
-                    return definitionToReturn;
-                };
-
-                // Iterate through a block definition parameters and return the requested named parameter
-                var getParameterDefinition = function(definition, parameterName) {
-                    var parameterToReturn = null;
-
-                    definition.parameters.some(function(parameter) {
-                        if (parameter.name == parameterName) {
-                            parameterToReturn = parameter;
-                            return true;
-                        }
-                    });
-
-                    return parameterToReturn;
                 };
 
                 var endBlockConfiguration = function(save){
-                    // If the save button is hit during property configuration save the
-                    // configured parameter data to real block instance
-                    if (save) {
-                        $scope.configurationBlock.parameters.some(function (editParameter) {
-                            setConfiguredParameterValue(editParameter.name, editParameter.value);
-                        });
-                    }
 
-                    // Clean up after configuration is complete
+                    $scope.blockConfiguration.controller.close();
+
+                    $scope.blockConfiguration.close.then(function(configBlock){
+
+                        if (save)
+                            $scope.diagram.updateBlock(configBlock);
+                    });
+
                     $scope.configuringBlock = false;
-
-                    delete $scope.configurationBlock;
+                    delete $scope.blockConfiguration;
                 };
 
-                // Update the real block parameter with the new configured value
-                var setConfiguredParameterValue = function(parameterName, parameterValue) {
-                    $scope.configurationBlock.block.data.parameters.some(function(parameter) {
-                        if (parameter.name == parameterName) {
-                            parameter.value = parameterValue;
-                            return true;
+                //
+                // Event that handles any click on the diagram
+                //
+                $scope.diagramClick = function(evt) {
+
+                    if ($scope.configuringBlock)
+                        endBlockConfiguration(true);
+
+                    evt.stopPropagation();
+                    evt.preventDefault();
+                };
+
+
+                $scope.showLibraryModal = function(evt){
+
+                    var modalInstance = $modal.open({
+                        templateUrl: '/assets/scripts/components/diagram/libraryModal.html',
+                        controller: 'libraryModalController',
+                        size: 'sm',
+                        resolve: {
+                            nodes: function () {
+                                return $scope.nodes;
+                            },
+                            getConfigBlock: function(){
+                                return getConfigBlock;
+                            },
+                            loadSources: function(){
+                                return $scope.loadSources;
+                            }
                         }
                     });
+
+                    modalInstance.result.then(function (block) {
+
+                            // todo: temp coordinates
+
+                            block.x = ($scope.diagramWidth/ 2) - 100;
+                            block.y = 50;
+
+                            $scope.diagram.createBlock(block);
+                        },
+                        function () {}
+                    );
+
+                    evt.stopPropagation();
+                    evt.preventDefault();
                 };
 
-                // Handler for rename double click
-                $scope.renameClick = function(evt) {
-                    var point = inverseCoordinates(evt.x(), evt.y());
-
-                    $scope.renameBlock = {
-                        x: point.x,
-                        y: point.y,
-                        block: evt
-                    };
-
-                    $scope.renamingBlock = true;
-
-                    // We need to set the focus on the rename input element but we must
-                    // wait a while as the element has not been created yet.
-                    setInterval(function() { $('#rename-input').focus() }, 10);
-                };
-
-                // Event that handles any click on the diagram
-                $scope.diagramClick = function() {
-                    $scope.renamingBlock = false;
-                    delete $scope.renameBlock;
-                };
-
-                // If the users hits return key while renaming we need to end the rename
-                $scope.endRenameOnEnter = function() {
-                    if(event.keyCode == 13) {
-                        $scope.diagramClick();
-                    }
-                };
             }
         }
-    }]
-);
+    }]);

@@ -8,10 +8,11 @@ GET         /getDiagram/item                 controllers.Diagrams.getBlankDiagra
 GET         /getDiagrams                     controllers.Diagrams.getDiagrams()
 GET         /deleteDiagram/item/:name        controllers.Diagrams.deleteDiagram(name: String)
 GET         /getDataSet/item/:name           controllers.Projects.getDataSet(name: String)
-GET         /socket                          controllers.Application.clientSocket()
+GET         /getClientSocket                 controllers.Application.clientSocket()
+GET         /getServiceSocket                controllers.Application.serviceSocket()
 
 POST        /saveDiagram                     controllers.Diagrams.saveDiagram()
-POST        /evaluate                        controllers.Diagrams.evaluate()
+POST        /evaluate/:clientId              controllers.Diagrams.evaluate(clientId: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                    controllers.Assets.at(path="/public", file)

@@ -1,0 +1,45 @@
+<div ng-class="{'browser-page': true, 'browser-page-enter': pageIndex > 0}"
+     ng-repeat="page in pages"
+     ng-hide="!isCurrentPage($index)">
+
+    <div class="browser-item browser-header"
+         ng-hide="{{pageIndex===0}}"
+         ng-click="pageBack();">
+
+        <i class="fa fa-arrow-left"></i><span>{{pageHeader[(pageIndex - 1)]}}</span>
+    </div>
+
+    <!--
+    <div ng-if="loading" class="page-loader text-center"><i class="fa fa-2x fa-spin fa-spinner"></i></div>
+    -->
+
+    <div class="browser-item browser-categories"
+         ng-repeat="category in page.categories"
+         ng-click="pageForward(category);">
+
+        <i class="fa fa-folder"></i>
+        <span>{{category.name}}</span>
+        <div class="pull-right">
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </div>
+
+    <div class="browser-item browser-definitions"
+         ng-repeat="definition in page.definitions"
+         ng-mousedown="mouseDown($event, definition);"
+         ng-click="show(definition);">
+
+        <i class="fa fa-th"></i><span>{{definition.name}}</span>
+        <div ng-if="isConfigurable()" class="pull-right">
+            <i class="fa fa-chevron-right"></i>
+        </div>
+    </div>
+
+    <div class="browser-definition"
+         ng-if="page.definition != null">
+
+        <block-config block="page.definition" load-sources="loadSources"></block-config>
+
+    </div>
+
+</div>

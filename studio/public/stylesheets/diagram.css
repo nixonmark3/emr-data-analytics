@@ -11,108 +11,283 @@
  */
 
 .block-group { cursor: move; }
+.block-group.ng-leave { -webkit-animation: fadeOut 0.4s; }
 
-.block{ fill: #ffffff; stroke: #d8d8d8; stroke-width: 1; }
-.block-selected{ fill: #ffffff; stroke: #7f7f7f; stroke-width: 1; }
-.block-mouseover{ fill: #ffffff; stroke: #7f7f7f; stroke-width: 1; }
+.block{ fill: #ffffff; stroke-width: 1; }
+.block-unselected{ stroke: #d8d8d8; }
+.block-selected{ stroke: #7f7f7f; }
+
+.block-delete { cursor: pointer; display: none; }
+.block-delete-circle { fill: #ffffff; stroke: #7f7f7f; stroke-width: 1; }
+.block-delete-text:hover { cursor: pointer; fill: #d62728; }
+
+.block-group:hover .block { stroke: #7f7f7f; }
+.block-group:hover .block-delete { display: block; }
 
 .block-header{ stroke: #d8d8d8; stroke-width: 1; }
-rect.block-config{ fill: #1f77b4; }
 
-.block-name{ fill: #e8e8e8; font-size: 1.1em; }
+.block-name{ fill: #686868; font-size: 1.1em; }
 .block-definition{ fill: #b8b8b8; }
 
-.block-icon { font-family: FontAwesome; fill: #b8b8b8; }
-.block-icon:hover { cursor: pointer; fill: #d62728; }
+.block-button-wrapper { cursor: pointer; display: none; }
+.block-button { fill: #fff; stroke-width: 1px; stroke: #b8b8b8; }
+.block-button-wrapper text { font-size: 1.4em; }
+.block-button-wrapper:hover .block-button { fill: #1f77b4; stroke: #1f77b4; }
+.block-button-wrapper:hover text { fill: #f8f8f8; }
+.block-group:hover .block-button-wrapper { display: block; }
 
-.block-delete { cursor: pointer; fill: #ffffff; stroke: #7f7f7f; stroke-width: 1; }
-.block-delete-text { cursor: pointer; }
+.block-icon { font-family: FontAwesome; fill: #b8b8b8; }
+
+/*
+ * Progress
+ */
+
+
+.block-progress circle { stroke-dasharray: 87.5; stroke-width: 5px; }
+
+.progress-text { font-family: FontAwesome; fill: #686868; }
+
+.progress-foreground {
+    fill: transparent;
+    transition: stroke-dashoffset 0.6s;
+    -webkit-transition: stroke-dashoffset 0.6s;
+}
+.block-config .progress-foreground { stroke: #ff7f0e; stroke-dashoffset: 65.625; }
+.block-ready .progress-foreground { stroke: #9467bd; stroke-dashoffset: 43.75; }
+.block-executing .progress-foreground { stroke: #2ca02c; stroke-dashoffset: 21.875; }
+.block-complete .progress-foreground { stroke: #1f77b4; stroke-dashoffset: 0; }
+.block-error .progress-foreground { stroke: #d62728; stroke-dashoffset: 0; }
+
+.progress-background { fill: #f8f8f8; }
+.block-config .progress-background { stroke: #fdd0a2; }
+.block-ready .progress-background { stroke: #dadaeb; }
+.block-executing .progress-background { stroke: #c7e9c0; }
+.block-complete .progress-background { fill: #aec7e8; }
+.block-error .progress-background { fill: #ff9896; }
+.block-complete .progress-text { fill: #ffffff; }
+.block-error .progress-text { fill: #ffffff; }
 
 /*
  * Block Configuration
  */
 
-#block-rename {
+.block-properties {
     position: absolute;
-}
-
-#rename-input {
-    width: 190px;
-    text-align: center;
-}
-
-#block-configuration {
-    position: absolute;
-    width: 200px;
-    min-height: 60px;
-    background-color: white;
+    z-index: 1001;
     border-radius: 10px;
     border: 1px solid #989898;
-    margin-right: 10px;
+    background-color: white;
+    padding: 10px;
     box-shadow: 0px 6px 12px rgba(0,0,0,0.175);
+    transition: all 0.4s ease-out;
 }
 
-.block-configuration-content {
+.block-properties.ng-enter,
+.block-properties.ng-leave.ng-leave-active {
+    opacity: 0;
+}
+.block-properties.ng-enter.ng-enter-active,
+.block-properties.ng-leave {
+    opacity: 1;
+}
+
+.block-properties.align-left:before {
+    content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    padding: 8px;
+    top: 15px;
+    right: -17px;
+    border-top: 17px solid transparent;
+    border-bottom: 17px solid transparent;
+    border-left: 17px solid #989898;
 }
 
-.arrowUpper { position: absolute;
-    top: 25px;
-    right: -10px;
-    border-top: 10px solid transparent;
-    border-bottom: 10px solid transparent;
-    border-left: 10px solid #ffffff;
-    display: block;
-    width: 0;
-    height: 0;
-    z-index: 1;
+.block-properties.align-left:after {
+    content: "";
+    position: absolute;
+    top: 16px;
+    right: -16px;
+    border-top: 16px solid transparent;
+    border-bottom: 16px solid transparent;
+    border-left: 16px solid #fff;
 }
 
-.arrowLower { position: absolute;
-    top: 25px;
-    right: -11px;
-    border-top: 11px solid transparent;
-    border-bottom: 11px solid transparent;
-    border-left: 11px solid #989898;
-    display: block;
-    width: 0;
-    height: 0;
-    z-index: 0;
+.block-properties.align-right:before {
+    content: "";
+    position: absolute;
+    top: 15px;
+    left: -17px;
+    border-top: 17px solid transparent;
+    border-bottom: 17px solid transparent;
+    border-right: 17px solid #989898;
 }
 
-.configuration-parameter { margin-bottom: 8px; }
-.configuration-parameter span { display: block; }
-.configuration-parameter input { display: block; width: 100%; }
-
-.dropdown.dropdown-scroll .dropdown-menu {
-    max-height: 300px;
-    width: auto;
-    overflow: auto;
+.block-properties.align-right:after {
+    content: "";
+    position: absolute;
+    top: 16px;
+    left: -16px;
+    border-top: 16px solid transparent;
+    border-bottom: 16px solid transparent;
+    border-right: 16px solid #fff;
 }
-.search-control {
-    padding: 5px 10px;
+
+/*
+ * Diagram Configuration
+ */
+
+.diagram-properties {
+    position: absolute;
+    z-index: 1000;
+    top: 126px;
+    right: 10px;
+    width: 250px;
+    height: calc(100% - 144px);
+    height: -webkit-calc(100% - 144px);
+    height: -moz-calc(100% - 144px);
+    border-radius: 10px;
+    border: 1px solid #989898;
+    background-color: white;
+    padding: 10px;
+    box-shadow: 0px 6px 12px rgba(0,0,0,0.175);
+    transition: all 0.4s ease-out;
+}
+
+.diagram-properties.ng-enter,
+.diagram-properties.ng-leave.ng-leave-active {
+    opacity: 0;
+}
+.diagram-properties.ng-enter.ng-enter-active,
+.diagram-properties.ng-leave {
+    opacity: 1;
+}
+
+.diagram-properties:before {
+    content: "";
+    position: absolute;
+    top: -17px;
+    right: 12px;
+    border-right: 17px solid transparent;
+    border-left: 17px solid transparent;
+    border-bottom: 17px solid #989898;
+}
+
+.diagram-properties:after {
+    content: "";
+    position: absolute;
+    top: -16px;
+    right: 12px;
+    border-right: 17px solid transparent;
+    border-left: 17px solid transparent;
+    border-bottom: 17px solid #fff;
 }
 
 /*
  * Connectors
  */
 
-.connector { stroke-width: 1; }
-.connector-mouseover { stroke-width: 1; }
-.connector-text { stroke: #1f77b4; }
+.connector-group { cursor: pointer; }
 
-circle.block-config{ stroke: #1f77b4; fill: #aec7e8; }
+.connector {
+    stroke-width: 1;
+    stroke: #7f7f7f;
+    fill: #f0f0f0;
+    -webkit-transform: scale(1);
+    transform: scale(1);
+    -webkit-transform-origin: center;
+    transform-origin: center;
+    -webkit-transition: fill, -webkit-transform;
+    transition: fill, -webkit-transform;
+    -webkit-transition-duration: 0.4s;
+    transition-duration: 0.4s;
+}
+
+.connector-hover {
+    fill: #1f77b4;
+    -webkit-transform: scale(3);
+    transform: scale(3);
+    -webkit-transform-origin: center;
+    transform-origin: center;
+    -webkit-transition: fill, -webkit-transform;
+    transition: fill, -webkit-transform;
+    -webkit-transition-duration: 0.4s;
+    transition-duration: 0.4s;
+}
+
+.connector-icon {
+    visibility: hidden;
+    opacity: 0;
+}
+
+.connector-icon-hover {
+    visibility: visible;
+    opacity: 1;
+    fill: #ffffff;
+    font-size: 2em;
+    transition: opacity linear 0.4s;
+}
+
+/*
+ * Root Connector
+ */
+
+#root-connector-container {
+    cursor: pointer;
+}
+
+#root-connector-container.ng-leave { -webkit-animation: fadeOut 0.6s; }
+#root-connector-container.ng-enter { -webkit-animation: fadeIn 0.6s; }
+
+#root-connector {
+    fill: #1f77b4;
+    -webkit-transform: scale(1);
+    transform: scale(1);
+    -webkit-transform-origin: center;
+    transform-origin: center;
+    -webkit-transition: fill, -webkit-transform;
+    transition: fill, -webkit-transform;
+    -webkit-transition-duration: 0.4s;
+    transition-duration: 0.4s;
+}
+
+#root-connector-text {
+    fill: #ffffff;
+    font-size: 1.8em;
+    -webkit-transform-origin: center;
+    transform-origin: center;
+    -webkit-transition: font-size;
+    transition: font-size;
+    -webkit-transition-duration: 0.4s;
+    transition-duration: 0.4s;
+}
+
+#root-connector-container:hover #root-connector {
+    -webkit-transform: scale(1.2);
+    transform: scale(1.2);
+    -webkit-transform-origin: center;
+    transform-origin: center;
+    -webkit-transition: fill, -webkit-transform;
+    transition: fill, -webkit-transform;
+    -webkit-transition-duration: 0.4s;
+    transition-duration: 0.4s;
+}
+
+#root-connector-container:hover #root-connector-text {
+    font-size: 2.2em;
+    -webkit-transform-origin: center;
+    transform-origin: center;
+    -webkit-transition: font-size;
+    transition: font-size;
+    -webkit-transition-duration: 0.4s;
+    transition-duration: 0.4s;
+}
 
 /*
  * Wires
  */
 
 .wire { stroke-width: 4; fill: transparent; }
+.wire-group.ng-leave { -webkit-animation: fadeOut 0.4s; }
+
 .wire-unselected { stroke: #989898; }
 .wire-selected { stroke: #989898; }
 .wire-mouseover { stroke: #989898; }
@@ -123,3 +298,19 @@ circle.block-config{ stroke: #1f77b4; fill: #aec7e8; }
 
 .dragging-wire { pointer-events: none; stroke: #989898; }
 
+/*
+ * Library Browser Modal
+ */
+
+.browser-modal-body { padding: 0; }
+
+.modal-backdrop { bottom: 0; }
+
+#browser-modal{
+    position: relative;
+    display: block;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    width: 100%;
+    height: 280px;
+}

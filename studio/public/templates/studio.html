@@ -1,29 +1,30 @@
 
-<div id="ghost"
-     ng-if="draggingGhost"
-     ng-style="{top: ghostPosition.y, left: ghostPosition.x, width: 200, height: 80}"
-     ng-cloak>
-</div>
-
-<div id="studio-controls" class="btn-group">
-    <button type="button" class="btn btn-default">
-        <i class="fa fa-refresh"></i>
-    </button>
-    <button type="button" class="btn btn-default" ng-click="evaluate()">
-        <i class="fa fa-play"></i>
-    </button>
-    <button type="button" class="btn btn-default">
-        <i class="fa fa-cogs"></i>
-    </button>
-</div>
-
 <div id="studio-canvas">
 
     <div class="container-fluid">
 
         <div class="row">
 
-            <diagram view-model="diagramViewModel" definitions="definitions" service="service"></diagram>
+            <div id="diagram-container">
+
+                <div id="studio-controls" class="btn-group">
+                    <button type="button" class="btn btn-default">
+                        <i class="fa fa-refresh"></i>
+                    </button>
+                    <button type="button" class="btn btn-default" ng-click="evaluate($event)">
+                        <i class="fa fa-play"></i>
+                    </button>
+                    <button type="button" class="btn btn-default" ng-click="toggleDiagramConfiguration($event)">
+                        <i class="fa fa-wrench"></i>
+                    </button>
+                </div>
+
+                <diagram view-model="diagramViewModel"
+                         nodes="nodes"
+                         library="library"
+                        load-sources="loadSources"></diagram>
+
+            </div>
 
         </div>
     </div>

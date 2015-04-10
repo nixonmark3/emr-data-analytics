@@ -1,35 +1,42 @@
 package models.definition;
 
+import org.bson.types.ObjectId;
+
 import java.util.*;
 
 public class Definition {
-    public Definition(String name, String friendlyName) {
+    private ObjectId _id = null;
+    private int w = 200;
+    private String description = null;
+    private String name = null;
+    private String category = null;
+    private String friendlyName = null;
+    private List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+    private List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+    private List<ConnectorDefinition> outputConnectors  = new ArrayList<ConnectorDefinition>();
+
+    private Definition() {}
+
+    public Definition(String name, String friendlyName, String category) {
         this.name = name;
         this.friendlyName = friendlyName;
-        this.w = 200;
-        this.parameters = new ArrayList<ParameterDefinition>();
-        this.inputConnectors = new ArrayList<ConnectorDefinition>();
-        this.outputConnectors = new ArrayList<ConnectorDefinition>();;
+        this.category = category;
     }
 
-    public int getW() { return w; }
-
-    public void setW(int width) { this.w = width; }
-
-    public String getName() {
-        return name;
+    public ObjectId get_id() {
+        return _id;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void set_id(ObjectId _id) {
+        this._id = _id;
     }
 
-    public String getFriendlyName() {
-        return friendlyName;
+    public int getW() {
+        return w;
     }
 
-    public void setFriendlyName(String friendlyName) {
-        this.friendlyName = friendlyName;
+    public void setW(int w) {
+        this.w = w;
     }
 
     public String getDescription() {
@@ -40,29 +47,51 @@ public class Definition {
         this.description = description;
     }
 
-    public List<ParameterDefinition> getParameters() { return parameters; }
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getFriendlyName() {
+        return friendlyName;
+    }
+
+    public void setFriendlyName(String friendlyName) {
+        this.friendlyName = friendlyName;
+    }
+
+    public List<ParameterDefinition> getParameters() {
+        return parameters;
+    }
 
     public void setParameters(List<ParameterDefinition> parameters) {
         this.parameters = parameters;
     }
 
-    public List<ConnectorDefinition> getInputConnectors() { return inputConnectors; }
+    public List<ConnectorDefinition> getInputConnectors() {
+        return inputConnectors;
+    }
 
     public void setInputConnectors(List<ConnectorDefinition> inputConnectors) {
         this.inputConnectors = inputConnectors;
     }
 
-    public List<ConnectorDefinition> getOutputConnectors() { return outputConnectors; }
+    public List<ConnectorDefinition> getOutputConnectors() {
+        return outputConnectors;
+    }
 
     public void setOutputConnectors(List<ConnectorDefinition> outputConnectors) {
         this.outputConnectors = outputConnectors;
     }
-
-    private int w;
-    private String description;
-    private String name;
-    private String friendlyName;
-    private List<ParameterDefinition> parameters;
-    private List<ConnectorDefinition> inputConnectors;
-    private List<ConnectorDefinition> outputConnectors;
 }

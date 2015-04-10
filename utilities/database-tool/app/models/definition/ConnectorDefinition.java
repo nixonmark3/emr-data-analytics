@@ -1,6 +1,11 @@
 package models.definition;
 
 public class ConnectorDefinition {
+    private String name = null;
+    private String type = null;
+
+    private ConnectorDefinition() {}
+
     public ConnectorDefinition(String name, String type) {
         this.name = name;
         this.type = type;
@@ -21,7 +26,4 @@ public class ConnectorDefinition {
     public void setType(String type) {
         this.type = type;
     }
-
-    private String name;
-    private String type;
 }

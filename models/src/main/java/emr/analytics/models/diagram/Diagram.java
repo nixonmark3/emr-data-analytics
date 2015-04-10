@@ -9,6 +9,15 @@ import java.util.stream.Collectors;
  * Jackson schema for Diagram.
  */
 public class Diagram implements Serializable {
+    private String name = "";
+    private String description = "";
+    private String owner = "";
+    private List<Wire> wires = new ArrayList<Wire>();
+    private List<Block> blocks = new ArrayList<Block>();
+    private int version = 0;
+
+    private Diagram() {}
+
     /**
      * Returns the name of this Diagram.
      * @return diagram name
@@ -104,21 +113,6 @@ public class Diagram implements Serializable {
     public void setVersion(int version) {
         this.version = version;
     }
-
-    /**
-     * Hidden Jackson constructor.
-     */
-    private Diagram() {}
-
-    /**
-     * Private members.
-     */
-    private String name;
-    private String description;
-    private String owner;
-    private List<Wire> wires = new ArrayList<Wire>();
-    private List<Block> blocks = new ArrayList<Block>();
-    private int version = 0;
 
     /**
      * Retrieve a list of root level blocks

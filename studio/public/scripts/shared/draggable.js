@@ -78,7 +78,7 @@ angular.module('draggableApp', [])
             }
             else {
                 if (config.clicked) {
-                    config.clicked();
+                    config.clicked(evt);
                 }
             }
 

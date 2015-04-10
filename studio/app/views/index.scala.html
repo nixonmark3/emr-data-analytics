@@ -2,149 +2,74 @@
 
 @styles = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/diagram.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("scripts/components/browser/browser.css")">
 }
 
 @scripts = {
     <script type="text/javascript" src="@routes.Assets.at("scripts/shared/draggable.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("scripts/components/browser/browser.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("scripts/components/diagram/diagramViewModel.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("scripts/components/diagram/diagram.js")"></script>
-    <script type="text/javascript" src="@routes.Assets.at("scripts/components/diagram/popover.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("scripts/components/popup/popupService.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("scripts/components/diagram/diagramController.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("scripts/app.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("scripts/services/diagramService.js")"></script>
 }
 
 @main(title)(styles)(scripts){
+    <body ng-app="analyticsApp">
 
-    <div id="studio-wrapper"
-    ng-app="analyticsApp"
-    ng-controller="analyticsController"
-    ng-class="{'show-nav': showNav, 'show-props': showProps}"
-    draggable>
+        <div id="studio-wrapper"
+            ng-controller="analyticsController"
+            ng-class="{'show-sidebar': showSidebar}"
+            draggable>
 
-        <div id="diagrams-menu" class="sidebar-offcanvas">
-            <div class="wrapper">
-                <div class="col-md-12">
-                    <h3>Diagrams</h3>
-                    <ul class="nav nav-pills nav-stacked custom" ng-model="diagrams" ng-repeat="d in diagrams" ng-click="loadDiagram(d.name)">
-                        <li>
-                            <a class="glyphicon glyphicon-picture" href="#"> {{d.name}}</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="col-md-12">
-                <p>
-                    <button type="button" class="btn btn-success" ng-click="createDiagram()" style="width: 100%">
-                        <i class="glyphicon glyphicon-new-window"></i>
-                        <span class="navbar-btn-text">Create New</span>
-                    </button>
-                </p>
-            </div>
-        </div>
-
-        <div class="navbar">
-            <div class="container-fluid">
-                <button type="button" class="btn btn-default navbar-btn" ng-click="toggleDiagrams()">
-                    <i class="fa fa-bars"></i>
-                </button>
-                <button type="button" class="btn btn-default navbar-btn" ng-click="toggleLibrary()">
-                    <i class="fa fa-th"></i>
-                    <span class="navbar-btn-text">Library</span>
-                    <i class="fa fa-caret-down"></i>
-                </button>
-                <button type="button" class="btn btn-default navbar-btn pull-right dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                    <i class="glyphicon glyphicon-picture"></i>
-                    <span ng-cloak class="navbar-btn-text">{{diagramViewModel.data.name}}</span>
-                    <i class="fa fa-caret-down"></i>
-                </button>
-                <ul class="dropdown-menu pull-right" role="menu">
-                    <li ng-show="canShowMenuItems" ng-click="saveDiagram()">
-                        <a class="glyphicon glyphicon-save" href="#"> Save</a>
-                    </li>
-                    <li ng-show="canShowMenuItems" ng-click="evaluateDiagram()">
-                        <a class="glyphicon glyphicon-play" href="#"> Evaluate</a>
-                    </li>
-                    <li ng-show="canShowMenuItems" ng-click="downloadDiagram()">
-                        <a class="glyphicon glyphicon-cloud-download" href="#"> Download</a>
-                    </li>
-                    <li ng-show="canShowMenuItems" ng-click="deleteDiagram()">
-                        <a class="glyphicon glyphicon-trash" href="#"> Delete</a>
-                    </li>
-                    <li ng-show="canShowMenuItems" class="divider"></li>
-                    <li ng-click="toggleDiagramProperties()">
-                        <a class="glyphicon glyphicon-cog" href="#"> Edit</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <div id="navigation" ng-show="showLibrary" ng-cloak>
-
-            <div class="navigation-page"
-            ng-repeat="page in pages"
-            ng-hide="!isCurrentPage($index)">
-
-                <div class="navigation-item navigation-header"
-                ng-hide="{{pageIndex===0}}"
-                ng-click="pageBack();">
-
-                    <i class="fa fa-arrow-left"></i><span>{{pageHeader[(pageIndex - 1)]}}</span>
-                </div>
-
-                <div class="navigation-item navigation-categories"
-                ng-repeat="category in page.categories"
-                ng-click="pageForward(category);">
-
-                    <i class="fa fa-folder"></i><span>{{category.name}}</span>
-                </div>
-
-                <div class="navigation-item navigation-definitions"
-                ng-repeat="definition in page.definitions"
-                ng-mousedown="mouseDown($event, definition);">
-
-                    <i class="fa fa-th"></i><span>{{definition.name}}</span>
-                </div>
-
-                <div class="navigation-definition"
-                ng-show="{{page.definition}}">
-
-                    <div class="navigation-parameter"
-                    ng-repeat="parameter in page.definition.parameters">
-                        <span>{{parameter.name}}</span>
-                        <input type="text" />
+            <div id="diagrams-menu" class="sidebar-offcanvas">
+                <div class="wrapper">
+                    <div class="col-md-12">
+                        <h3>Diagrams</h3>
+                        <ul class="nav nav-pills nav-stacked custom" ng-model="diagrams" ng-repeat="d in diagrams" ng-click="loadDiagram(d.name)">
+                            <li>
+                                <a class="glyphicon glyphicon-picture" href="#"> {{d.name}}</a>
+                            </li>
+                        </ul>
                     </div>
-
-                    <button type="button" class="btn btn-primary pull-right">Add</button>
                 </div>
-
-            </div>
-        </div>
-
-        <ng-view></ng-view>
-
-        <div id="properties-menu" class="sidebar-offcanvas">
-            <div class="wrapper">
                 <div class="col-md-12">
-                    <h3>Properties</h3>
-                    <span>Name</span>
-                    <input type="text" ng-model="diagramViewModel.data.name" style="width: 100%" />
-                    <span>Description</span>
-                    <input type="text" ng-model="diagramViewModel.data.description" style="width: 100%" />
-                    <span>Owner</span>
-                    <input type="text" ng-model="diagramViewModel.data.owner" style="width: 100%" />
+                    <p>
+                        <button type="button" class="btn btn-success" ng-click="createDiagram()" style="width: 100%">
+                            <i class="glyphicon glyphicon-new-window"></i>
+                            <span class="navbar-btn-text">Create New</span>
+                        </button>
+                    </p>
                 </div>
             </div>
-            <div class="col-md-12">
-                <p>
-                    <button type="button" class="btn btn-success" ng-click="toggleDiagramProperties()" style="width: 100%">
-                        <i class="glyphicon glyphicon-log-out"></i>
-                        <span class="navbar-btn-text">Done</span>
+
+            <div class="navbar">
+                <div class="container-fluid">
+                    <button type="button" class="btn btn-default navbar-btn" ng-click="toggleDiagrams()">
+                        <i class="fa fa-bars"></i>
                     </button>
-                </p>
+                    <button type="button" class="btn btn-default navbar-btn" ng-click="toggleLibrary()">
+                        <i class="fa fa-th"></i>
+                        <span class="navbar-btn-text">Library</span>
+                        <i class="fa fa-caret-down"></i>
+                    </button>
+                </div>
             </div>
+
+            <browser id="library-browser"
+                ng-if="showLibrary"
+                nodes="nodes"
+                on-drop="createBlock"
+                savable="savable"
+                output="output"
+                ng-cloak>
+            </browser>
+
+            <ng-view></ng-view>
+
         </div>
 
-    </div>
-
-
+    </body>
 }

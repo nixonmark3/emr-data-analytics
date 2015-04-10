@@ -1,0 +1,29 @@
+
+
+
+.browser-page { position: absolute; width: 100%; height: 100%; top: 0; left: 0; }
+.browser-page.ng-leave { -webkit-animation: slideOutRight 0.4s; }
+.browser-page-enter.ng-enter { -webkit-animation: slideInRight 0.4s; }
+.browser-page.ng-hide-add { -webkit-animation: slideOutLeft 0.4s; }
+.browser-page.ng-hide-remove { -webkit-animation: slideInLeft 0.4s; }
+
+.browser-header { font-weight: bold; }
+.browser-item { cursor: pointer; padding: 8px 6px 8px 6px; border-bottom: 1px solid #d8d8d8; }
+.browser-item span { margin-left: 10px; }
+.browser-item i { color: #989898; }
+
+.browser-definition { padding: 8px; background-color: #f5f5f5; height: 100%; }
+.browser-definition button { margin-top: 6px; }
+
+/*
+.browser-parameter { margin-bottom: 8px; }
+.browser-parameter span { display: block; }
+.browser-parameter input { display: block; width: 100%; }
+*/
+
+/*
+ * Ghost
+ */
+
+#ghost { position: absolute; background-color: #ffffff; z-index: 1001; opacity: 0.6; border-radius: 10px; }
+

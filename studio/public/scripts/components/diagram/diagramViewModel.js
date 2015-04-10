@@ -10,7 +10,7 @@ viewmodels.connectorViewModel = function (data, x, y, parent) {
     this._parent = parent;
     this._x = x;
     this._y = y;
-    this._normalRadius = 6.5;
+    this._normalRadius = 6;
     this._expandedRadius = 12;
 
     //
@@ -20,17 +20,17 @@ viewmodels.connectorViewModel = function (data, x, y, parent) {
     this.showName = false;
 
     //
-    // The normal radius of the connector.
+    // Set the connector radius to normal.
     //
     this.normalRadius = function () {
-        return this._normalRadius;
+        this.radius = this._normalRadius;
     };
 
     //
-    // The expanded radius of the connector.
+    // Set the connector radius to expanded.
     //
-    this.expandedRadius = function () {
-        return this._expandedRadius;
+    this.expandRadius = function () {
+        this.radius = this._expandedRadius;
     };
 
     //
@@ -179,32 +179,37 @@ viewmodels.blockViewModel = function (data) {
         return "test";
     };
 
-    //
-    // Return the text representation of the state
-    //
-    this.state = function(){
-        return stateLabel(this.data.state);
+    this.advanceProgress = function(){
+
+        this.data.state = (this.data.state + 1) % 5;
     };
 
-    var stateLabel = function(state){
+    this.updateProgress = function(state) {
+        this.data.state = state % 5;
+    }
 
-        var label;
-        switch(state){
-            case 0:
-                label = "Configuring";
+    this.progressText = function(){
+
+        var text;
+        switch(this.data.state){
+            case 0: // configuring
+                text = "\uf040";
                 break;
-            case 1:
-                label = "Ready";
+            case 1: // ready
+                text = "\uf087";
                 break;
-            case 2:
-                label = "Executing";
+            case 2: // executing
+                text = "\uf085";
                 break;
-            case 3:
-                label = "Complete";
+            case 3: // complete
+                text = "\uf00c";
+                break;
+            case 4: // error
+                text = "\uf12A";
                 break;
         }
 
-        return label;
+        return text;
     };
 
     //
@@ -226,9 +231,22 @@ viewmodels.blockViewModel = function (data) {
             case 3:
                 result = "block-complete";
                 break;
+            case 4:
+                result = "block-error";
+                break;
         }
 
         return result;
+    };
+
+    //
+    // retrieve parameter by name
+    //
+    this.getParameter = function(name){
+
+        for(var p = 0; p < this.data.parameters.length; p++)
+            if (this.data.parameters[p].name == name)
+                return this.data.parameters[p];
     };
 
     // connector functions
@@ -298,22 +316,30 @@ viewmodels.wireViewModel = function (data, parent, sourceConnector, targetConnec
     // Set to true when the connection is selected.
     this._selected = false;
 
-    this.sourceCoordX = function () {
-        return this.source.parent().x() + this.source.x();
+    this.sourceConnectorX = function(){
+        return this.source.x();
     };
 
-    this.sourceCoordY = function () {
-        return this.source.parent().y() + this.source.y();
+    this.sourceConnectorY = function(){
+        return this.source.y();
     };
 
-    this.sourceCoord = function () {
+    this.sourceCoordX = function() {
+        return this.source.parent().x() + this.sourceConnectorX();
+    };
+
+    this.sourceCoordY = function() {
+        return this.source.parent().y() + this.sourceConnectorY();
+    };
+
+    this.sourceCoord = function() {
         return {
             x: this.sourceCoordX(),
             y: this.sourceCoordY()
         };
     };
 
-    this.sourceTangentX = function () {
+    this.sourceTangentX = function() {
         return this.parent.computeWireSourceTangentX(this.sourceCoord(), this.targetCoord());
     };
 
@@ -321,27 +347,35 @@ viewmodels.wireViewModel = function (data, parent, sourceConnector, targetConnec
         return this.parent.computeWireSourceTangentY(this.sourceCoord(), this.targetCoord());
     };
 
-    this.targetCoordX = function () {
-        return this.target.parent().x() + this.target.x();
+    this.targetConnectorX = function(){
+        return this.target.x();
     };
 
-    this.targetCoordY = function () {
-        return this.target.parent().y() + this.target.y();
+    this.targetConnectorY = function(){
+        return this.target.y();
     };
 
-    this.targetCoord = function () {
+    this.targetCoordX = function() {
+        return this.target.parent().x() + this.targetConnectorX();
+    };
+
+    this.targetCoordY = function() {
+        return this.target.parent().y() + this.targetConnectorY();
+    };
+
+    this.targetCoord = function() {
         return {
             x: this.targetCoordX(),
             y: this.targetCoordY()
         };
     };
 
-    this.targetTangentX = function () {
+    this.targetTangentX = function() {
         return this.parent.computeWireTargetTangentX(this.sourceCoord(),
             this.targetCoord());
     };
 
-    this.targetTangentY = function () {
+    this.targetTangentY = function() {
         return this.parent.computeWireTargetTangentY(this.sourceCoord(),
             this.targetCoord());
     };
@@ -349,28 +383,28 @@ viewmodels.wireViewModel = function (data, parent, sourceConnector, targetConnec
     //
     // Select the wire.
     //
-    this.select = function () {
+    this.select = function() {
         this._selected = true;
     };
 
     //
     // Deselect the wire.
     //
-    this.deselect = function () {
+    this.deselect = function() {
         this._selected = false;
     };
 
     //
     // Toggle the selection state of the connection.
     //
-    this.toggleSelected = function () {
+    this.toggleSelected = function() {
         this._selected = !this._selected;
     };
 
     //
     // Returns true if the connection is selected.
     //
-    this.selected = function () {
+    this.selected = function() {
         return this._selected;
     };
 };
@@ -484,24 +518,19 @@ viewmodels.diagramViewModel = function(data) {
     this.wires = this.createWireViewModels(this.data.wires);
 
     //
-    // Compute the tangent for the bezier curve.
+    // Bezier curve calculations
     //
+
     this.computeWireSourceTangentX = function (pt1, pt2) {
 
-        return pt1.x + this.computeWireTangentOffset(pt1, pt2);
+        return pt1.x;
     };
 
-    //
-    // Compute the tangent for the bezier curve.
-    //
     this.computeWireSourceTangentY = function (pt1, pt2) {
 
-        return pt1.y;
+        return pt1.y + this.computeWireTangentOffset(pt1, pt2);
     };
 
-    //
-    // Compute the tangent for the bezier curve.
-    //
     this.computeWireSourceTangent = function(pt1, pt2) {
         return {
             x: this.computeWireSourceTangentX(pt1, pt2),
@@ -509,25 +538,16 @@ viewmodels.diagramViewModel = function(data) {
         };
     };
 
-    //
-    // Compute the tangent for the bezier curve.
-    //
     this.computeWireTargetTangentX = function (pt1, pt2) {
 
-        return pt2.x - this.computeWireTangentOffset(pt1, pt2);
+        return pt2.x;
     };
 
-    //
-    // Compute the tangent for the bezier curve.
-    //
     this.computeWireTargetTangentY = function (pt1, pt2) {
 
-        return pt2.y;
+        return pt2.y - this.computeWireTangentOffset(pt1, pt2);
     };
 
-    //
-    // Compute the tangent for the bezier curve.
-    //
     this.computeWireTargetTangent = function(pt1, pt2) {
         return {
             x: this.computeWireTargetTangentX(pt1, pt2),
@@ -537,7 +557,7 @@ viewmodels.diagramViewModel = function(data) {
 
     this.computeWireTangentOffset = function (pt1, pt2) {
 
-        return (pt2.x - pt1.x) / 2;
+        return (pt2.y - pt1.y) / 2;
     };
 
     //
@@ -609,13 +629,13 @@ viewmodels.diagramViewModel = function(data) {
     //
     // Add a block to the view model.
     //
-    this.createBlock = function (x, y, definition) {
+    this.createBlock = function (configBlock) {
+
+        var block = getDataBlock(configBlock);
 
         if (!this.data.blocks) {
             this.data.blocks = [];
         }
-
-        var block = new DataBlock(x, y, definition);
 
         //
         // Update the data model.
@@ -628,35 +648,96 @@ viewmodels.diagramViewModel = function(data) {
         this.blocks.push(new viewmodels.blockViewModel(block));
     };
 
-    var DataBlock = function(x, y, definition){
+    this.updateBlock = function(configBlock){
+
+        var block = this.findBlock(configBlock.name);
+
+        var configured = true;
+        var dirty = false;
+        configBlock.parameters.forEach(function(configParameter){
+
+            if (!configParameter.collected)
+                configured = false;
+
+            if (configParameter.dirty)
+                dirty = true;
+
+            var parameter = block.getParameter(configParameter.name);
+            parameter.value = configParameter.value;
+            parameter.collected = configParameter.collected;
+        });
+
+        if (dirty && configured)
+            block.data.state = 1;
+        else if (!configured)
+            block.data.state = 0;
+    };
+
+    this.getBlockDescription = function(x, y, definition){
+
+        return new BlockDescription(x, y, definition);
+    };
+
+    var BlockDescription = function(x, y, definition){
+
+        // initialize block properties
+        this.name = generateBlockName(definition.name);
+        this.definition = definition.name;
+        this.x = x;
+        this.y = y;
+    };
+
+    var getDataBlock = function(configBlock){
+
+        return new DataBlock(configBlock);
+    };
+
+    var DataBlock = function(configBlock){
+
+        this.name = configBlock.name;
+        this.definition = configBlock.definition.name;
+        this.state = 0;
+        this.w = configBlock.definition.w;
+        this.x = configBlock.x;
+        this.y = configBlock.y;
+        this.inputConnectors = angular.copy(configBlock.definition.inputConnectors); // todo copy over only what we need from definition
+        this.outputConnectors = angular.copy(configBlock.definition.outputConnectors); // todo copy over only what we need from definition
+
+        var parameters = [];
+        var configured = true;
+        configBlock.parameters.forEach(function(parameter){
+
+            if (!parameter.collected)
+                configured = false;
+
+            parameters.push({
+                name:parameter.name,
+                value:parameter.value,
+                collected:parameter.collected
+            });
+        });
+
+        if (configured)
+            this.state = 1;
+
+        this.parameters = parameters;
+    };
+
+    var generateBlockName = function(definitionName){
 
         // generate unique block name
         var index = 1;
         var name;
         do{
-            name = definition.name + index;
+            name = definitionName + index;
             index++;
         }
         while(name in blockNames);
+
         // capture new block name
         blockNames[name] = true;
 
-        this.name = name;
-        this.definition = definition.name;
-        this.state = 0;
-        this.w = definition.w;
-        this.x = x;
-        this.y = y;
-        this.inputConnectors = definition.inputConnectors; // todo copy over only what we need from definition
-        this.outputConnectors = definition.outputConnectors; // todo copy over only what we need from definition
-
-        var parameters = [];
-
-        definition.parameters.forEach(function(parameterDefinition){
-            parameters.push({name:parameterDefinition.name, value:parameterDefinition.value});
-        });
-
-        this.parameters = parameters;
+        return name;
     };
 
     //
@@ -695,6 +776,18 @@ viewmodels.diagramViewModel = function(data) {
         }
     };
 
+    this.selectBlock = function(block){
+
+        this.deselectAll();
+        block.select();
+    };
+
+    this.deleteBlock = function(block){
+
+        this.selectBlock(block);
+        this.deleteSelected();
+    };
+
     //
     // Update the location of the block and its connectors.
     //
@@ -714,8 +807,7 @@ viewmodels.diagramViewModel = function(data) {
     //
     this.handleBlockClicked = function (block) {
 
-        this.deselectAll();
-        block.select();
+        this.selectBlock(block);
 
         // Move node to the end of the list so it is rendered after all the other.
         // This is the way Z-order is done in SVG.
@@ -867,5 +959,67 @@ viewmodels.diagramViewModel = function(data) {
 
         return selectedWires;
     };
+
+    //
+    // Updates the enumerated blocks with their new state.
+    //
+    this.updateStatusOfBlocks = function(blockStates) {
+        for (var i = 0; i < blockStates.length; ++i) {
+            var block = this.findBlock(blockStates[i].name);
+            block.updateProgress(blockStates[i].state);
+        }
+    }
 };
 
+viewmodels.configuringBlockViewModel = function (definition, block) {
+
+    this.name = block.name;
+    this.x = block.x;
+    this.y = block.y;
+    this.state = block.state;
+
+    this.definition = definition;
+
+    var blockParameters = block.parameters;
+
+    // capture parameters
+    var parameters = [];
+    definition.parameters.forEach(function(parameterDefinition){
+
+        // if exists - reference block parameter
+        var blockParameter;
+        if (blockParameters){
+            for(var i = 0; i < blockParameters.length; i++){
+
+                if (blockParameters[i].name == parameterDefinition.name){
+
+                    blockParameter = blockParameters[i];
+                    break;
+                }
+            }
+        }
+
+        // copy parameter definition
+        var parameter = angular.copy(parameterDefinition);
+
+        // initialize parameter collection fields
+        parameter.loaded = !parameter.options.dynamic;
+        parameter.loading = false;
+        parameter.dirty = false;
+
+        if (blockParameter && blockParameter.collected !== undefined){
+            parameter.collected = blockParameter.collected;
+        }
+        else{
+            parameter.collected = false;
+        }
+
+        if (blockParameter && blockParameter.value !== undefined){
+            parameter.value = blockParameter.value;
+        }
+
+        // add to list of parameters
+        parameters.push(parameter);
+    });
+    this.parameters = parameters;
+};

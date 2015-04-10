@@ -1,6 +1,6 @@
 package controllers;
 
-import models.definition.*;
+import emr.analytics.models.definition.Definition;
 
 import org.jongo.*;
 
@@ -11,21 +11,23 @@ import play.mvc.Result;
  * Definitions Controller.
  */
 public class Definitions  extends ControllerBase {
+    private static final String DEFINITION_COLLECTION = "definitions";
+
     /**
      * Returns all the Definitions and Categories.
      * @return Json representing requested definition and categories
      */
     public static Result getDefinitions() {
-        MongoCursor<Category> definitionCategories = null;
+        MongoCursor<Definition> definitions = null;
 
         try {
-            MongoCollection definitions = getMongoCollection(DEFINITIONS_COLLECTION);
+            MongoCollection definitionCollection = getMongoCollection(DEFINITION_COLLECTION);
 
-            if (definitions != null) {
-                definitionCategories = definitions.find().as(Category.class);
+            if (definitionCollection != null) {
+                definitions = definitionCollection.find().as(Definition.class);
             }
             else {
-                return internalServerError(String.format("'%s' collection could not be found!", DEFINITIONS_COLLECTION));
+                return internalServerError(String.format("'%s' collection could not be found!", DEFINITION_COLLECTION));
             }
         }
         catch (Exception exception) {
@@ -33,11 +35,6 @@ public class Definitions  extends ControllerBase {
             return internalServerError("Failed to get definitions.");
         }
 
-        return ok(Json.toJson(definitionCategories));
+        return ok(Json.toJson(definitions));
     }
-
-    /**
-     * Private constants.
-     */
-    private static final String DEFINITIONS_COLLECTION = "definitions";
 }

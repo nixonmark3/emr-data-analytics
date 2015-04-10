@@ -1,6 +1,7 @@
 package controllers;
 
 import actors.ClientActor;
+import actors.ServiceActor;
 
 import play.mvc.*;
 
@@ -16,8 +17,13 @@ public class Application extends Controller {
         return ok(index.render("Data Analytics Studio"));
     }
 
-    public static WebSocket<JsonNode> clientSocket() {
+    public static WebSocket<JsonNode> clientSocket()
+    {
         return WebSocket.withActor(ClientActor::props);
     }
 
+    public static WebSocket<JsonNode> serviceSocket()
+    {
+        return WebSocket.withActor(ServiceActor::props);
+    }
 }

@@ -1,16 +1,14 @@
 'use strict';
 
-analyticsApp.factory('diagramService', function ($http, $q) {
+analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
 
     return {
 
-        evaluate: function (data) {
-
-            console.log(JSON.stringify(data));
+        evaluate: function (clientId, data) {
 
             var deferred = $q.defer();
 
-            $http.post('/evaluate', data)
+            $http.post('/evaluate/' + clientId, data)
                 .success(function (data, status, headers, config) {
                     deferred.resolve(data);
                 })
@@ -56,9 +54,44 @@ analyticsApp.factory('diagramService', function ($http, $q) {
 
             var deferred = $q.defer();
 
+            //$http({ method: 'GET', url: '/assets/data/definitions/list.json' })
             $http.get('/getDefinitions')
                 .success(function (data, status, headers, config) {
+
                     deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
+
+        loadSources: function(request){
+
+            var deferred = $q.defer();
+
+            $http({ method: 'GET', url: '/assets/data/definitions/sources.json' })
+                .success(function (data, status, headers, config) {
+
+                    // find source and capture values
+
+                    request.forEach(function(item){
+
+                        var source = data[item.method];
+
+                        item.arguments.forEach(function(argument){
+
+                            source = source[argument];
+                        });
+
+                        item.fieldOptions = source;
+                    });
+
+                    // simulating a delay to test the client
+                    $timeout(function(){
+                        deferred.resolve(request);
+                    }, 1000);
                 })
                 .error(function (data, status, headers, config){
                     deferred.reject(status);

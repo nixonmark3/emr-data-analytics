@@ -1,0 +1,18 @@
+<div>
+    <div class="modal-header">
+        <h3 class="modal-title">Add Block</h3>
+    </div>
+    <div class="modal-body browser-modal-body">
+        <browser id="browser-modal"
+                 nodes="nodes"
+                 get-config-block="getConfigBlock"
+                 load-sources="loadSources"
+                 savable="savable"
+                 output="output"></browser>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+        <button class="btn btn-success" ng-click="save(output);">Save</button>
+    </div>
+</div>
+
