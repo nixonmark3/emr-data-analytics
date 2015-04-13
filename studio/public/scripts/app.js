@@ -22,7 +22,12 @@ var analyticsApp = angular.module('analyticsApp',
             return $sce.trustAsHtml(val);
         };
     }])
-    .controller('analyticsController', function($scope, diagramService, popupService) {
+    .controller('analyticsController', ['$scope', '$timeout', 'diagramService', 'popupService',
+        function($scope, $timeout, diagramService, popupService) {
+
+        //
+        // Initialize web socket connection
+        //
 
         var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket
         var sock = new WS("ws://localhost:9000/getClientSocket")
@@ -45,6 +50,9 @@ var analyticsApp = angular.module('analyticsApp',
                     console.log('job id: ' + data.jobId);
                     console.log('evaluation state: ' + data.state);
                     $scope.diagramViewModel.updateStatusOfBlocks(data['blockStates']);
+                    if (data.state > 0) {
+                        $scope.evaluating = false;
+                    }
                 });
             }
         }
@@ -59,6 +67,10 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.showSidebar = false;
         // controls whether the library is displayed
         $scope.showLibrary = false;
+        // indicates whether the current diagram is being evaluated
+        $scope.evaluating = false;
+        // indicates whether a block is being created
+        $scope.creatingBlock = false;
 
         //
         // load data from the service
@@ -178,7 +190,8 @@ var analyticsApp = angular.module('analyticsApp',
         };
 
         // save the current diagram
-        $scope.saveDiagram = function() {
+        $scope.save = function(evt) {
+
             var data = $scope.diagramViewModel.data;
             // we need to delete the object id or the save will not work
             // TODO need a better solution for this
@@ -191,10 +204,23 @@ var analyticsApp = angular.module('analyticsApp',
                     console.log(code); // TODO show exception
                 }
             );
+
+            evt.stopPropagation();
+            evt.preventDefault();
         };
 
         // evaluate the current diagram
         $scope.evaluate = function(evt) {
+
+            $scope.evaluating = true;
+
+            //$timeout(function(){
+            //
+            //    $scope.evaluating = false;
+            //}, 4000);
+            //
+            //return;
+
             var data = $scope.diagramViewModel.data;
 
             diagramService.evaluate($scope.clientId, data).then(
@@ -209,16 +235,6 @@ var analyticsApp = angular.module('analyticsApp',
 
             evt.stopPropagation();
             evt.preventDefault();
-        };
-
-        // evaluate the current diagram
-        $scope.evaluateDiagram = function() {
-            console.log("evaluate selected");
-        };
-
-        // download the current diagram
-        $scope.downloadDiagram = function() {
-            console.log("download selected");
         };
 
         // delete the current diagram
@@ -261,7 +277,7 @@ var analyticsApp = angular.module('analyticsApp',
                 templateUrl: '/assets/scripts/components/diagram/diagramProperties.html',
                 controller: 'diagramConfigController',
                 inputs: {
-                    diagram: $scope.diagram
+                    diagram: $scope.diagramViewModel.data
                 }}).then(function(popup){
 
                 $scope.configuringDiagram = true;
@@ -277,5 +293,5 @@ var analyticsApp = angular.module('analyticsApp',
             $scope.configuringDiagram = false;
             delete $scope.diagramConfiguration;
         };
-    });
+    }]);
 

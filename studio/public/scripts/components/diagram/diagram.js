@@ -12,17 +12,20 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                 diagram: '=viewModel',
                 nodes: '=',
                 library: '=',
-                loadSources: "="
+                loadSources: "=",
+                creatingBlock: "="
             },
             link: function($scope, element, attrs){
 
                 $scope.draggingWire = false;
+                $scope.mouseOverBlock = null;
                 $scope.mouseOverConnector = null;
                 $scope.configuringBlock = false;
                 $scope.configuringDiagram = false;
 
                 // capture the diagram's width
                 $scope.diagramWidth = element.width();
+                $scope.windowHeight = $window.innerHeight;
 
                 $scope.absUrl = $location.absUrl();
 
@@ -32,7 +35,11 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                 angular.element($window).bind("resize", function () {
 
                     // update the width property on window resize
-                    $scope.$apply($scope.diagramWidth = element.width());
+                    $scope.$apply(function() {
+
+                        $scope.diagramWidth = element.width();
+                        $scope.windowHeight = $window.innerHeight;
+                    });
                 });
 
                 var jQuery = function (element) {
@@ -177,10 +184,13 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                         return;
                     }
 
-                    // Figure out if the mouse is over a connector.
+                    // check whether the mouse is over a connector
                     var scope = checkForHit(mouseOverElement, 'connector-group');
-
                     $scope.mouseOverConnector = (scope && scope.connector) ? scope.connector : null;
+
+                    // check whether the mouse is over a block
+                    scope = checkForHit(mouseOverElement, 'block-group');
+                    $scope.mouseOverBlock = (scope && scope.block) ? scope.block : null;
                 };
 
                 //
@@ -279,9 +289,9 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                             $scope.$apply();
                         },
 
-                        clicked: function () {
+                        clicked: function (evt) {
 
-                            $scope.showLibraryModal();
+                            $scope.showLibraryPopup(evt);
                         }
                     });
 
@@ -369,37 +379,35 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                     evt.preventDefault();
                 };
 
+                $scope.showLibraryPopup = function(evt){
 
-                $scope.showLibraryModal = function(evt){
+                    popupService.show({
+                        templateUrl: '/assets/scripts/components/diagram/library.html',
+                        controller: 'libraryController',
+                        inputs: {
+                            nodes: $scope.nodes,
+                            getConfigBlock: getConfigBlock,
+                            loadSources: $scope.loadSources
 
-                    var modalInstance = $modal.open({
-                        templateUrl: '/assets/scripts/components/diagram/libraryModal.html',
-                        controller: 'libraryModalController',
-                        size: 'sm',
-                        resolve: {
-                            nodes: function () {
-                                return $scope.nodes;
-                            },
-                            getConfigBlock: function(){
-                                return getConfigBlock;
-                            },
-                            loadSources: function(){
-                                return $scope.loadSources;
+                        }}).then(function(popup){
+
+                        $scope.creatingBlock = true;
+
+                        popup.close.then(function(configBlock){
+
+                            $scope.creatingBlock = false;
+
+                            if (configBlock) {
+
+                                // todo: temp coordinates
+
+                                configBlock.x = ($scope.diagramWidth/ 2) - 100;
+                                configBlock.y = 50;
+
+                                $scope.diagram.createBlock(configBlock);
                             }
-                        }
+                        });
                     });
-
-                    modalInstance.result.then(function (block) {
-
-                            // todo: temp coordinates
-
-                            block.x = ($scope.diagramWidth/ 2) - 100;
-                            block.y = 50;
-
-                            $scope.diagram.createBlock(block);
-                        },
-                        function () {}
-                    );
 
                     evt.stopPropagation();
                     evt.preventDefault();

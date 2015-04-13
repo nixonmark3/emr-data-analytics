@@ -79,23 +79,17 @@
     background-color: white;
     padding: 10px;
     box-shadow: 0px 6px 12px rgba(0,0,0,0.175);
-    transition: all 0.4s ease-out;
 }
 
-.block-properties.ng-enter,
-.block-properties.ng-leave.ng-leave-active {
-    opacity: 0;
-}
-.block-properties.ng-enter.ng-enter-active,
-.block-properties.ng-leave {
-    opacity: 1;
-}
+.block-properties.ng-enter { -webkit-animation: fadeIn 0.4s; }
+
+.block-properties.ng-leave { -webkit-animation: fadeOut 0.4s; }
 
 .block-properties.align-left:before {
     content: "";
     position: absolute;
     top: 15px;
-    right: -17px;
+    right: -16px;
     border-top: 17px solid transparent;
     border-bottom: 17px solid transparent;
     border-left: 17px solid #989898;
@@ -105,7 +99,7 @@
     content: "";
     position: absolute;
     top: 16px;
-    right: -16px;
+    right: -15px;
     border-top: 16px solid transparent;
     border-bottom: 16px solid transparent;
     border-left: 16px solid #fff;
@@ -131,6 +125,9 @@
     border-right: 16px solid #fff;
 }
 
+.block-parameter { margin-top: 10px; }
+.block-parameter label { color: #989898; font-weight: normal; margin-bottom: 2px; }
+
 /*
  * Diagram Configuration
  */
@@ -149,23 +146,17 @@
     background-color: white;
     padding: 10px;
     box-shadow: 0px 6px 12px rgba(0,0,0,0.175);
-    transition: all 0.4s ease-out;
 }
 
-.diagram-properties.ng-enter,
-.diagram-properties.ng-leave.ng-leave-active {
-    opacity: 0;
-}
-.diagram-properties.ng-enter.ng-enter-active,
-.diagram-properties.ng-leave {
-    opacity: 1;
-}
+.diagram-properties.ng-enter { -webkit-animation: fadeIn 0.4s; }
+
+.diagram-properties.ng-leave { -webkit-animation: fadeOut 0.4s; }
 
 .diagram-properties:before {
     content: "";
     position: absolute;
     top: -17px;
-    right: 12px;
+    right: 84px;
     border-right: 17px solid transparent;
     border-left: 17px solid transparent;
     border-bottom: 17px solid #989898;
@@ -175,11 +166,14 @@
     content: "";
     position: absolute;
     top: -16px;
-    right: 12px;
+    right: 84px;
     border-right: 17px solid transparent;
     border-left: 17px solid transparent;
     border-bottom: 17px solid #fff;
 }
+
+.diagram-property { margin-top: 10px; }
+.diagram-property label { color: #989898; font-weight: normal; margin-bottom: 2px; }
 
 /*
  * Connectors
@@ -226,6 +220,29 @@
     transition: opacity linear 0.4s;
 }
 
+.connector-name-group {
+    opacity: 0;
+    -webkit-transition: all 0.4s ease-in-out;
+    transition: all 0.4s ease-in-out;
+}
+
+.connector-name-group-block-hover { opacity: 1; }
+
+.connector-name-group-in-hover {
+    opacity: 1;
+    -webkit-transform: translate(0,-10px);
+    transform: translate(0,-10px);
+}
+
+.connector-name-group-out-hover {
+    opacity: 1;
+    -webkit-transform: translate(0,10px);
+    transform: translate(0,10px);
+}
+
+.connector-name-bg { stroke-width: 1; stroke: #7f7f7f; fill: #f0f0f0; }
+.connector-name { }
+
 /*
  * Root Connector
  */
@@ -261,8 +278,8 @@
 }
 
 #root-connector-container:hover #root-connector {
-    -webkit-transform: scale(1.2);
-    transform: scale(1.2);
+    -webkit-transform: scale(1.4);
+    transform: scale(1.4);
     -webkit-transform-origin: center;
     transform-origin: center;
     -webkit-transition: fill, -webkit-transform;
@@ -272,7 +289,7 @@
 }
 
 #root-connector-container:hover #root-connector-text {
-    font-size: 2.2em;
+    font-size: 2.4em;
     -webkit-transform-origin: center;
     transform-origin: center;
     -webkit-transition: font-size;
@@ -302,9 +319,7 @@
  * Library Browser Modal
  */
 
-.browser-modal-body { padding: 0; }
-
-.modal-backdrop { bottom: 0; }
+.modal-body { padding: 0; }
 
 #browser-modal{
     position: relative;
@@ -314,3 +329,50 @@
     width: 100%;
     height: 280px;
 }
+
+.library-popup-wrapper {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1150;
+}
+
+.library-popup-wrapper.ng-enter {
+    -webkit-animation: zoomIn 0.6s;
+    animation: zoomIn 0.6s;
+}
+
+.library-popup {
+    position: relative;
+    margin: 80px auto;
+    width: 300px;
+    border-radius: 10px;
+    border: 1px solid #989898;
+    background-color: white;
+    -webkit-animation-delay: 2.0s;
+    animation-delay: 2.0s;
+}
+
+.library-backdrop {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    background-color: #c6dbef;
+    width: 100%;
+    z-index: 1100;
+    opacity: 0.6;
+    -webkit-transition: all 0.4s ease-in-out;
+    transition: all 0.4s ease-in-out;
+}
+
+.library-backdrop.ng-enter,
+.library-backdrop.ng-leave.ng-leave-active {
+    opacity: 0;
+}
+.library-backdrop.ng-enter.ng-enter-active,
+.library-backdrop.ng-leave {
+    opacity: 0.6;
+}
+

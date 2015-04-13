@@ -1,28 +1,6 @@
 'use strict';
 
-diagramApp.controller('libraryModalController',
-    ['$scope', '$modalInstance', 'nodes', 'getConfigBlock', 'loadSources',
-        function($scope, $modalInstance, nodes, getConfigBlock, loadSources) {
-
-        $scope.nodes = nodes;
-
-        $scope.getConfigBlock = getConfigBlock;
-
-        $scope.loadSources = loadSources;
-
-        $scope.savable = false;
-
-        $scope.save = function (block) {
-
-            $modalInstance.close(block);
-        };
-
-        $scope.cancel = function () {
-
-            $modalInstance.dismiss('cancel');
-        };
-        }])
-    .controller('blockConfigController',
+diagramApp.controller('blockConfigController',
     ['$scope', '$element', 'block', 'position', 'loadSources', 'close',
         function($scope, $element, block, position, loadSources, close) {
 
@@ -61,6 +39,29 @@ diagramApp.controller('libraryModalController',
             };
 
             this.close = $scope.close;
+        }
+    ])
+    .controller('libraryController',
+    ['$scope', '$element', 'nodes', 'getConfigBlock', 'loadSources', 'close',
+        function($scope, $element, nodes, getConfigBlock, loadSources, close) {
+
+            $scope.nodes = nodes;
+
+            $scope.getConfigBlock = getConfigBlock;
+
+            $scope.loadSources = loadSources;
+
+            $scope.savable = false;
+
+            $scope.save = function(block){
+
+                close(block);
+            };
+
+            $scope.cancel = function(){
+
+                close();
+            };
         }
     ]);
 

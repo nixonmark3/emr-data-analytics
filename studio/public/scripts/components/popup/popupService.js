@@ -74,6 +74,10 @@ angular.module('popupApp', ['ngAnimate'])
                                         //  Resolve the 'close' promise.
                                         closeDeferred.resolve(result);
 
+                                        // remove backdrop element
+                                        if (backdropElement)
+                                            $animate.leave(backdropElement);
+
                                         //  cleanup and remove the element from the dom
                                         $animate.leave(popupElement);
                                         popupScope.$destroy();
@@ -84,6 +88,7 @@ angular.module('popupApp', ['ngAnimate'])
                                         popup = null;
                                         inputs = null;
                                         popupElement = null;
+                                        backdropElement = null;
                                         popupScope = null;
 
                                     }, delay);
@@ -100,6 +105,14 @@ angular.module('popupApp', ['ngAnimate'])
                             //  create a dom element
                             var popupElementTemplate = angular.element(template);
 
+                            var backdropElement = null;
+                            if (options.backdropClass) {
+                                // if a backdrop class name has been specified
+
+                                backdropElement = angular.element(
+                                    "<div class='" + options.backdropClass + "'></div>");
+                            }
+
                             //  Compile then link the template element, building the actual element.
                             //  Set the $element on the inputs so that it can be injected if required.
                             var popupElement = $compile(popupElementTemplate)(popupScope);
@@ -111,11 +124,14 @@ angular.module('popupApp', ['ngAnimate'])
                             //  Finally, append the popup to the dom.
                             if (options.appendElement) {
                                 // append to custom append element
-                                // options.appendElement.append(popupElement);
+
                                 $animate.enter(popupElement, options.appendElement);
                             } else {
                                 // append to body when no custom append element is specified
-                                // body.append(popupElement);
+
+                                if (backdropElement !== null)
+                                    $animate.enter(backdropElement, body);
+
                                 $animate.enter(popupElement, body);
                             }
 
@@ -123,6 +139,7 @@ angular.module('popupApp', ['ngAnimate'])
                                 controller: popupController,
                                 scope: popupScope,
                                 element: popupElement,
+                                backdrop: backdropElement,
                                 close: closeDeferred.promise
                             };
 

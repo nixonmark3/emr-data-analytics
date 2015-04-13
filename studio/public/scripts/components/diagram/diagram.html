@@ -19,10 +19,11 @@
         </filter>
     </defs>
 
+    <!-- root connector -->
     <g ng-if="diagram.blocks.length==0"
        ng-attr-transform="translate({{diagramWidth/2}})"
        id="root-connector-container"
-        ng-click="showLibraryModal($event)">
+        ng-click="showLibraryPopup($event)">
 
         <circle id="root-connector"
                 r="16"
@@ -187,6 +188,25 @@
 
             </g>
 
+            <g ng-attr-class="connector-name-group {{block == mouseOverBlock && 'connector-name-group-block-hover' || connector == mouseOverConnector && 'connector-name-group-in-hover'}}">
+
+                <rect class="connector-name-bg"
+                      ry="6"
+                      rx="6"
+                      ng-attr-x="{{connector.x() - 18}}"
+                      ng-attr-y="{{connector.y() - 32}}"
+                      width="36"
+                      height="20">
+                </rect>
+
+                <text class="connector-name"
+                      ng-attr-x="{{connector.x()}}"
+                      ng-attr-y="{{connector.y() - 22}}"
+                      text-anchor="middle"
+                      alignment-baseline="middle">{{connector.name()}}</text>
+
+            </g>
+
         </g>
 
         <g ng-repeat="connector in block.outputConnectors">
@@ -205,6 +225,25 @@
                       ng-attr-y="{{connector.y()}}"
                       text-anchor="middle"
                       alignment-baseline="central">+</text>
+
+            </g>
+
+            <g ng-attr-class="connector-name-group {{block == mouseOverBlock && 'connector-name-group-block-hover' || connector == mouseOverConnector && 'connector-name-group-out-hover'}}">
+
+                <rect class="connector-name-bg"
+                      ry="6"
+                      rx="6"
+                      ng-attr-x="{{connector.x() - 18}}"
+                      ng-attr-y="{{connector.y() + 12}}"
+                      width="36"
+                      height="20">
+                </rect>
+
+                <text class="connector-name"
+                      ng-attr-x="{{connector.x()}}"
+                      ng-attr-y="{{connector.y() + 22}}"
+                      text-anchor="middle"
+                      alignment-baseline="middle">{{connector.name()}}</text>
 
             </g>
 

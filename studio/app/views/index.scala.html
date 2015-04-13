@@ -19,57 +19,7 @@
 @main(title)(styles)(scripts){
     <body ng-app="analyticsApp">
 
-        <div id="studio-wrapper"
-            ng-controller="analyticsController"
-            ng-class="{'show-sidebar': showSidebar}"
-            draggable>
-
-            <div id="diagrams-menu" class="sidebar-offcanvas">
-                <div class="wrapper">
-                    <div class="col-md-12">
-                        <h3>Diagrams</h3>
-                        <ul class="nav nav-pills nav-stacked custom" ng-model="diagrams" ng-repeat="d in diagrams" ng-click="loadDiagram(d.name)">
-                            <li>
-                                <a class="glyphicon glyphicon-picture" href="#"> {{d.name}}</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-12">
-                    <p>
-                        <button type="button" class="btn btn-success" ng-click="createDiagram()" style="width: 100%">
-                            <i class="glyphicon glyphicon-new-window"></i>
-                            <span class="navbar-btn-text">Create New</span>
-                        </button>
-                    </p>
-                </div>
-            </div>
-
-            <div class="navbar">
-                <div class="container-fluid">
-                    <button type="button" class="btn btn-default navbar-btn" ng-click="toggleDiagrams()">
-                        <i class="fa fa-bars"></i>
-                    </button>
-                    <button type="button" class="btn btn-default navbar-btn" ng-click="toggleLibrary()">
-                        <i class="fa fa-th"></i>
-                        <span class="navbar-btn-text">Library</span>
-                        <i class="fa fa-caret-down"></i>
-                    </button>
-                </div>
-            </div>
-
-            <browser id="library-browser"
-                ng-if="showLibrary"
-                nodes="nodes"
-                on-drop="createBlock"
-                savable="savable"
-                output="output"
-                ng-cloak>
-            </browser>
-
-            <ng-view></ng-view>
-
-        </div>
+        <ng-view></ng-view>
 
     </body>
 }
