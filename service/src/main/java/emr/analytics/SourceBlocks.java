@@ -10,37 +10,30 @@ import java.util.List;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
+
 import emr.analytics.models.diagram.*;
 
 public class SourceBlocks {
-
-    public String definitions;
+    public List<DefinitionImport> definitions;
     public List<SourceBlock> blocks;
 
-    public SourceBlocks(Diagram diagram){
-
-        definitions = "";
+    public SourceBlocks(Diagram diagram) {
+        definitions = new ArrayList<DefinitionImport>();
         definitionNames = new HashSet<String>();
         blocks = new ArrayList<SourceBlock>();
     }
 
-    public void add(Block block, List<Wire> wires){
-
-        if(!definitionNames.contains(block.getDefinition())){
-
-            // capture the block's definition
-            if (!definitions.isEmpty())
-                definitions += ", ";
-            definitions += block.getDefinition();
-
-            definitionNames.add(block.getDefinition());
+    public void add(Block block, List<Wire> wires) {
+        if(!definitionNames.contains(block.getDefinition())) {
+            String definitionName = block.getDefinition();
+            definitions.add(new DefinitionImport(String.format("from %s import %s", definitionName, definitionName)));
+            definitionNames.add(definitionName);
         }
 
         blocks.add(new SourceBlock(block, wires));
     }
 
-    public boolean isEmpty(){
-
+    public boolean isEmpty() {
         return this.blocks.isEmpty();
     }
 
@@ -55,8 +48,15 @@ public class SourceBlocks {
         return writer.toString();
     }
 
-    public class SourceBlock {
+    public class DefinitionImport {
+        public String definitionImport;
 
+        public DefinitionImport(String definitionImport) {
+            this.definitionImport = definitionImport;
+        }
+    }
+
+    public class SourceBlock {
         public String name;
         public String definition;
         public String parameters;

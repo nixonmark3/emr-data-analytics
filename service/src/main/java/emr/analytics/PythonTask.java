@@ -15,7 +15,7 @@ import java.util.UUID;
 public class PythonTask {
     private UUID _id;
     private String _source;
-    private String _path = "temp";
+    private String _path = "../algorithms";
     private ServiceSocketCallback _socketCallback = null;
 
     public PythonTask(UUID id, String source) {

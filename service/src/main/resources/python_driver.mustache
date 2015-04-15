@@ -1,6 +1,8 @@
 {{=<% %>=}}
 
-from blocks import <%definitions%>
+<%#definitions%>
+<%definitionImport%>
+<%/definitions%>
 
 blocks_to_execute = []
 
@@ -11,7 +13,6 @@ blocks_to_execute = []
 blocks_to_execute.append(<%name%>)
 
 <%/blocks%>
-
 results_table = {}
 
 for block in blocks_to_execute:
