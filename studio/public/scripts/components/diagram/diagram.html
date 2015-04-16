@@ -93,6 +93,7 @@
 
         </g>
 
+        <!-- block configuration button -->
         <g class="block-button-wrapper"
            ng-click="toggleBlockConfiguration($event, block);">
 
@@ -112,6 +113,30 @@
                   text-anchor="middle"
                   alignment-baseline="central">
                 &#xf0ad
+            </text>
+
+        </g>
+
+        <!-- block data button -->
+        <g class="block-button-wrapper"
+           ng-click="toggleBlockData($event, block);">
+
+            <rect class="block-button"
+                  ry="6"
+                  rx="6"
+                  ng-attr-x="{{block.width() - 40}}"
+                  ng-attr-y="{{block.height() - 33}}"
+                  width="34"
+                  height="28">
+
+            </rect>
+
+            <text class="block-icon"
+                  ng-attr-x="{{block.width() - 23}}"
+                  ng-attr-y="{{block.height() - 19}}"
+                  text-anchor="middle"
+                  alignment-baseline="central">
+                &#xf201
             </text>
 
         </g>

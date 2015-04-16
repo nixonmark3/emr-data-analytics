@@ -53,15 +53,23 @@ public class DefinitionGenerator {
         parameters.add(new ParameterDefinition("Project",
                 DataType.LIST.toString(),
                 "None",
-                new ParameterOptions(true, new ArrayList<String>(), new ArrayList<String>(), "findProjects")));
+                new ArrayList<String>(),
+                new ParameterSource("Jar",
+                        "plugins-1.0-SNAPSHOT.jar",
+                        "Projects",
+                        new ArrayList<Argument>())));
 
-        List<String> dependencies = new ArrayList<String>();
-        dependencies.add("Project");
+        List<Argument> arguments = new ArrayList<Argument>();
+        arguments.add(new Argument("Project", 0, "Project.Value"));
 
         parameters.add(new ParameterDefinition("Data Set",
                 DataType.LIST.toString(),
                 "None",
-                new ParameterOptions(true, dependencies, new ArrayList<String>(), "findDataSets")));
+                new ArrayList<String>(),
+                new ParameterSource("Jar",
+                        "plugins-1.0-SNAPSHOT.jar",
+                        "DataSets",
+                        arguments)));
 
         loadDB.setParameters(parameters);
 
@@ -85,12 +93,14 @@ public class DefinitionGenerator {
         parameters.add(new ParameterDefinition("Project",
                 DataType.STRING.toString(),
                 "None",
-                new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
+                new ArrayList<String>(),
+                null));
 
         parameters.add(new ParameterDefinition("DataSet",
                 DataType.STRING.toString(),
                 "None",
-                new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
+                new ArrayList<String>(),
+                null));
 
         saveDB.setParameters(parameters);
 
@@ -117,7 +127,8 @@ public class DefinitionGenerator {
         parameters.add(new ParameterDefinition("Columns",
                 DataType.STRING.toString(),
                 "None",
-                new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
+                new ArrayList<String>(),
+                null));
         columns.setParameters(parameters);
 
         _definitions.save(columns);
@@ -143,11 +154,13 @@ public class DefinitionGenerator {
         parameters.add(new ParameterDefinition("From",
                 DataType.TIMESTAMP.toString(),
                 "None",
-                new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
+                new ArrayList<String>(),
+                null));
         parameters.add(new ParameterDefinition("To",
                 DataType.TIMESTAMP.toString(),
                 "None",
-                new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
+                new ArrayList<String>(),
+                null));
         timeSelection.setParameters(parameters);
 
         _definitions.save(timeSelection);
@@ -212,7 +225,8 @@ public class DefinitionGenerator {
         parameters.add(new ParameterDefinition("SampleSize",
                 DataType.INT.toString(),
                 Integer.toString(100),
-                new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
+                new ArrayList<String>(),
+                null));
 
         List<String> opts = new ArrayList<String>();
         opts.add("First");
@@ -221,7 +235,8 @@ public class DefinitionGenerator {
 
         parameters.add(new ParameterDefinition("Interpolation",
                 DataType.LIST.toString(), "Last",
-                new ParameterOptions(false, new ArrayList<String>(), opts, "")));
+                opts,
+                null));
 
         downSample.setParameters(parameters);
 
@@ -249,7 +264,8 @@ public class DefinitionGenerator {
         parameters.add(new ParameterDefinition("lag",
                 DataType.INT.toString(),
                 Integer.toString(60),
-                new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
+                new ArrayList<String>(),
+                null));
         lagCorrelate.setParameters(parameters);
 
         _definitions.save(lagCorrelate);
@@ -276,7 +292,8 @@ public class DefinitionGenerator {
         parameters.add(new ParameterDefinition("Prop1",
                 DataType.INT.toString(),
                 Integer.toString(0),
-                new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
+                new ArrayList<String>(),
+                null));
         test.setParameters(parameters);
 
         _definitions.save(test);
@@ -302,7 +319,8 @@ public class DefinitionGenerator {
         parameters.add(new ParameterDefinition("WindowSize",
                 DataType.INT.toString(),
                 Integer.toString(60),
-                new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
+                new ArrayList<String>(),
+                null));
         rollingAverage.setParameters(parameters);
 
         _definitions.save(rollingAverage);
@@ -328,7 +346,8 @@ public class DefinitionGenerator {
         parameters.add(new ParameterDefinition("WindowSize",
                 DataType.INT.toString(),
                 Integer.toString(60),
-                new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
+                new ArrayList<String>(),
+                null));
         rollingDeviation.setParameters(parameters);
 
         _definitions.save(rollingDeviation);
@@ -354,7 +373,8 @@ public class DefinitionGenerator {
         parameters.add(new ParameterDefinition("Weight",
                 DataType.INT.toString(),
                 Integer.toString(20),
-                new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
+                new ArrayList<String>(),
+                null));
         weightedAverage.setParameters(parameters);
 
         _definitions.save(weightedAverage);
@@ -380,7 +400,8 @@ public class DefinitionGenerator {
         parameters.add(new ParameterDefinition("Weight",
                 DataType.INT.toString().toString(),
                 Integer.toString(20),
-                new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
+                new ArrayList<String>(),
+                null));
         weightedDeviation.setParameters(parameters);
 
         _definitions.save(weightedDeviation);
@@ -403,9 +424,13 @@ public class DefinitionGenerator {
         savitskyGolayFilter.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("PointsToLeft", DataType.INT.toString().toString(), Integer.toString(10), new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
-        parameters.add(new ParameterDefinition("PointsToRight", DataType.INT.toString().toString(), Integer.toString(10), new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
-        parameters.add(new ParameterDefinition("PolynomialOrder", DataType.INT.toString().toString(), Integer.toString(3), new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
+        parameters.add(new ParameterDefinition("PointsToLeft", DataType.INT.toString().toString(), Integer.toString(10),
+                new ArrayList<String>(),
+                null));
+        parameters.add(new ParameterDefinition("PointsToRight", DataType.INT.toString().toString(), Integer.toString(10), new ArrayList<String>(),
+                null));
+        parameters.add(new ParameterDefinition("PolynomialOrder", DataType.INT.toString().toString(), Integer.toString(3), new ArrayList<String>(),
+                null));
         savitskyGolayFilter.setParameters(parameters);
 
         _definitions.save(savitskyGolayFilter);
@@ -428,8 +453,10 @@ public class DefinitionGenerator {
         exponentialFilter.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("Alpha", DataType.FLOAT.toString(), Double.toString(0.8), new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
-        parameters.add(new ParameterDefinition("Order", DataType.INT.toString().toString(), Integer.toString(1), new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
+        parameters.add(new ParameterDefinition("Alpha", DataType.FLOAT.toString(), Double.toString(0.8), new ArrayList<String>(),
+                null));
+        parameters.add(new ParameterDefinition("Order", DataType.INT.toString().toString(), Integer.toString(1), new ArrayList<String>(),
+                null));
         exponentialFilter.setParameters(parameters);
 
         _definitions.save(exponentialFilter);
@@ -452,7 +479,8 @@ public class DefinitionGenerator {
         stepwiseAverage.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("WindowSize", DataType.INT.toString().toString(), Integer.toString(20), new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
+        parameters.add(new ParameterDefinition("WindowSize", DataType.INT.toString().toString(), Integer.toString(20), new ArrayList<String>(),
+                null));
         stepwiseAverage.setParameters(parameters);
 
         _definitions.save(stepwiseAverage);
@@ -475,8 +503,10 @@ public class DefinitionGenerator {
         threeSigma.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("MovingWindow", DataType.INT.toString().toString(), Double.toString(20), new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
-        parameters.add(new ParameterDefinition("Order", DataType.FLOAT.toString(), Double.toString(3), new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
+        parameters.add(new ParameterDefinition("MovingWindow", DataType.INT.toString().toString(), Double.toString(20), new ArrayList<String>(),
+                null));
+        parameters.add(new ParameterDefinition("Order", DataType.FLOAT.toString(), Double.toString(3), new ArrayList<String>(),
+                null));
         threeSigma.setParameters(parameters);
 
         _definitions.save(threeSigma);
@@ -518,7 +548,8 @@ public class DefinitionGenerator {
         outlierScrubber.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("Algorithm", DataType.STRING.toString().toString(), "3Sigma", new ParameterOptions(false, new ArrayList<String>(), new ArrayList<String>(), "")));
+        parameters.add(new ParameterDefinition("Algorithm", DataType.STRING.toString().toString(), "3Sigma", new ArrayList<String>(),
+                null));
         outlierScrubber.setParameters(parameters);
 
         _definitions.save(outlierScrubber);

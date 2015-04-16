@@ -172,49 +172,52 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
                 var init = function(){
 
                     // assemble initial list of dynamic parameters
-                    var dynamicSourceRequests = [];
+                    var dynamicSourceRequests = {
+                        name: $scope.block.name,
+                        parameters: [],
+                        diagram: null
+                    };
                     $scope.block.parameters.forEach(function(parameter){
 
-                        // if the parameter is not loaded and has no dependencies -
-                        // flag as loading and add to the dynamicSourceRequests list
+                        if (parameter.source()) {
 
-
-                        if (!parameter.loaded){
-
-                            var request = {
-                                name: parameter.name,
-                                method: parameter.options.method,
-                                arguments: [],
-                                fieldOptions: []
-                            };
-
+                            // build a list of dependencies and track whether dependencies have
+                            // been collected
                             var dependenciesCollected = true;
-                            parameter.options.dependencies.forEach(function(dependencyName){
 
-                                var dependency = getParameter(dependencyName);
-                                if (dependency.collected) {
-                                    request.arguments.push(dependency.value);
-                                }
-                                else{
-                                    dependenciesCollected = false;
-                                    // todo: break ?
+                            parameter.source().arguments.forEach(function (argument) {
+
+                                if (argument.type === 0) {
+                                    // represents a parameter dependency
+
+                                    var dependencyName = argument.name;
+
+                                    if (!parameter.loaded) {
+
+                                        var dependency = getParameter(dependencyName);
+                                        if (dependency.collected) {
+                                            argument.value = dependency.value;
+                                        }
+                                        else {
+                                            dependenciesCollected = false;
+                                        }
+                                    }
+
+                                    if (!(dependencyName in $scope.dependants))
+                                        $scope.dependants[dependencyName] = [];
+
+                                    $scope.dependants[dependencyName].push(parameter.name());
                                 }
                             });
 
-                            if (dependenciesCollected) {
+                            // if the parameter is not loaded and has no dependencies -
+                            // flag as loading and add to the dynamicSourceRequests list
+
+                            if (!parameter.loaded && dependenciesCollected) {
                                 parameter.loading = true;
-                                dynamicSourceRequests.push(request);
+                                dynamicSourceRequests.parameters.push(parameter.data);
                             }
                         }
-
-                        parameter.options.dependencies.forEach(function(dependencyName){
-
-                            if (!(dependencyName in $scope.dependants))
-                                $scope.dependants[dependencyName] = [];
-
-                            $scope.dependants[dependencyName].push(parameter.name);
-
-                        });
                     });
 
                     loadDynamicSources(dynamicSourceRequests);
@@ -222,20 +225,20 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
 
                 var loadDynamicSources = function(request){
 
-                    if (request.length === 0)
+                    if (request.parameters.length === 0)
                         return;
 
                     $scope.loadSources(request, function(response){
 
-                        response.forEach(function(source){
+                        response.parameters.forEach(function(source){
 
                             var parameter = getParameter(source.name);
 
-                            // toggle value
+                            // toggle value - todo: determine whether this is still necessary
                             var temp = parameter.value;
                             parameter.value = "";
 
-                            parameter.options.fieldOptions = source.fieldOptions;
+                            parameter.fieldOptions = source.fieldOptions;
                             parameter.value = temp;
                             parameter.loaded = true;
                             parameter.loading = false;
@@ -247,7 +250,7 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
 
                     var parameters = $scope.block.parameters;
                     for (var i = 0; i < parameters.length; i++){
-                        if (parameters[i].name == name)
+                        if (parameters[i].name() == name)
                             return parameters[i];
                     }
                 };
@@ -258,38 +261,42 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
                     parameter.collected = true;
 
                     // check for dependants
-                    if (parameter.name in $scope.dependants){
+                    if (parameter.name() in $scope.dependants){
 
-                        var dependants = $scope.dependants[parameter.name];
-                        var dynamicSourceRequests = [];
+                        var dependants = $scope.dependants[parameter.name()];
+
+                        var dynamicSourceRequests = {
+                            name: $scope.block.name,
+                            parameters: [],
+                            diagram: null
+                        };
                         dependants.forEach(function(dependantName){
 
+                            // retrieve the dependant parameter, clear value and mark as not loaded
                             var dependant = getParameter(dependantName);
                             dependant.value = "";
                             dependant.loaded = false;
-                            var request = {
-                                name: dependant.name,
-                                method: dependant.options.method,
-                                arguments: [],
-                                fieldOptions: []
-                            };
 
                             var dependenciesCollected = true;
-                            dependant.options.dependencies.forEach(function(dependencyName){
+                            dependant.source().arguments.forEach(function(argument){
 
-                                var dependency = getParameter(dependencyName);
-                                if (dependency.collected) {
-                                    request.arguments.push(dependency.value);
-                                }
-                                else{
-                                    dependenciesCollected = false;
-                                    // todo: break ?
+                                if(argument.type === 0){
+                                    // represents a parameter dependency
+
+                                    var dependencyName = argument.name;
+                                    var dependency = getParameter(dependencyName);
+                                    if (dependency.collected) {
+                                        argument.value = dependency.value;
+                                    }
+                                    else{
+                                        dependenciesCollected = false;
+                                    }
                                 }
                             });
 
                             if (dependenciesCollected) {
                                 dependant.loading = true;
-                                dynamicSourceRequests.push(request);
+                                dynamicSourceRequests.parameters.push(dependant.data);
                             }
                         });
 

@@ -1,8 +1,8 @@
 'use strict';
 
 var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAnimate', 'ui.bootstrap'])
-    .directive('diagram', ['$compile', '$modal', '$window', '$location', 'popupService',
-        function ($compile, $modal, $window, $location, popupService) {
+    .directive('diagram', ['$compile', '$modal', '$window', '$location', '$timeout', 'popupService',
+        function ($compile, $modal, $window, $location, $timeout, popupService) {
 
         return {
             restrict: 'E',
@@ -13,19 +13,20 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                 nodes: '=',
                 library: '=',
                 loadSources: "=",
-                creatingBlock: "="
+                blurBackground: "="
             },
-            link: function($scope, element, attrs){
+            link: function($scope, element, attrs) {
 
                 $scope.draggingWire = false;
                 $scope.mouseOverBlock = null;
                 $scope.mouseOverConnector = null;
                 $scope.configuringBlock = false;
                 $scope.configuringDiagram = false;
+                $scope.showingBlockData = false;
+                $scope.creatingBlock = false;
 
                 // capture the diagram's width
                 $scope.diagramWidth = element.width();
-                $scope.windowHeight = $window.innerHeight;
 
                 $scope.absUrl = $location.absUrl();
 
@@ -35,10 +36,9 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                 angular.element($window).bind("resize", function () {
 
                     // update the width property on window resize
-                    $scope.$apply(function() {
+                    $scope.$apply(function () {
 
                         $scope.diagramWidth = element.width();
-                        $scope.windowHeight = $window.innerHeight;
                     });
                 });
 
@@ -46,7 +46,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                     return $(element);
                 };
 
-                var beginDragEvent = function(x, y, config){
+                var beginDragEvent = function (x, y, config) {
 
                     $scope.$root.$broadcast("beginDrag", {
                         x: x,
@@ -66,7 +66,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                     $scope.diagram.createBlock(configBlock);
                 });
 
-                var hasClassSVG = function(obj, has) {
+                var hasClassSVG = function (obj, has) {
                     var classes = obj.attr('class');
                     if (!classes) {
                         return false;
@@ -140,7 +140,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                 //
                 // Translate the coordinates so they are relative to the svg element
                 //
-                var translateCoordinates = function(x, y, evt) {
+                var translateCoordinates = function (x, y, evt) {
                     var diagram = document.getElementById('diagram');
                     var matrix = diagram.getScreenCTM();
                     var point = diagram.createSVGPoint();
@@ -149,7 +149,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                     return point.matrixTransform(matrix.inverse());
                 };
 
-                var inverseCoordinates = function(x, y){
+                var inverseCoordinates = function (x, y) {
                     var diagram = document.getElementById('diagram');
                     var matrix = diagram.getScreenCTM().translate(x, y);
 
@@ -158,7 +158,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                     };
                 };
 
-                var getConfigBlock = function(x, y, definitionName){
+                var getConfigBlock = function (x, y, definitionName) {
 
                     // retrieve definition
                     var definition = getDefinition(definitionName);
@@ -170,7 +170,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                     return new viewmodels.configuringBlockViewModel(definition, block);
                 };
 
-                var getDefinition = function(definitionName){
+                var getDefinition = function (definitionName) {
 
                     return $scope.library[definitionName];
                 };
@@ -236,7 +236,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                     evt.preventDefault();
                 };
 
-                $scope.connectorMouseDown = function(evt, block, connector, connectorIndex, isInputConnector) {
+                $scope.connectorMouseDown = function (evt, block, connector, connectorIndex, isInputConnector) {
 
                     var diagram = $scope.diagram;
 
@@ -299,10 +299,10 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                     evt.preventDefault();
                 };
 
-                $scope.deleteBlock = function(evt, block){
+                $scope.deleteBlock = function (evt, block) {
 
                     // If the configuration box is open close it!
-                    if ($scope.configuringBlock){
+                    if ($scope.configuringBlock) {
                         endBlockConfiguration(false);
                     }
 
@@ -313,12 +313,12 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                     evt.preventDefault();
                 };
 
-                $scope.toggleBlockConfiguration = function(evt, block){
+                $scope.toggleBlockConfiguration = function (evt, block) {
 
-                    if ($scope.configuringBlock){
+                    if ($scope.configuringBlock) {
                         endBlockConfiguration(true);
                     }
-                    else{
+                    else {
                         beginBlockConfiguration(block);
                     }
 
@@ -326,7 +326,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                     evt.preventDefault();
                 };
 
-                var beginBlockConfiguration = function(block){
+                var beginBlockConfiguration = function (block) {
 
                     // capture the block coordinates and set the popup's width and height
                     var position = inverseCoordinates(block.x(), block.y());
@@ -346,18 +346,19 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                             block: configBlock,
                             position: position,
                             loadSources: $scope.loadSources
-                        }}).then(function(popup){
+                        }
+                    }).then(function (popup) {
 
-                            $scope.configuringBlock = true;
-                            $scope.blockConfiguration = popup;
-                        });
+                        $scope.configuringBlock = true;
+                        $scope.blockConfiguration = popup;
+                    });
                 };
 
-                var endBlockConfiguration = function(save){
+                var endBlockConfiguration = function (save) {
 
                     $scope.blockConfiguration.controller.close();
 
-                    $scope.blockConfiguration.close.then(function(configBlock){
+                    $scope.blockConfiguration.close.then(function (configBlock) {
 
                         if (save)
                             $scope.diagram.updateBlock(configBlock);
@@ -370,16 +371,19 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                 //
                 // Event that handles any click on the diagram
                 //
-                $scope.diagramClick = function(evt) {
+                $scope.diagramClick = function (evt) {
 
                     if ($scope.configuringBlock)
                         endBlockConfiguration(true);
+
+                    if ($scope.showingBlockData)
+                        hideBlockData();
 
                     evt.stopPropagation();
                     evt.preventDefault();
                 };
 
-                $scope.showLibraryPopup = function(evt){
+                $scope.showLibraryPopup = function (evt) {
 
                     popupService.show({
                         templateUrl: '/assets/scripts/components/diagram/library.html',
@@ -389,19 +393,22 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                             getConfigBlock: getConfigBlock,
                             loadSources: $scope.loadSources
 
-                        }}).then(function(popup){
+                        }
+                    }).then(function (popup) {
 
                         $scope.creatingBlock = true;
+                        $scope.blurBackground = true;
 
-                        popup.close.then(function(configBlock){
+                        popup.close.then(function (configBlock) {
 
                             $scope.creatingBlock = false;
+                            $scope.blurBackground = false;
 
                             if (configBlock) {
 
                                 // todo: temp coordinates
 
-                                configBlock.x = ($scope.diagramWidth/ 2) - 100;
+                                configBlock.x = ($scope.diagramWidth / 2) - 100;
                                 configBlock.y = 50;
 
                                 $scope.diagram.createBlock(configBlock);
@@ -413,6 +420,48 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                     evt.preventDefault();
                 };
 
+                $scope.toggleBlockData = function (evt, block) {
+
+                    if ($scope.showingBlockData) {
+                        hideBlockData();
+                    }
+                    else {
+                        showBlockData(block);
+                    }
+
+                    evt.stopPropagation();
+                    evt.preventDefault();
+                };
+
+                var showBlockData = function (block) {
+
+                    var position = inverseCoordinates(block.x(), block.y());
+                    position.width = 600;
+                    position.height = 400;
+
+                    popupService.show({
+                        templateUrl: '/assets/scripts/components/diagram/blockData.html',
+                        controller: 'blockDataController',
+                        isAnimated: false,
+                        inputs: {
+                            block: block,
+                            position: position
+                        }
+                    }).then(function (popup) {
+
+                        $scope.showingBlockData = true;
+                        $scope.blurBackground = true;
+                        $scope.blockDataPopup = popup;
+                    });
+                };
+
+                var hideBlockData = function () {
+                    $scope.blockDataPopup.controller.close();
+
+                    $scope.showingBlockData = false;
+                    $scope.blurBackground = false;
+                    delete $scope.blockDataPopup;
+                };
             }
         }
     }]);

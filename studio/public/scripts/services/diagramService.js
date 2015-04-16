@@ -71,29 +71,13 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
 
             var deferred = $q.defer();
 
-            $http({ method: 'GET', url: '/assets/data/definitions/sources.json' })
+            $http.post('/loadSources', request)
                 .success(function (data, status, headers, config) {
 
-                    // find source and capture values
-
-                    request.forEach(function(item){
-
-                        var source = data[item.method];
-
-                        item.arguments.forEach(function(argument){
-
-                            source = source[argument];
-                        });
-
-                        item.fieldOptions = source;
-                    });
-
-                    // simulating a delay to test the client
-                    $timeout(function(){
-                        deferred.resolve(request);
-                    }, 1000);
+                    deferred.resolve(data);
                 })
                 .error(function (data, status, headers, config){
+
                     deferred.reject(status);
                 });
 

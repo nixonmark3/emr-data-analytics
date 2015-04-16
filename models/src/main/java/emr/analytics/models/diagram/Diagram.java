@@ -91,6 +91,17 @@ public class Diagram implements Serializable {
     }
 
     /**
+     * Returns the specified block
+     * @return Block
+     */
+    public Block getBlock(String name){
+        return blocks.stream()
+                .filter(b -> b.getName().equals(name))
+                .findFirst()
+                .get();
+    }
+
+    /**
      * Sets the Blocks that belong to this Diagram.
      * @param blocks list of blocks
      */

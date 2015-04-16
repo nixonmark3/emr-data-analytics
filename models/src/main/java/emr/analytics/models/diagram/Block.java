@@ -145,6 +145,17 @@ public class Block implements Serializable {
     }
 
     /**
+     * Returns the specified parameter
+     * @return Parameter
+     */
+    public Parameter getParameter(String name){
+        return parameters.stream()
+                .filter(p -> p.getName().equals(name))
+                .findFirst()
+                .get();
+    }
+
+    /**
      * Sets the list of Parameters that belong to this Block.
      * @param parameters list of parameters
      */

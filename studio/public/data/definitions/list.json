@@ -10,24 +10,26 @@
         "name": "Project",
         "type": "list",
         "value": "None",
-        "options": {
-          "dynamic": true,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": "findProjects"
+        "fieldOptions": [],
+        "source": {
+          "type": "Jar",
+          "fileName": "plugins-1.0-SNAPSHOT.jar",
+          "className": "Projects",
+          "arguments": []
         }
       },
       {
         "name": "Data Set",
         "type": "list",
         "value": "None",
-        "options": {
-          "dynamic": true,
-          "dependencies": [
-            "Project"
-          ],
-          "fieldOptions": [],
-          "method": "findDataSets"
+        "fieldOptions": [],
+        "source": {
+          "type": "Jar",
+          "fileName": "plugins-1.0-SNAPSHOT.jar",
+          "className": "DataSets",
+          "arguments": [
+            { "name": "Project", "type": 0, "value": "Project.Value" }
+          ]
         }
       }
     ],
@@ -52,23 +54,15 @@
         "name": "Project",
         "type": "string",
         "value": "None",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       },
       {
         "name": "DataSet",
         "type": "string",
         "value": "None",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       }
     ],
     "inputConnectors": [
@@ -91,12 +85,8 @@
         "name": "Columns",
         "type": "string",
         "value": "None",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       }
     ],
     "inputConnectors": [
@@ -123,23 +113,15 @@
         "name": "From",
         "type": "timestamp",
         "value": "None",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       },
       {
         "name": "To",
         "type": "timestamp",
         "value": "None",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       }
     ],
     "inputConnectors": [
@@ -210,27 +192,19 @@
         "name": "SampleSize",
         "type": "int",
         "value": "100",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       },
       {
         "name": "Interpolation",
         "type": "list",
         "value": "Last",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [
-            "First",
-            "Last",
-            "Mean"
-          ],
-          "method": ""
-        }
+        "fieldOptions": [
+          "First",
+          "Last",
+          "Mean"
+        ],
+        "source": null
       }
     ],
     "inputConnectors": [
@@ -257,12 +231,8 @@
         "name": "lag",
         "type": "int",
         "value": "60",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       }
     ],
     "inputConnectors": [
@@ -289,12 +259,8 @@
         "name": "Prop1",
         "type": "int",
         "value": "0",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       }
     ],
     "inputConnectors": [
@@ -333,12 +299,8 @@
         "name": "WindowSize",
         "type": "int",
         "value": "60",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       }
     ],
     "inputConnectors": [
@@ -365,12 +327,8 @@
         "name": "WindowSize",
         "type": "int",
         "value": "60",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       }
     ],
     "inputConnectors": [
@@ -397,12 +355,8 @@
         "name": "Weight",
         "type": "int",
         "value": "20",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       }
     ],
     "inputConnectors": [
@@ -429,12 +383,8 @@
         "name": "Weight",
         "type": "int",
         "value": "20",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       }
     ],
     "inputConnectors": [
@@ -461,34 +411,22 @@
         "name": "PointsToLeft",
         "type": "int",
         "value": "10",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       },
       {
         "name": "PointsToRight",
         "type": "int",
         "value": "10",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       },
       {
         "name": "PolynomialOrder",
         "type": "int",
         "value": "3",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       }
     ],
     "inputConnectors": [
@@ -515,23 +453,15 @@
         "name": "Alpha",
         "type": "float",
         "value": "0.8",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       },
       {
         "name": "Order",
         "type": "int",
         "value": "1",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       }
     ],
     "inputConnectors": [
@@ -558,12 +488,8 @@
         "name": "WindowSize",
         "type": "int",
         "value": "20",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       }
     ],
     "inputConnectors": [
@@ -590,23 +516,15 @@
         "name": "MovingWindow",
         "type": "int",
         "value": "20.0",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       },
       {
         "name": "Order",
         "type": "float",
         "value": "3.0",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       }
     ],
     "inputConnectors": [
@@ -633,12 +551,8 @@
         "name": "Algorithm",
         "type": "string",
         "value": "3Sigma",
-        "options": {
-          "dynamic": false,
-          "dependencies": [],
-          "fieldOptions": [],
-          "method": ""
-        }
+        "fieldOptions": [],
+        "source": null
       }
     ],
     "inputConnectors": [

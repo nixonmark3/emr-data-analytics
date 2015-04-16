@@ -29,8 +29,8 @@ var analyticsApp = angular.module('analyticsApp',
         // Initialize web socket connection
         //
 
-        var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket
-        var sock = new WS("ws://localhost:9000/getClientSocket")
+        var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
+        var sock = new WS("ws://localhost:9000/getClientSocket");
 
         $scope.send = function() {
             console.log("send!");
@@ -57,7 +57,7 @@ var analyticsApp = angular.module('analyticsApp',
             }
         }
 
-        sock.onmessage = receiveEvent
+        sock.onmessage = receiveEvent;
 
         //
         // initialize scope level properties
@@ -69,8 +69,8 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.showLibrary = false;
         // indicates whether the current diagram is being evaluated
         $scope.evaluating = false;
-        // indicates whether a block is being created
-        $scope.creatingBlock = false;
+        // during some operations, we want to blur the background
+        $scope.blurBackground = false;
 
         //
         // load data from the service
@@ -164,6 +164,9 @@ var analyticsApp = angular.module('analyticsApp',
         };
 
         $scope.loadSources = function(request, success){
+
+            // attach the diagram to the request
+            request.diagram = $scope.diagramViewModel.data;
 
             diagramService.loadSources(request).then(
                 function (response) {

@@ -17,24 +17,24 @@
 .block-unselected{ stroke: #d8d8d8; }
 .block-selected{ stroke: #7f7f7f; }
 
-.block-delete { cursor: pointer; display: none; }
+.block-delete { cursor: pointer; opacity: 0; -webkit-transition: opacity 0.4s ease-in-out; transition: opacity 0.4s ease-in-out; }
 .block-delete-circle { fill: #ffffff; stroke: #7f7f7f; stroke-width: 1; }
 .block-delete-text:hover { cursor: pointer; fill: #d62728; }
 
 .block-group:hover .block { stroke: #7f7f7f; }
-.block-group:hover .block-delete { display: block; }
+.block-group:hover .block-delete { opacity: 1; }
 
 .block-header{ stroke: #d8d8d8; stroke-width: 1; }
 
-.block-name{ fill: #686868; font-size: 1.1em; }
+.block-name{ fill: #686868; font-size: 1.0em; }
 .block-definition{ fill: #b8b8b8; }
 
-.block-button-wrapper { cursor: pointer; display: none; }
+.block-button-wrapper { cursor: pointer; opacity: 0; -webkit-transition: opacity 0.4s ease-in-out; transition: opacity 0.4s ease-in-out; }
 .block-button { fill: #fff; stroke-width: 1px; stroke: #b8b8b8; }
-.block-button-wrapper text { font-size: 1.4em; }
+.block-button-wrapper text { font-size: 1.0em; }
 .block-button-wrapper:hover .block-button { fill: #1f77b4; stroke: #1f77b4; }
 .block-button-wrapper:hover text { fill: #f8f8f8; }
-.block-group:hover .block-button-wrapper { display: block; }
+.block-group:hover .block-button-wrapper { opacity: 1; }
 
 .block-icon { font-family: FontAwesome; fill: #b8b8b8; }
 
@@ -376,3 +376,15 @@
     opacity: 0.6;
 }
 
+/*
+ * Block Data Popup
+ */
+
+.block-data-wrapper {
+    position: absolute;
+    -webkit-transform: scale(0.01);
+    border-radius: 15px;
+    background-color: red;
+    z-index: 1150;
+    -webkit-transition: all 0.5s ease;
+}

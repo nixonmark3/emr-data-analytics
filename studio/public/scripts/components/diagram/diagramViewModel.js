@@ -662,7 +662,7 @@ viewmodels.diagramViewModel = function(data) {
             if (configParameter.dirty)
                 dirty = true;
 
-            var parameter = block.getParameter(configParameter.name);
+            var parameter = block.getParameter(configParameter.name());
             parameter.value = configParameter.value;
             parameter.collected = configParameter.collected;
         });
@@ -711,7 +711,7 @@ viewmodels.diagramViewModel = function(data) {
                 configured = false;
 
             parameters.push({
-                name:parameter.name,
+                name:parameter.name(),
                 value:parameter.value,
                 collected:parameter.collected
             });
@@ -1000,26 +1000,46 @@ viewmodels.configuringBlockViewModel = function (definition, block) {
         }
 
         // copy parameter definition
-        var parameter = angular.copy(parameterDefinition);
-
-        // initialize parameter collection fields
-        parameter.loaded = !parameter.options.dynamic;
-        parameter.loading = false;
-        parameter.dirty = false;
-
-        if (blockParameter && blockParameter.collected !== undefined){
-            parameter.collected = blockParameter.collected;
-        }
-        else{
-            parameter.collected = false;
-        }
-
-        if (blockParameter && blockParameter.value !== undefined){
-            parameter.value = blockParameter.value;
-        }
+        var parameter = new viewmodels.configuringParameterViewModel(parameterDefinition, blockParameter);
 
         // add to list of parameters
         parameters.push(parameter);
     });
     this.parameters = parameters;
+};
+
+viewmodels.configuringParameterViewModel = function (definitionParameter, blockParameter) {
+
+    this.data = angular.copy(definitionParameter);
+
+    this.loaded = (this.data.source == null);
+    this.loading = false;
+    this.dirty = false;
+    this.fieldOptions = this.data.fieldOptions;
+
+    if (blockParameter && blockParameter.collected !== undefined){
+        this.collected = blockParameter.collected;
+    }
+    else{
+        this.collected = false;
+    }
+
+    if (blockParameter && blockParameter.value !== undefined){
+        this.value = blockParameter.value;
+    }
+    else{
+        this.value = this.data.value;
+    }
+
+    this.name = function(){
+        return this.data.name;
+    }
+
+    this.type = function(){
+        return this.data.type;
+    }
+
+    this.source = function(){
+        return this.data.source;
+    }
 };
