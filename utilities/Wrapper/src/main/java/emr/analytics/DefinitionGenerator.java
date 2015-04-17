@@ -16,6 +16,7 @@ public class DefinitionGenerator {
 
     public void generate() {
         createLoadDBBlock();
+        createDataBrickBlock();
         createSaveDBBlock();
         createColumnsBlock();
         createTimeSelectionBlock();
@@ -34,6 +35,43 @@ public class DefinitionGenerator {
         createThreeSigmaBlock();
         createOutlierScrubberBlock();
         createNullScrubberBlock();
+    }
+
+    //
+    // Create Data Brick Block
+    //
+    private void createDataBrickBlock() {
+        // Definition
+        Definition definition = new Definition("DataBrick", "Data Brick", Category.DATA_SOURCES.toString());
+        definition.setDescription("Loads a data brick");
+
+        // Output Connectors
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        definition.setOutputConnectors(outputConnectors);
+
+        // Parameters
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+
+        parameters.add(new ParameterDefinition("Project",
+                DataType.LIST.toString(),
+                "None",
+                new ArrayList<String>(),
+                new ParameterSource("Jar",
+                        "plugins-1.0-SNAPSHOT.jar",
+                        "Projects",
+                        new ArrayList<Argument>())));
+
+        parameters.add(new ParameterDefinition("Query",
+                DataType.QUERY.toString(),
+                "None",
+                new ArrayList<String>(),
+                null));
+
+        definition.setParameters(parameters);
+
+        // Save Definition
+        _definitions.save(definition);
     }
 
     //

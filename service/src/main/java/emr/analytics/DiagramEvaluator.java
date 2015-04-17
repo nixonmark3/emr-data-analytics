@@ -26,7 +26,7 @@ public class DiagramEvaluator implements Runnable {
         String source = "";
 
         // compile a list of blocks to execute
-        SourceBlocks sourceBlocks = new SourceBlocks(this._diagram);
+        SourceBlocks sourceBlocks = new SourceBlocks();
 
         // Initialize queue of blocks to compile
         Queue<Block> queue = new LinkedList<Block>();

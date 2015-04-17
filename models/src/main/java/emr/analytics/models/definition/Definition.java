@@ -83,4 +83,19 @@ public class Definition {
     public void setOutputConnectors(List<ConnectorDefinition> outputConnectors) {
         this.outputConnectors = outputConnectors;
     }
+
+    public String getTypeOfParameterDefinition(String parameterName) {
+        ParameterDefinition parameterDefinition = this.getParameters().stream()
+                .filter(parameter -> parameter.getName().equals(parameterName))
+                .findAny()
+                .get();
+
+        String parameterType = null;
+
+        if (parameterDefinition != null) {
+            parameterType = parameterDefinition.getType();
+        }
+
+        return parameterType;
+    }
 }
