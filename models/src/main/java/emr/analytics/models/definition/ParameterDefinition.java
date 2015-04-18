@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ParameterDefinition {
-    private String name = null;
-    private String type = null;
-    private String value = null;
+    private String name = "";
+    private String type = "";
+    private Object value = null;
     private List<String> fieldOptions = new ArrayList<String>();
     private ParameterSource source = null;
 
     private ParameterDefinition() {}
 
-    public ParameterDefinition(String name, String type, String value, List<String> fieldOptions, ParameterSource source) {
+    public ParameterDefinition(String name, String type, Object value, List<String> fieldOptions, ParameterSource source) {
         this.name = name;
         this.type = type;
         this.value = value;
@@ -36,11 +36,11 @@ public class ParameterDefinition {
         this.type = type;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(Object value) {
         this.value = value;
     }
 

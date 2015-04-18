@@ -166,6 +166,18 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
             },
             link: function ($scope, element, attrs) {
 
+                $scope.users = [
+                    { "id": 1, "name": "Ali" },
+                    { "id": 2, "name": "Sara" },
+                    { "id": 3, "name": "Babak" },
+                    { "id": 4, "name": "Sanaz" },
+                    { "id": 5, "name": "Dariush" },
+                ];
+
+                $scope.selectedUserIds = ["Sara"];
+
+
+
                 // list of dependants for reverse lookup
                 $scope.dependants = {};
 
@@ -230,7 +242,7 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
 
                     $scope.loadSources(request, function(response){
 
-                        response.parameters.forEach(function(source){
+                        response.parameters.forEach(function(source) {
 
                             var parameter = getParameter(source.name);
 
@@ -238,7 +250,28 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
                             var temp = parameter.value;
                             parameter.value = "";
 
-                            parameter.fieldOptions = source.fieldOptions;
+                            if (parameter.data.type == 'multiSelectList') {
+                                var idIndex = 0;
+                                var options = [];
+                                source.fieldOptions.forEach(function(fieldOption) {
+                                    var option = {};
+                                    option.id = idIndex;
+                                    option.itemName = fieldOption;
+                                    if (temp.indexOf(fieldOption) > -1) {
+                                        option.selected = true;
+                                    }
+                                    else {
+                                        option.selected = false;
+                                    }
+                                    idIndex++;
+                                    options.push(option);
+                                });
+                                parameter.fieldOptions = options;
+                            }
+                            else {
+                                parameter.fieldOptions = source.fieldOptions;
+                            }
+
                             parameter.value = temp;
                             parameter.loaded = true;
                             parameter.loading = false;
@@ -246,7 +279,7 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
                     });
                 };
 
-                var getParameter = function(name){
+                var getParameter = function(name) {
 
                     var parameters = $scope.block.parameters;
                     for (var i = 0; i < parameters.length; i++){
@@ -255,7 +288,7 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
                     }
                 };
 
-                $scope.setValue = function(parameter){
+                $scope.setValue = function(parameter) {
 
                     parameter.dirty = true;
                     parameter.collected = true;

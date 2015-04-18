@@ -194,6 +194,6 @@ public class Block implements Serializable {
         // todo: enhance configuration criteria
         // configuration criteria is that all parameters have a value
 
-        return (!this.parameters.stream().anyMatch(p -> p.getValue().isEmpty()));
+        return (!this.parameters.stream().anyMatch(p -> p.getValue().equals(null)));
     }
 }

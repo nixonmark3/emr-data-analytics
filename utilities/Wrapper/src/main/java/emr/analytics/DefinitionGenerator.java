@@ -162,11 +162,16 @@ public class DefinitionGenerator {
         columns.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+
         parameters.add(new ParameterDefinition("Columns",
-                DataType.STRING.toString(),
-                "None",
+                DataType.MULTI_SELECT_LIST.toString(),
                 new ArrayList<String>(),
-                null));
+                new ArrayList<String>(),
+                new ParameterSource("Jar",
+                        "plugins-1.0-SNAPSHOT.jar",
+                        "Columns",
+                        new ArrayList<Argument>())));
+
         columns.setParameters(parameters);
 
         _definitions.save(columns);
