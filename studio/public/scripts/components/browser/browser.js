@@ -220,6 +220,10 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
 
                                     $scope.dependants[dependencyName].push(parameter.name());
                                 }
+                                else if (argument.type === 1) { // represents a block name
+
+                                    argument.value = $scope.block.name;
+                                }
                             });
 
                             // if the parameter is not loaded and has no dependencies -

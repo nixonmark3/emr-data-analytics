@@ -91,10 +91,18 @@ public class SourceBlocks {
                 String parameterType = definition.getTypeOfParameterDefinition(param.getName());
 
                 if (parameterType != null) {
-                    if (parameterType.equals(DataType.LIST.toString()) || parameterType.equals(DataType.STRING.toString())) {
+
+                    if (parameterType.equals(DataType.LIST.toString())
+                            || parameterType.equals(DataType.STRING.toString())) {
+
                         parameters += String.format("'%s': '%s'", param.getName(), param.getValue());
                     }
-                    else {
+                    else if (parameterType.equals(DataType.MULTI_SELECT_LIST.toString())) {
+
+                        parameters += String.format("'%s': %s", param.getName(), adaptValueToStringArray(param.getValue()));
+
+                    } else {
+
                         parameters += String.format("'%s': %s", param.getName(), param.getValue());
                     }
                 }
@@ -133,6 +141,31 @@ public class SourceBlocks {
                 }
                 inputs += "]";
             }
+        }
+
+        private String adaptValueToStringArray(Object value) {
+
+            if (value.toString().equals("[]")) {
+                return value.toString();
+            }
+
+            String[] items = value.toString().replaceAll("\\[|\\]|\\,", "").split(" ");
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("[");
+
+            for (int idx = 0; idx < items.length; idx++) {
+
+                if (idx > 0) {
+                    sb.append(", ");
+                }
+
+                sb.append(String.format("'%s'", items[idx]));
+            }
+
+            sb.append("]");
+
+            return sb.toString();
         }
     }
 

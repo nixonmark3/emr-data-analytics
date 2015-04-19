@@ -163,6 +163,9 @@ public class DefinitionGenerator {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
 
+        List<Argument> arguments = new ArrayList<Argument>();
+        arguments.add(new Argument("BlockName", 1, "BlockName.Value"));
+
         parameters.add(new ParameterDefinition("Columns",
                 DataType.MULTI_SELECT_LIST.toString(),
                 new ArrayList<String>(),
@@ -170,7 +173,7 @@ public class DefinitionGenerator {
                 new ParameterSource("Jar",
                         "plugins-1.0-SNAPSHOT.jar",
                         "Columns",
-                        new ArrayList<Argument>())));
+                        arguments)));
 
         columns.setParameters(parameters);
 
