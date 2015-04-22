@@ -6,10 +6,9 @@
         <div class="input-group" ng-switch on="parameter.type()">
 
             <span class="input-group-addon">
-                <i ng-attr-class="fa {{parameter.loading && 'fa-spinner fa-spin' || parameter.type()=='list' && 'fa-list-ul' || parameter.type()=='int' && 'fa-list-ol' || 'fa-file-text-o'}}"></i>
+                <i ng-attr-class="fa {{parameter.loading && 'fa-spinner fa-spin' || parameter.type()=='list' && 'fa-list-ul' || parameter.type()=='multiSelectList' && 'fa-list-alt' || parameter.type()=='query' && 'fa-pencil-square-o' || parameter.type()=='int' && 'fa-list-ol' || 'fa-file-text-o'}}"></i>
             </span>
 
-            <!--ng-options="option as option for option in parameter.options.fieldOptions"-->
             <select ng-switch-when="list"
                     class="form-control"
                     ng-model="parameter.value"
@@ -22,7 +21,20 @@
 
             </select>
 
+            <select ng-switch-when="multiSelectList"
+                    class="form-control"
+                    multiple="multiple"
+                    ng-model="parameter.value"
+                    ng-disabled="!parameter.loaded"
+                    ng-change="setValue(parameter);">
+
+                <option ng-repeat="option in parameter.fieldOptions" ng-selected="option.selected">{{option.itemName}}</option>
+
+            </select>
+
             <input ng-switch-when="int" class="form-control" type="number" ng-model="parameter.value" ng-change="setValue(parameter);" />
+
+            <textarea ng-switch-when="query" class="form-control" type="text" ng-model="parameter.value" ng-change="setValue(parameter);" />
 
             <input ng-switch-default class="form-control" type="text" ng-model="parameter.value" ng-change="setValue(parameter);" />
 

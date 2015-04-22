@@ -1,7 +1,8 @@
-package emr.analytics.service;
+package emr.analytics;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,17 +12,26 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
+import com.mongodb.MongoClient;
+
+import emr.analytics.models.definition.DataType;
+import emr.analytics.models.definition.Definition;
 import emr.analytics.models.diagram.*;
+
+import org.jongo.Jongo;
 
 public class SourceBlocks {
     public List<DefinitionImport> definitions;
     public List<SourceBlock> blocks;
-    private HashSet<String> definitionNames;
 
-    public SourceBlocks(Diagram diagram) {
+    private HashSet<String> definitionNames;
+    private HashMap<String, Definition> definitionsMap = null;
+
+    public SourceBlocks() {
         definitions = new ArrayList<DefinitionImport>();
         definitionNames = new HashSet<String>();
         blocks = new ArrayList<SourceBlock>();
+        definitionsMap = this.getDefinitions();
     }
 
     public void add(Block block, List<Wire> wires) {
@@ -31,7 +41,9 @@ public class SourceBlocks {
             definitionNames.add(definitionName);
         }
 
-        blocks.add(new SourceBlock(block, wires));
+        Definition definition = definitionsMap.get(block.getDefinition());
+
+        blocks.add(new SourceBlock(definition, block, wires));
     }
 
     public boolean isEmpty() {
@@ -43,9 +55,7 @@ public class SourceBlocks {
         Mustache mustache = mf.compile(template);
 
         StringWriter writer = new StringWriter();
-
         mustache.execute(writer, this);
-
         return writer.toString();
     }
 
@@ -59,25 +69,43 @@ public class SourceBlocks {
 
     public class SourceBlock {
         public String name;
-        public String definition;
+        public String definitionName;
         public String parameters;
         public String inputs;
 
-        public SourceBlock(Block block, List<Wire> wires){
+        public SourceBlock(Definition definition, Block block, List<Wire> wires) {
             name = block.getName();
-            definition = block.getDefinition();
+            definitionName = block.getDefinition();
 
             // todo: string builders
 
             parameters = "";
             List<Parameter> params = block.getParameters();
-            for(int i = 0; i < params.size(); i++){
-
-                if (i > 0)
+            for(int i = 0; i < params.size(); i++) {
+                if (i > 0) {
                     parameters += ", ";
+                }
 
                 Parameter param = params.get(i);
-                parameters += String.format("'%s': %s", param.getName(), param.getValue());
+
+                String parameterType = definition.getTypeOfParameterDefinition(param.getName());
+
+                if (parameterType != null) {
+
+                    if (parameterType.equals(DataType.LIST.toString())
+                            || parameterType.equals(DataType.STRING.toString())) {
+
+                        parameters += String.format("'%s': '%s'", param.getName(), param.getValue());
+                    }
+                    else if (parameterType.equals(DataType.MULTI_SELECT_LIST.toString())) {
+
+                        parameters += String.format("'%s': %s", param.getName(), adaptValueToStringArray(param.getValue()));
+
+                    } else {
+
+                        parameters += String.format("'%s': %s", param.getName(), param.getValue());
+                    }
+                }
             }
 
             HashMap<String, List<String>> inputVariables = new HashMap<String, List<String>>();
@@ -114,31 +142,52 @@ public class SourceBlocks {
                 inputs += "]";
             }
         }
-    }
 
-    private String adaptValueToStringArray(Object value) {
+        private String adaptValueToStringArray(Object value) {
 
-        if (value.toString().equals("[]")) {
-            return value.toString();
-        }
-
-        String[] items = value.toString().replaceAll("\\[|\\]|\\,", "").split(" ");
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-
-        for (int idx = 0; idx < items.length; idx++) {
-
-            if (idx > 0) {
-                sb.append(", ");
+            if (value.toString().equals("[]")) {
+                return value.toString();
             }
 
-            sb.append(String.format("'%s'", items[idx]));
+            String[] items = value.toString().replaceAll("\\[|\\]|\\,", "").split(" ");
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("[");
+
+            for (int idx = 0; idx < items.length; idx++) {
+
+                if (idx > 0) {
+                    sb.append(", ");
+                }
+
+                sb.append(String.format("'%s'", items[idx]));
+            }
+
+            sb.append("]");
+
+            return sb.toString();
+        }
+    }
+
+    /**
+     * Returns all block definitions that we currently have in a (key=DefinitionName, Value=DefinitionInstance) pair
+     * @return Hash Map of definition name to definition instance
+     */
+    private HashMap<String, Definition> getDefinitions() {
+        HashMap<String, Definition> definitionMap = new HashMap<String, Definition>();
+
+        try {
+            Jongo db = new Jongo(new MongoClient().getDB("emr-data-analytics-studio"));
+
+            for (Definition definition : db.getCollection("definitions").find().as(Definition.class)) {
+                definitionMap.put(definition.getName(), definition);
+            }
+        }
+        catch (UnknownHostException excpetion) {
+            excpetion.printStackTrace();
         }
 
-        sb.append("]");
-
-        return sb.toString();
+        return definitionMap;
     }
 }
 

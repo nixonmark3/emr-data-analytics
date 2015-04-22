@@ -6,7 +6,9 @@ public enum DataType {
     FLOAT("float"),
     STRING("string"),
     TIMESTAMP("timestamp"),
-    LIST("list");
+    LIST("list"),
+    MULTI_SELECT_LIST("multiSelectList"),
+    QUERY("query");
 
     private final String stringValue;
 

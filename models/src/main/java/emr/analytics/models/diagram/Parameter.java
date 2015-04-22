@@ -7,7 +7,7 @@ import java.io.Serializable;
  */
 public class Parameter implements Serializable {
     private String name = "";
-    private String value = "";
+    private Object value = null;
     private boolean collected = false;
 
     private Parameter() {}
@@ -32,7 +32,7 @@ public class Parameter implements Serializable {
      * Returns the current value of this Parameter.
      * @return parameters current value
      */
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
@@ -40,7 +40,7 @@ public class Parameter implements Serializable {
      * Sets the current value of this Parameter.
      * @param value parameters current value
      */
-    public void setValue(String value) {
+    public void setValue(Object value) {
         this.value = value;
     }
 

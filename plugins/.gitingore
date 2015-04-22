@@ -3,6 +3,7 @@ tmp
 .history
 dist
 /.idea
+/.idea/libraries
 /*.iml
 /out
 /.idea_modules
