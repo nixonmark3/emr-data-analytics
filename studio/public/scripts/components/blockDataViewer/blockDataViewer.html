@@ -6,21 +6,72 @@
 
     <div class="block-data-viewer-body">
 
-        <div class="block-data-viewer-content" ng-repeat="page in pages" ng-hide="!isCurrentPage($index)">
-            {{page}}
+        <div class="block-data-page" ng-repeat="page in pages" ng-hide="!isCurrentPage($index)" ng-switch on="page.name">
+
+            <div class="grid-container" ng-switch-when="Statistics">
+
+                <div class="grid-fixed-col">
+                    <div class="grid-fixed-cell grid-fixed-cell-header">&nbsp;</div>
+                    <div class="grid-fixed-cell">Count</div>
+                    <div class="grid-fixed-cell">Mean</div>
+                    <div class="grid-fixed-cell">StdDev</div>
+                    <div class="grid-fixed-cell">Min</div>
+                    <div class="grid-fixed-cell">25%</div>
+                    <div class="grid-fixed-cell">50%</div>
+                    <div class="grid-fixed-cell">75%</div>
+                    <div class="grid-fixed-cell">Max</div>
+                </div>
+
+                <div class="grid-horizontal-scroll">
+
+                    <div class="grid-col-container">
+
+                        <div class="grid-col" ng-repeat="point in page.data">
+                            <div class="grid-cell grid-cell-header">{{::point.name}}</div>
+                            <div class="grid-cell">{{::point.count}}</div>
+                            <div class="grid-cell">{{::point.mean}}</div>
+                            <div class="grid-cell">{{::point.std}}</div>
+                            <div class="grid-cell">{{::point.min}}</div>
+                            <div class="grid-cell">{{::point.twentyFive}}</div>
+                            <div class="grid-cell">{{::point.fifty}}</div>
+                            <div class="grid-cell">{{::point.seventyFive}}</div>
+                            <div class="grid-cell">{{::point.max}}</div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div ng-switch-when="Plot">
+
+                Plot
+
+            </div>
+            <div ng-switch-when="Results">
+
+                Results
+
+            </div>
         </div>
 
     </div>
 
     <div class="block-data-viewer-footer">
 
-        <div class="pull-right arrow-right" ng-click="pageRight();">
+        <div class="footer-control footer-control-left" ng-click="pageLeft();">
+            <i class="fa fa-arrow-left"></i>
+        </div>
+
+        <div class="footer-label">
+            {{pageName}}
+        </div>
+
+        <div class="footer-control footer-control-right" ng-click="pageRight();">
             <i class="fa fa-arrow-right"></i>
         </div>
 
-        <div class="pull-left arrow-left" ng-click="pageLeft();">
-            <i class="fa fa-arrow-left"></i>
-        </div>
+
     </div>
 
 </div>

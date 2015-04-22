@@ -436,8 +436,8 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                 var showBlockData = function (block) {
 
                     var position = inverseCoordinates(block.x(), block.y());
-                    position.width = 600;
-                    position.height = 400;
+                    position.width = 750;
+                    position.height = 550;
 
                     popupService.show({
                         templateUrl: '/assets/scripts/components/diagram/blockData.html',

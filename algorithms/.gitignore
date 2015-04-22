@@ -1,3 +1,4 @@
 /__pycache__
 /Bricks/__pycache__
 /.idea
+*.pyc
