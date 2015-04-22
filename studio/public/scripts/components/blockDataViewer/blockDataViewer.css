@@ -1,0 +1,61 @@
+.block-data-viewer-container
+{
+    height: 100%;
+}
+
+.block-data-viewer-header
+{
+    font-weight: bold;
+    width: 100%;
+    height: 50px;
+}
+
+.block-data-viewer-body
+{
+    border-top: 1px solid #636363;
+    border-bottom: 1px solid #636363;
+    width: 100%;
+    height: -webkit-calc(100% - 100px);
+    height: calc(100% - 100px);
+    padding: 1%;
+    overflow-y: scroll;
+    position: relative;
+}
+
+.block-data-viewer-content
+{
+    background-color: red;
+    width: 100%;
+    height: 100%;
+}
+
+.block-data-viewer-footer
+{
+    font-weight: bold;
+    width: 100%;
+    height: 50px;
+}
+
+.header-text
+{
+    font-size: 1.4em;
+    margin-left: 15px;
+    line-height: 50px;
+    vertical-align: middle;
+}
+
+.arrow-left
+{
+    font-size: 1.5em;
+    margin-left: 15px;
+    line-height: 50px;
+    vertical-align: middle;
+}
+
+.arrow-right
+{
+    font-size: 1.5em;
+    margin-right: 15px;
+    line-height: 50px;
+    vertical-align: middle;
+}
