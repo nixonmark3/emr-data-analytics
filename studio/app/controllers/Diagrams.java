@@ -1,7 +1,5 @@
 package controllers;
 
-import actors.JobProducer;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import emr.analytics.models.diagram.*;
@@ -11,6 +9,7 @@ import play.mvc.BodyParser;
 import play.mvc.Result;
 
 import org.jongo.*;
+import services.EvaluationService;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -20,7 +19,10 @@ import java.util.UUID;
  * Diagrams Controller.
  */
 public class Diagrams extends ControllerBase {
-    private static JobProducer _producer = new JobProducer();
+
+    // initialize the evaluation service Akka components
+    private static EvaluationService _evaluationService = new EvaluationService();
+
     private static Map<UUID, UUID> _mapJobIdToClientId = new HashMap<UUID, UUID>();
 
     public static UUID getClientIdForJob(UUID jobId) {
@@ -38,8 +40,7 @@ public class Diagrams extends ControllerBase {
 
         saveDiagram(diagram);
 
-        UUID jobId = _producer.sendEvaluationRequest(diagram);
-
+        UUID jobId = _evaluationService.sendRequest(diagram);
         if (jobId != null) {
             _mapJobIdToClientId.put(jobId, UUID.fromString(clientId));
 

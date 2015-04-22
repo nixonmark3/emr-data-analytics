@@ -1,4 +1,4 @@
-package emr.analytics;
+package emr.analytics.service;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -16,6 +16,7 @@ import emr.analytics.models.diagram.*;
 public class SourceBlocks {
     public List<DefinitionImport> definitions;
     public List<SourceBlock> blocks;
+    private HashSet<String> definitionNames;
 
     public SourceBlocks(Diagram diagram) {
         definitions = new ArrayList<DefinitionImport>();
@@ -115,6 +116,29 @@ public class SourceBlocks {
         }
     }
 
-    private HashSet<String> definitionNames;
+    private String adaptValueToStringArray(Object value) {
+
+        if (value.toString().equals("[]")) {
+            return value.toString();
+        }
+
+        String[] items = value.toString().replaceAll("\\[|\\]|\\,", "").split(" ");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+
+        for (int idx = 0; idx < items.length; idx++) {
+
+            if (idx > 0) {
+                sb.append(", ");
+            }
+
+            sb.append(String.format("'%s'", items[idx]));
+        }
+
+        sb.append("]");
+
+        return sb.toString();
+    }
 }
 

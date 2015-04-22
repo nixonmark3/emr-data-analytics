@@ -14,6 +14,7 @@ libraryDependencies ++= Seq(
   cache,
   javaWs,
   "emr.analytics.models" % "analytics-models" % "1.0-SNAPSHOT",
+  "emr.analytics.service" % "analytics-service" % "1.0-SNAPSHOT",
   "org.mongodb" % "mongo-java-driver" % "2.13.0",
   "org.jongo" % "jongo" % "1.1",
   "org.webjars" % "bootstrap" % "3.3.2",
