@@ -1,8 +1,8 @@
 'use strict';
 
-var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAnimate', 'ui.bootstrap'])
-    .directive('diagram', ['$compile', '$modal', '$window', '$location', '$timeout', 'popupService',
-        function ($compile, $modal, $window, $location, $timeout, popupService) {
+var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAnimate', 'blockDataViewerApp'])
+    .directive('diagram', ['$compile', '$window', '$location', '$timeout', 'popupService',
+        function ($compile, $window, $location, $timeout, popupService) {
 
         return {
             restrict: 'E',

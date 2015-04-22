@@ -6,8 +6,7 @@ var analyticsApp = angular.module('analyticsApp',
         'popupApp',
         'ngRoute',
         'ngSanitize',
-        'ngAnimate',
-        'ui.bootstrap'])
+        'ngAnimate'])
     .config(function ($routeProvider, $locationProvider) {
         $routeProvider.when('/studio', {
             templateUrl: "/assets/templates/studio.html"
