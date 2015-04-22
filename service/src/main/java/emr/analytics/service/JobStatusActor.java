@@ -38,11 +38,14 @@ public class JobStatusActor extends AbstractActor {
                 if ((_logLevel == LogLevel.All) || (_logLevel == LogLevel.Progress))
                     _requestor.tell(status, self());
 
+                context().parent().tell(status, self());
             })
             .match(JobFailed.class, status -> {
 
                 if ((_logLevel == LogLevel.All) || (_logLevel == LogLevel.Progress))
                     _requestor.tell(status, self());
+
+                context().parent().tell(status, self());
             })
             .match(JobStopped.class, status -> {
 

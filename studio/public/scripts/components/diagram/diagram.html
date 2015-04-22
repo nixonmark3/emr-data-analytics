@@ -57,19 +57,22 @@
 
             </rect>
 
-            <g ng-attr-class="block-progress {{block.stateClass()}}">
+            <g class="block-progress">
 
                 <circle class="progress-background"
                     r="14"
                     cx="22"
-                    cy="22">
+                    cy="22"
+                    ng-attr-stroke="{{block.stateBgStroke()}}">
                 </circle>
 
                 <circle class="progress-foreground"
                         r="14"
                         cx="22"
                         cy="22"
-                        transform="rotate(270, 22, 22)">
+                        transform="rotate(270, 22, 22)"
+                        ng-attr-stroke="{{block.stateFgStroke()}}"
+                        ng-attr-stroke-dashoffset="{{block.stateStrokeOffset()}}">
                 </circle>
 
                 <text class="progress-text"

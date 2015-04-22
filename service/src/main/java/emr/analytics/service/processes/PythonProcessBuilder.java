@@ -8,7 +8,7 @@ public class PythonProcessBuilder extends AnalyticsProcessBuilder {
 
     private static final String _command = "python";
 
-    public PythonProcessBuilder(List<String> arguments){
-        super(_command, arguments);
+    public PythonProcessBuilder(String fileName, List<String> arguments){
+        super(fileName, _command, arguments);
     }
 }

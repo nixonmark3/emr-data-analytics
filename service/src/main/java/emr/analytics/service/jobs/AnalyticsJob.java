@@ -37,6 +37,8 @@ public abstract class AnalyticsJob implements Serializable {
 
     public UUID getId(){ return _id; }
 
+    public String getFileName(){ return _fileName; }
+
     public abstract List<String> processArguments();
 
     protected class ProcessArgumentBuilder {

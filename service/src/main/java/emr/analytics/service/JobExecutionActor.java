@@ -14,6 +14,8 @@ import emr.analytics.service.processes.ProcessBuilderException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 public class JobExecutionActor extends AbstractActor {
@@ -53,18 +55,22 @@ public class JobExecutionActor extends AbstractActor {
                     if (complete != 0) {
                         // job failed
 
-                        _jobStatusActor.tell(new JobFailed(_jobId), self());
-                        System.err.println("Process Failed!");
+                        JobFailed message = new JobFailed(_jobId);
+                        _jobStatusActor.tell(message, self());
 
                         while ((lineRead = err.readLine()) != null) {
 
                             // todo: send status update
                             System.err.println(lineRead);
                         }
+
+                        this.cleanup(builder.getFileName());
                     } else {
 
-                        _jobStatusActor.tell(new JobCompleted(_jobId), self());
-                        System.out.println("Process Complete!");
+                        JobCompleted message = new JobCompleted(_jobId);
+                        _jobStatusActor.tell(message, self());
+
+                        this.cleanup(builder.getFileName());
                     }
                 } catch (ProcessBuilderException | IOException | InterruptedException ex) {
 
@@ -74,5 +80,14 @@ public class JobExecutionActor extends AbstractActor {
 
             }).build()
         );
+    }
+
+    private void cleanup(String fileName) {
+        try {
+            Files.delete(Paths.get(fileName));
+        }
+        catch(IOException ex) {
+            System.err.println("IO Exception occurred.");
+        }
     }
 }

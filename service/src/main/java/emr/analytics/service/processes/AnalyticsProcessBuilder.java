@@ -7,22 +7,25 @@ import java.util.Map;
 
 public abstract class AnalyticsProcessBuilder {
 
-
+    private String _fileName;
     private ProcessBuilder _builder = new ProcessBuilder();
 
-    public AnalyticsProcessBuilder(String command){
-        this(command, new ArrayList<String>(), null);
+    public AnalyticsProcessBuilder(String fileName, String command){
+        this(fileName, command, new ArrayList<String>(), null);
     }
 
-    public AnalyticsProcessBuilder(String command, List<String> arguments){
-        this(command, arguments, null);
+    public AnalyticsProcessBuilder(String fileName, String command, List<String> arguments){
+        this(fileName, command, arguments, null);
     }
 
-    public AnalyticsProcessBuilder(String command, String evCommandPrefix){
-        this(command, new ArrayList<String>(), evCommandPrefix);
+    public AnalyticsProcessBuilder(String fileName, String command, String evCommandPrefix){
+        this(fileName, command, new ArrayList<String>(), evCommandPrefix);
     }
 
-    public AnalyticsProcessBuilder(String command, List<String> arguments, String evCommandPrefix){
+    public AnalyticsProcessBuilder(String fileName, String command, List<String> arguments, String evCommandPrefix){
+
+        // reference file name
+        this._fileName = fileName;
 
         // reference arguments
         List<String> args = arguments;
@@ -46,6 +49,10 @@ public abstract class AnalyticsProcessBuilder {
         catch(IOException ex){
             throw new ProcessBuilderException(ex.toString());
         }
+    }
+
+    public String getFileName(){
+        return this._fileName;
     }
 
     /*

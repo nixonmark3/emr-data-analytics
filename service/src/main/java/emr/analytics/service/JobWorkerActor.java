@@ -2,9 +2,13 @@ package emr.analytics.service;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
 import emr.analytics.service.jobs.AnalyticsJob;
+import emr.analytics.service.jobs.LogLevel;
+import emr.analytics.service.messages.JobCompleted;
+import emr.analytics.service.messages.JobFailed;
 import emr.analytics.service.processes.AnalyticsProcessBuilder;
 import emr.analytics.service.processes.AnalyticsProcessBuilderFactory;
 
@@ -32,7 +36,14 @@ public class JobWorkerActor extends AbstractActor {
 
                 AnalyticsProcessBuilder builder = AnalyticsProcessBuilderFactory.get(job);
                 jobExecutionActor.tell(builder, self());
-            }).build()
+            })
+            .match(JobCompleted.class, status -> {
+                self().tell(PoisonPill.getInstance(), self());
+            })
+            .match(JobFailed.class, status -> {
+                self().tell(PoisonPill.getInstance(), self());
+            })
+            .build()
         );
     }
 }

@@ -9,10 +9,10 @@ public class AnalyticsProcessBuilderFactory {
     public static AnalyticsProcessBuilder get(AnalyticsJob job){
 
         if(job instanceof PythonJob){
-            return new PythonProcessBuilder(job.processArguments());
+            return new PythonProcessBuilder(job.getFileName(), job.processArguments());
         }
         else if(job instanceof SparkJob){
-            return new SparkSubmitProcessBuilder(job.processArguments());
+            return new SparkSubmitProcessBuilder(job.getFileName(), job.processArguments());
         }
         else{
             throw new UnsupportedOperationException(String.format("The job type specified, '%s' is not supported.",

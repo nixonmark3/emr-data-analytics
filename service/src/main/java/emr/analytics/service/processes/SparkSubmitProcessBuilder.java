@@ -9,8 +9,8 @@ public class SparkSubmitProcessBuilder extends AnalyticsProcessBuilder {
     private static final String _command = "bin/spark-submit";
     private static final String _evCommandPrefix = "SPARK_HOME";
 
-    public SparkSubmitProcessBuilder(List<String> arguments){
-        super(_command, arguments, _evCommandPrefix);
+    public SparkSubmitProcessBuilder(String fileName, List<String> arguments){
+        super(fileName, _command, arguments, _evCommandPrefix);
     }
 }
 

@@ -45,16 +45,18 @@ var analyticsApp = angular.module('analyticsApp',
                 }
             }
             else {
-                $scope.$apply( function() {
-                    console.log('job id: ' + data.jobId);
-                    console.log('evaluation state: ' + data.state);
-                    $scope.diagramViewModel.updateStatusOfBlocks(data['blockStates']);
-                    if (data.state > 0) {
-                        $scope.evaluating = false;
+                console.log('job id: ' + data.jobId);
+                console.log('evaluation state: ' + data.state);
+
+                $scope.$applyAsync(function() {
+                        $scope.diagramViewModel.updateStatusOfBlocks(data['blockStates']);
+                        if (data.state > 0) {
+                            $scope.evaluating = false;
+                        }
                     }
-                });
+                );
             }
-        }
+        };
 
         sock.onmessage = receiveEvent;
 

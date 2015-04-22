@@ -185,8 +185,9 @@ viewmodels.blockViewModel = function (data) {
     };
 
     this.updateProgress = function(state) {
-        this.data.state = state % 5;
-    }
+
+        setTimeout(this.data.state = state, 500);
+    };
 
     this.progressText = function(){
 
@@ -210,6 +211,78 @@ viewmodels.blockViewModel = function (data) {
         }
 
         return text;
+    };
+
+    this.stateBgStroke = function(){
+
+        var text;
+        switch(this.data.state){
+            case 0: // configuring
+                text = "#fdd0a2";
+                break;
+            case 1: // ready
+                text = "#dadaeb";
+                break;
+            case 2: // executing
+                text = "#c7e9c0";
+                break;
+            case 3: // complete
+                text = "#aec7e8";
+                break;
+            case 4: // error
+                text = "#ff9896";
+                break;
+        }
+
+        return text;
+    };
+
+    this.stateFgStroke = function(){
+
+        var text;
+        switch(this.data.state){
+            case 0: // configuring
+                text = "#ff7f0e";
+                break;
+            case 1: // ready
+                text = "#9467bd";
+                break;
+            case 2: // executing
+                text = "#2ca02c";
+                break;
+            case 3: // complete
+                text = "#1f77b4";
+                break;
+            case 4: // error
+                text = "#d62728";
+                break;
+        }
+
+        return text;
+    };
+
+    this.stateStrokeOffset = function(){
+
+        var offset;
+        switch(this.data.state){
+            case 0: // configuring
+                offset = 65.625;
+                break;
+            case 1: // ready
+                offset = 43.75;
+                break;
+            case 2: // executing
+                offset = 21.875;
+                break;
+            case 3: // complete
+                offset = 0;
+                break;
+            case 4: // error
+                offset = 0;
+                break;
+        }
+
+        return offset;
     };
 
     //
@@ -964,6 +1037,9 @@ viewmodels.diagramViewModel = function(data) {
     // Updates the enumerated blocks with their new state.
     //
     this.updateStatusOfBlocks = function(blockStates) {
+
+        console.log(JSON.stringify(blockStates));
+
         for (var i = 0; i < blockStates.length; ++i) {
             var block = this.findBlock(blockStates[i].name);
             block.updateProgress(blockStates[i].state);
