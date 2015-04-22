@@ -10,6 +10,10 @@ GET         /deleteDiagram/item/:name        controllers.Diagrams.deleteDiagram(
 GET         /getDataSet/item/:name           controllers.Projects.getDataSet(name: String)
 GET         /getClientSocket                 controllers.Application.clientSocket()
 GET         /getServiceSocket                controllers.Application.serviceSocket()
+GET         /getAvailableResults/:name       controllers.BlockResults.getAvailableResults(name: String)
+GET         /getStatistics/:name             controllers.BlockResults.getStatistics(name: String)
+GET         /getPlot/:name                   controllers.BlockResults.getPlot(name: String)
+GET         /getOutputResults/:name          controllers.BlockResults.getOutputResults(name: String)
 
 POST        /saveDiagram                     controllers.Diagrams.saveDiagram()
 POST        /evaluate/:clientId              controllers.Diagrams.evaluate(clientId: String)
