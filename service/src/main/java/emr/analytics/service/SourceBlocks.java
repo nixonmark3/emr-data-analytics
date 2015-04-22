@@ -1,4 +1,4 @@
-package emr.analytics;
+package emr.analytics.service;
 
 import java.io.IOException;
 import java.io.StringWriter;
