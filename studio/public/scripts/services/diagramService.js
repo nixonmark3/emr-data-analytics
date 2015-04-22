@@ -4,6 +4,66 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
 
     return {
 
+        availableBlockResults: function (blockName) {
+
+            var deferred = $q.defer();
+
+            $http.get('/getAvailableResults/' + blockName)
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
+
+        blockStatistics: function (blockName) {
+
+            var deferred = $q.defer();
+
+            $http.get('/getStatistics/' + blockName)
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
+
+        blockPlot: function (blockName) {
+
+            var deferred = $q.defer();
+
+            $http.get('/getPlot/' + blockName)
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
+
+        blockOutputResults: function (blockName) {
+
+            var deferred = $q.defer();
+
+            $http.get('/getOutputResults/' + blockName)
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
+
         evaluate: function (clientId, data) {
 
             var deferred = $q.defer();
