@@ -38,12 +38,18 @@ class FunctionBlock():
         sys.stdout.flush()
 
     def save_results(self, plot_df=None, plot=False):
-
-
         connection = pymongo.MongoClient()
         db = connection['emr-data-analytics-studio']
 
         if plot:
+            # get a connection to GridFS
+            fs = gridfs.GridFS(db)
+
+            # delete the old plot if it exists
+            if fs.exists(filename=self.name):
+                fp = fs.get_last_version(self.name)
+                fs.delete(fp._id)
+
             # Generate plot
             ax = plot_df.plot(legend=False)
             fig = ax.get_figure()
@@ -54,14 +60,12 @@ class FunctionBlock():
             with open('{0}.png'.format(self.name), 'rb') as f:
                 png = f.read()
 
-            fs = gridfs.GridFS(db)
             stored = fs.put(png, filename=self.name)
-            print(stored)
 
             # Remove the generate plot file
             os.remove('{0}.png'.format(self.name))
 
-            self.blockResults['Plot'] = { 'name': self.name }
+            self.blockResults['Plot'] = {'name': self.name, 'ID': stored}
 
         self.results['Results'] = self.blockResults
 
