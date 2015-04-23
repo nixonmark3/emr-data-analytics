@@ -3,7 +3,7 @@ import pandas as pd
 import json
 import sys
 
-from pymongo import Connection
+from pymongo import MongoClient
 from datetime import datetime, timedelta
 from operator import itemgetter
 from Bricks import BricksDB
@@ -44,7 +44,7 @@ class DataBrick(FunctionBlock):
                 return {'{0}/{1}'.format(self.name, 'out'): None}
 
             # Now we are ready to run the algorithm
-            connection = Connection()
+            connection = MongoClient()
             bricks_db = BricksDB(connection, project)
 
             query = query.replace("'", "\"")
