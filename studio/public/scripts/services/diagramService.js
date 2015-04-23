@@ -85,27 +85,13 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
 
             var diagramName = (typeof name == 'undefined' ? '' : '/' + name);
 
-            // todo: temporarily intercept any diagram named Diag1
-            if (diagramName == "/Diag1"){
-
-                $http({ method: 'GET', url: '/assets/data/diagram/diag1.json' })
-                    .success(function (data, status, headers, config) {
-                        deferred.resolve(data);
-                    })
-                    .error(function (data, status, headers, config){
-                        deferred.reject(status);
-                    });
-            }
-            else{
-
-                $http.get('/getDiagram/item' + diagramName)
-                    .success(function (data, status, headers, config) {
-                        deferred.resolve(data);
-                    })
-                    .error(function (data, status, headers, config) {
-                        deferred.reject(status);
-                    });
-            }
+            $http.get('/getDiagram/item' + diagramName)
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config) {
+                    deferred.reject(status);
+                });
 
             return deferred.promise;
         },
@@ -165,9 +151,6 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
 
             $http.get('/getDiagrams')
                 .success(function (data, status, headers, config) {
-
-                    // todo: temporarily inject an extra diagram for testing purposes
-                    data.push({"_id": 0, "name": "Diag1", "description": ""});
 
                     deferred.resolve(data);
                 })

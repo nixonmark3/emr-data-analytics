@@ -6,7 +6,7 @@ import java.util.List;
 
 public class PythonProcessBuilder extends AnalyticsProcessBuilder {
 
-    private static final String _command = "python";
+    private static final String _command = "python3";
 
     public PythonProcessBuilder(String fileName, List<String> arguments){
         super(fileName, _command, arguments);
