@@ -25,6 +25,7 @@ var blockDataViewerApp = angular.module('blockDataViewerApp', []).directive('blo
                         $scope.pagingForward = false;
                         $scope.pageIndex = $scope.pageIndex - 1;
                         setPageName();
+                        getData();
                     }
                 };
 
@@ -33,17 +34,13 @@ var blockDataViewerApp = angular.module('blockDataViewerApp', []).directive('blo
                         $scope.pagingForward = true;
                         $scope.pageIndex = $scope.pageIndex + 1;
                         setPageName();
+                        getData();
                     }
                 };
 
-                $scope.getBlockData('Pages',
-                    $scope.block.name,
-                    function(result){
 
 
-                });
-
-                $scope.pages = [{name: 'Statistics', data: [{"name": "630_MASS_FRAC_C5",
+                /*$scope.pages = [{name: 'Statistics', data: [{"name": "630_MASS_FRAC_C5",
                     "std" : 0.1512856681655764,
                     "mean" : 0.2757579020697675,
                     "min" : 0.09067086000000001,
@@ -89,15 +86,46 @@ var blockDataViewerApp = angular.module('blockDataViewerApp', []).directive('blo
                         "twentyFive" : 19.96193,
                         "seventyFive" : 20.00355}] },
                     {name: 'Plot', data: null },
-                    {name: 'Results', data: null }];
+                    {name: 'Results', data: null }];*/
 
+                var init = function(){
 
+                    $scope.getBlockData('Pages',
+                        $scope.block.name,
+                        function(results){
+
+                            $scope.pages = [];
+                            for(var i = 0; i < results.length; i++){
+                                $scope.pages.push({name: results[i], data: null});
+                            }
+
+                            setPageName();
+
+                            getData();
+                        });
+
+                };
+
+                var getData = function(){
+
+                    var page = $scope.pages[$scope.pageIndex];
+
+                    if (page.data == null) {
+                        $scope.getBlockData(page.name,
+                            $scope.block.name,
+                            function (results) {
+
+                                page.data = results;
+                            });
+                    }
+
+                };
 
                 var setPageName = function(){
                     $scope.pageName = $scope.pages[$scope.pageIndex].name;
                 };
 
-                setPageName();
+                init();
             }
         }
     });

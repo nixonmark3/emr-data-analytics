@@ -4,7 +4,7 @@ import sys
 import pickle
 import pandas as pd
 import numpy as np
-from pymongo import Connection, ASCENDING
+from pymongo import MongoClient, ASCENDING
 from pymongo.database import Database
 from bson import ObjectId
 from datetime import datetime, timedelta

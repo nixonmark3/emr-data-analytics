@@ -275,6 +275,26 @@ var analyticsApp = angular.module('analyticsApp',
                         }
                     );
                     break;
+                case "Statistics":
+                    diagramService.blockStatistics(key).then(
+                        function(data){
+                            success(data);
+                        },
+                        function (code) {
+                            console.log(code); // TODO show exception
+                        }
+                    );
+                    break;
+                case "Plot":
+                    diagramService.blockPlot(key).then(
+                        function(data){
+                            success(data);
+                        },
+                        function (code) {
+                            console.log(code); // TODO show exception
+                        }
+                    );
+                    break;
             }
         };
 
