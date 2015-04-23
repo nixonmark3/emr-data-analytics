@@ -4,6 +4,7 @@ import play.libs.Json;
 import play.mvc.Result;
 
 import java.util.List;
+import java.io.ByteArrayInputStream;
 
 import services.BlockResultsService;
 
@@ -21,9 +22,14 @@ public class BlockResults extends ControllerBase {
 
     public static Result getPlot(String blockName) {
 
-        List<String> plot = BlockResultsService.getPlot(blockName);
+        ByteArrayInputStream image = new ByteArrayInputStream(BlockResultsService.getPlot(blockName));
 
-        return ok(Json.toJson(plot));
+        if (image != null) {
+
+            return ok(image).as("image/jpeg");
+        }
+
+        return notFound();
     }
 
     public static Result getOutputResults(String blockName) {
