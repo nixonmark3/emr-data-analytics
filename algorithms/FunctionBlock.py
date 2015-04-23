@@ -15,6 +15,7 @@ class FunctionBlock():
         self.input_connectors = {}
         self.parameters = {}
         self.results = {'name': self.name}
+        self.blockResults = {}
 
     @abstractmethod
     def execute(self, results_table):
@@ -37,6 +38,8 @@ class FunctionBlock():
         sys.stdout.flush()
 
     def save_results(self, plot_df=None, plot=False):
+
+
         connection = pymongo.MongoClient()
         db = connection['emr-data-analytics-studio']
 
@@ -57,6 +60,10 @@ class FunctionBlock():
 
             # Remove the generate plot file
             os.remove('{0}.png'.format(self.name))
+
+            self.blockResults['Plot'] = { 'name': self.name }
+
+        self.results['Results'] = self.blockResults
 
         results = db['results']
         results.update({'name': self.name}, self.results, upsert=True)
