@@ -20,7 +20,12 @@ public class BlockResultsService {
 
         List<String> availableResults = new ArrayList<String>();
 
-        BlockResultsService.getResults(blockName).keySet().forEach(s -> availableResults.add(s));
+        BasicDBObject results = BlockResultsService.getResults(blockName);
+
+        if (results != null) {
+
+            results.keySet().forEach(s -> availableResults.add(s));
+        }
 
         return availableResults;
     }
@@ -29,28 +34,34 @@ public class BlockResultsService {
 
         List<BasicDBObject> statistics = new ArrayList<BasicDBObject>();
 
-        BasicDBObject blockStatistics = (BasicDBObject)BlockResultsService.getResults(blockName).get("Statistics");
+        BasicDBObject results = BlockResultsService.getResults(blockName);
 
-        blockStatistics.forEach((featureName, featureStatisticsObj) -> {
-            BasicDBObject blockFeatureStatistics = new BasicDBObject();
-            blockFeatureStatistics.put("name", featureName);
+        if (results != null) {
 
-            BasicDBObject featureStatistics = (BasicDBObject) featureStatisticsObj;
-            featureStatistics.forEach((statistic, statisticValue) -> {
+            BasicDBObject blockStatistics = (BasicDBObject)results.get("Statistics");
 
-                if (statistic.contains("25")) {
-                    statistic = "twentyFive";
-                } else if (statistic.contains("50")) {
-                    statistic = "fifty";
-                } else if (statistic.contains("75")) {
-                    statistic = "seventyFive";
-                }
+            blockStatistics.forEach((featureName, featureStatisticsObj) -> {
 
-                blockFeatureStatistics.put(statistic, statisticValue);
+                BasicDBObject blockFeatureStatistics = new BasicDBObject();
+                blockFeatureStatistics.put("name", featureName);
+
+                BasicDBObject featureStatistics = (BasicDBObject) featureStatisticsObj;
+                featureStatistics.forEach((statistic, statisticValue) -> {
+
+                    if (statistic.contains("25")) {
+                        statistic = "twentyFive";
+                    } else if (statistic.contains("50")) {
+                        statistic = "fifty";
+                    } else if (statistic.contains("75")) {
+                        statistic = "seventyFive";
+                    }
+
+                    blockFeatureStatistics.put(statistic, statisticValue);
+                });
+
+                statistics.add(blockFeatureStatistics);
             });
-
-            statistics.add(blockFeatureStatistics);
-        });
+        }
 
         return statistics;
     }
@@ -98,18 +109,21 @@ public class BlockResultsService {
 
             BasicDBObject query = new BasicDBObject("name", blockName);
             DBCollection resultsCollection = new MongoClient().getDB("emr-data-analytics-studio").getCollection("results");
-            DBCursor cursor = resultsCollection.find(query);
 
-            try {
+            if (resultsCollection != null) {
 
-                while(cursor.hasNext()) {
+                DBCursor cursor = resultsCollection.find(query);
 
-                    results = (BasicDBObject)cursor.next().get("Results");
+                try {
+
+                    while (cursor.hasNext()) {
+
+                        results = (BasicDBObject) cursor.next().get("Results");
+                    }
+                } finally {
+
+                    cursor.close();
                 }
-            }
-            finally {
-
-                cursor.close();
             }
         }
         catch (UnknownHostException exception) {
@@ -122,15 +136,21 @@ public class BlockResultsService {
     }
 
     private static byte[] toByteArray(GridFSDBFile file) throws IOException {
-        InputStream is=file.getInputStream();
-        int len=(int)file.getLength();
-        int pos=0;
-        byte[] b=new byte[len];
+
+        InputStream is = file.getInputStream();
+
+        int len = (int)file.getLength();
+        byte[] b = new byte[len];
+
+        int pos = 0;
+
         while (len > 0) {
+
             int read=is.read(b,pos,len);
             pos+=read;
             len-=read;
         }
+
         return b;
     }
 }

@@ -38,7 +38,7 @@ class Columns(FunctionBlock):
             df = df[columns]
 
             # save block statistics
-            self.results['Statistics'] = df.describe().to_dict()
+            self.blockResults['Statistics'] = df.describe().to_dict()
 
             # save results and report block state is good
             FunctionBlock.save_results(self, plot_df=df, plot=True)
