@@ -262,6 +262,22 @@ var analyticsApp = angular.module('analyticsApp',
             );
         };
 
+        $scope.getBlockData = function(type, key, success){
+
+            switch(type){
+                case "list":
+                    diagramService.availableBlockResults(key).then(
+                       function(data){
+                           success(data);
+                       },
+                        function (code) {
+                            console.log(code); // TODO show exception
+                        }
+                    );
+                    break;
+            }
+        };
+
         $scope.toggleDiagramConfiguration = function(evt){
 
             if ($scope.configuringDiagram){

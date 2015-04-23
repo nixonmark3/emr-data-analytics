@@ -7,7 +7,8 @@ var blockDataViewerApp = angular.module('blockDataViewerApp', []).directive('blo
             replace: false,
             templateUrl: '/assets/scripts/components/blockDataViewer/blockDataViewer.html',
             scope: {
-
+                block: "=",
+                getBlockData: "="
             },
             link: function ($scope, element, attrs) {
 
@@ -33,6 +34,13 @@ var blockDataViewerApp = angular.module('blockDataViewerApp', []).directive('blo
                         setPageName();
                     }
                 };
+
+                $scope.getBlockData('list',
+                    $scope.block.name,
+                    function(result){
+
+                        console.log(JSON.stringify(result));
+                });
 
                 $scope.pages = [{name: 'Statistics', data: [{"name": "630_MASS_FRAC_C5",
                     "std" : 0.1512856681655764,

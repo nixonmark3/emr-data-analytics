@@ -13,6 +13,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                 nodes: '=',
                 library: '=',
                 loadSources: "=",
+                getBlockData: "=",
                 blurBackground: "="
             },
             link: function($scope, element, attrs) {
@@ -445,7 +446,8 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                         isAnimated: false,
                         inputs: {
                             block: block,
-                            position: position
+                            position: position,
+                            getBlockData: $scope.getBlockData
                         }
                     }).then(function (popup) {
 
