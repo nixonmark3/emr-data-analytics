@@ -14,15 +14,15 @@ var blockDataViewerApp = angular.module('blockDataViewerApp', []).directive('blo
 
                 $scope.pageIndex = 0;
                 $scope.pageName = "";
+                $scope.pagingForward = true;
 
                 $scope.isCurrentPage = function(index){
                     return $scope.pageIndex === index;
                 };
 
-                $scope.block = {name: 'Columns1'};
-
                 $scope.pageLeft = function() {
                     if ($scope.pageIndex > 0) {
+                        $scope.pagingForward = false;
                         $scope.pageIndex = $scope.pageIndex - 1;
                         setPageName();
                     }
@@ -30,16 +30,17 @@ var blockDataViewerApp = angular.module('blockDataViewerApp', []).directive('blo
 
                 $scope.pageRight = function() {
                     if ($scope.pageIndex < ($scope.pages.length - 1)) {
+                        $scope.pagingForward = true;
                         $scope.pageIndex = $scope.pageIndex + 1;
                         setPageName();
                     }
                 };
 
-                $scope.getBlockData('list',
+                $scope.getBlockData('Pages',
                     $scope.block.name,
                     function(result){
 
-                        console.log(JSON.stringify(result));
+
                 });
 
                 $scope.pages = [{name: 'Statistics', data: [{"name": "630_MASS_FRAC_C5",
@@ -89,6 +90,7 @@ var blockDataViewerApp = angular.module('blockDataViewerApp', []).directive('blo
                         "seventyFive" : 20.00355}] },
                     {name: 'Plot', data: null },
                     {name: 'Results', data: null }];
+
 
 
                 var setPageName = function(){

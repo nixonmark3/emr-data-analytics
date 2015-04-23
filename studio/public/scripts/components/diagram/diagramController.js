@@ -75,7 +75,7 @@ diagramApp.controller('blockConfigController',
 
             $scope.getBlockData = getBlockData;
 
-            $scope.block = block;
+            $scope.block = block.data;
 
             // calculate transitions for popup destination
             var transX = ($window.innerWidth / 2 - position.width / 2) - position.x;

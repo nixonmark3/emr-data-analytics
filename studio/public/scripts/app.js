@@ -265,7 +265,7 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.getBlockData = function(type, key, success){
 
             switch(type){
-                case "list":
+                case "Pages":
                     diagramService.availableBlockResults(key).then(
                        function(data){
                            success(data);

@@ -6,7 +6,7 @@
 
     <div class="block-data-viewer-body">
 
-        <div class="block-data-page" ng-repeat="page in pages" ng-hide="!isCurrentPage($index)" ng-switch on="page.name">
+        <div class="block-data-page ng-class:{'page-left': pagingForward, 'page-right': pagingForward==false}" ng-repeat="page in pages" ng-hide="!isCurrentPage($index)" ng-switch on="page.name">
 
             <div class="grid-container" ng-switch-when="Statistics">
 
