@@ -23,8 +23,6 @@ public class BlockResults extends ControllerBase {
 
     public static Result getPlot(String blockName) {
 
-        // ByteArrayInputStream image = new ByteArrayInputStream(BlockResultsService.getPlot(blockName));
-
         byte[] image = BlockResultsService.getPlot(blockName);
 
         if (image != null) {
