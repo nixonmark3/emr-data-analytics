@@ -43,11 +43,8 @@
                 </div>
             </div>
 
-            <div ng-switch-when="Plot">
+            <img width="100%" ng-switch-when="Plot" ng-src="data:image/png;base64,{{page.data}}">
 
-                <img ng-src="data:image/png;base64,{{page.data}}">
-
-            </div>
             <div ng-switch-when="Results">
 
                 Results
@@ -63,9 +60,7 @@
             <i class="fa fa-arrow-left"></i>
         </div>
 
-        <div class="footer-label">
-            {{pageName}}
-        </div>
+        <div class="footer-label">&#160;{{pageName}}&#160;</div>
 
         <div class="footer-control footer-control-right" ng-click="pageRight();">
             <i class="fa fa-arrow-right"></i>

@@ -58,6 +58,7 @@
     width: 100%;
     height: -webkit-calc(100% - 100px);
     height: calc(100% - 100px);
+    margin: 0;
     overflow-x: hidden;
     overflow-y: auto;
 }
@@ -80,3 +81,5 @@
 .grid-col{ position: relative; display: inline-block; }
 .grid-cell{ display: block; width: 160px; padding: 10px; border-bottom: 1px solid #000; border-right: 1px solid #000; }
 .grid-cell-header { border-top: 1px solid #000; background-color: #f0f0f0; font-weight: bold; }
+
+.block-data-page img { position: relative; display: block; width: 100%; padding-right: 17px; }
