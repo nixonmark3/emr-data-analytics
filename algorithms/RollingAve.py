@@ -1,10 +1,14 @@
+__author__ = 'noelbell'
+
+
 import sys
 import pandas as pd
+import collections
 
 from FunctionBlock import FunctionBlock
 
 
-class Columns(FunctionBlock):
+class RollingAve(FunctionBlock):
 
     def __init__(self, name):
         FunctionBlock.__init__(self, name)
@@ -17,24 +21,24 @@ class Columns(FunctionBlock):
 
             df = results_table[self.input_connectors['in'][0]]
 
-            self.results['Columns'] = list(df.columns.values)
+            window_size = self.parameters['WindowSize']
 
-            columns = self.parameters['Columns']
+            df_rolling_ave = pd.rolling_mean(df, int(window_size))
 
-            if len(columns) == 0:
-                FunctionBlock.save_results(self)
-                FunctionBlock.report_status_configure(self)
-                return {'{0}/{1}'.format(self.name, 'out'): None}
+            results = collections.OrderedDict()
+            results['WindowSize'] = window_size
 
-            df = df[columns]
-
-            FunctionBlock.save_results(self, df=df, statistics=True, plot=True)
+            FunctionBlock.save_results(self, df=df_rolling_ave, statistics=True, plot=True, results=results)
 
             FunctionBlock.report_status_complete(self)
 
-            return {'{0}/{1}'.format(self.name, 'out'): df}
+            return {'{0}/{1}'.format(self.name, 'out'): df_rolling_ave}
 
         except Exception as err:
             FunctionBlock.save_results(self)
             FunctionBlock.report_status_failure(self)
             print(err.args, file=sys.stderr)
+
+
+
+

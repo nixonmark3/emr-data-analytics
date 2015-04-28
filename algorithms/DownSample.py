@@ -4,7 +4,7 @@ import pandas as pd
 from FunctionBlock import FunctionBlock
 
 
-class Columns(FunctionBlock):
+class DownSample(FunctionBlock):
 
     def __init__(self, name):
         FunctionBlock.__init__(self, name)
@@ -17,16 +17,11 @@ class Columns(FunctionBlock):
 
             df = results_table[self.input_connectors['in'][0]]
 
-            self.results['Columns'] = list(df.columns.values)
+            sample_size = '{0}S'.format(self.parameters['SampleSize'])
 
-            columns = self.parameters['Columns']
+            interpolation = self.parameters['Interpolation']
 
-            if len(columns) == 0:
-                FunctionBlock.save_results(self)
-                FunctionBlock.report_status_configure(self)
-                return {'{0}/{1}'.format(self.name, 'out'): None}
-
-            df = df[columns]
+            df = df.resample(sample_size, how=interpolation.lower())
 
             FunctionBlock.save_results(self, df=df, statistics=True, plot=True)
 
@@ -38,3 +33,4 @@ class Columns(FunctionBlock):
             FunctionBlock.save_results(self)
             FunctionBlock.report_status_failure(self)
             print(err.args, file=sys.stderr)
+

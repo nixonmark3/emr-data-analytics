@@ -15,7 +15,9 @@ public class Main {
     }
 
     public static void createDefinitions() throws java.net.UnknownHostException {
-        DB db = new MongoClient().getDB("emr-data-analytics-studio");
+        MongoClient connection = new MongoClient();
+
+        DB db = connection.getDB("emr-data-analytics-studio");
 
         Jongo jongo = new Jongo(db);
         MongoCollection definitions = jongo.getCollection("definitions");
@@ -24,11 +26,13 @@ public class Main {
         definitions.drop();
 
         // Need to ensure that each category has a unique name
-        definitions.ensureIndex("{name: 1}","{unique:true}");
+        definitions.ensureIndex("{name: 1}", "{unique:true}");
 
         DefinitionGenerator generator = new DefinitionGenerator(definitions);
 
         generator.generate();
+
+        connection.close();
     }
 
 }

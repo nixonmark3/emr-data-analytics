@@ -56,7 +56,7 @@ public class BlockResultsService {
                         statistic = "seventyFive";
                     }
 
-                    blockFeatureStatistics.put(statistic, statisticValue);
+                    blockFeatureStatistics.put(statistic, statisticValue.toString());
                 });
 
                 statistics.add(blockFeatureStatistics);

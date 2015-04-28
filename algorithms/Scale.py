@@ -4,7 +4,7 @@ import pandas as pd
 from FunctionBlock import FunctionBlock
 
 
-class Columns(FunctionBlock):
+class Scale(FunctionBlock):
 
     def __init__(self, name):
         FunctionBlock.__init__(self, name)
@@ -17,24 +17,18 @@ class Columns(FunctionBlock):
 
             df = results_table[self.input_connectors['in'][0]]
 
-            self.results['Columns'] = list(df.columns.values)
+            scale_df = df.copy()
+            for tag in scale_df.columns:
+                scale_df[tag] = (scale_df[tag] - scale_df[tag].min()) / (scale_df[tag].max() - scale_df[tag].min())
 
-            columns = self.parameters['Columns']
-
-            if len(columns) == 0:
-                FunctionBlock.save_results(self)
-                FunctionBlock.report_status_configure(self)
-                return {'{0}/{1}'.format(self.name, 'out'): None}
-
-            df = df[columns]
-
-            FunctionBlock.save_results(self, df=df, statistics=True, plot=True)
+            FunctionBlock.save_results(self, df=scale_df, statistics=True, plot=True)
 
             FunctionBlock.report_status_complete(self)
 
-            return {'{0}/{1}'.format(self.name, 'out'): df}
+            return {'{0}/{1}'.format(self.name, 'out'): scale_df}
 
         except Exception as err:
             FunctionBlock.save_results(self)
             FunctionBlock.report_status_failure(self)
             print(err.args, file=sys.stderr)
+

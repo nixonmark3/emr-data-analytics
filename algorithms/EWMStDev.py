@@ -1,10 +1,13 @@
+__author__ = 'noelbell'
+
 import sys
 import pandas as pd
+import collections
 
 from FunctionBlock import FunctionBlock
 
 
-class Columns(FunctionBlock):
+class EWMStDev(FunctionBlock):
 
     def __init__(self, name):
         FunctionBlock.__init__(self, name)
@@ -17,24 +20,24 @@ class Columns(FunctionBlock):
 
             df = results_table[self.input_connectors['in'][0]]
 
-            self.results['Columns'] = list(df.columns.values)
+            weight = self.parameters['Weight']
 
-            columns = self.parameters['Columns']
+            df_ewmstdev = pd.ewmstd(df, weight)
 
-            if len(columns) == 0:
-                FunctionBlock.save_results(self)
-                FunctionBlock.report_status_configure(self)
-                return {'{0}/{1}'.format(self.name, 'out'): None}
+            results = collections.OrderedDict()
+            results['Weight'] = weight
 
-            df = df[columns]
-
-            FunctionBlock.save_results(self, df=df, statistics=True, plot=True)
+            FunctionBlock.save_results(self, df=df_ewmstdev, statistics=True, plot=True, results=results)
 
             FunctionBlock.report_status_complete(self)
 
-            return {'{0}/{1}'.format(self.name, 'out'): df}
+            return {'{0}/{1}'.format(self.name, 'out'): df_ewmstdev}
 
         except Exception as err:
             FunctionBlock.save_results(self)
             FunctionBlock.report_status_failure(self)
             print(err.args, file=sys.stderr)
+
+
+
+

@@ -15,26 +15,34 @@ public class DefinitionGenerator {
     }
 
     public void generate() {
-        createLoadDBBlock();
+        /* ALL ALGORITHMS MUST BE GENERATED WITH THERE CATEGORIES */
+        generateDataSources();
+        generateFilters();
+        generateTransformers();
+    }
+
+    private void generateDataSources() {
         createDataBrickBlock();
-        createSaveDBBlock();
-        createColumnsBlock();
-        createTimeSelectionBlock();
-        createMergeBlock();
-        createScaleBlock();
-        createDownSampleBlock();
-        createLagCorrelateBlock();
-        createTest1Block();
-        createRollingAverageBlock();
-        createRollingDeviationBlock();
-        createWeightedAverageBlock();
-        createWeightedDeviationBlock();
-        createSavitskyGolayFilterBlock();
+    }
+
+    private void generateFilters() {
+        createBoxcarAverageBlock();
+        createEWMABlock();
+        createEWMStDevBlock();
         createExponentialFilterBlock();
-        createStepwiseAverageBlock();
+        createSavGolayBlock();
+        createRollingAveBlock();
+        createRollingStdDevBlock();
         createThreeSigmaBlock();
-        createOutlierScrubberBlock();
-        createNullScrubberBlock();
+    }
+
+    private void generateTransformers() {
+        createColumnsBlock();
+        createDownSampleBlock();
+        createMergeBlock();
+        createLagCorrelateBlock();
+        createPLSSensitivityBlock();
+        createScaleBlock();
     }
 
     //
@@ -74,76 +82,76 @@ public class DefinitionGenerator {
         _definitions.save(definition);
     }
 
-    //
-    // Load Block Definition
-    //
-    private void createLoadDBBlock() {
-        Definition loadDB = new Definition("LoadDB", "Load DB", Category.DATA_SOURCES.toString());
-
-        loadDB.setDescription("Loads a data set from a given project");
-
-        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        loadDB.setOutputConnectors(outputConnectors);
-
-        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-
-        parameters.add(new ParameterDefinition("Project",
-                DataType.LIST.toString(),
-                "None",
-                new ArrayList<String>(),
-                new ParameterSource("Jar",
-                        "plugins-1.0-SNAPSHOT.jar",
-                        "Projects",
-                        new ArrayList<Argument>())));
-
-        List<Argument> arguments = new ArrayList<Argument>();
-        arguments.add(new Argument("Project", 0, "Project.Value"));
-
-        parameters.add(new ParameterDefinition("Data Set",
-                DataType.LIST.toString(),
-                "None",
-                new ArrayList<String>(),
-                new ParameterSource("Jar",
-                        "plugins-1.0-SNAPSHOT.jar",
-                        "DataSets",
-                        arguments)));
-
-        loadDB.setParameters(parameters);
-
-        _definitions.save(loadDB);
-    }
-
-    //
-    // Save Block Definition
-    //
-    private void createSaveDBBlock() {
-        Definition saveDB = new Definition("SaveDB", "Save DB", Category.DATA_SOURCES.toString());
-
-        saveDB.setDescription("Saves a given data frame");
-
-        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
-        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-        saveDB.setInputConnectors(inputConnectors);
-
-        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-
-        parameters.add(new ParameterDefinition("Project",
-                DataType.STRING.toString(),
-                "None",
-                new ArrayList<String>(),
-                null));
-
-        parameters.add(new ParameterDefinition("DataSet",
-                DataType.STRING.toString(),
-                "None",
-                new ArrayList<String>(),
-                null));
-
-        saveDB.setParameters(parameters);
-
-        _definitions.save(saveDB);
-    }
+//    //
+//    // Load Block Definition
+//    //
+//    private void createLoadDBBlock() {
+//        Definition loadDB = new Definition("LoadDB", "Load DB", Category.DATA_SOURCES.toString());
+//
+//        loadDB.setDescription("Loads a data set from a given project");
+//
+//        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+//        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+//        loadDB.setOutputConnectors(outputConnectors);
+//
+//        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+//
+//        parameters.add(new ParameterDefinition("Project",
+//                DataType.LIST.toString(),
+//                "None",
+//                new ArrayList<String>(),
+//                new ParameterSource("Jar",
+//                        "plugins-1.0-SNAPSHOT.jar",
+//                        "Projects",
+//                        new ArrayList<Argument>())));
+//
+//        List<Argument> arguments = new ArrayList<Argument>();
+//        arguments.add(new Argument("Project", 0, "Project.Value"));
+//
+//        parameters.add(new ParameterDefinition("Data Set",
+//                DataType.LIST.toString(),
+//                "None",
+//                new ArrayList<String>(),
+//                new ParameterSource("Jar",
+//                        "plugins-1.0-SNAPSHOT.jar",
+//                        "DataSets",
+//                        arguments)));
+//
+//        loadDB.setParameters(parameters);
+//
+//        _definitions.save(loadDB);
+//    }
+//
+//    //
+//    // Save Block Definition
+//    //
+//    private void createSaveDBBlock() {
+//        Definition saveDB = new Definition("SaveDB", "Save DB", Category.DATA_SOURCES.toString());
+//
+//        saveDB.setDescription("Saves a given data frame");
+//
+//        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+//        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+//        saveDB.setInputConnectors(inputConnectors);
+//
+//        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+//
+//        parameters.add(new ParameterDefinition("Project",
+//                DataType.STRING.toString(),
+//                "None",
+//                new ArrayList<String>(),
+//                null));
+//
+//        parameters.add(new ParameterDefinition("DataSet",
+//                DataType.STRING.toString(),
+//                "None",
+//                new ArrayList<String>(),
+//                null));
+//
+//        saveDB.setParameters(parameters);
+//
+//        _definitions.save(saveDB);
+//    }
 
     //
     // Columns Block Definition
@@ -181,36 +189,58 @@ public class DefinitionGenerator {
     }
 
     //
-    // Time Selection Block Definition
+    // Columns Block Definition
     //
-    private void createTimeSelectionBlock() {
-        Definition timeSelection = new Definition("TimeSelection", "Time Selection", Category.TRANSFORMERS.toString());
+    private void createPLSSensitivityBlock() {
+        Definition plsSensitivity = new Definition("Sensitivity", "PLSSensitivity", Category.TRANSFORMERS.toString());
 
-        timeSelection.setDescription("Selects time range of data from a given data frame");
+        plsSensitivity.setDescription("Calculates sensitivity of output y to set of inputs X using PLS");
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
-        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-        timeSelection.setInputConnectors(inputConnectors);
+        inputConnectors.add(new ConnectorDefinition("x", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("y", DataType.FRAME.toString()));
+        plsSensitivity.setInputConnectors(inputConnectors);
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        timeSelection.setOutputConnectors(outputConnectors);
+        outputConnectors.add(new ConnectorDefinition("obj", DataType.FRAME.toString()));
+        outputConnectors.add(new ConnectorDefinition("coef", DataType.FRAME.toString()));
+        outputConnectors.add(new ConnectorDefinition("r2", DataType.FRAME.toString()));
+        plsSensitivity.setOutputConnectors(outputConnectors);
 
-        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("From",
-                DataType.TIMESTAMP.toString(),
-                "None",
-                new ArrayList<String>(),
-                null));
-        parameters.add(new ParameterDefinition("To",
-                DataType.TIMESTAMP.toString(),
-                "None",
-                new ArrayList<String>(),
-                null));
-        timeSelection.setParameters(parameters);
-
-        _definitions.save(timeSelection);
+        _definitions.save(plsSensitivity);
     }
+
+//    //
+//    // Time Selection Block Definition
+//    //
+//    private void createTimeSelectionBlock() {
+//        Definition timeSelection = new Definition("TimeSelection", "Time Selection", Category.TRANSFORMERS.toString());
+//
+//        timeSelection.setDescription("Selects time range of data from a given data frame");
+//
+//        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+//        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+//        timeSelection.setInputConnectors(inputConnectors);
+//
+//        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+//        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+//        timeSelection.setOutputConnectors(outputConnectors);
+//
+//        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+//        parameters.add(new ParameterDefinition("From",
+//                DataType.TIMESTAMP.toString(),
+//                "None",
+//                new ArrayList<String>(),
+//                null));
+//        parameters.add(new ParameterDefinition("To",
+//                DataType.TIMESTAMP.toString(),
+//                "None",
+//                new ArrayList<String>(),
+//                null));
+//        timeSelection.setParameters(parameters);
+//
+//        _definitions.save(timeSelection);
+//    }
 
     //
     // Merge Block Definition
@@ -270,7 +300,7 @@ public class DefinitionGenerator {
 
         parameters.add(new ParameterDefinition("SampleSize",
                 DataType.INT.toString(),
-                Integer.toString(100),
+                100,
                 new ArrayList<String>(),
                 null));
 
@@ -280,7 +310,8 @@ public class DefinitionGenerator {
         opts.add("Mean");
 
         parameters.add(new ParameterDefinition("Interpolation",
-                DataType.LIST.toString(), "Last",
+                DataType.LIST.toString(),
+                "Last",
                 opts,
                 null));
 
@@ -289,12 +320,11 @@ public class DefinitionGenerator {
         _definitions.save(downSample);
     }
 
-
     //
     // Lag Correlate Block Definition
     //
     private void createLagCorrelateBlock() {
-        Definition lagCorrelate = new Definition("LagCorrelate", "Lag Correlate", Category.TRANSFORMERS.toString());
+        Definition lagCorrelate = new Definition("LagCorr", "Lag Correlate", Category.TRANSFORMERS.toString());
 
         lagCorrelate.setDescription("Performs a lag correlation a given data frame");
 
@@ -307,9 +337,9 @@ public class DefinitionGenerator {
         lagCorrelate.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("lag",
+        parameters.add(new ParameterDefinition("Lag",
                 DataType.INT.toString(),
-                Integer.toString(60),
+                60,
                 new ArrayList<String>(),
                 null));
         lagCorrelate.setParameters(parameters);
@@ -318,38 +348,10 @@ public class DefinitionGenerator {
     }
 
     //
-    // Multi Connector Block Example
-    //
-    private void createTest1Block() {
-        Definition test = new Definition("Test1", "Test1", Category.TRANSFORMERS.toString());
-
-        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
-        inputConnectors.add(new ConnectorDefinition("in1", DataType.FRAME.toString()));
-        inputConnectors.add(new ConnectorDefinition("in2", DataType.FRAME.toString()));
-        inputConnectors.add(new ConnectorDefinition("in3", DataType.FRAME.toString()));
-        test.setInputConnectors(inputConnectors);
-
-        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-        outputConnectors.add(new ConnectorDefinition("out1", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("out2", DataType.FRAME.toString()));
-        test.setOutputConnectors(outputConnectors);
-
-        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("Prop1",
-                DataType.INT.toString(),
-                Integer.toString(0),
-                new ArrayList<String>(),
-                null));
-        test.setParameters(parameters);
-
-        _definitions.save(test);
-    }
-
-    //
     // Rolling Average Block Definition
     //
-    private void createRollingAverageBlock() {
-        Definition rollingAverage = new Definition("RollingAverage", "Rolling Average", Category.FILTERS.toString());
+    private void createRollingAveBlock() {
+        Definition rollingAverage = new Definition("RollingAve", "Rolling Ave", Category.FILTERS.toString());
 
         rollingAverage.setDescription("Determines the rolling average of a given data frame");
 
@@ -364,7 +366,7 @@ public class DefinitionGenerator {
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
         parameters.add(new ParameterDefinition("WindowSize",
                 DataType.INT.toString(),
-                Integer.toString(60),
+                60,
                 new ArrayList<String>(),
                 null));
         rollingAverage.setParameters(parameters);
@@ -375,8 +377,8 @@ public class DefinitionGenerator {
     //
     // Rolling Deviation Block Definition
     //
-    private void createRollingDeviationBlock() {
-        Definition rollingDeviation = new Definition("RollingDeviation", "Rolling Deviation", Category.FILTERS.toString());
+    private void createRollingStdDevBlock() {
+        Definition rollingDeviation = new Definition("RollingStdDev", "Rolling Std Dev", Category.FILTERS.toString());
 
         rollingDeviation.setDescription("Determines the rolling deviation of a given data frame");
 
@@ -391,7 +393,7 @@ public class DefinitionGenerator {
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
         parameters.add(new ParameterDefinition("WindowSize",
                 DataType.INT.toString(),
-                Integer.toString(60),
+                60,
                 new ArrayList<String>(),
                 null));
         rollingDeviation.setParameters(parameters);
@@ -402,91 +404,98 @@ public class DefinitionGenerator {
     //
     // Weighted Average Block Definition
     //
-    private void createWeightedAverageBlock() {
-        Definition weightedAverage = new Definition("WeightedAverage", "Weighted Average", Category.FILTERS.toString());
+    private void createEWMABlock() {
+        Definition EWMA = new Definition("EWMA", "Weighted Ave", Category.FILTERS.toString());
 
-        weightedAverage.setDescription("Determines the weighted average of a given data frame");
+        EWMA.setDescription("Determines the exponentially weighted moving average of a given data frame");
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
         inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-        weightedAverage.setInputConnectors(inputConnectors);
+        EWMA.setInputConnectors(inputConnectors);
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        weightedAverage.setOutputConnectors(outputConnectors);
+        EWMA.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
         parameters.add(new ParameterDefinition("Weight",
                 DataType.INT.toString(),
-                Integer.toString(20),
+                20,
                 new ArrayList<String>(),
                 null));
-        weightedAverage.setParameters(parameters);
+        EWMA.setParameters(parameters);
 
-        _definitions.save(weightedAverage);
+        _definitions.save(EWMA);
     }
 
     //
     // Weighted Deviation Block Definition
     //
-    private void createWeightedDeviationBlock() {
-        Definition weightedDeviation = new Definition("WeightedDeviation", "Weighted Deviation", Category.FILTERS.toString());
+    private void createEWMStDevBlock() {
+        Definition EWMStDev = new Definition("EWMStDev", "Weighted Dev", Category.FILTERS.toString());
 
-        weightedDeviation.setDescription("Determines the weighted deviation of a given data frame");
+        EWMStDev.setDescription("Determines the exponentially weighted  deviation of a given data frame");
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
         inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
-        weightedDeviation.setInputConnectors(inputConnectors);
+        EWMStDev.setInputConnectors(inputConnectors);
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
-        weightedDeviation.setOutputConnectors(outputConnectors);
+        EWMStDev.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
         parameters.add(new ParameterDefinition("Weight",
                 DataType.INT.toString().toString(),
-                Integer.toString(20),
+                20,
                 new ArrayList<String>(),
                 null));
-        weightedDeviation.setParameters(parameters);
+        EWMStDev.setParameters(parameters);
 
-        _definitions.save(weightedDeviation);
+        _definitions.save(EWMStDev);
     }
 
     //
     // Savitsky Golay Filter Block Definition
     //
-    private void createSavitskyGolayFilterBlock() {
-        Definition savitskyGolayFilter = new Definition("SavitskyGolayFilter", "Savitsky-Golay Filter", Category.FILTERS.toString());
+    private void createSavGolayBlock() {
+        Definition SavGolay = new Definition("SavGolay", "Savitsky-Golay Filter", Category.FILTERS.toString());
 
-        savitskyGolayFilter.setDescription("Apply Savitsky-Golay filter to a given data frame");
+        SavGolay.setDescription("Apply Savitsky-Golay filter to a given data frame");
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
         inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
-        savitskyGolayFilter.setInputConnectors(inputConnectors);
+        SavGolay.setInputConnectors(inputConnectors);
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
-        savitskyGolayFilter.setOutputConnectors(outputConnectors);
+        SavGolay.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("PointsToLeft", DataType.INT.toString().toString(), Integer.toString(10),
+        parameters.add(new ParameterDefinition("PointsToLeft",
+                DataType.INT.toString().toString(),
+                10,
                 new ArrayList<String>(),
                 null));
-        parameters.add(new ParameterDefinition("PointsToRight", DataType.INT.toString().toString(), Integer.toString(10), new ArrayList<String>(),
+        parameters.add(new ParameterDefinition("PointsToRight",
+                DataType.INT.toString().toString(),
+                10,
+                new ArrayList<String>(),
                 null));
-        parameters.add(new ParameterDefinition("PolynomialOrder", DataType.INT.toString().toString(), Integer.toString(3), new ArrayList<String>(),
+        parameters.add(new ParameterDefinition("PolynomialOrder",
+                DataType.INT.toString().toString(),
+                3, new ArrayList<String>(),
                 null));
-        savitskyGolayFilter.setParameters(parameters);
+        SavGolay.setParameters(parameters);
 
-        _definitions.save(savitskyGolayFilter);
+        _definitions.save(SavGolay);
     }
 
     //
     // Exponential Filter Block Definition
     //
     private void createExponentialFilterBlock() {
-        Definition exponentialFilter = new Definition("ExponentialFilter", "Exponential Filter", Category.FILTERS.toString());
+        Definition exponentialFilter = new Definition("ExpFilter", "Exp Filter", Category.FILTERS.toString());
 
         exponentialFilter.setDescription("Apply exponential filter to a given data frame");
 
@@ -499,9 +508,15 @@ public class DefinitionGenerator {
         exponentialFilter.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("Alpha", DataType.FLOAT.toString(), Double.toString(0.8), new ArrayList<String>(),
+        parameters.add(new ParameterDefinition("Alpha",
+                DataType.FLOAT.toString(),
+                0.8,
+                new ArrayList<String>(),
                 null));
-        parameters.add(new ParameterDefinition("Order", DataType.INT.toString().toString(), Integer.toString(1), new ArrayList<String>(),
+        parameters.add(new ParameterDefinition("Order",
+                DataType.INT.toString().toString(),
+                1,
+                new ArrayList<String>(),
                 null));
         exponentialFilter.setParameters(parameters);
 
@@ -509,36 +524,39 @@ public class DefinitionGenerator {
     }
 
     //
-    // Stepwise Average Block Definition
+    // Boxcar Average Block Definition
     //
-    private void createStepwiseAverageBlock() {
-        Definition stepwiseAverage = new Definition("StepwiseAverage", "Stepwise Average", Category.FILTERS.toString());
+    private void createBoxcarAverageBlock() {
+        Definition BoxcarAverage = new Definition("BoxcarAve", "Boxcar Ave", Category.FILTERS.toString());
 
-        stepwiseAverage.setDescription("Apply stepwise average filter to a given data frame");
+        BoxcarAverage.setDescription("Apply Boxcar average filter to a given data frame");
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
         inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
-        stepwiseAverage.setInputConnectors(inputConnectors);
+        BoxcarAverage.setInputConnectors(inputConnectors);
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
-        stepwiseAverage.setOutputConnectors(outputConnectors);
+        BoxcarAverage.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("WindowSize", DataType.INT.toString().toString(), Integer.toString(20), new ArrayList<String>(),
+        parameters.add(new ParameterDefinition("WindowSize",
+                DataType.INT.toString().toString(),
+                20,
+                new ArrayList<String>(),
                 null));
-        stepwiseAverage.setParameters(parameters);
+        BoxcarAverage.setParameters(parameters);
 
-        _definitions.save(stepwiseAverage);
+        _definitions.save(BoxcarAverage);
     }
 
     //
     // Three Sigma Block Definition
     //
     private void createThreeSigmaBlock() {
-        Definition threeSigma = new Definition("ThreeSigma", "Three Sigma", Category.CLEANERS.toString());
+        Definition threeSigma = new Definition("ThreeSigma", "Three Sigma", Category.FILTERS.toString());
 
-        threeSigma.setDescription("Apply three sigma algorithm to a given data frame");
+        threeSigma.setDescription("Apply three (or g-order) sigma algorithm to a given data frame");
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
         inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
@@ -549,55 +567,18 @@ public class DefinitionGenerator {
         threeSigma.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("MovingWindow", DataType.INT.toString().toString(), Double.toString(20), new ArrayList<String>(),
+        parameters.add(new ParameterDefinition("MovingWindow",
+                DataType.INT.toString().toString(),
+                20,
+                new ArrayList<String>(),
                 null));
-        parameters.add(new ParameterDefinition("Order", DataType.FLOAT.toString(), Double.toString(3), new ArrayList<String>(),
+        parameters.add(new ParameterDefinition("g-Sigma",
+                DataType.FLOAT.toString(),
+                3.0,
+                new ArrayList<String>(),
                 null));
         threeSigma.setParameters(parameters);
 
         _definitions.save(threeSigma);
-    }
-
-    //
-    // Null Scrubber Block Definition
-    //
-    private void createNullScrubberBlock() {
-        Definition nullScrubber = new Definition("NullScrubber", "Null Scrubber", Category.CLEANERS.toString());
-
-        nullScrubber.setDescription("Removes NaN values from a given data frame");
-
-        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
-        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
-        nullScrubber.setInputConnectors(inputConnectors);
-
-        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
-        nullScrubber.setOutputConnectors(outputConnectors);
-
-        _definitions.save(nullScrubber);
-    }
-
-    //
-    // Outlier Scrubber Definition
-    //
-    private void createOutlierScrubberBlock() {
-        Definition outlierScrubber = new Definition("OutlierScrubber", "Outlier Scrubber", Category.CLEANERS.toString());
-
-        outlierScrubber.setDescription("Removes outlier values from a given data frame");
-
-        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
-        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
-        outlierScrubber.setInputConnectors(inputConnectors);
-
-        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
-        outlierScrubber.setOutputConnectors(outputConnectors);
-
-        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("Algorithm", DataType.STRING.toString().toString(), "3Sigma", new ArrayList<String>(),
-                null));
-        outlierScrubber.setParameters(parameters);
-
-        _definitions.save(outlierScrubber);
     }
 }

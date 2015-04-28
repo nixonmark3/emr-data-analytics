@@ -53,13 +53,16 @@ class DataBrick(FunctionBlock):
 
             df = bricks_db.query(tags=tags, time_ranges=time_ranges, aliases=aliases, period_secs=sample_rate_secs, max_samples=max_samples)
 
-            # save block statistics
-            self.blockResults['Statistics'] = df.describe().to_dict()
-
             # save results and report block state is good
-            FunctionBlock.save_results(self, plot_df=df, plot=True)
+            FunctionBlock.save_results(self, df=df, statistics=True, plot=True)
+
+            # Report back good status as we are done
             FunctionBlock.report_status_complete(self)
 
+            # Close connection to database
+            connection.close()
+
+            # Return data so that next block can consume it
             return {'{0}/{1}'.format(self.name, 'out'): df}
 
         except Exception as err:

@@ -3,6 +3,7 @@ import pymongo
 import gridfs
 import matplotlib.pyplot as plt
 import os
+import collections
 
 from abc import ABCMeta, abstractmethod
 
@@ -15,7 +16,6 @@ class FunctionBlock():
         self.input_connectors = {}
         self.parameters = {}
         self.results = {'name': self.name}
-        self.blockResults = {}
 
     @abstractmethod
     def execute(self, results_table):
@@ -37,9 +37,14 @@ class FunctionBlock():
         print('{0},{1}'.format(self.name, '4'))
         sys.stdout.flush()
 
-    def save_results(self, plot_df=None, plot=False):
+    def save_results(self, df=None, statistics=False, plot=False, results=None):
         connection = pymongo.MongoClient()
         db = connection['emr-data-analytics-studio']
+
+        block_results = collections.OrderedDict()
+
+        if statistics:
+            block_results['Statistics'] = df.describe().to_dict()
 
         if plot:
             # get a connection to GridFS
@@ -51,7 +56,7 @@ class FunctionBlock():
                 fs.delete(fp._id)
 
             # Generate plot
-            ax = plot_df.plot(legend=False)
+            ax = df.plot(legend=False)
             fig = ax.get_figure()
             fig.savefig('{0}.png'.format(self.name))
             plt.close(fig)
@@ -65,9 +70,21 @@ class FunctionBlock():
             # Remove the generate plot file
             os.remove('{0}.png'.format(self.name))
 
-            self.blockResults['Plot'] = {'name': self.name, 'ID': stored}
+            block_results['Plot'] = {'name': self.name, 'ID': stored}
 
-        self.results['Results'] = self.blockResults
+        if results:
+            block_results['Results'] = results
+
+        self.results['Results'] = block_results
 
         results = db['results']
         results.update({'name': self.name}, self.results, upsert=True)
+
+        connection.close()
+
+    def check_connector_has_one_wire(self, connector_name):
+        if len(self.input_connectors[connector_name]) != 1:
+            FunctionBlock.report_status_failure(self)
+            FunctionBlock.save_results(self)
+            print("Too many wires connected to in connector!", file=sys.stderr)
+            return {'{0}/{1}'.format(self.name, 'out'): None}
