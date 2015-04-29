@@ -38,6 +38,18 @@ var blockDataViewerApp = angular.module('blockDataViewerApp', []).directive('blo
                     }
                 };
 
+                //
+                // Set the width of the Grid based on the number of Features
+                //
+                $scope.setGridWidth = function(columns) {
+
+                    if (columns != null) {
+                        return columns.length * 220;
+                    }
+
+                    return 1000;
+                };
+
                 var init = function(){
 
                     $timeout(function(){

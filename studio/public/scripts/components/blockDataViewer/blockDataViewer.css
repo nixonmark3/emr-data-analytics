@@ -77,9 +77,9 @@
 .grid-fixed-cell-header { border-top: 1px solid #fff; border-left: 0; background-color: #fff; }
 
 .grid-horizontal-scroll { overflow-x: scroll; height: 100%; }
-.grid-col-container { width: 1000px; padding-top: 30px; padding-left: 120px; }
+.grid-col-container { padding-top: 30px; padding-left: 120px; }
 .grid-col{ position: relative; display: inline-block; }
-.grid-cell{ display: block; width: 160px; padding: 10px; border-bottom: 1px solid #000; border-right: 1px solid #000; }
+.grid-cell{ display: block; width: 180px; padding: 10px; border-bottom: 1px solid #000; border-right: 1px solid #000; }
 .grid-cell-header { border-top: 1px solid #000; background-color: #f0f0f0; font-weight: bold; }
 
 .block-data-page img { position: relative; display: block; width: 100%; padding-right: 17px; }

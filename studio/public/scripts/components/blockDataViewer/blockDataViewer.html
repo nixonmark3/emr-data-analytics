@@ -24,7 +24,7 @@
 
                 <div class="grid-horizontal-scroll">
 
-                    <div class="grid-col-container">
+                    <div class="grid-col-container" ng-style="{width: setGridWidth(page.data)}">
 
                         <div class="grid-col" ng-repeat="point in page.data">
                             <div class="grid-cell grid-cell-header">{{::point.name}}</div>
