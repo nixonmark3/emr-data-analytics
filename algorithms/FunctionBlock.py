@@ -56,9 +56,11 @@ class FunctionBlock():
                 fs.delete(fp._id)
 
             # Generate plot
-            ax = df.plot(legend=False)
+            ax = df.plot(legend=True)
+            ax.legend(loc='best', fancybox=True, shadow=True, prop={'size': 7})
+            ax.tick_params(axis='both', which='major', labelsize=8)
             fig = ax.get_figure()
-            fig.savefig('{0}.png'.format(self.name))
+            fig.savefig('{0}.png'.format(self.name), dpi=100)
             plt.close(fig)
 
             # Save plot using GridFS
