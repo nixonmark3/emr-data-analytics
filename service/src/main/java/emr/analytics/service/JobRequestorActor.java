@@ -34,6 +34,10 @@ public class JobRequestorActor extends AbstractActor {
 
                 _jobCompilationActor.tell(request, self());
             })
+            .match(JobKillRequest.class, request -> {
+
+                _jobServiceActor.tell(request, self());
+            })
             .match(AnalyticsJob.class, job -> {
 
                 _jobServiceActor.tell(job, self());

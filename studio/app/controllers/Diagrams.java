@@ -46,7 +46,16 @@ public class Diagrams extends ControllerBase {
             return internalServerError("Error requesting evaluation.");
         }
 
-        return ok("Diagram deployed.");
+        return ok(jobId.toString());
+    }
+
+    public static Result kill(String jobId) {
+
+        UUID id = UUID.fromString(jobId);
+
+        boolean result = _evaluationService.sendKillRequest(id);
+
+        return ok("Diagram job has been successfully killed.");
     }
 
     @BodyParser.Of(BodyParser.Json.class)

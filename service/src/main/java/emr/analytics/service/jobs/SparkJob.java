@@ -60,7 +60,7 @@ public class SparkJob extends AnalyticsJob {
         ProcessArgumentBuilder argumentBuilder = new ProcessArgumentBuilder();
 
         // begin by appending the spark job name
-        argumentBuilder.addKeyValue("--name", this._diagramName);
+        argumentBuilder.addKeyValue("--name", this._id.toString());
 
         // add optional and list variables
         argumentBuilder.addOption("--class", _className);

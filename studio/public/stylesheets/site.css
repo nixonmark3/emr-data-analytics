@@ -92,5 +92,18 @@ button.diagram-evaluating { color: #2ca02c; }
 #library-browser.ng-leave { -webkit-animation: fadeOut 0.6s; }
 #library-browser.ng-enter { -webkit-animation: fadeIn 0.6s; }
 
+#deployment-notification {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    width: 200px;
+    height: 80px;
+    background-color: #c7e9c0;
+    border: 1px solid #31a354;
+    border-radius: 10px;
+}
 
+#deployment-notification.ng-leave { -webkit-animation: slideOutDown 0.6s; }
+#deployment-notification.ng-enter { -webkit-animation: slideInUp 0.6s; }
 
+#notification-exit { color: #31a354; position: absolute; right: 5px; top: 3px; cursor: pointer; z-index: 2000; }

@@ -239,9 +239,9 @@ var analyticsApp = angular.module('analyticsApp',
             var data = $scope.diagramViewModel.data;
 
             diagramService.deploy(data).then(
-                function (data) {
-                    // TODO report success back to the user
-                    console.log(data);
+                function (jobId) {
+
+                    beginDeploymentNotifications(jobId);
                 },
                 function (code) {
                     console.log(code); // TODO show exception
@@ -344,5 +344,43 @@ var analyticsApp = angular.module('analyticsApp',
             $scope.configuringDiagram = false;
             delete $scope.diagramConfiguration;
         };
-    }]);
+
+        var beginDeploymentNotifications = function(jobId){
+
+            var result = popupService.show({
+                templateUrl: '/assets/scripts/components/diagram/deploymentNotifications.html',
+                controller: 'deploymentNotificationController',
+                inputs: {
+                    jobId: jobId
+                }}).then(function(popup){
+
+                $scope.deployed = true;
+
+                popup.close.then(function (jobId) {
+
+                    diagramService.kill(jobId).then(
+                        function (data) {
+
+                            $scope.deployed = false;
+                        },
+                        function (code) {
+                            console.log(code); // TODO show exception
+                        }
+                    );
+                });
+            });
+        };
+    }])
+    .controller('deploymentNotificationController',
+    ['$scope', '$element', 'jobId', 'close',
+        function($scope, $element, jobId, close) {
+
+            $scope.jobId = jobId;
+
+            $scope.close = function(){
+
+                close(jobId);
+            };
+        }
+    ]);
 

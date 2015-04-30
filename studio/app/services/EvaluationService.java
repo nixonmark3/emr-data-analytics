@@ -9,6 +9,7 @@ import emr.analytics.service.JobServiceActor;
 import emr.analytics.service.jobs.JobMode;
 import emr.analytics.service.jobs.LogLevel;
 import emr.analytics.service.jobs.TargetEnvironments;
+import emr.analytics.service.messages.JobKillRequest;
 import emr.analytics.service.messages.JobRequest;
 
 import java.util.UUID;
@@ -35,5 +36,13 @@ public class EvaluationService {
         requestor.tell(request, null);
 
         return request.getJobId();
+    }
+
+    public boolean sendKillRequest(UUID jobId){
+
+        // pass it to the job request actor
+        requestor.tell((new JobKillRequest(jobId)), null);
+
+        return true;
     }
 }

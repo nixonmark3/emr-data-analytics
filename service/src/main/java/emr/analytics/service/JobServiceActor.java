@@ -6,6 +6,7 @@ import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.japi.pf.ReceiveBuilder;
 import emr.analytics.service.jobs.AnalyticsJob;
+import emr.analytics.service.messages.JobKillRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,6 +44,15 @@ public class JobServiceActor extends AbstractActor {
 
                 jobActor.tell("start", self());
 
+            })
+            .match(JobKillRequest.class, request -> {
+
+                if (idsByDiagram.containsKey(request.getJobId().toString())) {
+
+                    String jobName = idsByDiagram.get(request.getJobId().toString());
+                    ActorRef prevJobActor = workers.get(jobName);
+                    prevJobActor.tell("kill", self());
+                }
             })
             .match(Terminated.class, t -> {
 
