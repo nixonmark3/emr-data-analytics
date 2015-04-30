@@ -7,7 +7,9 @@ import akka.japi.pf.ReceiveBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import emr.analytics.models.messages.BlockStatus;
 import emr.analytics.models.messages.EvaluationStatus;
+import emr.analytics.models.messages.OnlineNotification;
 import emr.analytics.service.jobs.AnalyticsJob;
+import emr.analytics.service.jobs.JobMode;
 import emr.analytics.service.messages.*;
 
 import java.util.ArrayList;
@@ -30,26 +32,30 @@ public class JobRequestorActor extends AbstractActor {
         receive(ReceiveBuilder.
             match(JobRequest.class, request -> {
 
-                System.out.println("Job request received.");
-
                 _jobCompilationActor.tell(request, self());
             })
             .match(AnalyticsJob.class, job -> {
-
-                System.out.println("Analytics job received from compiler.");
 
                 _jobServiceActor.tell(job, self());
             })
             .match(JobStarted.class, status -> {
 
+                if (status.getJobMode() == JobMode.Online)
+                    sendOnlineNotification(status.getJobId(), 0, "Job has been started.");
             })
             .match(JobCompleted.class, status -> {
 
-                sendEvaluationStatus(status.getJobId(), 1);
+                if (status.getJobMode() == JobMode.Online)
+                    sendOnlineNotification(status.getJobId(), 1, "Job has been completed.");
+                else
+                    sendEvaluationStatus(status.getJobId(), 1);
             })
             .match(JobFailed.class, status -> {
 
-                sendEvaluationStatus(status.getJobId(), 2);
+                if (status.getJobMode() == JobMode.Online)
+                    sendOnlineNotification(status.getJobId(), 2, "Job has failed.");
+                else
+                    sendEvaluationStatus(status.getJobId(), 2);
             })
             .match(JobStopped.class, status -> {
 
@@ -58,11 +64,17 @@ public class JobRequestorActor extends AbstractActor {
 
                 // capture progress message
                 String message = status.getProgressMessage();
-                String[] data = message.split(",");
-                if (data.length == 2) {
 
-                    // if message matches the pattern of a block update - send
-                    sendEvaluationStatusForBlock(status.getJobId(), data[0], Integer.valueOf(data[1]));
+                if (status.getJobMode() == JobMode.Online) {
+                    sendOnlineNotification(status.getJobId(), 0, message);
+                }
+                else{
+                    String[] data = message.split(",");
+                    if (data.length == 2) {
+
+                        // if message matches the pattern of a block update - send
+                        sendEvaluationStatusForBlock(status.getJobId(), data[0], Integer.valueOf(data[1]));
+                    }
                 }
             }).build()
         );
@@ -82,6 +94,12 @@ public class JobRequestorActor extends AbstractActor {
 
         _socketCallback.sendMessage(new ObjectMapper().valueToTree(
             new EvaluationStatus(id, state)));
+    }
+
+    private void sendOnlineNotification(UUID id, int state, String message){
+
+        OnlineNotification notification = new OnlineNotification(id, state, message);
+        _socketCallback.sendMessage(new ObjectMapper().valueToTree(notification));
     }
 }
 

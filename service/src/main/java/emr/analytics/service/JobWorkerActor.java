@@ -5,46 +5,75 @@ import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import emr.analytics.service.jobs.AnalyticsJob;
-import emr.analytics.service.jobs.LogLevel;
-import emr.analytics.service.messages.JobCompleted;
-import emr.analytics.service.messages.JobFailed;
+import emr.analytics.service.messages.*;
 import emr.analytics.service.processes.AnalyticsProcessBuilder;
 import emr.analytics.service.processes.AnalyticsProcessBuilderFactory;
+import scala.concurrent.Await;
+import scala.concurrent.duration.Duration;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class JobWorkerActor extends AbstractActor {
 
     ActorRef _requestor;
+    ActorRef _jobStatusActor;
+    ActorRef _jobExecutionActor;
+    AnalyticsJob _job;
+    AnalyticsProcessBuilder _builder;
 
-    public static Props props(ActorRef requestor) {
-        return Props.create(JobWorkerActor.class, requestor);
+    public static Props props(ActorRef requestor, AnalyticsJob job) {
+        return Props.create(JobWorkerActor.class, requestor, job);
     }
 
-    public JobWorkerActor(ActorRef requestor){
+    public JobWorkerActor(ActorRef requestor, AnalyticsJob job){
 
+        // reference the requestor and the job
         _requestor = requestor;
+        _job = job;
+
+        // create the actor that manages the job status
+        _jobStatusActor = context().actorOf(JobStatusActor.props(job.getLogLevel(), _requestor), "JobStatusActor");
+
+        // create the actor that actually executes the job
+        _jobExecutionActor = context().actorOf(
+                JobExecutionActor.props(_job.getId(), job.getJobMode(), _jobStatusActor), "JobExecutionActor");
+
+        // get process builder
+        _builder = AnalyticsProcessBuilderFactory.get(job);
 
         receive(ReceiveBuilder
-            .match(AnalyticsJob.class, job -> {
+            .match(String.class, s -> s.equals("start"), s -> {
 
-                // create an actor that tracks the status of the job
-                ActorRef jobStatusActor = context().actorOf(
-                        JobStatusActor.props(job.getLogLevel(), _requestor), "JobStatusActor");
-                // create the actor that actually executes the job
-                ActorRef jobExecutionActor = context().actorOf(
-                    JobExecutionActor.props(job.getId(), jobStatusActor), "JobExecutionActor");
+                // send to job executor
+                _jobExecutionActor.tell(_builder, self());
+            })
+            .match(String.class, s -> s.equals("kill"), s -> {
 
-                AnalyticsProcessBuilder builder = AnalyticsProcessBuilderFactory.get(job);
-                jobExecutionActor.tell(builder, self());
+                // notify the job status actor that the job is being stopped
+                _jobStatusActor.tell(new JobStopped(job.getId(), job.getJobMode()), self());
             })
-            .match(JobCompleted.class, status -> {
-                self().tell(PoisonPill.getInstance(), self());
-            })
-            .match(JobFailed.class, status -> {
+            .match(String.class, s -> s.equals("finalize"), s -> {
+
+                this.cleanup(_builder.getFileName());
+
                 self().tell(PoisonPill.getInstance(), self());
             })
             .build()
         );
+    }
+
+    private void cleanup(String fileName) {
+        try {
+            Files.delete(Paths.get(fileName));
+        }
+        catch(IOException ex) {
+            System.err.println("IO Exception occurred.");
+        }
     }
 }
 

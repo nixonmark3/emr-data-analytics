@@ -4,6 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
+import emr.analytics.service.jobs.JobMode;
 import emr.analytics.service.messages.JobCompleted;
 import emr.analytics.service.messages.JobFailed;
 import emr.analytics.service.messages.JobProgress;
@@ -14,29 +15,31 @@ import emr.analytics.service.processes.ProcessBuilderException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.UUID;
 
 public class JobExecutionActor extends AbstractActor {
 
     private UUID _jobId;
+    private JobMode _mode;
     private ActorRef _jobStatusActor;
 
-    public static Props props(UUID id, ActorRef jobStatusActor){
+    public static Props props(UUID id, JobMode mode, ActorRef jobStatusActor){
 
-        return Props.create(JobExecutionActor.class, id, jobStatusActor);
+        return Props.create(JobExecutionActor.class, id, mode, jobStatusActor);
     }
 
-    public JobExecutionActor(UUID id, ActorRef jobStatusActor){
+    public JobExecutionActor(UUID id, JobMode mode, ActorRef jobStatusActor){
 
         _jobId = id;
+        _mode = mode;
         _jobStatusActor = jobStatusActor;
 
         receive(ReceiveBuilder.
             match(AnalyticsProcessBuilder.class, builder -> {
 
-                _jobStatusActor.tell(new JobStarted(_jobId), self());
+                _jobStatusActor.tell(new JobStarted(_jobId, _mode), self());
+
+                System.out.println(builder.toString());
 
                 // execute process
                 try {
@@ -47,7 +50,7 @@ public class JobExecutionActor extends AbstractActor {
 
                     String lineRead;
                     while ((lineRead = in.readLine()) != null) {
-                        _jobStatusActor.tell(new JobProgress(_jobId, lineRead), self());
+                        _jobStatusActor.tell(new JobProgress(_jobId, _mode, lineRead), self());
                     }
 
                     int complete = process.waitFor();
@@ -55,7 +58,7 @@ public class JobExecutionActor extends AbstractActor {
                     if (complete != 0) {
                         // job failed
 
-                        JobFailed message = new JobFailed(_jobId);
+                        JobFailed message = new JobFailed(_jobId, _mode);
                         _jobStatusActor.tell(message, self());
 
                         while ((lineRead = err.readLine()) != null) {
@@ -63,14 +66,10 @@ public class JobExecutionActor extends AbstractActor {
                             // todo: send status update
                             System.err.println(lineRead);
                         }
-
-                        this.cleanup(builder.getFileName());
                     } else {
 
-                        JobCompleted message = new JobCompleted(_jobId);
+                        JobCompleted message = new JobCompleted(_jobId, _mode);
                         _jobStatusActor.tell(message, self());
-
-                        this.cleanup(builder.getFileName());
                     }
                 } catch (ProcessBuilderException | IOException | InterruptedException ex) {
 
@@ -80,14 +79,5 @@ public class JobExecutionActor extends AbstractActor {
 
             }).build()
         );
-    }
-
-    private void cleanup(String fileName) {
-        try {
-            Files.delete(Paths.get(fileName));
-        }
-        catch(IOException ex) {
-            System.err.println("IO Exception occurred.");
-        }
     }
 }

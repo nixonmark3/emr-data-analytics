@@ -9,25 +9,29 @@ import java.util.UUID;
 public abstract class AnalyticsJob implements Serializable {
 
     protected UUID _id;
-    protected String _name;
+    protected JobMode _mode;
+    protected String _diagramName;
     protected String _fileName;
     protected List<String> _arguments;
     protected LogLevel _logLevel = LogLevel.Progress;
 
-    public AnalyticsJob(UUID id, String name, String fileName){
-        this(id, name, fileName, new ArrayList<String>());
+    public AnalyticsJob(UUID id, JobMode mode, String diagramName, String fileName){
+        this(id, mode, diagramName, fileName, new ArrayList<String>());
     }
 
-    public AnalyticsJob(UUID id, String name, String fileName, List<String> arguments){
+    public AnalyticsJob(UUID id, JobMode mode, String diagramName, String fileName, List<String> arguments){
         this._id = id;
-        this._name = name;
+        this._mode = mode;
+        this._diagramName = diagramName;
         this._fileName = fileName;
         this._arguments = arguments;
     }
 
-    public String getName(){
-        return _name;
+    public String getDiagramName(){
+        return _diagramName;
     }
+
+    public String getName(){ return _diagramName + "_" + _mode.toString(); }
 
     public void setLogLevel(LogLevel level){
         _logLevel = level;
@@ -38,6 +42,8 @@ public abstract class AnalyticsJob implements Serializable {
     public UUID getId(){ return _id; }
 
     public String getFileName(){ return _fileName; }
+
+    public JobMode getJobMode() { return _mode; }
 
     public abstract List<String> processArguments();
 

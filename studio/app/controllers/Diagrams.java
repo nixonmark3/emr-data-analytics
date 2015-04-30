@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import emr.analytics.models.diagram.*;
 
+import emr.analytics.service.jobs.JobMode;
 import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Result;
@@ -34,13 +35,28 @@ public class Diagrams extends ControllerBase {
      * @return temporarily return success message
      */
     @BodyParser.Of(BodyParser.Json.class)
+    public static Result deploy() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
+
+        saveDiagram(diagram);
+
+        UUID jobId = _evaluationService.sendRequest(JobMode.Online, diagram);
+        if (jobId == null) {
+            return internalServerError("Error requesting evaluation.");
+        }
+
+        return ok("Diagram deployed.");
+    }
+
+    @BodyParser.Of(BodyParser.Json.class)
     public static Result evaluate(String clientId) {
         ObjectMapper objectMapper = new ObjectMapper();
         Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
 
         saveDiagram(diagram);
 
-        UUID jobId = _evaluationService.sendRequest(diagram);
+        UUID jobId = _evaluationService.sendRequest(JobMode.Offline, diagram);
         if (jobId != null) {
             _mapJobIdToClientId.put(jobId, UUID.fromString(clientId));
 
