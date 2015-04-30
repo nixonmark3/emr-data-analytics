@@ -218,16 +218,27 @@ var analyticsApp = angular.module('analyticsApp',
 
             $scope.evaluating = true;
 
-            //$timeout(function(){
-            //
-            //    $scope.evaluating = false;
-            //}, 4000);
-            //
-            //return;
-
             var data = $scope.diagramViewModel.data;
 
             diagramService.evaluate($scope.clientId, data).then(
+                function (data) {
+                    // TODO report success back to the user
+                    console.log(data);
+                },
+                function (code) {
+                    console.log(code); // TODO show exception
+                }
+            );
+
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
+
+        $scope.deploy = function(evt) {
+
+            var data = $scope.diagramViewModel.data;
+
+            diagramService.deploy(data).then(
                 function (data) {
                     // TODO report success back to the user
                     console.log(data);

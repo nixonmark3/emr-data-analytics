@@ -13,11 +13,11 @@ public class SparkJob extends AnalyticsJob {
     private List<String> _jars = new ArrayList<String>();
     private List<String> _pyFiles = new ArrayList<String>();
 
-    public SparkJob(UUID id, String name, String fileName){
-        super(id, name, fileName);
+    public SparkJob(UUID id, JobMode mode, String diagramName, String fileName){
+        super(id, mode, diagramName, fileName);
     }
 
-    public SparkJob(UUID id, String name, String fileName, List<String> arguments){ super(id, name, fileName, arguments); }
+    public SparkJob(UUID id, JobMode mode, String diagramName, String fileName, List<String> arguments){ super(id, mode, diagramName, fileName, arguments); }
 
     public SparkJob setClass(String value){
         _className = Optional.of(value);
@@ -60,7 +60,7 @@ public class SparkJob extends AnalyticsJob {
         ProcessArgumentBuilder argumentBuilder = new ProcessArgumentBuilder();
 
         // begin by appending the spark job name
-        argumentBuilder.addKeyValue("--name", this._name);
+        argumentBuilder.addKeyValue("--name", this._diagramName);
 
         // add optional and list variables
         argumentBuilder.addOption("--class", _className);

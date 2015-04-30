@@ -6,6 +6,7 @@ import akka.actor.ActorSystem;
 import emr.analytics.models.diagram.Diagram;
 import emr.analytics.service.JobRequestorActor;
 import emr.analytics.service.JobServiceActor;
+import emr.analytics.service.jobs.JobMode;
 import emr.analytics.service.jobs.LogLevel;
 import emr.analytics.service.jobs.TargetEnvironments;
 import emr.analytics.service.messages.JobRequest;
@@ -25,12 +26,10 @@ public class EvaluationService {
         requestor = system.actorOf(JobRequestorActor.props(service), "job-requestor");
     }
 
-    public UUID sendRequest(Diagram diagram){
+    public UUID sendRequest(JobMode mode, Diagram diagram){
 
         // create the job request
-        JobRequest request = new JobRequest(LogLevel.Progress,
-            diagram,
-            TargetEnvironments.python);
+        JobRequest request = new JobRequest(mode, diagram);
 
         // pass it to the job request actor
         requestor.tell(request, null);

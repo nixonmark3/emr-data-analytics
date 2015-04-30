@@ -5,12 +5,16 @@ import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
 import emr.analytics.models.diagram.Block;
 import emr.analytics.models.diagram.Diagram;
+import emr.analytics.service.jobs.AnalyticsJob;
+import emr.analytics.service.jobs.JobMode;
 import emr.analytics.service.jobs.PythonJob;
+import emr.analytics.service.jobs.SparkJob;
 import emr.analytics.service.messages.JobRequest;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
@@ -27,23 +31,39 @@ public class JobCompilationActor extends AbstractActor {
         receive(ReceiveBuilder.
             match(JobRequest.class, request -> {
 
-                // todo: current this only handles python compilation
-
                 // compile diagram
                 Diagram diagram = request.getDiagram();
-                String source = this.compile(diagram);
+                String source = this.compile(request.getJobMode(), diagram);
 
                 // create file name
                 String fileName = this.writeSourceFile(request.getJobId(), source);
 
-                PythonJob job = new PythonJob(request.getJobId(), diagram.getName(), fileName);
+                AnalyticsJob job;
+                switch(request.getJobMode()){
+                    case Online:
+                        // todo: temporarily hardcode spark job
+                        job = (new SparkJob(request.getJobId(),
+                                JobMode.Online,
+                                diagram.getName(),
+                                fileName,
+                                Arrays.asList("localhost:2181", "runtime")))
+                                .setMaster("local[4]")
+                                .addJarFile("$SPARK_HOME/external/kafka-assembly/spark-streaming-kafka-assembly_2.10-1.3.1.jar");
+                        break;
+                    default:
+                        job = new PythonJob(request.getJobId(),
+                                JobMode.Offline,
+                                diagram.getName(),
+                                fileName);
+                        break;
+                }
 
                 sender().tell(job, self());
             }).build()
         );
     }
 
-    private String compile(Diagram diagram){
+    private String compile(JobMode mode, Diagram diagram){
 
         String source = "";
 
@@ -73,7 +93,8 @@ public class JobCompilationActor extends AbstractActor {
         // compile configured blocks
         if (!sourceBlocks.isEmpty()) {
             try {
-                source = sourceBlocks.compile("python_driver.mustache");
+                String template = (mode == JobMode.Offline) ? "python_driver.mustache" : "pyspark_driver.mustache";
+                source = sourceBlocks.compile(template);
             }
             catch (IOException ex) {
                 System.err.println(String.format("IOException: %s.", ex.toString()));

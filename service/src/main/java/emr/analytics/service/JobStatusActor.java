@@ -2,6 +2,7 @@ package emr.analytics.service;
 
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
 import emr.analytics.service.jobs.LogLevel;
@@ -32,25 +33,34 @@ public class JobStatusActor extends AbstractActor {
                 if ((_logLevel == LogLevel.All) || (_logLevel == LogLevel.Progress))
                     _requestor.tell(status, self());
 
+                System.out.println("Job started.");
             })
             .match(JobCompleted.class, status -> {
 
                 if ((_logLevel == LogLevel.All) || (_logLevel == LogLevel.Progress))
                     _requestor.tell(status, self());
 
-                context().parent().tell(status, self());
+                System.out.println("Job completed.");
+
+                SendFinalize();
             })
             .match(JobFailed.class, status -> {
 
                 if ((_logLevel == LogLevel.All) || (_logLevel == LogLevel.Progress))
                     _requestor.tell(status, self());
 
-                context().parent().tell(status, self());
+                System.out.println("Job failed.");
+
+                SendFinalize();
             })
             .match(JobStopped.class, status -> {
 
                 if (_logLevel == LogLevel.All)
                     _requestor.tell(status, self());
+
+                System.out.println("Job Stopped.");
+
+                SendFinalize();
             })
             .match(JobProgress.class, status -> {
 
@@ -59,5 +69,9 @@ public class JobStatusActor extends AbstractActor {
 
             }).build()
         );
+    }
+
+    private void SendFinalize(){
+        context().parent().tell("finalize", self());
     }
 }

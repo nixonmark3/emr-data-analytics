@@ -31,9 +31,15 @@ public abstract class AnalyticsProcessBuilder {
         List<String> args = arguments;
 
         // build process command
-        String cmd = (evCommandPrefix != null)
-            ? String.format("%s/%s", getCommandPrefix(evCommandPrefix), command)
-            : command;
+        String cmd = command;
+        if (evCommandPrefix != null){
+
+            String commandPrefix = getCommandPrefix(evCommandPrefix);
+            for (int i = 0; i < args.size(); i++)
+                args.set(i, args.get(i).replace("$" + evCommandPrefix, commandPrefix));
+
+            cmd = String.format("%s/%s", commandPrefix, command);
+        }
 
         // prepend the command name to the head of the list
         args.add(0, cmd);
@@ -49,6 +55,11 @@ public abstract class AnalyticsProcessBuilder {
         catch(IOException ex){
             throw new ProcessBuilderException(ex.toString());
         }
+    }
+
+    @Override
+    public String toString(){
+        return this._builder.command().toString();
     }
 
     public String getFileName(){

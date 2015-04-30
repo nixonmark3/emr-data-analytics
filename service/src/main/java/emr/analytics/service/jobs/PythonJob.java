@@ -7,12 +7,12 @@ import java.util.UUID;
 
 public class PythonJob extends AnalyticsJob {
 
-    public PythonJob(UUID id, String name, String fileName){
-        super(id, name, fileName);
+    public PythonJob(UUID id, JobMode mode, String diagramName, String fileName){
+        super(id, mode, diagramName, fileName);
     }
 
-    public PythonJob(UUID id, String name, String fileName, List<String> arguments){
-        super(id, name, fileName, arguments);
+    public PythonJob(UUID id, JobMode mode, String diagramName, String fileName, List<String> arguments){
+        super(id, mode, diagramName, fileName, arguments);
     }
 
     @Override
