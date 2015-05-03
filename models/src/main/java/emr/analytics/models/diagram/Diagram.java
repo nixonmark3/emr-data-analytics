@@ -166,6 +166,14 @@ public class Diagram implements Serializable {
                 .collect(Collectors.toList());
     }
 
+    public List<Wire> getLeadingWires(String name, String connectorName){
+
+        return this.wires.stream()
+                .filter(w -> w.getTo_node().equals(name)
+                        && w.getTo_connector().equals(connectorName))
+                .collect(Collectors.toList());
+    }
+
     /**
      * Add a new block
      */
@@ -174,5 +182,15 @@ public class Diagram implements Serializable {
         // todo: verify block has a unique name
 
         this.blocks.add(block);
+    }
+
+    /**
+     * Add a new wire
+     */
+    public void addWire(Wire wire){
+
+        // todo: verify valid wire
+
+        this.wires.add(wire);
     }
 }

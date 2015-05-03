@@ -238,4 +238,24 @@ public class Block implements Serializable {
 
         return (!this.parameters.stream().anyMatch(p -> p.getValue().equals(null)));
     }
+
+    public boolean hasInputConnector(String name){
+
+        return this.hasConnector(name, this.inputConnectors);
+    }
+
+    public Connector getInputConnector(String name){
+
+        return this.getConnector(name, this.inputConnectors);
+    }
+
+    private boolean hasConnector(String name, List<Connector> connectors){
+
+        return (connectors.stream().anyMatch(c -> c.getName().equals(name)));
+    }
+
+    private Connector getConnector(String name, List<Connector> connectors){
+
+        return (connectors.stream().filter(c -> c.getName().equals(name)).findFirst().get());
+    }
 }

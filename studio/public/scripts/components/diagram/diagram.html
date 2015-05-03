@@ -98,6 +98,7 @@
 
         <!-- block configuration button -->
         <g class="block-button-wrapper"
+           ng-if="!isOnline"
            ng-click="toggleBlockConfiguration($event, block);">
 
             <rect class="block-button"
@@ -122,6 +123,7 @@
 
         <!-- block data button -->
         <g class="block-button-wrapper"
+           ng-if="!isOnline"
            ng-click="toggleBlockData($event, block);">
 
             <rect class="block-button"
@@ -145,7 +147,8 @@
         </g>
 
         <g class="block-delete"
-                ng-click="deleteBlock($event, block)">
+           ng-if="!isOnline"
+           ng-click="deleteBlock($event, block)">
 
             <circle class="block-delete-circle"
                     r="12"

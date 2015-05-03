@@ -332,7 +332,7 @@ var analyticsApp = angular.module('analyticsApp',
                 $scope.onlineCanvas = true;
                 $scope.compiling = true;
 
-                // use timeout to testing loading screen
+                // todo: temporarily using timeout to test loading screen
                 $timeout(function(){diagramService.compile($scope.diagramViewModel.data).then(
                     function (data) {
                         $scope.onlineViewModel = new viewmodels.diagramViewModel(data);
@@ -341,8 +341,7 @@ var analyticsApp = angular.module('analyticsApp',
                     function (code) {
                         console.log(code); // TODO show exception
                     }
-                );},
-                2000);
+                );}, 0);
             }
             else if($scope.onlineCanvas && !showOnline){
                 $scope.onlineCanvas = false;

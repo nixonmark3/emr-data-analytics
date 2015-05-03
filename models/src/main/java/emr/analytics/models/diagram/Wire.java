@@ -107,6 +107,16 @@ public class Wire implements Serializable {
      */
     private Wire() {}
 
+    public Wire(String from, String from_connector, int from_index, String to, String to_connector, int to_index){
+
+        this.from_node = from;
+        this.from_connector = from_connector;
+        this.from_connectorIndex = from_index;
+        this.to_node = to;
+        this.to_connector = to_connector;
+        this.to_connectorIndex = to_index;
+    }
+
     /**
      * Private members.
      */
