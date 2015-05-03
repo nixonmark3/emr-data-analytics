@@ -72,6 +72,10 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.evaluating = false;
         // during some operations, we want to blur the background
         $scope.blurBackground = false;
+        // controls whether the offline or online canvas is shown
+        $scope.onlineCanvas = false;
+        // indicates whether the diagram is being compiled
+        $scope.compiling = false;
 
         //
         // load data from the service
@@ -111,6 +115,7 @@ var analyticsApp = angular.module('analyticsApp',
         diagramService.item().then(
             function (data) {
                 $scope.diagramViewModel = new viewmodels.diagramViewModel(data);
+                $scope.onlineViewModel = {};
             },
             function (code) {
                 // todo: show exception
@@ -130,6 +135,16 @@ var analyticsApp = angular.module('analyticsApp',
             }
         );
 
+        // fire the event to begin dragging an element
+        var beginDragEvent = function(x, y, config){
+
+            $scope.$root.$broadcast("beginDrag", {
+                x: x,
+                y: y,
+                config: config
+            });
+        };
+
         // fire the event to create a new block given a definition
         $scope.createBlock = function(x, y, evt, definitionName){
 
@@ -144,11 +159,6 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.toggleDiagrams = function() {
 
             $scope.showSidebar = !$scope.showSidebar;
-        };
-
-        $scope.toggleLibrary = function(){
-
-            $scope.showLibrary = !$scope.showLibrary;
         };
 
         // load an existing diagram
@@ -309,6 +319,74 @@ var analyticsApp = angular.module('analyticsApp',
             }
         };
 
+        /*
+         *
+        */
+        $scope.toggleCanvas = function(showOnline){
+
+            if (!$scope.onlineCanvas && showOnline){
+
+                if ($scope.showLibrary)
+                    hideLibraryBrowser();
+
+                $scope.onlineCanvas = true;
+                $scope.compiling = true;
+
+                // use timeout to testing loading screen
+                $timeout(function(){diagramService.compile($scope.diagramViewModel.data).then(
+                    function (data) {
+                        $scope.onlineViewModel = new viewmodels.diagramViewModel(data);
+                        $scope.compiling = false;
+                    },
+                    function (code) {
+                        console.log(code); // TODO show exception
+                    }
+                );},
+                2000);
+            }
+            else if($scope.onlineCanvas && !showOnline){
+                $scope.onlineCanvas = false;
+            }
+        };
+
+        $scope.toggleLibrary = function(evt){
+
+            if (!$scope.showLibrary) {
+                showLibraryBrowser();
+            }
+            else{
+                hideLibraryBrowser();
+            }
+
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
+
+        var showLibraryBrowser = function(){
+
+            var result = popupService.show({
+                templateUrl: '/assets/scripts/components/diagram/libraryBrowser.html',
+                controller: 'libraryBrowserController',
+                inputs: {
+                    nodes: $scope.nodes,
+                    onDrag: beginDragEvent,
+                    onDrop: $scope.createBlock
+                }
+            }).then(function (popup) {
+
+                $scope.showLibrary = true;
+                $scope.libraryBrowser = popup;
+            });
+        };
+
+        var hideLibraryBrowser = function(){
+
+            $scope.libraryBrowser.controller.close();
+
+            $scope.showLibrary = false;
+            delete $scope.libraryBrowser;
+        };
+
         $scope.toggleDiagramConfiguration = function(evt){
 
             if ($scope.configuringDiagram){
@@ -339,7 +417,6 @@ var analyticsApp = angular.module('analyticsApp',
         var endDiagramConfiguration = function(){
 
             $scope.diagramConfiguration.controller.close();
-
 
             $scope.configuringDiagram = false;
             delete $scope.diagramConfiguration;

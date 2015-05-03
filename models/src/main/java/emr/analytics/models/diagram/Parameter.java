@@ -1,5 +1,7 @@
 package emr.analytics.models.diagram;
 
+import emr.analytics.models.definition.ParameterDefinition;
+
 import java.io.Serializable;
 
 /**
@@ -11,6 +13,12 @@ public class Parameter implements Serializable {
     private boolean collected = false;
 
     private Parameter() {}
+
+    public Parameter(ParameterDefinition parameterDefinition){
+
+        this.name = parameterDefinition.getName();
+        this.value = parameterDefinition.getValue();
+    }
 
     /**
      * Returns the name of this Parameter.
