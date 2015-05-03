@@ -16,6 +16,12 @@ public class Diagram implements Serializable {
     private List<Block> blocks = new ArrayList<Block>();
     private int version = 0;
 
+    public Diagram(String name, String description, String owner){
+        this.name = name;
+        this.description = description;
+        this.owner = owner;
+    }
+
     private Diagram() {}
 
     /**
@@ -158,5 +164,15 @@ public class Diagram implements Serializable {
         return this.wires.stream()
                 .filter(w -> w.getTo_node().equals(name))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Add a new block
+     */
+    public void addBlock(Block block){
+
+        // todo: verify block has a unique name
+
+        this.blocks.add(block);
     }
 }

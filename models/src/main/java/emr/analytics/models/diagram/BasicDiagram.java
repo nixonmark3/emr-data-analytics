@@ -54,6 +54,6 @@ public class BasicDiagram implements Serializable {
     /**
      * Private members.
      */
-    private String name = "Untitled";
+    private String name = "New Diagram";
     private String description = "";
 }

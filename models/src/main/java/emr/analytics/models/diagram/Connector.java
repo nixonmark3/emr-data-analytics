@@ -1,5 +1,7 @@
 package emr.analytics.models.diagram;
 
+import emr.analytics.models.definition.ConnectorDefinition;
+
 import java.io.Serializable;
 
 /**
@@ -65,4 +67,12 @@ public class Connector implements Serializable {
     private String type;
     private String name;
     private String position;
+
+    public Connector(ConnectorDefinition connectorDefinition){
+        this.type = connectorDefinition.getType();
+        this.name = connectorDefinition.getName();
+
+        // todo: position ?
+        this.position = "";
+    }
 }

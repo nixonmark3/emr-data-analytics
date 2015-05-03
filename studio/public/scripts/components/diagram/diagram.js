@@ -10,6 +10,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
             templateUrl: '/assets/scripts/components/diagram/diagram.html',
             scope: {
                 diagram: '=viewModel',
+                isOnline: '=',
                 nodes: '=',
                 library: '=',
                 loadSources: "=",
@@ -58,13 +59,16 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
 
                 $scope.$on("createBlock", function (event, args) {
 
-                    // translate diagram (svg) coordinates into application coordinates
-                    var point = translateCoordinates(args.x, args.y, args.evt);
+                    if (!$scope.isOnline) {
 
-                    var configBlock = getConfigBlock(point.x, point.y, args.definitionName);
+                        // translate diagram (svg) coordinates into application coordinates
+                        var point = translateCoordinates(args.x, args.y, args.evt);
 
-                    // create the block
-                    $scope.diagram.createBlock(configBlock);
+                        var configBlock = getConfigBlock(point.x, point.y, args.definitionName);
+
+                        // create the block
+                        $scope.diagram.createBlock(configBlock);
+                    }
                 });
 
                 var hasClassSVG = function (obj, has) {
@@ -228,7 +232,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
 
                         clicked: function () {
 
-                            block.advanceProgress();
+                            // block.advanceProgress();
                             $scope.$apply(diagram.handleBlockClicked(block));
                         }
                     });

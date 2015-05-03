@@ -1,5 +1,9 @@
 package emr.analytics.models.diagram;
 
+import emr.analytics.models.definition.ConnectorDefinition;
+import emr.analytics.models.definition.Definition;
+import emr.analytics.models.definition.ParameterDefinition;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -172,6 +176,20 @@ public class Block implements Serializable {
      */
     private Block() { }
 
+    public Block(String name, int state, int x, int y, Definition definition){
+
+        this.name = name;
+        this.state = state;
+        this.x = x;
+        this.y = y;
+        this.definition = definition.getName();
+        this.w = definition.getW();
+
+        this.inputConnectors = createConnectors(definition.getInputConnectors());
+        this.outputConnectors = createConnectors(definition.getOutputConnectors());
+        this.parameters = createParameters(definition.getParameters());
+    }
+
     /**
      * Private members.
      */
@@ -185,6 +203,30 @@ public class Block implements Serializable {
     private List<Connector> inputConnectors = new ArrayList<Connector>();
     private List<Connector> outputConnectors = new ArrayList<Connector>();
     private List<Parameter> parameters = new ArrayList<Parameter>();
+
+    private List<Connector> createConnectors(List<ConnectorDefinition> connectorDefinitions){
+
+        List<Connector> connectors = new ArrayList<>();
+        for (ConnectorDefinition connectorDefinition : connectorDefinitions)
+            connectors.add(new Connector(connectorDefinition));
+
+        return connectors;
+    }
+
+    private List<Parameter> createParameters(List<ParameterDefinition> parameterDefinitions){
+
+        List<Parameter> parameters = new ArrayList<>();
+        for (ParameterDefinition parameterDefinition : parameterDefinitions)
+            parameters.add(new Parameter(parameterDefinition));
+
+        return parameters;
+    }
+
+    public void setParameter(String name, Object value){
+
+        Parameter parameter = this.getParameter(name);
+        parameter.setValue(value);
+    }
 
     /**
      * Verifies that this block has been configured

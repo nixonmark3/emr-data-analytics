@@ -1,8 +1,7 @@
 
 <div id="studio-wrapper"
      ng-controller="analyticsController"
-     ng-class="{'show-sidebar': showSidebar, 'blur-background': blurBackground}"
-     draggable>
+     ng-class="{'show-sidebar': showSidebar, 'blur-background': blurBackground}">
 
     <div id="diagrams-menu" class="sidebar-offcanvas">
         <div class="wrapper">
@@ -27,60 +26,87 @@
 
     <div class="navbar">
         <div class="container-fluid">
-            <button type="button" class="btn btn-default navbar-btn" ng-click="toggleDiagrams()">
-                <i class="fa fa-bars"></i>
-            </button>
-            <button type="button" class="btn btn-default navbar-btn" ng-click="toggleLibrary()">
-                <i class="fa fa-th"></i>
-                <span class="navbar-btn-text">Library</span>
-                <i class="fa fa-caret-down"></i>
-            </button>
+            <div class="row">
+                <div class="col-xs-4">
+                    <button type="button" class="btn btn-default navbar-btn pull-left" ng-click="toggleDiagrams()">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <span class="navbar-title">{{diagramViewModel.data.name}}</span>
+                </div>
+                <div class="col-xs-4 navbar-tabs">
+                    <span class="navbar-tab ng-class:{'selected': !onlineCanvas}" ng-click="toggleCanvas(false);">Offline</span>
+                    <span class="navbar-tab ng-class:{'selected': onlineCanvas}" ng-click="toggleCanvas(true);">Online</span>
+                </div>
+                <div class="col-xs-4">
+                    &#160;
+                </div>
+            </div>
         </div>
     </div>
 
-    <browser id="library-browser"
-             ng-if="showLibrary"
-             nodes="nodes"
-             on-drop="createBlock"
-             savable="savable"
-             output="output"
-             ng-cloak>
-    </browser>
+    <div id="studio-container">
 
-    <div id="studio-canvas">
+        <div id="studio-canvases" ng-class="{'flipped': onlineCanvas}">
 
-        <div class="container-fluid">
+            <div id="offline-canvas" class="studio-canvas">
 
-            <div class="row">
+                <div class="library-controls">
+                    <button type="button" class="btn btn-default" ng-click="toggleLibrary($event)">
+                        <i class="fa fa-th"></i>
+                    </button>
+                </div>
 
-                <div id="diagram-container">
+                <div class="studio-controls btn-group">
+                    <button type="button" class="btn btn-default" ng-click="toggleDiagramConfiguration($event)">
+                        <i class="fa fa-wrench"></i>
+                    </button>
+                    <button type="button" class="btn btn-default" ng-click="save($event)">
+                        <i class="fa fa-save"></i>
+                    </button>
+                    <button type="button"
+                            class="btn btn-default ng-class:{ 'diagram-evaluating' : evaluating }"
+                            ng-disabled="evaluating"
+                            ng-click="evaluate($event)">
 
-                    <div id="studio-controls" class="btn-group">
-                        <button type="button" class="btn btn-default" ng-click="toggleDiagramConfiguration($event)">
-                            <i class="fa fa-wrench"></i>
-                        </button>
-                        <button type="button" class="btn btn-default" ng-click="save($event)">
-                            <i class="fa fa-save"></i>
-                        </button>
-                        <button type="button" class="btn btn-default" ng-click="deploy($event)">
-                            <i class="fa fa-rocket"></i>
-                        </button>
-                        <button type="button"
-                                class="btn btn-default ng-class:{ 'diagram-evaluating' : evaluating }"
-                                ng-disabled="evaluating"
-                                ng-click="evaluate($event)">
+                        <i class="fa ng-class:{ 'fa-cog fa-spin': evaluating, 'fa-play': !evaluating }"></i>
+                    </button>
+                </div>
 
-                            <i class="fa ng-class:{ 'fa-cog fa-spin': evaluating, 'fa-play': !evaluating }"></i>
-                        </button>
-                    </div>
+                <div class="diagram-container">
 
                     <diagram view-model="diagramViewModel"
+                             is-online="false"
                              nodes="nodes"
                              library="library"
                              load-sources="loadSources"
                              get-block-data="getBlockData"
                              blur-background="blurBackground"></diagram>
 
+                </div>
+            </div>
+
+            <div id="online-canvas" class="studio-canvas">
+
+                <div class="studio-controls btn-group">
+                    <button type="button" class="btn btn-default" ng-click="deploy($event)">
+                        <i class="fa fa-rocket"></i>
+                    </button>
+                </div>
+
+                <div ng-if="!compiling" class="diagram-container">
+
+                    <diagram view-model="onlineViewModel"
+                             is-online="true"
+                             nodes="nodes"
+                             library="library"
+                             load-sources="loadSources"
+                             get-block-data="getBlockData"
+                             blur-background="blurBackground"></diagram>
+
+                </div>
+
+                <div id="loader-overlay" ng-if="compiling">
+                    <div class="loader"></div>
                 </div>
 
             </div>

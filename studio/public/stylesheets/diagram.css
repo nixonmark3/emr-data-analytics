@@ -3,7 +3,6 @@
  * Diagram
  */
 
-#diagram-container {  }
 #diagram { width: 100%; height: 1000px; }
 
 /*
@@ -135,7 +134,7 @@
 .diagram-properties {
     position: absolute;
     z-index: 1000;
-    top: 126px;
+    top: 120px;
     right: 10px;
     width: 250px;
     height: calc(100% - 144px);

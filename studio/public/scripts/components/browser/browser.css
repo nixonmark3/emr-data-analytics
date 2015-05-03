@@ -1,6 +1,8 @@
 
 
 
+#browser-title { position: relative; width: 100%; height: 50px; }
+#browser-pages { position: relative; width: 100%; }
 .browser-page { position: absolute; width: 100%; height: 100%; top: 0; left: 0; }
 .browser-page.ng-leave { -webkit-animation: slideOutRight 0.4s; }
 .browser-page-enter.ng-enter { -webkit-animation: slideInRight 0.4s; }
@@ -25,5 +27,5 @@
  * Ghost
  */
 
-#ghost { position: absolute; background-color: #ffffff; z-index: 1001; opacity: 0.6; border-radius: 10px; }
+#ghost { position: absolute; background-color: #fff; z-index: 1101; opacity: 0.6; border-radius: 10px; }
 
