@@ -20,7 +20,7 @@
     </defs>
 
     <!-- root connector -->
-    <g ng-if="diagram.blocks.length==0"
+    <g ng-if="!isOnline && diagram.blocks.length==0"
        ng-attr-transform="translate({{diagramWidth/2}})"
        id="root-connector-container"
         ng-click="showLibraryPopup($event)">

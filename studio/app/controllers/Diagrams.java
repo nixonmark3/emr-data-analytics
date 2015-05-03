@@ -10,6 +10,7 @@ import play.mvc.BodyParser;
 import play.mvc.Result;
 
 import org.jongo.*;
+import services.DiagramsService;
 import services.EvaluationService;
 
 import java.util.Map;
@@ -67,6 +68,17 @@ public class Diagrams extends ControllerBase {
         }
 
         return ok("Diagram evaluation initiated.");
+    }
+
+    @BodyParser.Of(BodyParser.Json.class)
+    public static Result compile(){
+        ObjectMapper objectMapper = new ObjectMapper();
+        Diagram offline = objectMapper.convertValue(request().body().asJson(), Diagram.class);
+
+        DiagramsService service = new DiagramsService();
+        Diagram online = service.compile(offline);
+
+        return ok(Json.toJson(online));
     }
 
     /**

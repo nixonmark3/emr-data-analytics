@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('browserApp', ['ngAnimate', 'draggableApp'])
-    .directive('browser', ['$compile', function ($compile) {
+    .directive('browser', ['$document', '$compile', function ($document, $compile) {
 
         return {
             restrict: 'E',
@@ -9,15 +9,19 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
             templateUrl: '/assets/scripts/components/browser/browser.html',
             scope: {
                 nodes: "=",
+                onDrag: "=",
                 onDrop: "=",
                 getConfigBlock: "=",
                 loadSources: "=",
-                savable: "=",
                 output: "="
             },
             link: function($scope, element, attrs){
 
+                var body = $document.find('body');
+
                 $scope.pageIndex = 0;
+
+                $scope.savable = false;
 
                 $scope.pageHeader = [];
 
@@ -37,16 +41,6 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
                         return false;
                     else
                         return true;
-                };
-
-                // fire the event to begin dragging an element
-                var beginDragEvent = function(x, y, config){
-
-                    $scope.$root.$broadcast("beginDrag", {
-                        x: x,
-                        y: y,
-                        config: config
-                    });
                 };
 
                 // set page index
@@ -113,7 +107,7 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
 
                     if($scope.onDrop) {
 
-                        beginDragEvent(evt.pageX, evt.pageY, {
+                        $scope.onDrag(evt.pageX, evt.pageY, {
 
                             dragStarted: function (x, y) {
 
@@ -126,7 +120,7 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
 
                                 // compile and append to the parent
                                 $compile(ghost)($scope);
-                                element.parent().append(ghost);
+                                body.append(ghost);
                             },
 
                             dragging: function (x, y) {
