@@ -95,9 +95,38 @@ public class BlockResultsService {
         return image;
     }
 
-    public static List<String> getOutputResults(String blockName) {
+    public static List<BasicDBObject> getOutputResults(String blockName) {
 
-        return new ArrayList<String>();
+        List<BasicDBObject> outputResults = new ArrayList<BasicDBObject>();
+
+        BasicDBObject results = BlockResultsService.getResults(blockName);
+
+        if (results != null) {
+
+            BasicDBObject blockResults = (BasicDBObject)results.get("Results");
+
+            blockResults.forEach((resultName, resultData) -> {
+
+                BasicDBObject data = new BasicDBObject();
+                data.put("name", resultName);
+
+                if (BasicDBObject.class.isInstance(resultData)) {
+                    data.put("type", "dictOfValues");
+                }
+                else if (BasicDBList.class.isInstance(resultData)) {
+                    data.put("type", "listOfValues");
+                }
+                else {
+                    data.put("type", "singleValue");
+                }
+
+                data.put("data", resultData);
+
+                outputResults.add(data);
+            });
+        }
+
+        return outputResults;
     }
 
 

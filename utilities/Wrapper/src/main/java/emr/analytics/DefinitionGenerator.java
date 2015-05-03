@@ -8,13 +8,16 @@ import java.util.List;
 import emr.analytics.models.definition.*;
 
 public class DefinitionGenerator {
+
     MongoCollection _definitions = null;
 
     public DefinitionGenerator(MongoCollection definitionsCollection) {
+
         this._definitions = definitionsCollection;
     }
 
     public void generate() {
+
         /* ALL ALGORITHMS MUST BE GENERATED WITH THERE CATEGORIES */
         generateDataSources();
         generateFilters();
@@ -22,10 +25,18 @@ public class DefinitionGenerator {
     }
 
     private void generateDataSources() {
+
+        createAddDataSetBlock();
+        createCreateDBBlock();
         createDataBrickBlock();
+        createLoadCSVBlock();
+        createLoadDBBlock();
+        createSaveCSVBlock();
+        createSaveDBBlock();
     }
 
     private void generateFilters() {
+
         createBoxcarAverageBlock();
         createEWMABlock();
         createEWMStDevBlock();
@@ -37,6 +48,7 @@ public class DefinitionGenerator {
     }
 
     private void generateTransformers() {
+
         createColumnsBlock();
         createDownSampleBlock();
         createMergeBlock();
@@ -67,7 +79,7 @@ public class DefinitionGenerator {
                 new ArrayList<String>(),
                 new ParameterSource("Jar",
                         "plugins-1.0-SNAPSHOT.jar",
-                        "Projects",
+                        "Bricks",
                         new ArrayList<Argument>())));
 
         parameters.add(new ParameterDefinition("Query",
@@ -82,76 +94,202 @@ public class DefinitionGenerator {
         _definitions.save(definition);
     }
 
-//    //
-//    // Load Block Definition
-//    //
-//    private void createLoadDBBlock() {
-//        Definition loadDB = new Definition("LoadDB", "Load DB", Category.DATA_SOURCES.toString());
-//
-//        loadDB.setDescription("Loads a data set from a given project");
-//
-//        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-//        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-//        loadDB.setOutputConnectors(outputConnectors);
-//
-//        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-//
-//        parameters.add(new ParameterDefinition("Project",
-//                DataType.LIST.toString(),
-//                "None",
-//                new ArrayList<String>(),
-//                new ParameterSource("Jar",
-//                        "plugins-1.0-SNAPSHOT.jar",
-//                        "Projects",
-//                        new ArrayList<Argument>())));
-//
-//        List<Argument> arguments = new ArrayList<Argument>();
-//        arguments.add(new Argument("Project", 0, "Project.Value"));
-//
-//        parameters.add(new ParameterDefinition("Data Set",
-//                DataType.LIST.toString(),
-//                "None",
-//                new ArrayList<String>(),
-//                new ParameterSource("Jar",
-//                        "plugins-1.0-SNAPSHOT.jar",
-//                        "DataSets",
-//                        arguments)));
-//
-//        loadDB.setParameters(parameters);
-//
-//        _definitions.save(loadDB);
-//    }
-//
-//    //
-//    // Save Block Definition
-//    //
-//    private void createSaveDBBlock() {
-//        Definition saveDB = new Definition("SaveDB", "Save DB", Category.DATA_SOURCES.toString());
-//
-//        saveDB.setDescription("Saves a given data frame");
-//
-//        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
-//        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-//        saveDB.setInputConnectors(inputConnectors);
-//
-//        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-//
-//        parameters.add(new ParameterDefinition("Project",
-//                DataType.STRING.toString(),
-//                "None",
-//                new ArrayList<String>(),
-//                null));
-//
-//        parameters.add(new ParameterDefinition("DataSet",
-//                DataType.STRING.toString(),
-//                "None",
-//                new ArrayList<String>(),
-//                null));
-//
-//        saveDB.setParameters(parameters);
-//
-//        _definitions.save(saveDB);
-//    }
+    //
+    // Load Block Definition
+    //
+    private void createLoadDBBlock() {
+        Definition loadDB = new Definition("LoadDB", "Load DB", Category.DATA_SOURCES.toString());
+
+        loadDB.setDescription("Loads a data set from a given project");
+
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        loadDB.setOutputConnectors(outputConnectors);
+
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+
+        parameters.add(new ParameterDefinition("Project",
+                DataType.LIST.toString(),
+                "None",
+                new ArrayList<String>(),
+                new ParameterSource("Jar",
+                        "plugins-1.0-SNAPSHOT.jar",
+                        "Projects",
+                        new ArrayList<Argument>())));
+
+        List<Argument> arguments = new ArrayList<Argument>();
+        arguments.add(new Argument("Project", 0, "Project.Value"));
+
+        parameters.add(new ParameterDefinition("Data Set",
+                DataType.LIST.toString(),
+                "None",
+                new ArrayList<String>(),
+                new ParameterSource("Jar",
+                        "plugins-1.0-SNAPSHOT.jar",
+                        "DataSets",
+                        arguments)));
+
+        loadDB.setParameters(parameters);
+
+        _definitions.save(loadDB);
+    }
+
+    //
+    // Save Block Definition
+    //
+    private void createSaveDBBlock() {
+        Definition saveDB = new Definition("SaveDB", "Save DB", Category.DATA_SOURCES.toString());
+
+        saveDB.setDescription("Saves a given data frame");
+
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+        saveDB.setInputConnectors(inputConnectors);
+
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        saveDB.setOutputConnectors(outputConnectors);
+
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+
+        parameters.add(new ParameterDefinition("Project",
+                DataType.LIST.toString(),
+                "None",
+                new ArrayList<String>(),
+                new ParameterSource("Jar",
+                        "plugins-1.0-SNAPSHOT.jar",
+                        "Projects",
+                        new ArrayList<Argument>())));
+
+        parameters.add(new ParameterDefinition("Data Set Name",
+                DataType.STRING.toString(),
+                "None",
+                new ArrayList<String>(),
+                null));
+
+        saveDB.setParameters(parameters);
+
+        _definitions.save(saveDB);
+    }
+
+    //
+    // Load Block Definition
+    //
+    private void createLoadCSVBlock() {
+        Definition load = new Definition("LoadCSV", "Load CSV", Category.DATA_SOURCES.toString());
+
+        load.setDescription("Loads a data set from a csv file");
+
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        load.setOutputConnectors(outputConnectors);
+
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+
+        parameters.add(new ParameterDefinition("Filename",
+                DataType.STRING.toString(),
+                "None",
+                new ArrayList<String>(),
+                null));
+
+        load.setParameters(parameters);
+
+        _definitions.save(load);
+    }
+
+    //
+    // Save CSV Block Definition
+    //
+    private void createSaveCSVBlock() {
+        Definition save = new Definition("SaveCSV", "Save CSV", Category.DATA_SOURCES.toString());
+
+        save.setDescription("Saves a given data frame to CSV");
+
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+        save.setInputConnectors(inputConnectors);
+
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        save.setOutputConnectors(outputConnectors);
+
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+
+        parameters.add(new ParameterDefinition("Filename",
+                DataType.STRING.toString(),
+                "None",
+                new ArrayList<String>(),
+                null));
+
+        save.setParameters(parameters);
+
+        _definitions.save(save);
+    }
+
+    //
+    // Create DB Block Definition
+    //
+    private void createCreateDBBlock() {
+        Definition createDB = new Definition("CreateDB", "Create DB", Category.DATA_SOURCES.toString());
+
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+
+        parameters.add(new ParameterDefinition("Filename",
+                DataType.STRING.toString(),
+                "None",
+                new ArrayList<String>(),
+                null));
+
+        parameters.add(new ParameterDefinition("Project Name",
+                DataType.STRING.toString(),
+                "None",
+                new ArrayList<String>(),
+                null));
+
+        parameters.add(new ParameterDefinition("Data Set Name",
+                DataType.STRING.toString(),
+                "None",
+                new ArrayList<String>(),
+                null));
+
+        createDB.setParameters(parameters);
+
+        _definitions.save(createDB);
+    }
+
+    //
+    // Add Data Set Block Definition
+    //
+    private void createAddDataSetBlock() {
+        Definition addDataSet = new Definition("AddDataSet", "Add Data Set", Category.DATA_SOURCES.toString());
+
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+
+        parameters.add(new ParameterDefinition("Filename",
+                DataType.STRING.toString(),
+                "None",
+                new ArrayList<String>(),
+                null));
+
+        parameters.add(new ParameterDefinition("Project Name",
+                DataType.LIST.toString(),
+                "None",
+                new ArrayList<String>(),
+                new ParameterSource("Jar",
+                        "plugins-1.0-SNAPSHOT.jar",
+                        "Projects",
+                        new ArrayList<Argument>())));
+
+        parameters.add(new ParameterDefinition("Data Set Name",
+                DataType.STRING.toString(),
+                "None",
+                new ArrayList<String>(),
+                null));
+
+        addDataSet.setParameters(parameters);
+
+        _definitions.save(addDataSet);
+    }
 
     //
     // Columns Block Definition

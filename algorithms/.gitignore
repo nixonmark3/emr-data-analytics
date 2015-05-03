@@ -1,4 +1,6 @@
 /__pycache__
 /Bricks/__pycache__
+/Projects/__pycache__
+/Exceptions/__pycache__
 /.idea
 *.pyc
