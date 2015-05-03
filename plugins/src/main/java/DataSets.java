@@ -1,8 +1,13 @@
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.MongoClient;
 import emr.analytics.models.definition.Argument;
 import emr.analytics.models.interfaces.DynamicSource;
 
-import java.util.Arrays;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -15,20 +20,40 @@ public class DataSets implements DynamicSource {
         // reference the project name argument
         String projectName = arguments.get(0).getValue();
 
-        return getDataSets().get(projectName);
+        return getDataSets(projectName);
     }
 
-    public HashMap<String, List<String>> getDataSets(){
+    public List<String> getDataSets(String projectName) {
 
-        HashMap<String, List<String>> sets = new HashMap<String, List<String>>();
-        sets.put("Project 1",
-                Arrays.<String>asList("DataSet 1 1", "DataSet 1 2", "DataSet 1 3", "DataSet 1 4"));
-        sets.put("Project 2",
-                Arrays.<String>asList("DataSet 2 1", "DataSet 2 2", "DataSet 2 3", "DataSet 2 4"));
-        sets.put("Project 3",
-                Arrays.<String>asList("DataSet 3 1", "DataSet 3 2", "DataSet 3 3", "DataSet 3 4"));
-        sets.put("Project 4",
-                Arrays.<String>asList("DataSet 4 1", "DataSet 4 2", "DataSet 4 3", "DataSet 4 4"));
+        List<String> sets = new ArrayList<String>();
+
+        try {
+            MongoClient mongoClient = new MongoClient();
+
+            DBCollection dataSetsCollection = mongoClient.getDB("das-" + projectName).getCollection("dataset");
+
+            if (dataSetsCollection != null) {
+
+                DBCursor cursor = dataSetsCollection.find();
+
+                try {
+
+                    while (cursor.hasNext()) {
+
+                        sets.add((String)cursor.next().get("name"));
+                    }
+                }
+                finally {
+
+                    cursor.close();
+                }
+            }
+
+            mongoClient.close();
+        }
+        catch (UnknownHostException exception) {
+            exception.printStackTrace();
+        }
 
         return sets;
     }

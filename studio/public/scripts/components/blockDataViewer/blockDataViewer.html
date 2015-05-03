@@ -45,11 +45,35 @@
 
             <img width="100%" ng-switch-when="Plot" ng-src="data:image/png;base64,{{page.data}}">
 
-            <div ng-switch-when="Results">
-
-                Results
-
+            <div class="results-container" ng-switch-when="Results">
+                <div class="result-container" ng-repeat="result in page.data">
+                    <div class="result-name">
+                        <span class="result-name-text">{{result.name}}</span>
+                    </div>
+                    <div class="result-data" ng-switch on="result.type">
+                        <div class="result-dict-item" ng-repeat="(key, value) in result.data" ng-switch-when="dictOfValues">
+                            <div class="result-dict-item-key">
+                                <span class="result-dict-item-text">{{key}}</span>
+                            </div>
+                            <div class="result-dict-item-value">
+                                <span class="result-dict-item-text">{{value}}</span>
+                            </div>
+                        </div>
+                        <div class="result-list-item" ng-repeat="value in result.data" ng-switch-when="listOfValues">
+                            <div class="result-list-item-index">
+                                <span class="result-item-item-text">{{$index+1}}</span>
+                            </div>
+                            <div class="result-list-item-value">
+                                <span class="result-list-item-text">{{value}}</span>
+                            </div>
+                        </div>
+                        <div class="result-value-item" ng-switch-when="singleValue">
+                            {{result.data}}
+                        </div>
+                    </div>
+                </div>
             </div>
+
         </div>
 
     </div>

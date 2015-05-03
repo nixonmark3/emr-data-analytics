@@ -4,8 +4,6 @@ import play.libs.Json;
 import play.mvc.Result;
 
 import java.util.Base64;
-import java.util.List;
-import java.io.ByteArrayInputStream;
 
 import services.BlockResultsService;
 
@@ -34,8 +32,6 @@ public class BlockResults extends ControllerBase {
 
     public static Result getOutputResults(String blockName) {
 
-        List<String> outputResults = BlockResultsService.getOutputResults(blockName);
-
-        return ok(Json.toJson(outputResults));
+        return ok(Json.toJson(BlockResultsService.getOutputResults(blockName)));
     }
 }

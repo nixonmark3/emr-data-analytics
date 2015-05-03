@@ -1,5 +1,3 @@
-__author__ = 'paulmuston'
-
 import sys
 import pickle
 import pandas as pd
@@ -9,19 +7,15 @@ from pymongo.database import Database
 from bson import ObjectId
 from datetime import datetime, timedelta
 from operator import itemgetter
-#import Pipes.Misc
-
-class NotFoundException(Exception):
-    pass
-
-class ParameterException(Exception):
-    pass
+from Exceptions import NotFoundException
 
 PICKLE_VERSION = 4
 rows_per_brick = 10000
 
+
 class BricksDB:
     bricks_preamble = "bricks-"
+
     def __init__(self, connection, name):
         self.name = name
         self.db = Database(connection, BricksDB.bricks_preamble+name)
@@ -76,6 +70,7 @@ class BricksDB:
             return concat_df.head(n=max_samples)
         else:
             return concat_df
+
 
 class Dataset:
     def __init__(self, bricks_db, name=None, id=None):

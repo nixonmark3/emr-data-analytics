@@ -306,6 +306,16 @@ var analyticsApp = angular.module('analyticsApp',
                         }
                     );
                     break;
+                case "Results":
+                    diagramService.blockOutputResults(key).then(
+                        function(data){
+                            success(data);
+                        },
+                        function (code) {
+                            console.log(code); // TODO show exception
+                        }
+                    );
+                    break;
             }
         };
 
