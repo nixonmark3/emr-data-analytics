@@ -12,8 +12,6 @@ spark-streaming-kafka-assembly_2.10-1.3.1.jar dotproduct.py localhost:2181 runti
 
 from __future__ import print_function
 
-__author__ = 'jkidd'
-
 import sys
 import json
 import numpy as np
@@ -26,20 +24,41 @@ from pyspark.streaming.kafka import KafkaUtils
 # temporarily hardcode url and write tag
 url = "http://172.16.167.130:8000/updatedata/InferredCalc1"
 write_tag = "PICK_INFER_MEAS/INFER1.CV"
+features = ["PICK_P101/PV.CV", "PICK_T101/PV.CV", "PICK_F101/PV.CV"]
+databaseName = "emr-data-analytics-studio"
+collectionName = "results"
+blockName = "Sensitivity1"
+resultName = "scaled_coef"
 
-def evaluateRDD(rdd):
+def evaluateRDD(rdd, model):
     if (rdd.isEmpty() == False):
-        rdd.foreach(evaluate)
+        rdd.foreach(lambda x: evaluate(x, model))
 
-def evaluate(tags):
-    vector = [float(tags[tag]["Val"]) for tag in tags]
-    scalar = np.dot(vector, [1, 1, 1, 1])
+def evaluate(tags, model):
+    # columns
+    vector = []
+    for feature in features:
+        vector.append(float(tags[feature]["Val"]))
+    # pls
+    scalar = np.dot(vector, model)
+    # rest api post
     writeOPCValue(scalar)
 
 def writeOPCValue(value):
     payload = "%s,%.3f" % (write_tag,value)
-    print(payload)
     requests.post(url, data=payload, headers={'content-type': 'text/plain'})
+
+def getModel():
+    from pymongo import MongoClient
+    client = MongoClient()
+    db = client[databaseName]
+    collection = db[collectionName]
+    document = collection.find_one({"name": blockName})
+    results = document["Results"]["Results"][resultName]
+    model = []
+    for data in results:
+        model.append(results[data])
+    return model
 
 if __name__ == "__main__":
 
@@ -47,6 +66,8 @@ if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: dotproduct.py <zk> <topic>", file=sys.stderr)
         exit(-1)
+
+    model = getModel()
 
     # create a spark context and a streaming context
     sc = SparkContext(appName="OPCKafkaConsumer")
@@ -56,7 +77,7 @@ if __name__ == "__main__":
     input = KafkaUtils.createStream(ssc, zkQuorum, "opc-kafka-consumer", {topic: 1})
 
     input.map(lambda x: json.loads(x[1].decode("utf-8")))\
-        .foreachRDD(evaluateRDD)
+        .foreachRDD(lambda rdd: evaluateRDD(rdd, model))
 
     ssc.start()
     ssc.awaitTermination()

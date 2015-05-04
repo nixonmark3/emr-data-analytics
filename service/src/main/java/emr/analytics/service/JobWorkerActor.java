@@ -17,6 +17,7 @@ import scala.concurrent.duration.Duration;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 public class JobWorkerActor extends AbstractActor {
 
@@ -54,10 +55,20 @@ public class JobWorkerActor extends AbstractActor {
             })
             .match(String.class, s -> s.equals("kill"), s -> {
 
+                System.out.println("Kill received.");
+
                 // notify the job status actor that the job is being stopped
                 _jobStatusActor.tell(new JobStopped(job.getId(), job.getJobMode()), self());
             })
             .match(String.class, s -> s.equals("finalize"), s -> {
+
+                System.out.println("Finalize received.");
+
+                Timeout timeout = new Timeout(10, TimeUnit.SECONDS);
+                Await.result(Patterns.ask(_jobExecutionActor, "kill", timeout),
+                    timeout.duration());
+
+                System.out.println("Interrupted.");
 
                 this.cleanup(_builder.getFileName());
 

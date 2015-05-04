@@ -50,8 +50,8 @@ public class JobServiceActor extends AbstractActor {
                 if (idsByDiagram.containsKey(request.getJobId().toString())) {
 
                     String jobName = idsByDiagram.get(request.getJobId().toString());
-                    ActorRef prevJobActor = workers.get(jobName);
-                    prevJobActor.tell("kill", self());
+                    ActorRef jobActor = workers.get(jobName);
+                    jobActor.tell("kill", self());
                 }
             })
             .match(Terminated.class, t -> {

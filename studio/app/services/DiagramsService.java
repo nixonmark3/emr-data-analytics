@@ -79,7 +79,7 @@ public class DiagramsService {
                 Block postBlock = createBlock(this.getWebServicePostBlockDefinition(),
                     3,
                     onlineBlock.getX(),
-                    (onlineBlock.getY() + 100));
+                    (onlineBlock.getY() + 120));
                 online.addBlock(postBlock);
                 online.addWire(new Wire(
                     onlineBlock.getName(),

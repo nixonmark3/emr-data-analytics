@@ -4,6 +4,7 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
+
 import emr.analytics.service.jobs.JobMode;
 import emr.analytics.service.messages.JobCompleted;
 import emr.analytics.service.messages.JobFailed;
@@ -22,6 +23,7 @@ public class JobExecutionActor extends AbstractActor {
     private UUID _jobId;
     private JobMode _mode;
     private ActorRef _jobStatusActor;
+    private Thread _thread = null;
 
     public static Props props(UUID id, JobMode mode, ActorRef jobStatusActor){
 
@@ -41,43 +43,54 @@ public class JobExecutionActor extends AbstractActor {
 
                 System.out.println(builder.toString());
 
-                // execute process
-                try {
-                    Process process = builder.start();
+                _thread = new Thread(() -> {
 
-                    BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                    BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+                    // execute process
+                    try {
+                        Process process = builder.start();
 
-                    String lineRead;
-                    while ((lineRead = in.readLine()) != null) {
-                        _jobStatusActor.tell(new JobProgress(_jobId, _mode, lineRead), self());
-                    }
+                        BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                        BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 
-                    int complete = process.waitFor();
-
-                    if (complete != 0) {
-                        // job failed
-
-                        JobFailed message = new JobFailed(_jobId, _mode);
-                        _jobStatusActor.tell(message, self());
-
-                        while ((lineRead = err.readLine()) != null) {
-
-                            // todo: send status update
-                            System.err.println(lineRead);
+                        String lineRead;
+                        while ((lineRead = in.readLine()) != null) {
+                            _jobStatusActor.tell(new JobProgress(_jobId, _mode, lineRead), self());
                         }
-                    } else {
 
-                        JobCompleted message = new JobCompleted(_jobId, _mode);
-                        _jobStatusActor.tell(message, self());
+                        int complete = process.waitFor();
+
+                        if (complete != 0) {
+                            // job failed
+
+                            JobFailed message = new JobFailed(_jobId, _mode);
+                            _jobStatusActor.tell(message, self());
+
+                            while ((lineRead = err.readLine()) != null) {
+
+                                // todo: send status update
+                                System.err.println(lineRead);
+                            }
+                        } else {
+
+                            JobCompleted message = new JobCompleted(_jobId, _mode);
+                            _jobStatusActor.tell(message, self());
+                        }
+                    } catch (ProcessBuilderException | IOException | InterruptedException ex) {
+
+                        // todo: handle
+                        System.out.println(ex.toString());
                     }
-                } catch (ProcessBuilderException | IOException | InterruptedException ex) {
+                });
+                _thread.start();
 
-                    // todo: handle
-                    System.out.println(ex.toString());
-                }
+            })
+            .match(String.class, s -> s.equals("kill"), s -> {
 
-            }).build()
-        );
+                if (_thread != null)
+                    _thread.interrupt();
+
+                sender().tell("interrupted", self());
+            })
+            .build());
+        }
     }
-}
