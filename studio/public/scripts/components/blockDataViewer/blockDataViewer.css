@@ -91,11 +91,11 @@
 
 .results-container { height: 100%; width: 100%; }
 
-.result-container {
+.result-container-multi-value {
     border-radius: 10px;
     margin: 10px;
     padding: 7px;
-    height: 85px;
+    height: 150px;
     width: calc(100% - 20px);
     border: 1px solid #e5e5e5;
 }
@@ -106,7 +106,7 @@
 
 .result-name-text { display: inline-block; vertical-align: middle; }
 
-.result-data {
+.result-data-multi-value {
     overflow-y: auto;
     height: 100%;
     width: calc(100% - 207px);
@@ -118,7 +118,6 @@
 
 .result-dict-item {
     margin: 10px;
-    border: 1px solid #e5e5e5;
     height: 50px;
     border: 1px solid #e5e5e5;
     border-radius: 5px;
@@ -147,7 +146,6 @@
     margin: 10px;
     border: 1px solid #e5e5e5;
     height: 50px;
-    border: 1px solid #e5e5e5;
     border-radius: 5px;
     vertical-align: middle;
     background: white;
@@ -170,16 +168,32 @@
 
 .result-list-item-text { display: inline-block; vertical-align: middle; }
 
-.result-value-item {
+.result-container-single-value {
+    border-radius: 10px;
+    margin: 10px;
+    padding: 7px;
+    height: 85px;
+    width: calc(100% - 20px);
+    border: 1px solid #e5e5e5;
+}
+
+.result-data-single-value {
+    height: 100%;
+    width: calc(100% - 207px);
+    float: right;
+    border: 1px solid #e5e5e5;
+    border-radius: 5px;
+    background: #f0f0f0;
+}
+
+.result-single-value-item {
     padding-left: 10px;
     margin: 10px;
     border: 1px solid #e5e5e5;
     height: 50px;
-    border: 1px solid #e5e5e5;
     border-radius: 5px;
     vertical-align: middle;
     background: white;
-    vertical-align: middle;
 }
 
-.result-value-item:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
+.result-single-value-item:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
