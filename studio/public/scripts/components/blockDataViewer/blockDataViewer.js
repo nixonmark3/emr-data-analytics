@@ -44,7 +44,14 @@ var blockDataViewerApp = angular.module('blockDataViewerApp', []).directive('blo
                 $scope.setGridWidth = function(columns) {
 
                     if (columns != null) {
-                        return columns.length * 220;
+
+                        var additionalLength = 0;
+
+                        if (columns.length < 3) {
+                            additionalLength++;
+                        }
+
+                        return (columns.length + additionalLength) * 220;
                     }
 
                     return 1000;
@@ -71,23 +78,31 @@ var blockDataViewerApp = angular.module('blockDataViewerApp', []).directive('blo
 
                 };
 
-                var getData = function(){
+                var getData = function() {
 
-                    var page = $scope.pages[$scope.pageIndex];
+                    if ($scope.pages.length != 0) {
 
-                    if (page.data == null) {
-                        $scope.getBlockData(page.name,
-                            $scope.block.name,
-                            function (results) {
+                        var page = $scope.pages[$scope.pageIndex];
 
-                                page.data = results;
-                            });
+                        if (page.data == null) {
+                            $scope.getBlockData(page.name,
+                                $scope.block.name,
+                                function (results) {
+
+                                    page.data = results;
+                                });
+                        }
                     }
-
                 };
 
                 var setPageName = function(){
-                    $scope.pageName = $scope.pages[$scope.pageIndex].name;
+
+                    if ($scope.pages.length == 0) {
+                        $scope.pageName = "";
+                    }
+                    else {
+                        $scope.pageName = $scope.pages[$scope.pageIndex].name;
+                    }
                 };
 
                 init();
