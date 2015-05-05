@@ -1,4 +1,5 @@
 import sys
+import ast
 
 from Projects import Project
 from Projects import Dataset
@@ -19,6 +20,8 @@ class LoadDB(FunctionBlock):
 
             data_set = str(self.parameters['Data Set'])
 
+            plot = ast.literal_eval(self.parameters['Plot'])
+
             if (project == 'None') | (data_set == 'None'):
                 FunctionBlock.report_status_configure(self)
                 return {'{0}/{1}'.format(self.name, 'out'): None}
@@ -31,7 +34,7 @@ class LoadDB(FunctionBlock):
 
             connection.close()
 
-            FunctionBlock.save_results(self, df=df, statistics=True, plot=True)
+            FunctionBlock.save_results(self, df=df, statistics=True, plot=plot)
             FunctionBlock.report_status_complete(self)
 
             return {'{0}/{1}'.format(self.name, 'out'): df}

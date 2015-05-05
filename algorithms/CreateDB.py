@@ -32,7 +32,7 @@ class CreateDB(FunctionBlock):
 
             connection.close()
 
-            FunctionBlock.save_results(self, df=df, statistics=True, plot=True)
+            FunctionBlock.save_results(self, df=df, statistics=True, plot=False)
             FunctionBlock.report_status_complete(self)
 
             return {'{0}'.format(self.name): None}

@@ -1,5 +1,6 @@
 import sys
 import pandas as pd
+import ast
 
 from FunctionBlock import FunctionBlock
 
@@ -15,9 +16,11 @@ class LoadCSV(FunctionBlock):
 
             filename = self.parameters['Filename']
 
+            plot = ast.literal_eval(self.parameters['Plot'])
+
             df = pd.read_csv(filename, parse_dates=True, index_col=0)
 
-            FunctionBlock.save_results(self, df=df, statistics=True, plot=True)
+            FunctionBlock.save_results(self, df=df, statistics=True, plot=plot)
             FunctionBlock.report_status_complete(self)
 
             return {'{0}/{1}'.format(self.name, 'out'): df}
