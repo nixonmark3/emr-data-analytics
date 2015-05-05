@@ -13,8 +13,10 @@ public class Projects implements DynamicSource {
     public List<String> Execute(List<Argument> arguments) {
         List<String> projectNames = new ArrayList<String>();
 
+        MongoClient mongoClient = null;
+
         try {
-            MongoClient mongoClient = new MongoClient();
+            mongoClient = new MongoClient();
             for (String databaseName : mongoClient.getDatabaseNames()) {
                 if (databaseName.contains(PROJECT_PREFIX)) {
                     projectNames.add(databaseName.replace(PROJECT_PREFIX, ""));
@@ -23,6 +25,11 @@ public class Projects implements DynamicSource {
         }
         catch (UnknownHostException exception) {
             exception.printStackTrace();
+        }
+        finally {
+            if (mongoClient != null) {
+                mongoClient.close();
+            }
         }
 
         return projectNames;

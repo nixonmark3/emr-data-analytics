@@ -12,22 +12,25 @@ public class Bricks implements DynamicSource {
 
         public List<String> Execute(List< Argument > arguments) {
         List<String> projectNames = new ArrayList<String>();
-
+        MongoClient mongoClient =null;
         try {
-            MongoClient mongoClient = new MongoClient();
+
+            mongoClient = new MongoClient();
             for (String databaseName : mongoClient.getDatabaseNames()) {
                 if (databaseName.contains(PROJECT_PREFIX)) {
                     projectNames.add(databaseName.replace(PROJECT_PREFIX, ""));
                 }
             }
-            mongoClient.close();
         }
         catch (UnknownHostException exception) {
             exception.printStackTrace();
         }
+        finally {
+            if (mongoClient != null) {
+                mongoClient.close();
+            }
+        }
 
-        System.out.println("Bricks called!");
         return projectNames;
     }
-
 }
