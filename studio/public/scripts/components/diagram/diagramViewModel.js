@@ -732,6 +732,10 @@ viewmodels.diagramViewModel = function(data) {
 
         var block = this.findBlock(configBlock.uniqueName);
 
+        if (configBlock.name) {
+            block.data.name = configBlock.name;
+        }
+
         var configured = true;
         var dirty = false;
         configBlock.parameters.forEach(function(configParameter){

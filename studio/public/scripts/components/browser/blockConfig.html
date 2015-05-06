@@ -1,4 +1,13 @@
 <div>
+    <div class="block-parameter">
+        <label>Block Name</label>
+        <div class="input-group">
+            <span class="input-group-addon">
+                <i class="fa fa-file-text-o"></i>
+            </span>
+            <input class="form-control" type="text" ng-model="block.name" pattern="[a-zA-Z0-9_]+" />
+        </div>
+    </div>
     <div class="block-parameter"
          ng-repeat="parameter in block.parameters">
         <label>{{parameter.name()}}</label>

@@ -70,6 +70,7 @@ public class SourceBlocks {
     public class SourceBlock {
         public String name;
         public String uniqueName;
+        public String variableName;
         public String definitionName;
         public String parameters;
         public String inputs;
@@ -77,6 +78,7 @@ public class SourceBlocks {
         public SourceBlock(Definition definition, Block block, List<Wire> wires) {
             name = block.getName();
             uniqueName = block.getUniqueName();
+            variableName = createVariableNameFromUniqueName(block.getUniqueName());
             definitionName = block.getDefinition();
 
             // todo: string builders
@@ -200,6 +202,13 @@ public class SourceBlocks {
         }
 
         return definitionMap;
+    }
+
+    private String createVariableNameFromUniqueName(String uniqueName) {
+        StringBuilder variableName = new StringBuilder();
+        variableName.append('_');
+        variableName.append(uniqueName.replaceAll("-", "_"));
+        return variableName.toString();
     }
 }
 
