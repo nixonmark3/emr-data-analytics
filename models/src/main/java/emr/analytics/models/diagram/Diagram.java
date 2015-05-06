@@ -152,7 +152,7 @@ public class Diagram implements Serializable {
                 .collect(Collectors.toList());
 
         return this.blocks.stream()
-                .filter(b -> names.contains(b.getName()))
+                .filter(b -> names.contains(b.getUniqueName()))
                 .collect(Collectors.toList());
     }
 

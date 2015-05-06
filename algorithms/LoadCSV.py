@@ -7,8 +7,8 @@ from FunctionBlock import FunctionBlock
 
 class LoadCSV(FunctionBlock):
 
-    def __init__(self, name):
-        FunctionBlock.__init__(self, name)
+    def __init__(self, name, unique_name):
+        FunctionBlock.__init__(self, name, unique_name)
 
     def execute(self, results_table):
         try:
@@ -23,7 +23,7 @@ class LoadCSV(FunctionBlock):
             FunctionBlock.save_results(self, df=df, statistics=True, plot=plot)
             FunctionBlock.report_status_complete(self)
 
-            return {'{0}/{1}'.format(self.name, 'out'): df}
+            return {FunctionBlock.getFullPath(self, 'out'): df}
 
         except Exception as err:
             FunctionBlock.save_results(self)

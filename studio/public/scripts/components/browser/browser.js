@@ -216,7 +216,7 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
                                 }
                                 else if (argument.type === 1) { // represents a block name
 
-                                    argument.value = $scope.block.name;
+                                    argument.value = $scope.block.uniqueName;
                                 }
                             });
 

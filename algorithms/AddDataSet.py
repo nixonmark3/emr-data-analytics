@@ -9,8 +9,8 @@ from FunctionBlock import FunctionBlock
 
 class AddDataSet(FunctionBlock):
 
-    def __init__(self, name):
-        FunctionBlock.__init__(self, name)
+    def __init__(self, name, unique_name):
+        FunctionBlock.__init__(self, name, unique_name)
 
     def execute(self, results_table):
         try:
@@ -35,7 +35,7 @@ class AddDataSet(FunctionBlock):
             FunctionBlock.save_results(self, df=df, statistics=True, plot=False)
             FunctionBlock.report_status_complete(self)
 
-            return {'{0}'.format(self.name): None}
+            return {'{0}'.format(self.unique_name): None}
 
         except Exception as err:
             FunctionBlock.save_results(self)

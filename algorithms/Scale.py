@@ -6,8 +6,8 @@ from FunctionBlock import FunctionBlock
 
 class Scale(FunctionBlock):
 
-    def __init__(self, name):
-        FunctionBlock.__init__(self, name)
+    def __init__(self, name, unique_name):
+        FunctionBlock.__init__(self, name, unique_name)
 
     def execute(self, results_table):
         try:
@@ -25,7 +25,7 @@ class Scale(FunctionBlock):
 
             FunctionBlock.report_status_complete(self)
 
-            return {'{0}/{1}'.format(self.name, 'out'): scale_df}
+            return {FunctionBlock.getFullPath(self, 'out'): scale_df}
 
         except Exception as err:
             FunctionBlock.save_results(self)

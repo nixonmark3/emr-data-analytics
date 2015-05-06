@@ -69,12 +69,14 @@ public class SourceBlocks {
 
     public class SourceBlock {
         public String name;
+        public String uniqueName;
         public String definitionName;
         public String parameters;
         public String inputs;
 
         public SourceBlock(Definition definition, Block block, List<Wire> wires) {
             name = block.getName();
+            uniqueName = block.getUniqueName();
             definitionName = block.getDefinition();
 
             // todo: string builders

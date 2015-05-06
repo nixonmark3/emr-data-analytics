@@ -27,8 +27,8 @@ def json_to_query(json_str):
 
 class DataBrick(FunctionBlock):
 
-    def __init__(self, name):
-        FunctionBlock.__init__(self, name)
+    def __init__(self, name, unique_name):
+        FunctionBlock.__init__(self, name, unique_name)
 
     def execute(self, results_table):
         try:
@@ -41,7 +41,7 @@ class DataBrick(FunctionBlock):
 
             if (project == 'None') | (query == 'None'):
                 FunctionBlock.report_status_configure(self)
-                return {'{0}/{1}'.format(self.name, 'out'): None}
+                return {FunctionBlock.getFullPath(self, 'out'): None}
 
             # Now we are ready to run the algorithm
             connection = MongoClient()
@@ -63,7 +63,7 @@ class DataBrick(FunctionBlock):
             connection.close()
 
             # Return data so that next block can consume it
-            return {'{0}/{1}'.format(self.name, 'out'): df}
+            return {FunctionBlock.getFullPath(self, 'out'): df}
 
         except Exception as err:
             # save results and report block state is bad

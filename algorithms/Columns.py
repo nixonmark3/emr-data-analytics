@@ -6,8 +6,8 @@ from FunctionBlock import FunctionBlock
 
 class Columns(FunctionBlock):
 
-    def __init__(self, name):
-        FunctionBlock.__init__(self, name)
+    def __init__(self, name, unique_name):
+        FunctionBlock.__init__(self, name, unique_name)
 
     def execute(self, results_table):
         try:
@@ -24,7 +24,7 @@ class Columns(FunctionBlock):
             if len(columns) == 0:
                 FunctionBlock.save_results(self)
                 FunctionBlock.report_status_configure(self)
-                return {'{0}/{1}'.format(self.name, 'out'): None}
+                return {'{0}/{1}'.format(self.unique_name, 'out'): None}
 
             df = df[columns]
 
@@ -32,7 +32,7 @@ class Columns(FunctionBlock):
 
             FunctionBlock.report_status_complete(self)
 
-            return {'{0}/{1}'.format(self.name, 'out'): df}
+            return {'{0}/{1}'.format(self.unique_name, 'out'): df}
 
         except Exception as err:
             FunctionBlock.save_results(self)

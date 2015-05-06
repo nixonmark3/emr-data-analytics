@@ -62,7 +62,7 @@ var blockDataViewerApp = angular.module('blockDataViewerApp', []).directive('blo
                     $timeout(function(){
 
                         $scope.getBlockData('Pages',
-                            $scope.block.name,
+                            $scope.block.uniqueName,
                             function(results){
 
                                 $scope.pages = [];
@@ -86,7 +86,7 @@ var blockDataViewerApp = angular.module('blockDataViewerApp', []).directive('blo
 
                         if (page.data == null) {
                             $scope.getBlockData(page.name,
-                                $scope.block.name,
+                                $scope.block.uniqueName,
                                 function (results) {
 
                                     page.data = results;
