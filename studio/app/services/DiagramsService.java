@@ -198,8 +198,14 @@ public class DiagramsService {
                 block = destination.getBlock(_dataSources.get(block.getName()));
             }
             else {
-                block = createBlock(this.getKafkaBlockDefinition(), block.getState(), block.getX(), block.getY());
+                String name = block.getName();
+                int state = block.getState();
+                int x = block.getX();
+                int y = block.getY();
+                block = createBlock(this.getKafkaBlockDefinition(), state, x, y);
                 destination.addBlock(block);
+
+                _dataSources.put(name, block.getName());
             }
 
             wire.setFrom_node(block.getName());

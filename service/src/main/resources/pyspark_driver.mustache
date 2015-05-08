@@ -1,15 +1,5 @@
 {{=<% %>=}}
 
-"""
-Spark streaming job that monitors a specified kafka topic for opc json and performs dot product
-
-Usage: dotproduct.py <zk> <topic>
-To run locally, you must start kafka, create a topic, and produce opc json
-Example:
-$SPARK_HOME/bin/spark-submit --jars $SPARK_HOME/external/kafka-assembly/\
-spark-streaming-kafka-assembly_2.10-1.3.1.jar dotproduct.py localhost:2181 runtime
-"""
-
 from __future__ import print_function
 
 import sys

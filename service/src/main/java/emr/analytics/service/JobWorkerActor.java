@@ -68,8 +68,6 @@ public class JobWorkerActor extends AbstractActor {
                 Await.result(Patterns.ask(_jobExecutionActor, "kill", timeout),
                     timeout.duration());
 
-                System.out.println("Interrupted.");
-
                 this.cleanup(_builder.getFileName());
 
                 self().tell(PoisonPill.getInstance(), self());

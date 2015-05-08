@@ -86,8 +86,10 @@ public class JobExecutionActor extends AbstractActor {
             })
             .match(String.class, s -> s.equals("kill"), s -> {
 
-                if (_thread != null)
+                if (_thread != null && _thread.isAlive()) {
                     _thread.interrupt();
+                    System.out.println("Interrupted.");
+                }
 
                 sender().tell("interrupted", self());
             })
