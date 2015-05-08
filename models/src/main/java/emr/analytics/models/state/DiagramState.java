@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class DiagramState {
+
     private String name = "";
     private int state = 0;
     private UUID jobId = null;
@@ -55,7 +56,7 @@ public class DiagramState {
         DiagramState diagramState = new DiagramState(diagram.getName(), jobId);
 
         List<BlockState> blockStateList = new ArrayList<BlockState>();
-        diagram.getBlocks().stream().forEach(b -> blockStateList.add(new BlockState(b.getName(), b.getState())));
+        diagram.getBlocks().stream().forEach(b -> blockStateList.add(new BlockState(b.getUniqueName(), b.getName(), b.getState())));
 
         diagramState.setBlockStates(blockStateList);
 

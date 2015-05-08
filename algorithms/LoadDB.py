@@ -1,4 +1,5 @@
 import sys
+import ast
 
 from Projects import Project
 from Projects import Dataset
@@ -8,8 +9,8 @@ from FunctionBlock import FunctionBlock
 
 class LoadDB(FunctionBlock):
 
-    def __init__(self, name):
-        FunctionBlock.__init__(self, name)
+    def __init__(self, name, unique_name):
+        FunctionBlock.__init__(self, name, unique_name)
 
     def execute(self, results_table):
         try:
@@ -19,9 +20,11 @@ class LoadDB(FunctionBlock):
 
             data_set = str(self.parameters['Data Set'])
 
+            plot = ast.literal_eval(self.parameters['Plot'])
+
             if (project == 'None') | (data_set == 'None'):
                 FunctionBlock.report_status_configure(self)
-                return {'{0}/{1}'.format(self.name, 'out'): None}
+                return {FunctionBlock.getFullPath(self, 'out'): None}
 
             connection = MongoClient()
             project = Project.Create(connection, name=project)
@@ -31,10 +34,10 @@ class LoadDB(FunctionBlock):
 
             connection.close()
 
-            FunctionBlock.save_results(self, df=df, statistics=True, plot=True)
+            FunctionBlock.save_results(self, df=df, statistics=True, plot=plot)
             FunctionBlock.report_status_complete(self)
 
-            return {'{0}/{1}'.format(self.name, 'out'): df}
+            return {FunctionBlock.getFullPath(self, 'out'): df}
 
         except Exception as err:
             FunctionBlock.save_results(self)

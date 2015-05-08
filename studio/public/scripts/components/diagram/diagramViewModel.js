@@ -99,6 +99,13 @@ viewmodels.blockViewModel = function (data) {
     };
 
     //
+    // Unique Name of the block
+    //
+    this.uniqueName = function () {
+        return this.data.uniqueName;
+    };
+
+    //
     // X coordinate of the block
     //
     this.x = function () {
@@ -495,7 +502,7 @@ viewmodels.diagramViewModel = function(data) {
         if (blocksData) {
             for (var i = 0; i < blocksData.length; ++i) {
 
-                blockNames[blocksData[i].name] = true;
+                blockNames[blocksData[i].uniqueName] = true;
 
                 models.push(new viewmodels.blockViewModel(blocksData[i]));
             }
@@ -518,7 +525,7 @@ viewmodels.diagramViewModel = function(data) {
 
         for (var i = 0; i < this.blocks.length; ++i) {
             var block = this.blocks[i];
-            if (block.data.name == name) {
+            if (block.data.uniqueName == name) {
                 return block;
             }
         }
@@ -679,10 +686,10 @@ viewmodels.diagramViewModel = function(data) {
         }
 
         var wireDataModel = {
-            from_node: (startConnectorType == 'output') ? startBlock.data.name : endBlock.data.name,
+            from_node: (startConnectorType == 'output') ? startBlock.data.uniqueName : endBlock.data.uniqueName,
             from_connectorIndex: (startConnectorType == 'output') ? startConnectorIndex : endConnectorIndex,
             from_connector: (startConnectorType == 'output') ? startConnector.name() : endConnector.name(),
-            to_node: (startConnectorType == 'output') ? endBlock.data.name : startBlock.data.name,
+            to_node: (startConnectorType == 'output') ? endBlock.data.uniqueName : startBlock.data.uniqueName,
             to_connectorIndex: (startConnectorType == 'output') ? endConnectorIndex : startConnectorIndex,
             to_connector: (startConnectorType == 'output') ? endConnector.name() : startConnector.name()
         };
@@ -723,7 +730,11 @@ viewmodels.diagramViewModel = function(data) {
 
     this.updateBlock = function(configBlock){
 
-        var block = this.findBlock(configBlock.name);
+        var block = this.findBlock(configBlock.uniqueName);
+
+        if (configBlock.name) {
+            block.data.name = configBlock.name;
+        }
 
         var configured = true;
         var dirty = false;
@@ -755,6 +766,7 @@ viewmodels.diagramViewModel = function(data) {
 
         // initialize block properties
         this.name = generateBlockName(definition.name);
+        this.uniqueName = generateUniqueName();
         this.definition = definition.name;
         this.x = x;
         this.y = y;
@@ -768,6 +780,7 @@ viewmodels.diagramViewModel = function(data) {
     var DataBlock = function(configBlock){
 
         this.name = configBlock.name;
+        this.uniqueName = configBlock.uniqueName;
         this.definition = configBlock.definition.name;
         this.state = 0;
         this.w = configBlock.definition.w;
@@ -811,6 +824,17 @@ viewmodels.diagramViewModel = function(data) {
         blockNames[name] = true;
 
         return name;
+    };
+
+    var generateUniqueName = function() {
+
+        var delim = "-";
+
+        function S4() {
+            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+        }
+
+        return (S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4());
     };
 
     //
@@ -934,7 +958,7 @@ viewmodels.diagramViewModel = function(data) {
             else {
                 // Keep track of blocks that were deleted, so their wires can also
                 // be deleted.
-                deletedBlocks.push(block.data.name);
+                deletedBlocks.push(block.data.uniqueName);
             }
         }
 
@@ -1050,6 +1074,7 @@ viewmodels.diagramViewModel = function(data) {
 viewmodels.configuringBlockViewModel = function (definition, block) {
 
     this.name = block.name;
+    this.uniqueName = block.uniqueName;
     this.x = block.x;
     this.y = block.y;
     this.state = block.state;

@@ -13,7 +13,7 @@ import java.util.List;
 
 public class DataSets implements DynamicSource {
 
-    public List<String> Execute(List<Argument> arguments){
+    public List<String> Execute(List<Argument> arguments) {
 
         // todo: perform some validation on the arguments received
 
@@ -27,8 +27,10 @@ public class DataSets implements DynamicSource {
 
         List<String> sets = new ArrayList<String>();
 
+        MongoClient mongoClient = null;
+
         try {
-            MongoClient mongoClient = new MongoClient();
+            mongoClient = new MongoClient();
 
             DBCollection dataSetsCollection = mongoClient.getDB("das-" + projectName).getCollection("dataset");
 
@@ -37,22 +39,24 @@ public class DataSets implements DynamicSource {
                 DBCursor cursor = dataSetsCollection.find();
 
                 try {
-
                     while (cursor.hasNext()) {
-
                         sets.add((String)cursor.next().get("name"));
                     }
                 }
                 finally {
-
-                    cursor.close();
+                    if (cursor != null) {
+                        cursor.close();
+                    }
                 }
             }
-
-            mongoClient.close();
         }
         catch (UnknownHostException exception) {
             exception.printStackTrace();
+        }
+        finally {
+            if (mongoClient != null) {
+                mongoClient.close();
+            }
         }
 
         return sets;

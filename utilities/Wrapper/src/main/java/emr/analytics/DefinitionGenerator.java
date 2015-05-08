@@ -129,6 +129,16 @@ public class DefinitionGenerator {
                         "DataSets",
                         arguments)));
 
+        List<String> opts = new ArrayList<String>();
+        opts.add("True");
+        opts.add("False");
+
+        parameters.add(new ParameterDefinition("Plot",
+                DataType.LIST.toString(),
+                "False",
+                opts,
+                null));
+
         loadDB.setParameters(parameters);
 
         _definitions.save(loadDB);
@@ -190,6 +200,16 @@ public class DefinitionGenerator {
                 DataType.STRING.toString(),
                 "None",
                 new ArrayList<String>(),
+                null));
+
+        List<String> opts = new ArrayList<String>();
+        opts.add("True");
+        opts.add("False");
+
+        parameters.add(new ParameterDefinition("Plot",
+                DataType.LIST.toString(),
+                "False",
+                opts,
                 null));
 
         load.setParameters(parameters);

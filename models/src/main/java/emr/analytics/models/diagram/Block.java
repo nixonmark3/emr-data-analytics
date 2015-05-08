@@ -12,6 +12,35 @@ import java.util.List;
  * Jackson schema for Diagram Block.
  */
 public class Block implements Serializable {
+
+    private boolean configured;
+    private String name;
+    private String uniqueName;
+    private String definition;
+    private int state;
+    private int x;
+    private int y;
+    private int w;
+    private List<Connector> inputConnectors = new ArrayList<Connector>();
+    private List<Connector> outputConnectors = new ArrayList<Connector>();
+    private List<Parameter> parameters = new ArrayList<Parameter>();
+
+    private Block() { }
+
+    public Block(String name, int state, int x, int y, Definition definition){
+
+        this.name = name;
+        this.state = state;
+        this.x = x;
+        this.y = y;
+        this.definition = definition.getName();
+        this.w = definition.getW();
+
+        this.inputConnectors = createConnectors(definition.getInputConnectors());
+        this.outputConnectors = createConnectors(definition.getOutputConnectors());
+        this.parameters = createParameters(definition.getParameters());
+    }
+
     /**
      * Returns the name of this Block.
      * @return block name
@@ -26,6 +55,22 @@ public class Block implements Serializable {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * Returns the unique name of this Block.
+     * @return get unique block name
+     */
+    public String getUniqueName() {
+        return uniqueName;
+    }
+
+    /**
+     * Sets the unique name of this Block.
+     * @param uniqueName block unique name
+     */
+    public void setUniqueName(String uniqueName) {
+        this.uniqueName = uniqueName;
     }
 
     /**
@@ -170,39 +215,6 @@ public class Block implements Serializable {
     public void setConfigured(boolean configured) {
         this.configured = configured;
     }
-
-    /**
-     * Hidden Jackson constructor.
-     */
-    private Block() { }
-
-    public Block(String name, int state, int x, int y, Definition definition){
-
-        this.name = name;
-        this.state = state;
-        this.x = x;
-        this.y = y;
-        this.definition = definition.getName();
-        this.w = definition.getW();
-
-        this.inputConnectors = createConnectors(definition.getInputConnectors());
-        this.outputConnectors = createConnectors(definition.getOutputConnectors());
-        this.parameters = createParameters(definition.getParameters());
-    }
-
-    /**
-     * Private members.
-     */
-    private boolean configured;
-    private String name;
-    private String definition;
-    private int state;
-    private int x;
-    private int y;
-    private int w;
-    private List<Connector> inputConnectors = new ArrayList<Connector>();
-    private List<Connector> outputConnectors = new ArrayList<Connector>();
-    private List<Parameter> parameters = new ArrayList<Parameter>();
 
     private List<Connector> createConnectors(List<ConnectorDefinition> connectorDefinitions){
 

@@ -1,6 +1,5 @@
 package services;
 
-import com.mongodb.MongoClient;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBList;
 import com.mongodb.DB;
@@ -13,6 +12,9 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+
+import plugins.MongoDBPlugin;
+
 
 public class BlockResultsService {
 
@@ -50,9 +52,11 @@ public class BlockResultsService {
 
                     if (statistic.contains("25")) {
                         statistic = "twentyFive";
-                    } else if (statistic.contains("50")) {
+                    }
+                    else if (statistic.contains("50")) {
                         statistic = "fifty";
-                    } else if (statistic.contains("75")) {
+                    }
+                    else if (statistic.contains("75")) {
                         statistic = "seventyFive";
                     }
 
@@ -71,8 +75,9 @@ public class BlockResultsService {
         byte[] image = null;
 
         try {
+            MongoDBPlugin mongoPlugin = MongoDBPlugin.getMongoDbPlugin();
 
-            DB db = new MongoClient().getDB("emr-data-analytics-studio");
+            DB db = mongoPlugin.getMongoDBInstance(mongoPlugin.getStudioDatabaseName());
 
             GridFS gridFS = new GridFS(db);
 
@@ -137,31 +142,35 @@ public class BlockResultsService {
         try {
 
             BasicDBObject query = new BasicDBObject("name", blockName);
-            DBCollection resultsCollection = new MongoClient().getDB("emr-data-analytics-studio").getCollection("results");
+
+            MongoDBPlugin mongoPlugin = MongoDBPlugin.getMongoDbPlugin();
+
+            DB db = mongoPlugin.getMongoDBInstance(mongoPlugin.getStudioDatabaseName());
+
+            DBCollection resultsCollection = db.getCollection("results");
 
             if (resultsCollection != null) {
 
                 DBCursor cursor = resultsCollection.find(query);
 
                 try {
-
                     while (cursor.hasNext()) {
-
                         results = (BasicDBObject) cursor.next().get("Results");
                     }
-                } finally {
-
-                    cursor.close();
+                }
+                finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
                 }
             }
         }
-        catch (UnknownHostException exception) {
+        catch (Exception exception) {
 
             exception.printStackTrace();
         }
 
         return results;
-
     }
 
     private static byte[] toByteArray(GridFSDBFile file) throws IOException {

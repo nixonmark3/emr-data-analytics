@@ -10,31 +10,32 @@ from abc import ABCMeta, abstractmethod
 
 class FunctionBlock():
 
-    def __init__(self, name):
+    def __init__(self, name, unique_name):
         __metaclass__ = ABCMeta
         self.name = name
+        self.unique_name = unique_name
         self.input_connectors = {}
         self.parameters = {}
-        self.results = {'name': self.name}
+        self.results = {'name': self.unique_name, 'friendly_name': self.name}
 
     @abstractmethod
     def execute(self, results_table):
         pass
 
     def report_status_configure(self):
-        print('{0},{1}'.format(self.name, '0'))
+        print('{0},{1}'.format(self.unique_name, '0'))
         sys.stdout.flush()
 
     def report_status_executing(self):
-        print('{0},{1}'.format(self.name, '2'))
+        print('{0},{1}'.format(self.unique_name, '2'))
         sys.stdout.flush()
 
     def report_status_complete(self):
-        print('{0},{1}'.format(self.name, '3'))
+        print('{0},{1}'.format(self.unique_name, '3'))
         sys.stdout.flush()
 
     def report_status_failure(self):
-        print('{0},{1}'.format(self.name, '4'))
+        print('{0},{1}'.format(self.unique_name, '4'))
         sys.stdout.flush()
 
     def save_results(self, df=None, statistics=False, plot=False, results=None):
@@ -51,8 +52,8 @@ class FunctionBlock():
             fs = gridfs.GridFS(db)
 
             # delete the old plot if it exists
-            if fs.exists(filename=self.name):
-                fp = fs.get_last_version(self.name)
+            if fs.exists(filename=self.unique_name):
+                fp = fs.get_last_version(self.unique_name)
                 fs.delete(fp._id)
 
             # Generate plot
@@ -60,19 +61,19 @@ class FunctionBlock():
             ax.legend(loc='best', fancybox=True, shadow=True, prop={'size': 7})
             ax.tick_params(axis='both', which='major', labelsize=8)
             fig = ax.get_figure()
-            fig.savefig('{0}.png'.format(self.name), dpi=100)
+            fig.savefig('{0}.png'.format(self.unique_name), dpi=100)
             plt.close(fig)
 
             # Save plot using GridFS
-            with open('{0}.png'.format(self.name), 'rb') as f:
+            with open('{0}.png'.format(self.unique_name), 'rb') as f:
                 png = f.read()
 
-            stored = fs.put(png, filename=self.name)
+            stored = fs.put(png, filename=self.unique_name)
 
             # Remove the generate plot file
-            os.remove('{0}.png'.format(self.name))
+            os.remove('{0}.png'.format(self.unique_name))
 
-            block_results['Plot'] = {'name': self.name, 'ID': stored}
+            block_results['Plot'] = {'name': self.unique_name, 'ID': stored}
 
         if results:
             block_results['Results'] = results
@@ -80,7 +81,7 @@ class FunctionBlock():
         self.results['Results'] = block_results
 
         results = db['results']
-        results.update({'name': self.name}, self.results, upsert=True)
+        results.update({'name': self.unique_name}, self.results, upsert=True)
 
         connection.close()
 
@@ -89,4 +90,7 @@ class FunctionBlock():
             FunctionBlock.report_status_failure(self)
             FunctionBlock.save_results(self)
             print("Too many wires connected to in connector!", file=sys.stderr)
-            return {'{0}/{1}'.format(self.name, 'out'): None}
+            return {'{0}'.format(self.unique_name): None}
+
+    def getFullPath(self, parameter_name):
+        return '{0}/{1}'.format(self.unique_name, parameter_name)

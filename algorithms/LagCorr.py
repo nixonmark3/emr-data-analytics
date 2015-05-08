@@ -8,8 +8,8 @@ from FunctionBlock import FunctionBlock
 
 class LagCorr(FunctionBlock):
 
-    def __init__(self, name):
-        FunctionBlock.__init__(self, name)
+    def __init__(self, name, unique_name):
+        FunctionBlock.__init__(self, name, unique_name)
 
     def execute(self, results_table):
         try:
@@ -63,7 +63,7 @@ class LagCorr(FunctionBlock):
 
             FunctionBlock.report_status_complete(self)
 
-            return {'{0}/{1}'.format(self.name, 'out'): df_result}
+            return {FunctionBlock.getFullPath(self, 'out'): df_result}
 
         except Exception as err:
             FunctionBlock.save_results(self)

@@ -160,18 +160,6 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
             },
             link: function ($scope, element, attrs) {
 
-                $scope.users = [
-                    { "id": 1, "name": "Ali" },
-                    { "id": 2, "name": "Sara" },
-                    { "id": 3, "name": "Babak" },
-                    { "id": 4, "name": "Sanaz" },
-                    { "id": 5, "name": "Dariush" },
-                ];
-
-                $scope.selectedUserIds = ["Sara"];
-
-
-
                 // list of dependants for reverse lookup
                 $scope.dependants = {};
 
@@ -179,7 +167,7 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
 
                     // assemble initial list of dynamic parameters
                     var dynamicSourceRequests = {
-                        name: $scope.block.name,
+                        name: $scope.block.uniqueName,
                         parameters: [],
                         diagram: null
                     };
@@ -216,7 +204,7 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
                                 }
                                 else if (argument.type === 1) { // represents a block name
 
-                                    argument.value = $scope.block.name;
+                                    argument.value = $scope.block.uniqueName;
                                 }
                             });
 
@@ -297,7 +285,7 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
                         var dependants = $scope.dependants[parameter.name()];
 
                         var dynamicSourceRequests = {
-                            name: $scope.block.name,
+                            name: $scope.block.uniqueName,
                             parameters: [],
                             diagram: null
                         };

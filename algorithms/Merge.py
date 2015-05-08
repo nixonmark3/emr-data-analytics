@@ -7,8 +7,8 @@ from FunctionBlock import FunctionBlock
 
 class Merge(FunctionBlock):
 
-    def __init__(self, name):
-        FunctionBlock.__init__(self, name)
+    def __init__(self, name, unique_name):
+        FunctionBlock.__init__(self, name, unique_name)
 
     def execute(self, results_table):
         try:
@@ -28,7 +28,7 @@ class Merge(FunctionBlock):
 
             FunctionBlock.report_status_complete(self)
 
-            return {'{0}/{1}'.format(self.name, 'out'): merge}
+            return {FunctionBlock.getFullPath(self, 'out'): merge}
 
         except Exception as err:
             FunctionBlock.save_results(self)

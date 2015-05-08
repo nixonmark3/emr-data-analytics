@@ -82,9 +82,9 @@ public class JobCompilationActor extends AbstractActor {
 
             // Capture configured blocks and queue descending blocks
             if (block.isConfigured()) {
-                sourceBlocks.add(block, diagram.getLeadingWires(block.getName()));
+                sourceBlocks.add(block, diagram.getLeadingWires(block.getUniqueName()));
 
-                for (Block next : diagram.getNext(block.getName())) {
+                for (Block next : diagram.getNext(block.getUniqueName())) {
                     queue.add(next);
                 }
             }

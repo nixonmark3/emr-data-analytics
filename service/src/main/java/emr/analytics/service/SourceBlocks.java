@@ -69,12 +69,16 @@ public class SourceBlocks {
 
     public class SourceBlock {
         public String name;
+        public String uniqueName;
+        public String variableName;
         public String definitionName;
         public String parameters;
         public String inputs;
 
         public SourceBlock(Definition definition, Block block, List<Wire> wires) {
             name = block.getName();
+            uniqueName = block.getUniqueName();
+            variableName = createVariableNameFromUniqueName(block.getUniqueName());
             definitionName = block.getDefinition();
 
             // todo: string builders
@@ -174,10 +178,15 @@ public class SourceBlocks {
      * @return Hash Map of definition name to definition instance
      */
     private HashMap<String, Definition> getDefinitions() {
+
         HashMap<String, Definition> definitionMap = new HashMap<String, Definition>();
 
+        MongoClient mongoClient = null;
+
         try {
-            Jongo db = new Jongo(new MongoClient().getDB("emr-data-analytics-studio"));
+            mongoClient = new MongoClient();
+
+            Jongo db = new Jongo(mongoClient.getDB("emr-data-analytics-studio"));
 
             for (Definition definition : db.getCollection("definitions").find().as(Definition.class)) {
                 definitionMap.put(definition.getName(), definition);
@@ -186,8 +195,20 @@ public class SourceBlocks {
         catch (UnknownHostException excpetion) {
             excpetion.printStackTrace();
         }
+        finally {
+            if (mongoClient != null) {
+                mongoClient.close();
+            }
+        }
 
         return definitionMap;
+    }
+
+    private String createVariableNameFromUniqueName(String uniqueName) {
+        StringBuilder variableName = new StringBuilder();
+        variableName.append('_');
+        variableName.append(uniqueName.replaceAll("-", "_"));
+        return variableName.toString();
     }
 }
 

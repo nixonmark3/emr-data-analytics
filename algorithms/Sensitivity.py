@@ -20,8 +20,8 @@ from FunctionBlock import FunctionBlock
 
 class Sensitivity(FunctionBlock):
 
-    def __init__(self, name):
-        FunctionBlock.__init__(self, name)
+    def __init__(self, name, unique_name):
+        FunctionBlock.__init__(self, name, unique_name)
 
     def execute(self, results_table):
         file_stderr = sys.stderr
@@ -74,8 +74,9 @@ class Sensitivity(FunctionBlock):
 
             FunctionBlock.report_status_complete(self)
 
-            return {'{0}/{1}'.format(self.name, 'obj'): pls_model, '{0}/{1}'.format(self.name, 'coef'): coeffs,
-                    '{0}/{1}'.format(self.name, 'r2'): R2_list}
+            return {FunctionBlock.getFullPath(self, 'obj'): pls_model,
+                    FunctionBlock.getFullPath(self, 'coef'): coeffs,
+                    FunctionBlock.getFullPath(self, 'r2'): R2_list}
 
         except Exception as err:
             FunctionBlock.save_results(self)
