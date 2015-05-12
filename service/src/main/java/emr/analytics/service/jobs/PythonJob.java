@@ -1,18 +1,26 @@
 package emr.analytics.service.jobs;
 
-import emr.analytics.service.jobs.AnalyticsJob;
+import emr.analytics.models.diagram.Diagram;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class PythonJob extends AnalyticsJob {
+public class PythonJob extends ProcessJob {
 
-    public PythonJob(UUID id, JobMode mode, String diagramName, String fileName){
-        super(id, mode, diagramName, fileName);
+    public PythonJob(UUID id, JobMode mode, Diagram diagram){
+        this(id, mode, diagram, new ArrayList<String>());
     }
 
-    public PythonJob(UUID id, JobMode mode, String diagramName, String fileName, List<String> arguments){
-        super(id, mode, diagramName, fileName, arguments);
+    public PythonJob(UUID id, JobMode mode, Diagram diagram, List<String> arguments){
+
+        super(id,
+            mode,
+            "python_driver.mustache",       // template
+            "python3",                      // command
+            "",                             // command prefix
+            diagram,
+            arguments);
     }
 
     @Override
@@ -21,8 +29,8 @@ public class PythonJob extends AnalyticsJob {
         ProcessArgumentBuilder argumentBuilder = new ProcessArgumentBuilder();
 
         // append file and arguments to the end of the list
-        argumentBuilder.add(this._fileName);
-        argumentBuilder.addAll(this._arguments);
+        argumentBuilder.add(this.getFileName());
+        argumentBuilder.addAll(this._commandArguments);
 
         return argumentBuilder.get();
     }

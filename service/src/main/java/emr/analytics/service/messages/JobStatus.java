@@ -2,9 +2,10 @@ package emr.analytics.service.messages;
 
 import emr.analytics.service.jobs.JobMode;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public abstract class JobStatus {
+public abstract class JobStatus implements Serializable {
 
     private UUID _id;
     private JobMode _mode;

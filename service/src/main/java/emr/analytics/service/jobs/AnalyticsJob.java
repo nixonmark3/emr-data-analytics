@@ -1,9 +1,13 @@
 package emr.analytics.service.jobs;
 
+import emr.analytics.models.diagram.Block;
+import emr.analytics.models.diagram.Diagram;
+import emr.analytics.service.SourceBlocks;
+
+import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.UUID;
 
 public abstract class AnalyticsJob implements Serializable {
@@ -11,20 +15,14 @@ public abstract class AnalyticsJob implements Serializable {
     protected UUID _id;
     protected JobMode _mode;
     protected String _diagramName;
-    protected String _fileName;
-    protected List<String> _arguments;
+    protected String _source;
     protected LogLevel _logLevel = LogLevel.Progress;
 
-    public AnalyticsJob(UUID id, JobMode mode, String diagramName, String fileName){
-        this(id, mode, diagramName, fileName, new ArrayList<String>());
-    }
-
-    public AnalyticsJob(UUID id, JobMode mode, String diagramName, String fileName, List<String> arguments){
+    public AnalyticsJob(UUID id, JobMode mode, String template, Diagram diagram){
         this._id = id;
         this._mode = mode;
-        this._diagramName = diagramName;
-        this._fileName = fileName;
-        this._arguments = arguments;
+        this._diagramName = diagram.getName();
+        this._source = this.compile(template, diagram);
     }
 
     public String getDiagramName(){
@@ -41,45 +39,50 @@ public abstract class AnalyticsJob implements Serializable {
 
     public UUID getId(){ return _id; }
 
-    public String getFileName(){ return _fileName; }
+    public String getSource(){ return _source; }
 
     public JobMode getJobMode() { return _mode; }
 
-    public abstract List<String> processArguments();
+    private String compile(String template, Diagram diagram){
 
-    protected class ProcessArgumentBuilder {
+        String source = "";
 
-        List<String> arguments = new ArrayList<String>();
+        // compile a list of blocks to execute
+        SourceBlocks sourceBlocks = new SourceBlocks();
 
-        public void add(String value){
-            arguments.add(value);
+        // Initialize queue of blocks to compile
+        Queue<Block> queue = new LinkedList<Block>();
+        for (Block block : diagram.getRoot()) {
+            queue.add(block);
         }
 
-        public void addAll(List<String> values){
-            arguments.addAll(values);
-        }
+        // Capture all configured blocks in order
+        while (!queue.isEmpty()) {
+            Block block = queue.remove();
 
-        public void addKeyValue(String key, String value){
-            arguments.add(key);
-            arguments.add(value);
-        }
+            // Capture configured blocks and queue descending blocks
+            if (block.isConfigured()) {
+                sourceBlocks.add(block, diagram.getLeadingWires(block.getUniqueName()));
 
-        public void addOption(String key, Optional<String> value){
-            if (value.isPresent()){
-                arguments.add(key);
-                arguments.add(value.get());
+                for (Block next : diagram.getNext(block.getUniqueName())) {
+                    queue.add(next);
+                }
             }
         }
 
-        public void addOptionList(String key, List<String> values) {
-            if (!values.isEmpty()) {
-                arguments.add(key);
-                arguments.add(values.stream().reduce((x, y) -> x + "," + y).get());
+        // compile configured blocks
+        if (!sourceBlocks.isEmpty()) {
+            try {
+                source = sourceBlocks.compile(template);
             }
+            catch (IOException ex) {
+                System.err.println(String.format("IOException: %s.", ex.toString()));
+            }
+
+            // todo: temporarily print generated code
+            System.out.println(source);
         }
 
-        public List<String> get(){
-            return arguments;
-        }
+        return source;
     }
 }

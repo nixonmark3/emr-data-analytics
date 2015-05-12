@@ -3,12 +3,10 @@ package services;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 
+import com.typesafe.config.ConfigFactory;
 import emr.analytics.models.diagram.Diagram;
-import emr.analytics.service.JobRequestorActor;
-import emr.analytics.service.JobServiceActor;
+import emr.analytics.service.JobClientActor;
 import emr.analytics.service.jobs.JobMode;
-import emr.analytics.service.jobs.LogLevel;
-import emr.analytics.service.jobs.TargetEnvironments;
 import emr.analytics.service.messages.JobKillRequest;
 import emr.analytics.service.messages.JobRequest;
 
@@ -16,15 +14,13 @@ import java.util.UUID;
 
 public class EvaluationService {
 
-    ActorSystem system;
-    ActorRef service;
-    ActorRef requestor;
+    ActorRef client;
 
     public EvaluationService(){
 
-        system = ActorSystem.create("job-service-system");
-        service = system.actorOf(JobServiceActor.props(), "job-service");
-        requestor = system.actorOf(JobRequestorActor.props(service), "job-requestor");
+        final ActorSystem system = ActorSystem.create("job-client-system", ConfigFactory.load("client"));
+        final String path = "akka.tcp://job-service-system@127.0.0.1:2552/user/job-service";
+        client = system.actorOf(JobClientActor.props(path), "job-client");
     }
 
     public UUID sendRequest(JobMode mode, Diagram diagram){
@@ -33,7 +29,7 @@ public class EvaluationService {
         JobRequest request = new JobRequest(mode, diagram);
 
         // pass it to the job request actor
-        requestor.tell(request, null);
+        client.tell(request, null);
 
         return request.getJobId();
     }
@@ -41,7 +37,7 @@ public class EvaluationService {
     public boolean sendKillRequest(UUID jobId){
 
         // pass it to the job request actor
-        requestor.tell((new JobKillRequest(jobId)), null);
+        client.tell((new JobKillRequest(jobId)), null);
 
         return true;
     }

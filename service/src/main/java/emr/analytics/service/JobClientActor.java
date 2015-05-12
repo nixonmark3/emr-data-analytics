@@ -1,8 +1,7 @@
 package emr.analytics.service;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.Props;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import akka.actor.*;
 import akka.japi.pf.ReceiveBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import emr.analytics.models.messages.BlockStatus;
@@ -11,36 +10,61 @@ import emr.analytics.models.messages.OnlineNotification;
 import emr.analytics.service.jobs.AnalyticsJob;
 import emr.analytics.service.jobs.JobMode;
 import emr.analytics.service.messages.*;
+import scala.PartialFunction;
+import scala.concurrent.duration.Duration;
+import scala.runtime.BoxedUnit;
 
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class JobRequestorActor extends AbstractActor {
+public class JobClientActor extends AbstractActor {
 
-    private ActorRef _jobServiceActor;
-    private ActorRef _jobCompilationActor;
+    private String _path;
+    private ActorRef _service = null;
+    private ActorRef _compiler;
+    private PartialFunction<Object, BoxedUnit> active;
     private ServiceSocketCallback _socketCallback;
 
-    public static Props props(ActorRef jobServiceActor){ return Props.create(JobRequestorActor.class, jobServiceActor); }
+    public static Props props(String path){ return Props.create(JobClientActor.class, path); }
 
-    public JobRequestorActor(ActorRef jobServiceActor){
+    public JobClientActor(String path) {
 
-        _jobServiceActor = jobServiceActor;
-        _jobCompilationActor = context().actorOf(JobCompilationActor.props(), "job-compiler");
+        _path = path;
+        _compiler = context().actorOf(JobCompilationActor.props(), "job-compiler");
         _socketCallback = new ServiceSocketCallback();
 
         receive(ReceiveBuilder.
-            match(JobRequest.class, request -> {
+            match(ActorIdentity.class, identity -> {
 
-                _jobCompilationActor.tell(request, self());
+                _service = ((ActorIdentity) identity).getRef();
+                if (_service == null) {
+                    System.out.println("Remote actor not available: " + path);
+                } else {
+                    context().watch(_service);
+                    context().become(active, true);
+                }
+            })
+            .match(ReceiveTimeout.class, timeout -> {
+
+                sendIdentifyRequest();
+            })
+            .matchAny(other -> {
+
+            }).build()
+        );
+
+        active = ReceiveBuilder
+            .match(JobRequest.class, request -> {
+
+                _compiler.tell(request, self());
             })
             .match(JobKillRequest.class, request -> {
 
-                _jobServiceActor.tell(request, self());
+                _service.tell(request, self());
             })
             .match(AnalyticsJob.class, job -> {
 
-                _jobServiceActor.tell(job, self());
+                _service.tell(job, self());
             })
             .match(JobStarted.class, status -> {
 
@@ -71,8 +95,7 @@ public class JobRequestorActor extends AbstractActor {
 
                 if (status.getJobMode() == JobMode.Online) {
                     sendOnlineNotification(status.getJobId(), 0, message);
-                }
-                else{
+                } else {
                     String[] data = message.split(",");
                     if (data.length == 2) {
 
@@ -80,8 +103,28 @@ public class JobRequestorActor extends AbstractActor {
                         sendEvaluationStatusForBlock(status.getJobId(), data[0], Integer.valueOf(data[1]));
                     }
                 }
-            }).build()
-        );
+            })
+            .match(Terminated.class, terminated -> {
+                System.out.println("Job Server Terminated");
+                sendIdentifyRequest();
+                getContext().unbecome();
+            })
+            .match(ReceiveTimeout.class, timeout -> {
+                // ignore
+            })
+            .matchAny(other -> {
+                unhandled(other);
+            })
+            .build();
+
+        sendIdentifyRequest();
+    }
+
+    private void sendIdentifyRequest() {
+        getContext().actorSelection(_path).tell(new Identify(_path), self());
+        getContext().system().scheduler()
+            .scheduleOnce(Duration.create(3, SECONDS), self(),
+                    ReceiveTimeout.getInstance(), getContext().dispatcher(), self());
     }
 
     private void sendEvaluationStatusForBlock(UUID id, String name, Integer state) {

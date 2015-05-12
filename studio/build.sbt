@@ -4,7 +4,7 @@ version := "1.0"
 
 lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.10.5"
 
 resolvers += Resolver.mavenLocal
 
@@ -23,3 +23,4 @@ libraryDependencies ++= Seq(
   "org.webjars" % "font-awesome" % "4.3.0",
   "org.webjars" % "jquery" % "2.1.3"
 )
+

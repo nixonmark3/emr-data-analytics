@@ -5,7 +5,8 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.japi.pf.ReceiveBuilder;
-import emr.analytics.service.jobs.AnalyticsJob;
+import emr.analytics.service.jobs.ProcessJob;
+import emr.analytics.service.jobs.SparkStreamingJob;
 import emr.analytics.service.messages.JobKillRequest;
 
 import java.util.HashMap;
@@ -22,8 +23,8 @@ public class JobServiceActor extends AbstractActor {
 
     public JobServiceActor(){
 
-        receive(ReceiveBuilder.
-            match(AnalyticsJob.class, job -> {
+        receive(ReceiveBuilder
+            .match(ProcessJob.class, job -> {
 
                 // reference the job name
                 String jobName = job.getName();
@@ -35,15 +36,33 @@ public class JobServiceActor extends AbstractActor {
                     prevJobActor.tell("kill", self());
                 }
 
-                ActorRef jobActor = context().actorOf(JobWorkerActor.props(sender(), job),
-                        job.getId().toString());
+                ActorRef jobActor = context().actorOf(ProcessActor.props(sender(), job), job.getId().toString());
                 idsByDiagram.put(jobId, jobName);
                 workers.put(jobName, jobActor);
 
                 context().watch(jobActor);
 
                 jobActor.tell("start", self());
+            })
+            .match(SparkStreamingJob.class, job -> {
 
+                String jobName = job.getName();
+                String jobId = job.getId().toString();
+
+                if (workers.containsKey(jobName)) {
+
+                    ActorRef prevJobActor = workers.get(jobName);
+                    prevJobActor.tell("kill", self());
+                }
+
+                // create a spark actor to manage executing the job
+                ActorRef jobActor = context().actorOf(SparkActor.props(sender(), job), job.getId().toString());
+                idsByDiagram.put(jobId, jobName);
+                workers.put(jobName, jobActor);
+
+                context().watch(jobActor);
+
+                jobActor.tell("start", self());
             })
             .match(JobKillRequest.class, request -> {
 
@@ -60,7 +79,7 @@ public class JobServiceActor extends AbstractActor {
                 String jobName = idsByDiagram.get(jobId);
 
                 System.out.println(String.format("Job for diagram '%s' has been terminated.",
-                        jobName));
+                    jobName));
 
                 workers.remove(jobName);
                 idsByDiagram.remove(jobId);

@@ -4,9 +4,10 @@ import emr.analytics.service.jobs.JobMode;
 import emr.analytics.service.jobs.LogLevel;
 import emr.analytics.models.diagram.Diagram;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class JobRequest {
+public class JobRequest implements Serializable {
 
     private UUID _jobId;
     private Diagram _diagram;

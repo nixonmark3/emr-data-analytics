@@ -7,31 +7,28 @@ import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import emr.analytics.service.jobs.AnalyticsJob;
-import emr.analytics.service.messages.*;
-import emr.analytics.service.processes.AnalyticsProcessBuilder;
-import emr.analytics.service.processes.AnalyticsProcessBuilderFactory;
+import emr.analytics.service.jobs.SparkStreamingJob;
+import emr.analytics.service.messages.JobStopped;
+import org.apache.spark.streaming.StreamingContext;
 import scala.concurrent.Await;
+import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
-public class JobWorkerActor extends AbstractActor {
+public class SparkActor extends AbstractActor {
 
     ActorRef _requestor;
     ActorRef _jobStatusActor;
     ActorRef _jobExecutionActor;
-    AnalyticsJob _job;
-    AnalyticsProcessBuilder _builder;
+    SparkStreamingJob _job;
+    StreamingContext _streamingContext = null;
 
-    public static Props props(ActorRef requestor, AnalyticsJob job) {
-        return Props.create(JobWorkerActor.class, requestor, job);
+    public static Props props(ActorRef requestor, SparkStreamingJob job) {
+        return Props.create(SparkActor.class, requestor, job);
     }
 
-    public JobWorkerActor(ActorRef requestor, AnalyticsJob job){
+    public SparkActor(ActorRef requestor, SparkStreamingJob job){
 
         // reference the requestor and the job
         _requestor = requestor;
@@ -41,17 +38,15 @@ public class JobWorkerActor extends AbstractActor {
         _jobStatusActor = context().actorOf(JobStatusActor.props(job.getLogLevel(), _requestor), "JobStatusActor");
 
         // create the actor that actually executes the job
-        _jobExecutionActor = context().actorOf(
-                JobExecutionActor.props(_job.getId(), job.getJobMode(), _jobStatusActor), "JobExecutionActor");
-
-        // get process builder
-        _builder = AnalyticsProcessBuilderFactory.get(job);
+        _jobExecutionActor = context().actorOf(SparkExecutionActor.props(_jobStatusActor), "JobExecutionActor");
 
         receive(ReceiveBuilder
             .match(String.class, s -> s.equals("start"), s -> {
 
-                // send to job executor
-                _jobExecutionActor.tell(_builder, self());
+                // send the job to the execution actor and wait for the spark streaming context to be returned
+                Timeout timeout = new Timeout(Duration.create(5, TimeUnit.SECONDS));
+                Future<Object> future = Patterns.ask(_jobExecutionActor, _job, timeout);
+                _streamingContext = (StreamingContext) Await.result(future, timeout.duration());
             })
             .match(String.class, s -> s.equals("kill"), s -> {
 
@@ -64,25 +59,11 @@ public class JobWorkerActor extends AbstractActor {
 
                 System.out.println("Finalize received.");
 
-                Timeout timeout = new Timeout(10, TimeUnit.SECONDS);
-                Await.result(Patterns.ask(_jobExecutionActor, "kill", timeout),
-                    timeout.duration());
-
-                this.cleanup(_builder.getFileName());
+                _streamingContext.stop(true, true);
 
                 self().tell(PoisonPill.getInstance(), self());
             })
             .build()
         );
     }
-
-    private void cleanup(String fileName) {
-        try {
-            Files.delete(Paths.get(fileName));
-        }
-        catch(IOException ex) {
-            System.err.println("IO Exception occurred.");
-        }
-    }
 }
-

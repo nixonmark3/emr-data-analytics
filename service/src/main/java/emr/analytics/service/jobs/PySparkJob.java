@@ -1,11 +1,13 @@
 package emr.analytics.service.jobs;
 
+import emr.analytics.models.diagram.Diagram;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class SparkJob extends AnalyticsJob {
+public class PySparkJob extends ProcessJob {
 
     private Optional<String> _className = Optional.empty();
     private Optional<String> _master = Optional.empty();
@@ -13,43 +15,52 @@ public class SparkJob extends AnalyticsJob {
     private List<String> _jars = new ArrayList<String>();
     private List<String> _pyFiles = new ArrayList<String>();
 
-    public SparkJob(UUID id, JobMode mode, String diagramName, String fileName){
-        super(id, mode, diagramName, fileName);
+    public PySparkJob(UUID id, JobMode mode, Diagram diagram){
+        this(id, mode, diagram, new ArrayList<String>());
     }
 
-    public SparkJob(UUID id, JobMode mode, String diagramName, String fileName, List<String> arguments){ super(id, mode, diagramName, fileName, arguments); }
+    public PySparkJob(UUID id, JobMode mode, Diagram diagram, List<String> arguments){
 
-    public SparkJob setClass(String value){
+        super(id,
+            mode,
+            "pyspark_driver.mustache",      // template
+            "bin/spark-submit",             // command
+            "SPARK_HOME",                   // command prefix
+            diagram,
+            arguments);
+    }
+
+    public PySparkJob setClass(String value){
         _className = Optional.of(value);
         return this;
     }
 
-    public SparkJob setMaster(String value){
+    public PySparkJob setMaster(String value){
         _master = Optional.of(value);
         return this;
     }
 
-    public SparkJob setDriverMemory(String value){
+    public PySparkJob setDriverMemory(String value){
         _driverMemory = Optional.of(value);
         return this;
     }
 
-    public SparkJob addJarFile(String value){
+    public PySparkJob addJarFile(String value){
         _jars.add(value);
         return this;
     }
 
-    public SparkJob addJarFiles(List<String> values){
+    public PySparkJob addJarFiles(List<String> values){
         _jars.addAll(values);
         return this;
     }
 
-    public SparkJob addPythonFile(String value){
+    public PySparkJob addPythonFile(String value){
         _pyFiles.add(value);
         return this;
     }
 
-    public SparkJob addPythonFiles(List<String> values){
+    public PySparkJob addPythonFiles(List<String> values){
         _pyFiles.addAll(values);
         return this;
     }
@@ -70,8 +81,8 @@ public class SparkJob extends AnalyticsJob {
         argumentBuilder.addOptionList("--py-files", _pyFiles);
 
         // append file and arguments to the end of the list
-        argumentBuilder.add(this._fileName);
-        argumentBuilder.addAll(this._arguments);
+        argumentBuilder.add(this.getFileName());
+        argumentBuilder.addAll(this._commandArguments);
 
         return argumentBuilder.get();
     }

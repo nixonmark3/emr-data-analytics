@@ -1,8 +1,9 @@
 package emr.analytics.service.messages;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class JobKillRequest {
+public class JobKillRequest implements Serializable {
 
     private UUID _id;
 

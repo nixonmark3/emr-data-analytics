@@ -1,0 +1,42 @@
+{{=<% %>=}}
+
+import emr.analytics.spark.algorithms.Utilities
+import emr.analytics.spark.algorithms.Requests
+
+import org.apache.spark.streaming._
+import org.apache.spark.streaming.kafka._
+
+import scala.util.parsing.json._
+
+val appName = "DotProduct"
+
+val zkQuorum = "localhost:2181"
+val topics = "runtime"
+val labels = "PICK_P101/PV.CV,PICK_T101/PV.CV,PICK_F101/PV.CV"
+val model = Array(1.0, 1.0, 1.0)
+val url = "http://172.16.167.131:8000/updatedata/InferredCalc1"
+val write_tag = "PICK_INFER_MEAS/INFER1.CV"
+
+val topicsMap = topics.split(",").map(t => (t,1)).toMap
+val input = KafkaUtils.createStream(ssc, zkQuorum, appName, topicsMap)
+
+input.map(x => JSON.parseFull(x._2)).foreachRDD(rdd => {
+
+    if (!rdd.isEmpty()){
+
+        rdd.foreach(point => {
+
+            // filter by list of columns
+            val features = Utilities.columns(point.get, labels)
+
+            // dot product of 2 arrays
+            val dp = Utilities.dotProduct(features, model)
+
+            // post value to opc
+            Requests.postOpcValue(url, write_tag, dp.toString)
+        })
+    }
+})
+
+ssc.start()
+ssc.awaitTermination()
