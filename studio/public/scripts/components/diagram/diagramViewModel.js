@@ -502,7 +502,7 @@ viewmodels.diagramViewModel = function(data) {
         if (blocksData) {
             for (var i = 0; i < blocksData.length; ++i) {
 
-                blockNames[blocksData[i].uniqueName] = true;
+                blockNames[blocksData[i].name] = true;
 
                 models.push(new viewmodels.blockViewModel(blocksData[i]));
             }
@@ -732,8 +732,9 @@ viewmodels.diagramViewModel = function(data) {
 
         var block = this.findBlock(configBlock.uniqueName);
 
-        if (configBlock.name) {
+        if ((configBlock.name) && (!blockNames[configBlock.name])) {
             block.data.name = configBlock.name;
+            blockNames[configBlock.name] = true;
         }
 
         var configured = true;

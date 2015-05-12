@@ -1,13 +1,23 @@
 <div>
-    <div class="block-parameter">
-        <label>Block Name</label>
-        <div class="input-group">
-            <span class="input-group-addon">
-                <i class="fa fa-file-text-o"></i>
-            </span>
-            <input class="form-control" type="text" ng-model="block.name" pattern="[a-zA-Z0-9_ ]+" />
+
+    <form name="blockNameForm">
+        <div class="block-parameter">
+            <label>Block Name</label>
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <i class="fa fa-file-text-o"></i>
+                </span>
+                <input class="form-control" type="text" name="blockName" ng-model="block.name" ng-required="true" ng-minlength="3" ng-maxlength="15" pattern="[a-zA-Z0-9_ ]+" />
+                <div class="fade error_container" ng-show="blockNameForm.blockName.$dirty && blockNameForm.blockName.$invalid">
+                    <small class="fade error error_message" ng-show="blockNameForm.blockName.$error.required">required</small>
+                    <small class="fade error error_message" ng-show="blockNameForm.blockName.$error.minlength">min</small>
+                    <small class="fade error error_message" ng-show="blockNameForm.blockName.$error.maxlength">max</small>
+                    <small class="fade error error_message" ng-show="blockNameForm.blockName.$error.pattern">pattern</small>
+                </div>
+            </div>
         </div>
-    </div>
+    </form>
+
     <div class="block-parameter"
          ng-repeat="parameter in block.parameters">
         <label>{{parameter.name()}}</label>
