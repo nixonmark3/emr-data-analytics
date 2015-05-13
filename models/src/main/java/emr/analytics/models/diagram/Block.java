@@ -7,6 +7,7 @@ import emr.analytics.models.definition.ParameterDefinition;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Jackson schema for Diagram Block.
@@ -30,6 +31,7 @@ public class Block implements Serializable {
     public Block(String name, int state, int x, int y, Definition definition){
 
         this.name = name;
+        this.uniqueName = UUID.randomUUID().toString();
         this.state = state;
         this.x = x;
         this.y = y;

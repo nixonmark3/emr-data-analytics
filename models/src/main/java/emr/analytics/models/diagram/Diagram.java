@@ -107,6 +107,13 @@ public class Diagram implements Serializable {
                 .get();
     }
 
+    public Block getBlockByUniqueName(String uniqueName){
+        return blocks.stream()
+            .filter(b -> b.getUniqueName().equals(uniqueName))
+            .findFirst()
+            .get();
+    }
+
     /**
      * Sets the Blocks that belong to this Diagram.
      * @param blocks list of blocks
@@ -144,32 +151,32 @@ public class Diagram implements Serializable {
     /**
      * Retrieve the next set of blocks that spawn from the name of specified block
      */
-    public List<Block> getNext(String name){
+    public List<Block> getNext(String uniqueName){
 
-        List<String> names = this.wires.stream()
-                .filter(w -> w.getFrom_node().equals(name))
+        List<String> uniqueNames = this.wires.stream()
+                .filter(w -> w.getFrom_node().equals(uniqueName))
                 .map(w -> w.getTo_node())
                 .collect(Collectors.toList());
 
         return this.blocks.stream()
-                .filter(b -> names.contains(b.getUniqueName()))
+                .filter(b -> uniqueNames.contains(b.getUniqueName()))
                 .collect(Collectors.toList());
     }
 
     /**
      * Retrieve the wires that lead to the specified block
      */
-    public List<Wire> getLeadingWires(String name){
+    public List<Wire> getLeadingWires(String uniqueName){
 
         return this.wires.stream()
-                .filter(w -> w.getTo_node().equals(name))
+                .filter(w -> w.getTo_node().equals(uniqueName))
                 .collect(Collectors.toList());
     }
 
-    public List<Wire> getLeadingWires(String name, String connectorName){
+    public List<Wire> getLeadingWires(String uniqueName, String connectorName){
 
         return this.wires.stream()
-                .filter(w -> w.getTo_node().equals(name)
+                .filter(w -> w.getTo_node().equals(uniqueName)
                         && w.getTo_connector().equals(connectorName))
                 .collect(Collectors.toList());
     }

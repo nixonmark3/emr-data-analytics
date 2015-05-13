@@ -59,12 +59,12 @@ public class DiagramsService {
 
                     if (block.hasInputConnector(connector.getName())){
 
-                        for(Wire wire : offline.getLeadingWires(block.getName(), connector.getName())){
+                        for(Wire wire : offline.getLeadingWires(block.getUniqueName(), connector.getName())){
 
                             Wire onlineWire = new Wire(wire.getFrom_node(),
                                 wire.getFrom_connector(),
                                 wire.getFrom_connectorIndex(),
-                                onlineBlock.getName(),
+                                onlineBlock.getUniqueName(),
                                 connector.getName(),
                                 index);
 
@@ -82,10 +82,10 @@ public class DiagramsService {
                     (onlineBlock.getY() + 120));
                 online.addBlock(postBlock);
                 online.addWire(new Wire(
-                    onlineBlock.getName(),
+                    onlineBlock.getUniqueName(),
                     onlineBlock.getOutputConnectors().get(0).getName(),
                     0,
-                    postBlock.getName(),
+                    postBlock.getUniqueName(),
                     onlineBlock.getInputConnectors().get(0).getName(),
                     0));
             }
@@ -188,8 +188,8 @@ public class DiagramsService {
 
         // todo: update to make copies
 
-        String blockName = wire.getFrom_node();
-        Block block = source.getBlock(blockName);
+        String blockUniqueName = wire.getFrom_node();
+        Block block = source.getBlockByUniqueName(blockUniqueName);
 
         // todo: temporarily replace offline databrick with online kafka block
         if (block.getDefinition().equals("DataBrick")) {
@@ -208,7 +208,7 @@ public class DiagramsService {
                 _dataSources.put(name, block.getName());
             }
 
-            wire.setFrom_node(block.getName());
+            wire.setFrom_node(block.getUniqueName());
         }
 
         if (!_onlineBlocks.contains(block.getName())){
@@ -219,7 +219,7 @@ public class DiagramsService {
 
         destination.addWire(wire);
 
-        for (Wire leadingWire : source.getLeadingWires(blockName))
+        for (Wire leadingWire : source.getLeadingWires(blockUniqueName))
             this.addLeadingPath(leadingWire, source, destination);
     }
 }
