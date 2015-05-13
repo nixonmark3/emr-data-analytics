@@ -76,7 +76,7 @@
     border-radius: 10px;
     border: 1px solid #989898;
     background-color: white;
-    padding: 10px;
+    /*padding: 10px;*/
     box-shadow: 0px 6px 12px rgba(0,0,0,0.175);
 }
 
@@ -124,7 +124,7 @@
     border-right: 16px solid #fff;
 }
 
-.block-parameter { margin-top: 10px; }
+.block-parameter { margin-top: 10px; height: 65px; }
 .block-parameter label { color: #989898; font-weight: normal; margin-bottom: 2px; }
 
 /*

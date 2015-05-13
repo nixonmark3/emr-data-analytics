@@ -6,6 +6,11 @@ import java.io.Serializable;
  * MongoDB schema for Basic Diagram.
  */
 public class BasicDiagram implements Serializable {
+
+    private String name = "New Diagram";
+    private String description = "";
+    private String owner = "";
+
     /**
      * Create a basic diagram with required properties only.
      * @return basic diagram
@@ -46,14 +51,16 @@ public class BasicDiagram implements Serializable {
         this.description = description;
     }
 
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
     /**
      * Hidden Jackson constructor.
      */
     private BasicDiagram() {}
-
-    /**
-     * Private members.
-     */
-    private String name = "New Diagram";
-    private String description = "";
 }

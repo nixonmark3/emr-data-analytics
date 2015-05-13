@@ -43,6 +43,34 @@ var analyticsApp = angular.module('analyticsApp',
                 if (data.messageType == 'ClientRegistration') {
                     $scope.clientId = data.id;
                 }
+                else if (data.messageType == 'AddDiagram') {
+                    $scope.$apply(function() {
+                        data['showProperties'] = false;
+                        $scope.diagrams.push(data);
+                    });
+                }
+                else if (data.messageType == 'UpdateDiagram') {
+                    $scope.$apply(function() {
+                        $scope.diagrams.forEach(function(item){
+                            if (item.name == data.name) {
+                                item.description = data.description;
+                                item.owner = data.owner;
+                            }
+                        });
+                    });
+                }
+                else if (data.messageType == 'DeleteDiagram') {
+                    $scope.$apply(function() {
+                        $scope.diagrams.forEach(function(element, index, array){
+                            if(element.name === data.name){
+                                $scope.diagrams.splice(index, 1);
+                            }
+                        });
+                    });
+                }
+                else {
+                    // todo : we got a message that we can't handle
+                }
             }
             else {
                 console.log('job id: ' + data.jobId);
@@ -127,6 +155,9 @@ var analyticsApp = angular.module('analyticsApp',
         diagramService.listDiagrams().then(
             function (data) {
                 $scope.diagrams = data;
+                $scope.diagrams.forEach(function(item) {
+                    item['showProperties'] = false;
+                });
             },
             function (code) {
 
@@ -263,13 +294,13 @@ var analyticsApp = angular.module('analyticsApp',
         };
 
         // delete the current diagram
-        $scope.deleteDiagram = function() {
-            diagramService.deleteDiagram($scope.diagramViewModel.data.name).then(
+        $scope.deleteDiagram = function(diagramName) {
+            diagramService.deleteDiagram(diagramName).then(
                 function (data) {
                     // TODO report success back to the user
                     diagramService.item().then(
                         function (data) {
-                            $scope.diagramViewModel = new viewmodels.diagramViewModel(data);
+                            //$scope.diagramViewModel = new viewmodels.diagramViewModel(data);
                         },
                         function (code) {
                             console.log(code); // TODO show exception
