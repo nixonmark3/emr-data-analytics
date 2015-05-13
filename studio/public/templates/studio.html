@@ -4,24 +4,53 @@
      ng-class="{'show-sidebar': showSidebar, 'blur-background': blurBackground}">
 
     <div id="diagrams-menu" class="sidebar-offcanvas">
-        <div class="wrapper">
-            <div class="col-md-12">
-                <h3>Diagrams</h3>
-                <ul class="nav nav-pills nav-stacked custom" ng-model="diagrams" ng-repeat="d in diagrams" ng-click="loadDiagram(d.name)">
-                    <li>
-                        <a class="glyphicon glyphicon-picture" href="#"> {{d.name}}</a>
-                    </li>
-                </ul>
+
+        <div class="col-xs-4 diagrams-menu-header">
+            <button type="button" class="btn btn-default navbar-btn pull-left" ng-click="toggleDiagrams()">
+                <i class="fa fa-toggle-left fa-lg"></i>
+            </button>
+            <button type="button" class="btn btn-default navbar-btn pull-right" ng-click="createDiagram()">
+                <i class="fa fa-plus fa-lg"></i>
+            </button>
+        </div>
+
+        <div class="diagrams-menu-body">
+            <div class="diagrams-menu-body-item" ng-model="diagrams" ng-repeat="d in diagrams">
+                <div class="diagrams-menu-body-item-name" ng-click="loadDiagram(d.name)">
+                    {{d.name}}
+                </div>
+                <div class="diagrams-menu-body-item-options">
+                    <div class="diagrams-menu-body-item-options-toggle" ng-click="d.showProperties = !d.showProperties">
+                        <i class="fa ng-class:{ 'fa-toggle-on': d.showProperties, 'fa-toggle-off': !d.showProperties }"></i>
+                        <small>Properties</small>
+                    </div>
+                    <div class="diagrams-menu-body-item-options-delete" ng-click="deleteDiagram(d.name)">
+                        <i class="fa fa-trash-o fa-lg"></i>
+                    </div>
+                </div>
+                <div class="fade diagrams-menu-body-item-info-container" ng-show="d.showProperties">
+                    <div ng-show="d.owner" class="fade diagrams-menu-body-item-info">
+                        <i class="fa fa-user"></i>
+                        <small>{{d.owner}}</small>
+                    </div>
+                    <div ng-show="d.description" class="fade diagrams-menu-body-item-info">
+                        <i class="fa fa-file-text-o"></i>
+                        <small>{{d.description}}</small>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-md-12">
-            <p>
-                <button type="button" class="btn btn-success" ng-click="createDiagram()" style="width: 100%">
-                    <i class="glyphicon glyphicon-new-window"></i>
-                    <span class="navbar-btn-text">Create New</span>
-                </button>
-            </p>
+
+        <div class="diagrams-menu-footer">
+            <div class="diagrams-menu-footer-name">
+                <b>Data Analytics Studio v0.1</b>
+            </div>
+            <div class="diagrams-menu-footer-company">
+                <i class="fa fa-copyright"></i>
+                <small>Emerson Process Management</small>
+            </div>
         </div>
+
     </div>
 
     <div class="navbar">
@@ -29,6 +58,7 @@
             <div class="row">
                 <div class="col-xs-4">
                     <button type="button" class="btn btn-default navbar-btn pull-left" ng-click="toggleDiagrams()">
+                        <!--<i class="fa ng-class:{ 'fa-toggle-left fa-lg': showSidebar, 'fa-toggle-right fa-lg': !showSidebar }"></i>-->
                         <i class="fa fa-bars"></i>
                     </button>
                     <span class="navbar-title">{{diagramViewModel.data.name}}</span>

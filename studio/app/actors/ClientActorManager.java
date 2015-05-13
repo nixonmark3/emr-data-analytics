@@ -3,6 +3,7 @@ package actors;
 import akka.actor.ActorPath;
 import akka.actor.ActorSelection;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import play.libs.Akka;
 
 import java.util.Map;
@@ -87,5 +88,14 @@ public class ClientActorManager
         }
 
         return actor;
+    }
+
+    public void updateClients(ObjectNode message) {
+        synchronized (ClientActorManager.class) {
+            this._clientActorPathMap.forEach((k, v) -> {
+                ActorSelection actor = Akka.system().actorSelection(v);
+                actor.tell(message, null);
+            });
+        }
     }
 }

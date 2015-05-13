@@ -1,7 +1,9 @@
 package controllers;
 
+import actors.ClientActorManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import emr.analytics.models.diagram.*;
 
 import emr.analytics.service.jobs.JobMode;
@@ -125,10 +127,18 @@ public class Diagrams extends ControllerBase {
      */
     @BodyParser.Of(BodyParser.Json.class)
     public static Result saveDiagram() {
+
+        Diagram diagram = null;
+
+        boolean exists = false;
+
         try {
             // Deserialize json sent by client to Diagram model object.
             ObjectMapper objectMapper = new ObjectMapper();
-            Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
+            diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
+
+            exists = doesDiagramExist(diagram.getName());
+
             saveDiagram(diagram);
 
         }
@@ -137,7 +147,39 @@ public class Diagrams extends ControllerBase {
             return internalServerError(String.format("Failed to save diagram."));
         }
 
+        ObjectNode addDiagramMsg = Json.newObject();
+
+        if (exists) {
+            addDiagramMsg.put("messageType", "UpdateDiagram");
+        }
+        else {
+            addDiagramMsg.put("messageType", "AddDiagram");
+        }
+
+        addDiagramMsg.put("name", diagram.getName());
+        addDiagramMsg.put("description", diagram.getDescription());
+        addDiagramMsg.put("owner", diagram.getOwner());
+
+        ClientActorManager.getInstance().updateClients(addDiagramMsg);
+
         return ok("Diagram saved successfully.");
+    }
+
+    private static boolean doesDiagramExist(String diagramName) {
+
+        boolean exists = false;
+
+        MongoCollection diagrams = getMongoCollection(DIAGRAMS_COLLECTION);
+
+        if (diagrams != null) {
+            Diagram diagram = diagrams.findOne(String.format(QUERY_BY_UNIQUE_ID, diagramName)).as(Diagram.class);
+
+            if (diagram != null) {
+                exists = true;
+            }
+        }
+
+        return exists;
     }
 
     private static void saveDiagram(Diagram diagram)
@@ -200,6 +242,13 @@ public class Diagrams extends ControllerBase {
             return internalServerError(String.format("Failed to remove diagram."));
         }
 
+        ObjectNode addDiagramMsg = Json.newObject();
+        addDiagramMsg.put("messageType", "DeleteDiagram");
+        addDiagramMsg.put("name", diagramName);
+        ClientActorManager.getInstance().updateClients(addDiagramMsg);
+
+        // todo delete all other document related to this diagram
+
         return ok("Diagram removed successfully.");
     }
 
@@ -217,7 +266,7 @@ public class Diagrams extends ControllerBase {
     private static final String DIAGRAM_INDEX = "{name: 1}";
     private static final String UNIQUE_IS_TRUE = "{unique:true}";
     private static final String VERSION_INCREMENT = "{$inc: {version: 1}}";
-    private static final String DIAGRAM_PROJECTION = "{_id: 0, name: 1, description: 1}";
+    private static final String DIAGRAM_PROJECTION = "{_id: 0, name: 1, description: 1, owner: 1}";
     private static final String DIAGRAMS_COLLECTION = "diagrams";
     private static final String QUERY_BY_UNIQUE_ID = "{name: '%s'}";
     private static final String SORT_BY_NAME = "{name: 1}";
