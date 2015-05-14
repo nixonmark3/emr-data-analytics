@@ -12,7 +12,7 @@ public class Definition {
     private List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
     private List<ConnectorDefinition> outputConnectors  = new ArrayList<ConnectorDefinition>();
     private boolean onlineOnly = false;
-    private boolean modelRequired = false;
+    private boolean modelGenerator = false;
 
     private Definition() {}
 
@@ -26,12 +26,12 @@ public class Definition {
         return onlineOnly;
     }
 
-    public boolean isModelRequired() {
-        return modelRequired;
+    public boolean isModelGenerator() {
+        return modelGenerator;
     }
 
-    public void setModelRequired(boolean modelRequired) {
-        this.modelRequired = modelRequired;
+    public void setModelGenerator(boolean modelGenerator) {
+        this.modelGenerator = modelGenerator;
     }
 
     public void setOnlineOnly(boolean onlineOnly) {

@@ -318,9 +318,9 @@ public class DefinitionGenerator {
 
         Definition definition;
 
-        // create sensitivity definition
         definition = new Definition("Kafka", "Kafka Data", Category.DATA_SOURCES.toString());
         definition.setDescription("Spark streaming block that monitors a topic in Kafka.");
+        definition.setOnlineOnly(true);
 
         // add output connector
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
@@ -372,6 +372,7 @@ public class DefinitionGenerator {
     //
     private void createPLSSensitivityBlock() {
         Definition plsSensitivity = new Definition("Sensitivity", "PLSSensitivity", Category.TRANSFORMERS.toString());
+        plsSensitivity.setModelGenerator(true);
 
         plsSensitivity.setDescription("Calculates sensitivity of output y to set of inputs X using PLS");
 
@@ -528,9 +529,11 @@ public class DefinitionGenerator {
 
     private void createPLSBlock(){
 
-        // create sensitivity definition
-        Definition definition = new Definition("PLS", "PLS Predict", Category.TRANSFORMERS.toString());
+        Definition definition;
+
+        definition = new Definition("PLS", "PLS Predict", Category.TRANSFORMERS.toString());
         definition.setDescription("Uses PLS model for prediction.");
+        definition.setOnlineOnly(true);
 
         // add input connector
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
@@ -558,9 +561,9 @@ public class DefinitionGenerator {
 
         Definition definition;
 
-        // create sensitivity definition
         definition = new Definition("RESTPost", "REST POST", Category.TRANSFORMERS.toString());
         definition.setDescription("Post data to a REST API.");
+        definition.setOnlineOnly(true);
 
         // add input connector
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();

@@ -25,7 +25,7 @@
     </div>
 
     <div class="browser-item browser-definitions"
-         ng-repeat="definition in page.definitions"
+         ng-repeat="definition in page.definitions | filter: {onlineOnly:false}"
          ng-mousedown="mouseDown($event, definition);"
          ng-click="show(definition);">
 

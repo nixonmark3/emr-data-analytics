@@ -128,7 +128,7 @@ var analyticsApp = angular.module('analyticsApp',
                         $scope.nodes.push(category);
                     }
 
-                    category.definitions.push({name: item.name});
+                    category.definitions.push({name: item.name, onlineOnly: item.onlineOnly});
 
                     $scope.library[item.name] = item;
                 });
