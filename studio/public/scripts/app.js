@@ -277,7 +277,7 @@ var analyticsApp = angular.module('analyticsApp',
 
         $scope.deploy = function(evt) {
 
-            var data = $scope.diagramViewModel.data;
+            var data = $scope.onlineViewModel.data;
 
             diagramService.deploy(data).then(
                 function (jobId) {
