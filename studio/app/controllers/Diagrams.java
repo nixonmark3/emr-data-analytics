@@ -4,6 +4,7 @@ import actors.ClientActorManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.WriteResult;
 import emr.analytics.models.diagram.*;
 
 import emr.analytics.service.jobs.JobMode;
@@ -130,14 +131,10 @@ public class Diagrams extends ControllerBase {
 
         Diagram diagram = null;
 
-        boolean exists = false;
-
         try {
-            // Deserialize json sent by client to Diagram model object.
+
             ObjectMapper objectMapper = new ObjectMapper();
             diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
-
-            exists = doesDiagramExist(diagram.getName());
 
             saveDiagram(diagram);
 
@@ -147,52 +144,48 @@ public class Diagrams extends ControllerBase {
             return internalServerError(String.format("Failed to save diagram."));
         }
 
-        ObjectNode addDiagramMsg = Json.newObject();
-
-        if (exists) {
-            addDiagramMsg.put("messageType", "UpdateDiagram");
-        }
-        else {
-            addDiagramMsg.put("messageType", "AddDiagram");
-        }
-
-        addDiagramMsg.put("name", diagram.getName());
-        addDiagramMsg.put("description", diagram.getDescription());
-        addDiagramMsg.put("owner", diagram.getOwner());
-
-        ClientActorManager.getInstance().updateClients(addDiagramMsg);
-
         return ok("Diagram saved successfully.");
     }
 
-    private static boolean doesDiagramExist(String diagramName) {
+    private static void saveDiagram(Diagram diagram) {
 
-        boolean exists = false;
+        try {
 
-        MongoCollection diagrams = getMongoCollection(DIAGRAMS_COLLECTION);
+            MongoCollection diagrams = getMongoCollection(DIAGRAMS_COLLECTION);
 
-        if (diagrams != null) {
-            Diagram diagram = diagrams.findOne(String.format(QUERY_BY_UNIQUE_ID, diagramName)).as(Diagram.class);
+            if (diagrams != null) {
 
-            if (diagram != null) {
-                exists = true;
+                // Need to ensure that each diagram has a unique name.
+                diagrams.ensureIndex(DIAGRAM_INDEX, UNIQUE_IS_TRUE);
+                // Update the Diagram document in MongoDB. If it does not exist create a new Diagram document.
+                WriteResult update = diagrams.update(String.format(QUERY_BY_UNIQUE_ID, diagram.getName())).upsert().with(diagram);
+
+                // todo determine if the save succeeded?
+
+                // After we successfully update the diagram bump the version.
+                diagrams.update(String.format(QUERY_BY_UNIQUE_ID, diagram.getName())).with(VERSION_INCREMENT);
+
+                ObjectNode addDiagramMsg = Json.newObject();
+
+                if (update.isUpdateOfExisting()) {
+
+                    addDiagramMsg.put("messageType", "UpdateDiagram");
+                }
+                else {
+
+                    addDiagramMsg.put("messageType", "AddDiagram");
+                }
+
+                addDiagramMsg.put("name", diagram.getName());
+                addDiagramMsg.put("description", diagram.getDescription());
+                addDiagramMsg.put("owner", diagram.getOwner());
+
+                ClientActorManager.getInstance().updateClients(addDiagramMsg);
             }
         }
+        catch (Exception expception) {
 
-        return exists;
-    }
-
-    private static void saveDiagram(Diagram diagram)
-    {
-        MongoCollection diagrams = getMongoCollection(DIAGRAMS_COLLECTION);
-
-        if (diagrams != null) {
-            // Need to ensure that each diagram has a unique name.
-            diagrams.ensureIndex(DIAGRAM_INDEX, UNIQUE_IS_TRUE);
-            // Update the Diagram document in MongoDB. If it does not exist create a new Diagram document.
-            diagrams.update(String.format(QUERY_BY_UNIQUE_ID, diagram.getName())).upsert().with(diagram);
-            // After we successfully update the diagram bump the version.
-            diagrams.update(String.format(QUERY_BY_UNIQUE_ID, diagram.getName())).with(VERSION_INCREMENT);
+            expception.printStackTrace();
         }
     }
 

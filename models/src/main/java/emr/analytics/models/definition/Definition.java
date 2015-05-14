@@ -11,6 +11,8 @@ public class Definition {
     private List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
     private List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
     private List<ConnectorDefinition> outputConnectors  = new ArrayList<ConnectorDefinition>();
+    private boolean onlineOnly = false;
+    private boolean modelRequired = false;
 
     private Definition() {}
 
@@ -18,6 +20,22 @@ public class Definition {
         this.name = name;
         this.friendlyName = friendlyName;
         this.category = category;
+    }
+
+    public boolean isOnlineOnly() {
+        return onlineOnly;
+    }
+
+    public boolean isModelRequired() {
+        return modelRequired;
+    }
+
+    public void setModelRequired(boolean modelRequired) {
+        this.modelRequired = modelRequired;
+    }
+
+    public void setOnlineOnly(boolean onlineOnly) {
+        this.onlineOnly = onlineOnly;
     }
 
     public int getW() {
