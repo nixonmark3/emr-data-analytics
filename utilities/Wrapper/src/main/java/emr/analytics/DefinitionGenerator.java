@@ -33,6 +33,7 @@ public class DefinitionGenerator {
         createLoadDBBlock();
         createSaveCSVBlock();
         createSaveDBBlock();
+        createKafkaBlock();
     }
 
     private void generateFilters() {
@@ -55,6 +56,8 @@ public class DefinitionGenerator {
         createLagCorrelateBlock();
         createPLSSensitivityBlock();
         createScaleBlock();
+        createPLSBlock();
+        createWebServicePostBlock();
     }
 
     //
@@ -311,6 +314,24 @@ public class DefinitionGenerator {
         _definitions.save(addDataSet);
     }
 
+    private void createKafkaBlock(){
+
+        Definition definition;
+
+        // create sensitivity definition
+        definition = new Definition("Kafka", "Kafka Data", Category.DATA_SOURCES.toString());
+        definition.setDescription("Spark streaming block that monitors a topic in Kafka.");
+
+        // add output connector
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        definition.setOutputConnectors(outputConnectors);
+
+        // todo: add parameters for zookeeper, kafka, topic name, and frequency
+
+        _definitions.save(definition);
+    }
+
     //
     // Columns Block Definition
     //
@@ -503,6 +524,52 @@ public class DefinitionGenerator {
         lagCorrelate.setParameters(parameters);
 
         _definitions.save(lagCorrelate);
+    }
+
+    private void createPLSBlock(){
+
+        // create sensitivity definition
+        Definition definition = new Definition("PLS", "PLS Predict", Category.TRANSFORMERS.toString());
+        definition.setDescription("Uses PLS model for prediction.");
+
+        // add input connector
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("x", DataType.FRAME.toString()));
+        definition.setInputConnectors(inputConnectors);
+
+        // add output connector
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FLOAT.toString()));
+        definition.setOutputConnectors(outputConnectors);
+
+        // add parameters
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("Model",
+                DataType.STRING.toString(),
+                "",
+                new ArrayList<String>(),
+                null));
+        definition.setParameters(parameters);
+
+        _definitions.save(definition);
+    }
+
+    private void createWebServicePostBlock(){
+
+        Definition definition;
+
+        // create sensitivity definition
+        definition = new Definition("RESTPost", "REST POST", Category.TRANSFORMERS.toString());
+        definition.setDescription("Post data to a REST API.");
+
+        // add input connector
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.STRING.toString()));
+        definition.setInputConnectors(inputConnectors);
+
+        // todo: add parameters for url, payload pattern
+
+        _definitions.save(definition);
     }
 
     //

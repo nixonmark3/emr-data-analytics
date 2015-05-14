@@ -42,8 +42,6 @@ public class Diagrams extends ControllerBase {
         ObjectMapper objectMapper = new ObjectMapper();
         Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
 
-        saveDiagram(diagram);
-
         UUID jobId = _evaluationService.sendRequest(JobMode.Online, diagram);
         if (jobId == null) {
             return internalServerError("Error requesting evaluation.");
