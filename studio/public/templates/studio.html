@@ -7,10 +7,10 @@
 
         <div class="col-xs-4 diagrams-menu-header">
             <button type="button" class="btn btn-default navbar-btn pull-left" ng-click="toggleDiagrams()">
-                <i class="fa fa-toggle-left fa-lg"></i>
+                <i class="fa fa-toggle-left"></i>
             </button>
             <button type="button" class="btn btn-default navbar-btn pull-right" ng-click="createDiagram()">
-                <i class="fa fa-plus fa-lg"></i>
+                <i class="fa fa-plus"></i>
             </button>
         </div>
 
@@ -29,13 +29,13 @@
                     </div>
                 </div>
                 <div class="fade diagrams-menu-body-item-info-container" ng-show="d.showProperties">
-                    <div ng-show="d.owner" class="fade diagrams-menu-body-item-info">
-                        <i class="fa fa-user"></i>
-                        <small>{{d.owner}}</small>
-                    </div>
                     <div ng-show="d.description" class="fade diagrams-menu-body-item-info">
                         <i class="fa fa-file-text-o"></i>
                         <small>{{d.description}}</small>
+                    </div>
+                    <div ng-show="d.owner" class="fade diagrams-menu-body-item-info">
+                        <i class="fa fa-user"></i>
+                        <small>{{d.owner}}</small>
                     </div>
                 </div>
             </div>
@@ -58,7 +58,6 @@
             <div class="row">
                 <div class="col-xs-4">
                     <button type="button" class="btn btn-default navbar-btn pull-left" ng-click="toggleDiagrams()">
-                        <!--<i class="fa ng-class:{ 'fa-toggle-left fa-lg': showSidebar, 'fa-toggle-right fa-lg': !showSidebar }"></i>-->
                         <i class="fa fa-bars"></i>
                     </button>
                     <span class="navbar-title">{{diagramViewModel.data.name}}</span>
