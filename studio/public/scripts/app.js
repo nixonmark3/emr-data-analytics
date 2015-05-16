@@ -45,9 +45,10 @@ var analyticsApp = angular.module('analyticsApp',
                 }
                 else if (data.messageType == 'AddDiagram') {
                     $scope.$apply(function() {
-                        data['showProperties'] = false;
+                        initializeNavigationItem(item);
                         $scope.diagrams.push(data);
                     });
+                    updateSelectedDiagram();
                 }
                 else if (data.messageType == 'UpdateDiagram') {
                     $scope.$apply(function() {
@@ -67,6 +68,7 @@ var analyticsApp = angular.module('analyticsApp',
                             }
                         });
                     });
+                    updateSelectedDiagram();
                 }
                 else {
                     // todo : we got a message that we can't handle
@@ -156,7 +158,7 @@ var analyticsApp = angular.module('analyticsApp',
             function (data) {
                 $scope.diagrams = data;
                 $scope.diagrams.forEach(function(item) {
-                    item['showProperties'] = false;
+                    initializeNavigationItem(item);
                 });
             },
             function (code) {
@@ -198,6 +200,7 @@ var analyticsApp = angular.module('analyticsApp',
                 function (data) {
                     $scope.toggleDiagrams();
                     $scope.diagramViewModel = new viewmodels.diagramViewModel(data);
+                    updateSelectedDiagram();
                 },
                 function (code) {
                     console.log(code); // TODO show exception
@@ -486,6 +489,26 @@ var analyticsApp = angular.module('analyticsApp',
                     );
                 });
             });
+        };
+
+        var updateSelectedDiagram = function() {
+            if ($scope.diagrams) {
+                $scope.$applyAsync(function() {
+                    $scope.diagrams.forEach(function (item) {
+                        if (item.selected == true) {
+                            item.selected = false;
+                        }
+                        if (item.name == $scope.diagramViewModel.data.name) {
+                            item.selected = true;
+                        }
+                    });
+                });
+            }
+        };
+
+        var initializeNavigationItem = function(item) {
+            item['showProperties'] = false;
+            item['selected'] = false;
         };
     }])
     .controller('deploymentNotificationController',

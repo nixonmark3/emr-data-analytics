@@ -189,68 +189,87 @@ button.diagram-evaluating { color: #2ca02c; }
     width: 100%;
     overflow-y: auto;
 }
+
 .diagrams-menu-body-item {
-    height: auto;
     background: white;
     margin: 10px;
     padding: 5px;
     box-shadow: 0px 6px 12px rgba(0,0,0,0.400);
+    height: auto;
+}
+
+.diagrams-menu-body-item-container {
+    height: 30px;
+    width: 100%;
 }
 
 .diagrams-menu-body-item-name {
-    height: 25px;
-    width: calc(100% - 10px);
+    float: left;
+    height: 30px;
+    width: 140px;
     text-align: center;
     vertical-align: middle;
-    margin: 5px;
 }
 
 .diagrams-menu-body-item-name:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
 
-.diagrams-menu-body-item-name:hover { cursor: pointer; color: #989898 }
+.diagrams-menu-body-item-name:hover { cursor: pointer; color: #3182bd }
 
-.diagrams-menu-body-item-options {
-    height: 25px;
-    width: calc(100% - 10px);
-    margin: 5px;
-    vertical-align: middle;
-}
-
-.diagrams-menu-body-item-options-toggle {
-    float: left;
-    height: 25px;
-    width: 90px;
-    text-align: center;
-    vertical-align: middle;
-}
-
-.diagrams-menu-body-item-options-toggle:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
-
-.diagrams-menu-body-item-options-toggle:hover { cursor: pointer; color: #989898; }
-
-.diagrams-menu-body-item-options-delete {
+.diagrams-menu-body-item-expand {
     float: right;
-    height: 25px;
-    width: calc(100% - 130px);
+    height: 30px;
+    width: calc(100% - 140px);
     text-align: center;
     vertical-align: middle;
 }
 
-.diagrams-menu-body-item-options-delete:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
+.diagrams-menu-body-item-expand:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
 
-.diagrams-menu-body-item-options-delete:hover { cursor: pointer; color: #989898 }
+.diagrams-menu-body-item-expand:hover { cursor: pointer; color: #3182bd }
 
-.diagrams-menu-body-item-info-container { opacity: 1; }
+.diagrams-menu-body-item-expand-container { opacity: 1; height: auto; width: 100%; }
 
-.diagrams-menu-body-item-info {
+.diagrams-menu-body-item-expand-row { opacity: 1; height: 30px; width: 100%; }
+
+.diagrams-menu-body-item-owner {
+    opacity: 1;
+    float: left;
+    height: 30px;
+    width: 140px;
+    color: grey;
+    vertical-align: middle;
+}
+
+.diagrams-menu-body-item-owner:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
+
+.diagrams-menu-body-item-owner:hover { cursor: default; }
+
+.diagrams-menu-body-item-no-owner-text { font-style: italic; }
+
+.diagrams-menu-body-item-delete {
+    opacity: 1;
+    float: right;
+    height: 30px;
+    width: calc(100% - 140px);
+    text-align: center;
+    vertical-align: middle;
+}
+
+.diagrams-menu-body-item-delete:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
+
+.diagrams-menu-body-item-delete:hover { cursor: pointer; color: #3182bd }
+
+.diagrams-menu-body-item-expand-row-auto { opacity: 1; height: auto; width: 100%; }
+
+.diagrams-menu-body-item-description {
     opacity: 1;
     height: auto;
-    width: calc(100% - 10px);
-    margin: 5px;
+    width: 100%;
+    color: grey;
     padding: 5px;
 }
 
-.diagrams-menu-body-item-info:hover { cursor: default; }
+.diagrams-menu-body-item-description:hover { cursor: default; }
 
 .diagrams-menu-footer { height: 50px; width: 100%; }
 
@@ -271,3 +290,5 @@ button.diagram-evaluating { color: #2ca02c; }
 }
 
 .diagrams-menu-footer-company:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
+
+.selected-diagram-text { font-weight: bold; }
