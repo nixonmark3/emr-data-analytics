@@ -146,7 +146,14 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                 // Translate the coordinates so they are relative to the svg element
                 //
                 var translateCoordinates = function (x, y, evt) {
-                    var diagram = document.getElementById('diagram');
+
+                    var elementName;
+                    if ($scope.isOnline)
+                        elementName = "online-diagram";
+                    else
+                        elementName = "offline-diagram";
+
+                    var diagram = document.getElementById(elementName);
                     var matrix = diagram.getScreenCTM();
                     var point = diagram.createSVGPoint();
                     point.x = x - evt.view.scrollX;
@@ -155,7 +162,14 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'popupApp', 'ngAn
                 };
 
                 var inverseCoordinates = function (x, y) {
-                    var diagram = document.getElementById('diagram');
+
+                    var elementName;
+                    if ($scope.isOnline)
+                        elementName = "online-diagram";
+                    else
+                        elementName = "offline-diagram";
+
+                    var diagram = document.getElementById(elementName);
                     var matrix = diagram.getScreenCTM().translate(x, y);
 
                     return {

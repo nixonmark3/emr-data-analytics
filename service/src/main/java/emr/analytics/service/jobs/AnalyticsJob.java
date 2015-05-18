@@ -1,11 +1,14 @@
 package emr.analytics.service.jobs;
 
+import emr.analytics.models.definition.Definition;
 import emr.analytics.models.diagram.Block;
 import emr.analytics.models.diagram.Diagram;
 import emr.analytics.service.SourceBlocks;
+import emr.analytics.service.messages.JobRequest;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
@@ -18,11 +21,11 @@ public abstract class AnalyticsJob implements Serializable {
     protected String _source;
     protected LogLevel _logLevel = LogLevel.Progress;
 
-    public AnalyticsJob(UUID id, JobMode mode, String template, Diagram diagram){
-        this._id = id;
-        this._mode = mode;
-        this._diagramName = diagram.getName();
-        this._source = this.compile(template, diagram);
+    public AnalyticsJob(JobRequest request, String template, HashMap<String, Definition> definitions){
+        this._id = request.getJobId();
+        this._mode = request.getJobMode();
+        this._diagramName = request.getDiagram().getName();
+        this._source = this.compile(request, template, definitions);
     }
 
     public String getDiagramName(){
@@ -43,9 +46,11 @@ public abstract class AnalyticsJob implements Serializable {
 
     public JobMode getJobMode() { return _mode; }
 
-    private String compile(String template, Diagram diagram){
+    protected String compile(JobRequest request, String template, HashMap<String, Definition> definitions){
 
         String source = "";
+
+        Diagram diagram = request.getDiagram();
 
         // compile a list of blocks to execute
         SourceBlocks sourceBlocks = new SourceBlocks();

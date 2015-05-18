@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import plugins.MongoDBPlugin;
 
@@ -30,6 +31,27 @@ public class BlockResultsService {
         }
 
         return availableResults;
+    }
+
+    public static String getModel(String blockName){
+
+        StringBuilder model = new StringBuilder();
+
+        List<BasicDBObject> results = getOutputResults(blockName);
+        Optional<BasicDBObject> result = results.stream().filter(r -> r.containsValue("scaled_coef")).findFirst();
+        if (result.isPresent()){
+            BasicDBObject data = (BasicDBObject)result.get().get("data");
+            if (data != null) {
+
+              data.forEach((k, v) -> {
+
+                  model.append(v.toString());
+                  model.append(",");
+              });
+            }
+        }
+
+        return (model.length() > 0) ? model.substring(0, model.length() - 1) : "";
     }
 
     public static List<BasicDBObject> getStatistics(String blockName) {
@@ -133,7 +155,6 @@ public class BlockResultsService {
 
         return outputResults;
     }
-
 
     private static BasicDBObject getResults(String blockName) {
 

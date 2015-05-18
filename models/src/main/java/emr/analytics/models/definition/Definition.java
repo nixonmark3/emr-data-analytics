@@ -3,16 +3,17 @@ package emr.analytics.models.definition;
 import java.util.*;
 
 public class Definition {
-    private int w = 200;
-    private String description = null;
     private String name = null;
+    private String description = null;
     private String category = null;
     private String friendlyName = null;
+    private int w = 200;
+    private boolean onlineOnly = false;
+    private String onlineComplement = null;
+    private Signature signature = null;
     private List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
     private List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
     private List<ConnectorDefinition> outputConnectors  = new ArrayList<ConnectorDefinition>();
-    private boolean onlineOnly = false;
-    private boolean modelGenerator = false;
 
     private Definition() {}
 
@@ -20,22 +21,6 @@ public class Definition {
         this.name = name;
         this.friendlyName = friendlyName;
         this.category = category;
-    }
-
-    public boolean isOnlineOnly() {
-        return onlineOnly;
-    }
-
-    public boolean isModelGenerator() {
-        return modelGenerator;
-    }
-
-    public void setModelGenerator(boolean modelGenerator) {
-        this.modelGenerator = modelGenerator;
-    }
-
-    public void setOnlineOnly(boolean onlineOnly) {
-        this.onlineOnly = onlineOnly;
     }
 
     public int getW() {
@@ -77,6 +62,20 @@ public class Definition {
     public void setFriendlyName(String friendlyName) {
         this.friendlyName = friendlyName;
     }
+
+    public boolean isOnlineOnly() { return onlineOnly; }
+
+    public void setOnlineOnly(boolean onlineOnly) { this.onlineOnly = onlineOnly; }
+
+    public boolean hasOnlineComplement(){ return !(onlineComplement == null); }
+
+    public String getOnlineComplement(){ return onlineComplement; }
+
+    public void setOnlineComplement(String value){ onlineComplement = value; }
+
+    public Signature getSignature(){ return signature; }
+
+    public void setSignature(Signature value){ signature = value; }
 
     public List<ParameterDefinition> getParameters() {
         return parameters;

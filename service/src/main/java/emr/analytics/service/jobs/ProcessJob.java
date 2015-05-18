@@ -1,6 +1,8 @@
 package emr.analytics.service.jobs;
 
+import emr.analytics.models.definition.Definition;
 import emr.analytics.models.diagram.Diagram;
+import emr.analytics.service.messages.JobRequest;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -16,12 +18,12 @@ public abstract class ProcessJob extends AnalyticsJob {
     protected String _commandPrefix;
     protected List<String> _commandArguments;
 
-    public ProcessJob(UUID id, JobMode mode, String template, String command, String commandPrefix, Diagram diagram){
-        this(id, mode, template, command, commandPrefix, diagram, new ArrayList<String>());
+    public ProcessJob(JobRequest request, String template, String command, String commandPrefix, HashMap<String, Definition> definitions){
+        this(request, template, command, commandPrefix, definitions, new ArrayList<String>());
     }
 
-    public ProcessJob(UUID id, JobMode mode, String template, String command, String commandPrefix, Diagram diagram, List<String> arguments){
-        super(id, mode, template, diagram);
+    public ProcessJob(JobRequest request, String template, String command, String commandPrefix, HashMap<String, Definition> definitions, List<String> arguments){
+        super(request, template, definitions);
         this._command = command;
         this._commandPrefix = commandPrefix;
         this._commandArguments = arguments;
