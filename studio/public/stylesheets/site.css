@@ -292,3 +292,7 @@ button.diagram-evaluating { color: #2ca02c; }
 .diagrams-menu-footer-company:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
 
 .selected-diagram-text { font-weight: bold; }
+
+.span-text {
+    font-size: 0.9em;
+}

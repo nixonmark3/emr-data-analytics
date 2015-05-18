@@ -45,7 +45,7 @@ class FunctionBlock():
         block_results = collections.OrderedDict()
 
         if statistics:
-            block_results['Statistics'] = df.describe().to_dict()
+            block_results['Statistics'] = list(df.describe().to_dict().items())
 
         if plot:
             # get a connection to GridFS
