@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import plugins.MongoDBPlugin;
@@ -66,7 +67,7 @@ public class BlockResultsService {
 
             blockStatistics.forEach(featureStatisticsObj -> {
 
-                BasicDBList tuple = (BasicDBList)featureStatisticsObj;
+                BasicDBList tuple = (BasicDBList) featureStatisticsObj;
 
                 if (tuple.size() == 2) {
 
@@ -141,12 +142,23 @@ public class BlockResultsService {
                 data.put("name", resultName);
 
                 if (BasicDBObject.class.isInstance(resultData)) {
+
                     data.put("type", "dictOfValues");
                 }
                 else if (BasicDBList.class.isInstance(resultData)) {
-                    data.put("type", "listOfValues");
+
+                    if (isListOfTuples(resultData)) {
+
+                        resultData = convertTuplesToDictionary(resultData);
+
+                        data.put("type", "dictOfValues");
+                    }
+                    else {
+                        data.put("type", "listOfValues");
+                    }
                 }
                 else {
+
                     data.put("type", "singleValue");
                 }
 
@@ -214,5 +226,45 @@ public class BlockResultsService {
         }
 
         return b;
+    }
+
+    private static boolean isListOfTuples(Object object) {
+
+        boolean isTuple = false;
+
+        BasicDBList list = (BasicDBList)object;
+
+        if (list.size() > 0) {
+
+            if (BasicDBList.class.isInstance(list.get(0))) {
+
+                BasicDBList listItem = (BasicDBList)list.get(0);
+
+                if (listItem.size() == 2) {
+
+                    isTuple = true;
+                }
+            }
+        }
+
+        return isTuple;
+    }
+
+    private static BasicDBObject convertTuplesToDictionary(Object object) {
+
+        BasicDBObject tupleDataAsDictionary = new BasicDBObject();
+
+        BasicDBList list = (BasicDBList)object;
+
+        if (object != null) {
+
+            list.forEach(item -> {
+
+                BasicDBList itemAsList = (BasicDBList)item;
+                tupleDataAsDictionary.put((String)itemAsList.get(0), itemAsList.get(1));
+            });
+        }
+
+        return tupleDataAsDictionary;
     }
 }

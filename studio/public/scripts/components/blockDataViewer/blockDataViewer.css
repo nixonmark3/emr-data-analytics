@@ -128,7 +128,7 @@
 .result-dict-item-key {
     padding-left: 10px;
     vertical-align: middle;
-    width: 150px;
+    width: 250px;
     height: 100%;
     float: left;
     border-right: 4px solid #e5e5e5;
@@ -136,7 +136,7 @@
 
 .result-dict-item-key:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
 
-.result-dict-item-value { height: 100%; width: calc(100% - 150px); float: right; padding-left: 10px; }
+.result-dict-item-value { height: 100%; width: calc(100% - 250px); float: right; padding-left: 10px; }
 
 .result-dict-item-value:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
 

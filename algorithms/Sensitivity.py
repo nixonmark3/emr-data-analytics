@@ -67,7 +67,7 @@ class Sensitivity(FunctionBlock):
             sensitivity_val = coll.OrderedDict(zip(x_variable_name, scoeff))
 
             sensitivity_result = coll.OrderedDict()
-            sensitivity_result['scaled_coef'] = sensitivity_val
+            sensitivity_result['scaled_coef'] = list(sensitivity_val.items())
             sensitivity_result['sensitivity_R2'] = R2_list
 
             FunctionBlock.save_results(self, results=sensitivity_result)

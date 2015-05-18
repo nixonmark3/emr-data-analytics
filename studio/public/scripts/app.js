@@ -45,7 +45,7 @@ var analyticsApp = angular.module('analyticsApp',
                 }
                 else if (data.messageType == 'AddDiagram') {
                     $scope.$apply(function() {
-                        initializeNavigationItem(item);
+                        initializeNavigationItem(data);
                         $scope.diagrams.push(data);
                     });
                     updateSelectedDiagram();
