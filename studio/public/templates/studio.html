@@ -7,35 +7,40 @@
 
         <div class="col-xs-4 diagrams-menu-header">
             <button type="button" class="btn btn-default navbar-btn pull-left" ng-click="toggleDiagrams()">
-                <i class="fa fa-toggle-left fa-lg"></i>
+                <i class="fa fa-toggle-left"></i>
             </button>
             <button type="button" class="btn btn-default navbar-btn pull-right" ng-click="createDiagram()">
-                <i class="fa fa-plus fa-lg"></i>
+                <i class="fa fa-plus"></i>
             </button>
         </div>
 
         <div class="diagrams-menu-body">
             <div class="diagrams-menu-body-item" ng-model="diagrams" ng-repeat="d in diagrams">
-                <div class="diagrams-menu-body-item-name" ng-click="loadDiagram(d.name)">
-                    {{d.name}}
-                </div>
-                <div class="diagrams-menu-body-item-options">
-                    <div class="diagrams-menu-body-item-options-toggle" ng-click="d.showProperties = !d.showProperties">
-                        <i class="fa ng-class:{ 'fa-toggle-on': d.showProperties, 'fa-toggle-off': !d.showProperties }"></i>
-                        <small>Properties</small>
+                <div class="diagrams-menu-body-item-container">
+                    <div class="diagrams-menu-body-item-name ng-class:{'selected-diagram-text': d.selected}" ng-click="loadDiagram(d.name)">
+                        {{d.name}}
                     </div>
-                    <div class="diagrams-menu-body-item-options-delete" ng-click="deleteDiagram(d.name)">
-                        <i class="fa fa-trash-o fa-lg"></i>
+                    <div class="diagrams-menu-body-item-expand" ng-click="d.showProperties = !d.showProperties">
+                        <i class="fa fa-ellipsis-v"></i>
                     </div>
                 </div>
-                <div class="fade diagrams-menu-body-item-info-container" ng-show="d.showProperties">
-                    <div ng-show="d.owner" class="fade diagrams-menu-body-item-info">
-                        <i class="fa fa-user"></i>
-                        <small>{{d.owner}}</small>
+                <div class="fade diagrams-menu-body-item-expand-container" ng-show="d.showProperties">
+                    <div class="diagrams-menu-body-item-expand-row">
+                        <div class="diagrams-menu-body-item-delete" ng-click="deleteDiagram(d.name)">
+                            <i class="fa fa-trash-o fa-lg"></i>
+                        </div>
                     </div>
-                    <div ng-show="d.description" class="fade diagrams-menu-body-item-info">
-                        <i class="fa fa-file-text-o"></i>
-                        <small>{{d.description}}</small>
+                    <div class="diagrams-menu-body-item-expand-row" ng-show="d.owner">
+                        <div class="diagrams-menu-body-item-owner">
+                            <i class="fa fa-user"></i>
+                            <small>{{d.owner}}</small>
+                        </div>
+                    </div>
+                    <div ng-show="d.description" class="diagrams-menu-body-item-expand-row-auto">
+                        <div class="diagrams-menu-body-item-description">
+                            <i class="fa fa-pencil-square-o"></i>
+                            <small>{{d.description}}</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -58,7 +63,6 @@
             <div class="row">
                 <div class="col-xs-4">
                     <button type="button" class="btn btn-default navbar-btn pull-left" ng-click="toggleDiagrams()">
-                        <!--<i class="fa ng-class:{ 'fa-toggle-left fa-lg': showSidebar, 'fa-toggle-right fa-lg': !showSidebar }"></i>-->
                         <i class="fa fa-bars"></i>
                     </button>
                     <span class="navbar-title">{{diagramViewModel.data.name}}</span>
