@@ -121,7 +121,8 @@ public class StreamingSourceBlocks {
                                             .toString()
                                             .replace(", ", ",")
                                             .replace("[", "")
-                                            .replace("]", ""));
+                                            .replace("]", "")
+                                            .replace("*", "."));    //
 
                                     // todo: temporarily hard code test tags
                                     // value = "\"PICK_P101/PV.CV,PICK_T101/PV.CV,PICK_F101/PV.CV\"";
