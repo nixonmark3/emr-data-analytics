@@ -4,6 +4,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import akka.actor.*;
 import akka.japi.pf.ReceiveBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import emr.analytics.models.definition.Definition;
 import emr.analytics.models.messages.BlockStatus;
 import emr.analytics.models.messages.EvaluationStatus;
 import emr.analytics.models.messages.OnlineNotification;
@@ -15,6 +16,7 @@ import scala.concurrent.duration.Duration;
 import scala.runtime.BoxedUnit;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class JobClientActor extends AbstractActor {
@@ -25,12 +27,12 @@ public class JobClientActor extends AbstractActor {
     private PartialFunction<Object, BoxedUnit> active;
     private ServiceSocketCallback _socketCallback;
 
-    public static Props props(String path){ return Props.create(JobClientActor.class, path); }
+    public static Props props(String path, HashMap<String, Definition> definitions){ return Props.create(JobClientActor.class, path, definitions); }
 
-    public JobClientActor(String path) {
+    public JobClientActor(String path, HashMap<String, Definition> definitions) {
 
         _path = path;
-        _compiler = context().actorOf(JobCompilationActor.props(), "job-compiler");
+        _compiler = context().actorOf(JobCompilationActor.props(definitions), "job-compiler");
         _socketCallback = new ServiceSocketCallback();
 
         receive(ReceiveBuilder.

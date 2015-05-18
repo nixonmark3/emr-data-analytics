@@ -13,34 +13,44 @@ public class DiagramsService {
     private HashSet<String> _onlineBlocks;
     private HashMap<String, String> _dataSources;
 
+    private HashMap<String, Definition> _definitions;
+
+    private Definition sourceBlock;
+    private Definition sinkBlock;
+
+    public DiagramsService(HashMap<String, Definition> definitions){
+        _definitions = definitions;
+
+        sourceBlock = definitions.get("Kafka");
+        sinkBlock = definitions.get("RESTPost");
+    }
+
     public Diagram compile(Diagram offline){
 
         Diagram online = new Diagram(offline.getName(),
             offline.getDescription(),
             offline.getOwner());
 
-        HashMap<String, Definition> onlineDefinitions = getOnlineDefinitions();
-
         _onlineBlocks = new HashSet<>();
         _dataSources = new HashMap<>();
 
-        // find model block - currently model blocks will exist in the collection of online definitions
-        // todo: establish a more definitive definition of a model block
+        // iterate over offline blocks to find model block
         for(Block block : offline.getBlocks()){
 
-            if (onlineDefinitions.containsKey(block.getDefinition())){
+            Definition offlineDefinition = _definitions.get(block.getDefinition());
+
+            if (offlineDefinition.hasOnlineComplement()){
 
                 // reference online definition
-                Definition onlineDefinition = onlineDefinitions.get(block.getDefinition());
+                Definition onlineDefinition = _definitions.get(offlineDefinition.getOnlineComplement());
 
                 // create online block
                 Block onlineBlock = this.createBlock(onlineDefinition,
                         block.getState(),
                         block.getX(),
                         block.getY());
-                // set model parameter
-                //todo: clean this up
-                onlineBlock.setParameter("Model", block.getName());
+                // reference offline complement
+                onlineBlock.setOfflineComplement(block.getUniqueName());
 
                 // set collected parameter values
                 for(Parameter parameter : block.getParameters()){
@@ -55,7 +65,12 @@ public class DiagramsService {
 
                 // follow the offline diagram to its root (collecting blocks along the way)
                 int index = 0;
+                boolean sourceConnector = false;
                 for(Connector connector : onlineBlock.getInputConnectors()){
+
+                    String connectorName = connector.getName();
+                    if (connectorName.toLowerCase().equals("x"))
+                        sourceConnector = true;
 
                     if (block.hasInputConnector(connector.getName())){
 
@@ -68,7 +83,7 @@ public class DiagramsService {
                                 connector.getName(),
                                 index);
 
-                            this.addLeadingPath(onlineWire, offline, online);
+                            this.addLeadingPath(onlineWire, offline, online, sourceConnector);
                         }
                     }
 
@@ -76,7 +91,7 @@ public class DiagramsService {
                 }
 
                 // add a result block to the output of the model block
-                Block postBlock = createBlock(this.getWebServicePostBlockDefinition(),
+                Block postBlock = this.createBlock(this.sinkBlock,
                     3,
                     onlineBlock.getX(),
                     (onlineBlock.getY() + 120));
@@ -86,87 +101,12 @@ public class DiagramsService {
                     onlineBlock.getOutputConnectors().get(0).getName(),
                     0,
                     postBlock.getUniqueName(),
-                    onlineBlock.getInputConnectors().get(0).getName(),
+                    postBlock.getInputConnectors().get(0).getName(),
                     0));
             }
         }
 
         return online;
-    }
-
-    /**
-     * Loads online definitions organized by the name of the offline definition counterpart
-     */
-    private HashMap<String, Definition> getOnlineDefinitions(){
-
-        // todo: online definitions are currently hardcoded
-        // todo: this should be updated so that these are created in the utilities wrapper project and loaded here from mongo
-
-        HashMap<String, Definition> definitions = new HashMap<>();
-        Definition definition;
-
-        // create sensitivity definition
-        definition = new Definition("PLS", "PLS Predict", Category.TRANSFORMERS.toString());
-        definition.setDescription("Uses PLS model for prediction.");
-
-        // add input connector
-        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
-        inputConnectors.add(new ConnectorDefinition("x", DataType.FRAME.toString()));
-        definition.setInputConnectors(inputConnectors);
-
-        // add output connector
-        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-        outputConnectors.add(new ConnectorDefinition("out", DataType.FLOAT.toString()));
-        definition.setOutputConnectors(outputConnectors);
-
-        // add parameters
-        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("Model",
-                DataType.STRING.toString(),
-                "",
-                new ArrayList<String>(),
-                null));
-        definition.setParameters(parameters);
-
-        definitions.put("Sensitivity", definition);
-
-        return definitions;
-    }
-
-    private Definition getKafkaBlockDefinition(){
-
-        Definition definition;
-
-        // create sensitivity definition
-        definition = new Definition("Kafka", "Kafka Data", Category.DATA_SOURCES.toString());
-        definition.setDescription("Spark streaming block that monitors a topic in Kafka.");
-
-        // add output connector
-        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        definition.setOutputConnectors(outputConnectors);
-
-        // todo: add parameters for zookeeper, kafka, topic name, and frequency
-
-        return definition;
-    }
-
-    private Definition getWebServicePostBlockDefinition(){
-
-        Definition definition;
-
-        // create sensitivity definition
-        definition = new Definition("RESTPost", "REST POST", Category.TRANSFORMERS.toString());
-        definition.setDescription("Post data to a REST API.");
-
-        // add input connector
-        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
-        inputConnectors.add(new ConnectorDefinition("in", DataType.STRING.toString()));
-        definition.setInputConnectors(inputConnectors);
-
-        // todo: add parameters for url, payload pattern
-
-        return definition;
     }
 
     private Block createBlock(Definition definition, int state, int x, int y){
@@ -184,15 +124,14 @@ public class DiagramsService {
         return new Block(name, state, x, y, definition);
     }
 
-    private void addLeadingPath(Wire wire, Diagram source, Diagram destination){
+    private void addLeadingPath(Wire wire, Diagram source, Diagram destination, boolean isSourceConnector){
 
         // todo: update to make copies
 
         String blockUniqueName = wire.getFrom_node();
         Block block = source.getBlockByUniqueName(blockUniqueName);
 
-        // todo: temporarily replace offline databrick with online kafka block
-        if (block.getDefinition().equals("DataBrick")) {
+        if (isSourceConnector && block.getInputConnectors().size() == 0) {
 
             if (_dataSources.containsKey(block.getName())) {
                 block = destination.getBlock(_dataSources.get(block.getName()));
@@ -202,7 +141,7 @@ public class DiagramsService {
                 int state = block.getState();
                 int x = block.getX();
                 int y = block.getY();
-                block = createBlock(this.getKafkaBlockDefinition(), state, x, y);
+                block = createBlock(this.sourceBlock, state, x, y);
                 destination.addBlock(block);
 
                 _dataSources.put(name, block.getName());
@@ -220,6 +159,6 @@ public class DiagramsService {
         destination.addWire(wire);
 
         for (Wire leadingWire : source.getLeadingWires(blockUniqueName))
-            this.addLeadingPath(leadingWire, source, destination);
+            this.addLeadingPath(leadingWire, source, destination, isSourceConnector);
     }
 }

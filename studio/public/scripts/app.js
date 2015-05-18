@@ -379,6 +379,7 @@ var analyticsApp = angular.module('analyticsApp',
                 // todo: temporarily using timeout to test loading screen
                 $timeout(function(){diagramService.compile($scope.diagramViewModel.data).then(
                     function (data) {
+
                         $scope.onlineViewModel = new viewmodels.diagramViewModel(data);
                         $scope.compiling = false;
                     },

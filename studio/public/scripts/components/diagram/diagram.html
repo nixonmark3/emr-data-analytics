@@ -1,6 +1,5 @@
 
-<svg id="diagram"
-     xmlns="http://www.w3.org/2000/svg"
+<svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
      ng-mousemove="mouseMove($event)"
      ng-click="diagramClick($event);">
@@ -98,7 +97,7 @@
 
         <!-- block configuration button -->
         <g class="block-button-wrapper"
-           ng-if="!isOnline"
+           ng-if="!isOnline || (isOnline && block.data.onlineOnly)"
            ng-click="toggleBlockConfiguration($event, block);">
 
             <rect class="block-button"

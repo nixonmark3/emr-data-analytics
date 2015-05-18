@@ -4,7 +4,9 @@ import actors.ClientActorManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.BasicDBObject;
 import com.mongodb.WriteResult;
+import emr.analytics.models.definition.Definition;
 import emr.analytics.models.diagram.*;
 
 import emr.analytics.service.jobs.JobMode;
@@ -13,9 +15,12 @@ import play.mvc.BodyParser;
 import play.mvc.Result;
 
 import org.jongo.*;
+import services.BlockResultsService;
+import services.DefinitionsService;
 import services.DiagramsService;
 import services.EvaluationService;
 
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.UUID;
@@ -25,8 +30,10 @@ import java.util.UUID;
  */
 public class Diagrams extends ControllerBase {
 
+    private static HashMap<String, Definition> _definitions = DefinitionsService.getDefinitionsMap();
+
     // initialize the evaluation service Akka components
-    private static EvaluationService _evaluationService = new EvaluationService();
+    private static EvaluationService _evaluationService = new EvaluationService(_definitions);
 
     private static Map<UUID, UUID> _mapJobIdToClientId = new HashMap<UUID, UUID>();
 
@@ -43,7 +50,16 @@ public class Diagrams extends ControllerBase {
         ObjectMapper objectMapper = new ObjectMapper();
         Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
 
-        UUID jobId = _evaluationService.sendRequest(JobMode.Online, diagram);
+        // retrieve models
+        HashMap<String, String> models = new HashMap<>();
+        BlockResultsService service = new BlockResultsService();
+        for(Block block : diagram.getBlocksWithOfflineComplements()){
+
+            String model = BlockResultsService.getModel(block.getOfflineComplement());
+            models.put(block.getOfflineComplement(), model);
+        }
+
+        UUID jobId = _evaluationService.sendRequest(JobMode.Online, diagram, models);
         if (jobId == null) {
             return internalServerError("Error requesting evaluation.");
         }
@@ -85,7 +101,7 @@ public class Diagrams extends ControllerBase {
         ObjectMapper objectMapper = new ObjectMapper();
         Diagram offline = objectMapper.convertValue(request().body().asJson(), Diagram.class);
 
-        DiagramsService service = new DiagramsService();
+        DiagramsService service = new DiagramsService(_definitions);
         Diagram online = service.compile(offline);
 
         return ok(Json.toJson(online));

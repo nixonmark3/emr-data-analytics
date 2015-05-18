@@ -200,4 +200,10 @@ public class Diagram implements Serializable {
 
         this.wires.add(wire);
     }
+
+    public List<Block> getBlocksWithOfflineComplements(){
+        return this.blocks.stream()
+                .filter(b -> b.hasOfflineComplement())
+                .collect(Collectors.toList());
+    }
 }

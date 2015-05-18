@@ -3,20 +3,24 @@ package emr.analytics.service;
 import akka.actor.AbstractActor;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
+import emr.analytics.models.definition.Definition;
 import emr.analytics.models.diagram.Diagram;
 import emr.analytics.service.jobs.AnalyticsJob;
-import emr.analytics.service.jobs.JobMode;
 import emr.analytics.service.jobs.PythonJob;
 import emr.analytics.service.jobs.SparkStreamingJob;
 import emr.analytics.service.messages.JobRequest;
 
-import java.util.Arrays;
+import java.util.HashMap;
 
 public class JobCompilationActor extends AbstractActor {
 
-    public static Props props(){ return Props.create(JobCompilationActor.class); }
+    private HashMap<String, Definition> _definitions;
 
-    public JobCompilationActor(){
+    public static Props props(HashMap<String, Definition> definitions){ return Props.create(JobCompilationActor.class, definitions); }
+
+    public JobCompilationActor(HashMap<String, Definition> definitions){
+
+        _definitions = definitions;
 
         receive(ReceiveBuilder.
             match(JobRequest.class, request -> {
@@ -27,14 +31,10 @@ public class JobCompilationActor extends AbstractActor {
                 AnalyticsJob job;
                 switch(request.getJobMode()){
                     case Online:
-                        job = new SparkStreamingJob(request.getJobId(),
-                            JobMode.Online,
-                            diagram);
+                        job = new SparkStreamingJob(request, _definitions);
                         break;
                     default:
-                        job = new PythonJob(request.getJobId(),
-                            JobMode.Offline,
-                            diagram);
+                        job = new PythonJob(request, _definitions);
                         break;
                 }
 

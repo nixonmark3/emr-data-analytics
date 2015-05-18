@@ -321,13 +321,35 @@ public class DefinitionGenerator {
         definition = new Definition("Kafka", "Kafka Data", Category.DATA_SOURCES.toString());
         definition.setDescription("Spark streaming block that monitors a topic in Kafka.");
         definition.setOnlineOnly(true);
+        definition.setSignature(new Signature("emr.analytics.spark.algorithms.Utilities",
+            "Utilities",
+            "kafkaStream",
+            new String[]{
+                "ssc",
+                "parameter:Zookeeper Quorum",
+                "appName",
+                "parameter:Topics"
+            })
+        );
 
         // add output connector
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
         definition.setOutputConnectors(outputConnectors);
 
-        // todo: add parameters for zookeeper, kafka, topic name, and frequency
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("Zookeeper Quorum",
+                DataType.STRING.toString(),
+                "localhost:2181",
+                new ArrayList<String>(),
+                null));
+        parameters.add(new ParameterDefinition("Topics",
+                DataType.STRING.toString(),
+                "runtime",
+                new ArrayList<String>(),
+                null));
+
+        definition.setParameters(parameters);
 
         _definitions.save(definition);
     }
@@ -339,6 +361,15 @@ public class DefinitionGenerator {
         Definition columns = new Definition("Columns", "Columns", Category.TRANSFORMERS.toString());
 
         columns.setDescription("Selects columns from a given data frame");
+
+        columns.setSignature(new Signature("emr.analytics.spark.algorithms.Utilities",
+            "Utilities",
+            "columns",
+            new String[]{
+                "input:in",
+                "parameter:Columns"
+            })
+        );
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
         inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
@@ -372,7 +403,7 @@ public class DefinitionGenerator {
     //
     private void createPLSSensitivityBlock() {
         Definition plsSensitivity = new Definition("Sensitivity", "PLSSensitivity", Category.TRANSFORMERS.toString());
-        plsSensitivity.setModelGenerator(true);
+        plsSensitivity.setOnlineComplement("PLS");
 
         plsSensitivity.setDescription("Calculates sensitivity of output y to set of inputs X using PLS");
 
@@ -534,6 +565,14 @@ public class DefinitionGenerator {
         definition = new Definition("PLS", "PLS Predict", Category.TRANSFORMERS.toString());
         definition.setDescription("Uses PLS model for prediction.");
         definition.setOnlineOnly(true);
+        definition.setSignature(new Signature("emr.analytics.spark.algorithms.Utilities",
+                        "Utilities",
+                        "dotProduct",
+                        new String[]{
+                                "input:x",
+                                "block:model"
+                        })
+        );
 
         // add input connector
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
@@ -545,15 +584,6 @@ public class DefinitionGenerator {
         outputConnectors.add(new ConnectorDefinition("out", DataType.FLOAT.toString()));
         definition.setOutputConnectors(outputConnectors);
 
-        // add parameters
-        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("Model",
-                DataType.STRING.toString(),
-                "",
-                new ArrayList<String>(),
-                null));
-        definition.setParameters(parameters);
-
         _definitions.save(definition);
     }
 
@@ -564,6 +594,15 @@ public class DefinitionGenerator {
         definition = new Definition("RESTPost", "REST POST", Category.TRANSFORMERS.toString());
         definition.setDescription("Post data to a REST API.");
         definition.setOnlineOnly(true);
+        definition.setSignature(new Signature("emr.analytics.spark.algorithms.Requests",
+            "Requests",
+            "postOpcValue",
+            new String[]{
+                    "parameter:Url",
+                    "parameter:Tag",
+                    "input:in"
+            })
+        );
 
         // add input connector
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
@@ -571,6 +610,19 @@ public class DefinitionGenerator {
         definition.setInputConnectors(inputConnectors);
 
         // todo: add parameters for url, payload pattern
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("Url",
+                DataType.STRING.toString(),
+                "",
+                new ArrayList<String>(),
+                null));
+        parameters.add(new ParameterDefinition("Tag",
+                DataType.STRING.toString(),
+                "",
+                new ArrayList<String>(),
+                null));
+
+        definition.setParameters(parameters);
 
         _definitions.save(definition);
     }

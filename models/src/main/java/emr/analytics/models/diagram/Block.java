@@ -18,6 +18,8 @@ public class Block implements Serializable {
     private String name;
     private String uniqueName;
     private String definition;
+    private boolean onlineOnly = false;
+    private String offlineComplement = null;
     private int state;
     private int x;
     private int y;
@@ -37,6 +39,8 @@ public class Block implements Serializable {
         this.y = y;
         this.definition = definition.getName();
         this.w = definition.getW();
+        this.onlineOnly = definition.isOnlineOnly();
+        this.offlineComplement = null;
 
         this.inputConnectors = createConnectors(definition.getInputConnectors());
         this.outputConnectors = createConnectors(definition.getOutputConnectors());
@@ -106,6 +110,16 @@ public class Block implements Serializable {
     public void setState(int state) {
         this.state = state;
     }
+
+    public boolean isOnlineOnly() { return onlineOnly; }
+
+    public void setOnlineOnly(boolean onlineOnly) { this.onlineOnly = onlineOnly; }
+
+    public boolean hasOfflineComplement(){ return !(offlineComplement == null); }
+
+    public String getOfflineComplement(){ return offlineComplement; }
+
+    public void setOfflineComplement(String value){ offlineComplement = value; }
 
     /**
      * Sets the x position of this Block in Diagram.

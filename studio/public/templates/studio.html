@@ -108,8 +108,9 @@
 
                 <div class="diagram-container">
 
-                    <diagram view-model="diagramViewModel"
-                             is-online="false"
+                    <diagram id="offline-diagram"
+                             view-model="diagramViewModel"
+                             is-online="onlineCanvas"
                              nodes="nodes"
                              library="library"
                              load-sources="loadSources"
@@ -129,8 +130,9 @@
 
                 <div ng-if="!compiling" class="diagram-container">
 
-                    <diagram view-model="onlineViewModel"
-                             is-online="true"
+                    <diagram id="online-diagram"
+                             view-model="onlineViewModel"
+                             is-online="onlineCanvas"
                              nodes="nodes"
                              library="library"
                              load-sources="loadSources"

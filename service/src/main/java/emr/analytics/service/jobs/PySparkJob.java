@@ -1,11 +1,10 @@
 package emr.analytics.service.jobs;
 
+import emr.analytics.models.definition.Definition;
 import emr.analytics.models.diagram.Diagram;
+import emr.analytics.service.messages.JobRequest;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class PySparkJob extends ProcessJob {
 
@@ -15,18 +14,17 @@ public class PySparkJob extends ProcessJob {
     private List<String> _jars = new ArrayList<String>();
     private List<String> _pyFiles = new ArrayList<String>();
 
-    public PySparkJob(UUID id, JobMode mode, Diagram diagram){
-        this(id, mode, diagram, new ArrayList<String>());
+    public PySparkJob(JobRequest request, HashMap<String, Definition> definitions){
+        this(request, definitions, new ArrayList<String>());
     }
 
-    public PySparkJob(UUID id, JobMode mode, Diagram diagram, List<String> arguments){
+    public PySparkJob(JobRequest request, HashMap<String, Definition> definitions, List<String> arguments){
 
-        super(id,
-            mode,
+        super(request,
             "pyspark_driver.mustache",      // template
             "bin/spark-submit",             // command
             "SPARK_HOME",                   // command prefix
-            diagram,
+            definitions,
             arguments);
     }
 

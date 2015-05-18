@@ -3,7 +3,7 @@
  * Diagram
  */
 
-#diagram { width: 100%; height: 1000px; }
+#offline-diagram, #online-diagram { width: 100%; height: 1000px; }
 
 /*
  * Blocks
@@ -72,7 +72,7 @@
 
 .block-properties {
     position: absolute;
-    z-index: 1001;
+    z-index: 3001;
     border-radius: 10px;
     border: 1px solid #989898;
     background-color: white;
