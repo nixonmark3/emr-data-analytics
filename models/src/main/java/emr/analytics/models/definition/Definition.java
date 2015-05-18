@@ -7,6 +7,7 @@ public class Definition {
     private String description = null;
     private String category = null;
     private String friendlyName = null;
+    private int type = 0;
     private int w = 200;
     private boolean onlineOnly = false;
     private String onlineComplement = null;

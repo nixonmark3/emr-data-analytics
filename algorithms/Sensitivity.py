@@ -59,7 +59,7 @@ class Sensitivity(FunctionBlock):
             R2_list.append(pls_model.score(X,Y))
             coeffs = pls_model.coefs
 
-            scale_coeffs = coeffs/sum(abs(coeffs))
+            scale_coeffs = coeffs # /sum(abs(coeffs))
             scoeff = [x[0] for x in scale_coeffs]
 
             sensitivity_val_list.append(scale_coeffs.T)
