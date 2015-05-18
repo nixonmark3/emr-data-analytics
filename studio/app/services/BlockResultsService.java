@@ -40,30 +40,33 @@ public class BlockResultsService {
 
         if (results != null) {
 
-            BasicDBObject blockStatistics = (BasicDBObject)results.get("Statistics");
+            BasicDBList blockStatistics = (BasicDBList)results.get("Statistics");
 
-            blockStatistics.forEach((featureName, featureStatisticsObj) -> {
+            blockStatistics.forEach(featureStatisticsObj -> {
 
-                BasicDBObject blockFeatureStatistics = new BasicDBObject();
-                blockFeatureStatistics.put("name", featureName);
+                BasicDBList tuple = (BasicDBList)featureStatisticsObj;
 
-                BasicDBObject featureStatistics = (BasicDBObject) featureStatisticsObj;
-                featureStatistics.forEach((statistic, statisticValue) -> {
+                if (tuple.size() == 2) {
 
-                    if (statistic.contains("25")) {
-                        statistic = "twentyFive";
-                    }
-                    else if (statistic.contains("50")) {
-                        statistic = "fifty";
-                    }
-                    else if (statistic.contains("75")) {
-                        statistic = "seventyFive";
-                    }
+                    BasicDBObject blockFeatureStatistics = new BasicDBObject();
+                    blockFeatureStatistics.put("name", tuple.get(0));
 
-                    blockFeatureStatistics.put(statistic, statisticValue.toString());
-                });
+                    BasicDBObject featureStatistics = (BasicDBObject) tuple.get(1);
+                    featureStatistics.forEach((statistic, statisticValue) -> {
 
-                statistics.add(blockFeatureStatistics);
+                        if (statistic.contains("25")) {
+                            statistic = "twentyFive";
+                        } else if (statistic.contains("50")) {
+                            statistic = "fifty";
+                        } else if (statistic.contains("75")) {
+                            statistic = "seventyFive";
+                        }
+
+                        blockFeatureStatistics.put(statistic, statisticValue.toString());
+                    });
+
+                    statistics.add(blockFeatureStatistics);
+                }
             });
         }
 
