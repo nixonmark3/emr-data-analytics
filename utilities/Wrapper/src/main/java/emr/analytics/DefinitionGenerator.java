@@ -58,6 +58,7 @@ public class DefinitionGenerator {
         createScaleBlock();
         createPLSBlock();
         createWebServicePostBlock();
+        createSplitBlock();
     }
 
     //
@@ -626,6 +627,34 @@ public class DefinitionGenerator {
 
         _definitions.save(definition);
     }
+
+    private void createSplitBlock() {
+
+        Definition definition = null;
+
+        definition = new Definition("Split", "Split", Category.TRANSFORMERS.toString());
+        definition.setDescription("Splits a data frame into training and testing data frames");
+
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+        definition.setInputConnectors(inputConnectors);
+
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("train", DataType.FRAME.toString()));
+        outputConnectors.add(new ConnectorDefinition("test", DataType.FRAME.toString()));
+        definition.setOutputConnectors(outputConnectors);
+
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("Split",
+                DataType.INT.toString(),
+                75,
+                new ArrayList<String>(),
+                null));
+        definition.setParameters(parameters);
+
+        _definitions.save(definition);
+    }
+
 
     //
     // Rolling Average Block Definition
