@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class StreamingSourceBlocks {
 
-    private String _streamingContextName = "kafka";
+    private String _streamingContextName = "pollingstream";
 
     public HashSet<String> packageNames;
     public StreamingSourceBlock streamingContext;
