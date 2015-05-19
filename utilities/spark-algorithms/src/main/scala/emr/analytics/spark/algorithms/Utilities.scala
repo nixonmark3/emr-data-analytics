@@ -23,4 +23,6 @@ object Utilities {
     val topicsMap = topics.split(",").map(t => (t,1)).toMap
     KafkaUtils.createStream(ssc, zkQuorum, groupId, topicsMap)
   }
+
+
 }
