@@ -59,6 +59,8 @@ public class DefinitionGenerator {
         createPLSBlock();
         createWebServicePostBlock();
         createSplitBlock();
+        createTimeDelayBlock();
+        createShiftBlock();
     }
 
     //
@@ -655,6 +657,49 @@ public class DefinitionGenerator {
         _definitions.save(definition);
     }
 
+    private void createTimeDelayBlock() {
+
+        Definition definition = null;
+
+        definition = new Definition("TimeDelay", "Time Delay", Category.TRANSFORMERS.toString());;
+
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("x", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("y", DataType.FRAME.toString()));
+        definition.setInputConnectors(inputConnectors);
+
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        definition.setOutputConnectors(outputConnectors);
+
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("Max Lag",
+                DataType.INT.toString(),
+                10,
+                new ArrayList<String>(),
+                null));
+        definition.setParameters(parameters);
+
+        _definitions.save(definition);
+    }
+
+    private void createShiftBlock() {
+
+        Definition definition = null;
+
+        definition = new Definition("Shift", "Time Shift", Category.TRANSFORMERS.toString());;
+
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("delay", DataType.FRAME.toString()));
+        definition.setInputConnectors(inputConnectors);
+
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        definition.setOutputConnectors(outputConnectors);
+
+        _definitions.save(definition);
+    }
 
     //
     // Rolling Average Block Definition
