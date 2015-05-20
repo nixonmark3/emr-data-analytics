@@ -152,6 +152,54 @@ public class DefinitionGenerator {
         _definitions.save(loadDB);
     }
 
+    private void createLoadFF3Block() {
+
+        Definition definition = new Definition("LoadFF3", "Load FF3", Category.DATA_SOURCES.toString());
+
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        definition.setOutputConnectors(outputConnectors);
+
+//        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+//
+//        parameters.add(new ParameterDefinition("Project",
+//                DataType.LIST.toString(),
+//                "None",
+//                new ArrayList<String>(),
+//                new ParameterSource("Jar",
+//                        "plugins-1.0-SNAPSHOT.jar",
+//                        "Projects",
+//                        new ArrayList<Argument>())));
+//
+//        List<Argument> arguments = new ArrayList<Argument>();
+//        arguments.add(new Argument("Project", 0, "Project.Value"));
+//
+//        parameters.add(new ParameterDefinition("Data Set",
+//                DataType.LIST.toString(),
+//                "None",
+//                new ArrayList<String>(),
+//                new ParameterSource("Jar",
+//                        "plugins-1.0-SNAPSHOT.jar",
+//                        "DataSets",
+//                        arguments)));
+//
+//        List<String> opts = new ArrayList<String>();
+//        opts.add("True");
+//        opts.add("False");
+//
+//        parameters.add(new ParameterDefinition("Plot",
+//                DataType.LIST.toString(),
+//                "False",
+//                opts,
+//                null));
+//
+//        loadDB.setParameters(parameters);
+
+        _definitions.save(definition);
+    }
+
+
+
     //
     // Save Block Definition
     //
@@ -268,6 +316,16 @@ public class DefinitionGenerator {
                 new ArrayList<String>(),
                 null));
 
+        List<String> opts = new ArrayList<String>();
+        opts.add("CSV");
+        opts.add("FF3");
+
+        parameters.add(new ParameterDefinition("File Type",
+                DataType.LIST.toString(),
+                "CSV",
+                opts,
+                null));
+
         parameters.add(new ParameterDefinition("Project Name",
                 DataType.STRING.toString(),
                 "None",
@@ -297,6 +355,16 @@ public class DefinitionGenerator {
                 DataType.STRING.toString(),
                 "None",
                 new ArrayList<String>(),
+                null));
+
+        List<String> opts = new ArrayList<String>();
+        opts.add("CSV");
+        opts.add("FF3");
+
+        parameters.add(new ParameterDefinition("File Type",
+                DataType.LIST.toString(),
+                "CSV",
+                opts,
                 null));
 
         parameters.add(new ParameterDefinition("Project Name",

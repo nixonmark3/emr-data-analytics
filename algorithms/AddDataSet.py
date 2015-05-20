@@ -1,9 +1,6 @@
 import sys
-import pandas as pd
+import Wranglers
 
-from Projects import Project
-from Projects import Dataset
-from pymongo import MongoClient
 from FunctionBlock import FunctionBlock
 
 
@@ -18,19 +15,20 @@ class AddDataSet(FunctionBlock):
 
             filename = self.parameters['Filename']
 
+            file_type = self.parameters['File Type']
+
             project_name = self.parameters['Project Name']
 
             data_set_name = str(self.parameters['Data Set Name'])
 
-            df = pd.read_csv(filename, parse_dates=True, index_col=0)
-
-            connection = MongoClient()
-            project = Project.Create(connection, name=project_name)
-
-            ds = Dataset.Create(project, data_set_name)
-            ds.Store_Data(df)
-
-            connection.close()
+            if file_type == 'CSV':
+                df = Wranglers.import_csv(filename, project_name, data_set_name)
+            elif file_type == 'FF3':
+                import_parameters = {
+                    "Path": filename,
+                    "Name": data_set_name
+                }
+                df = Wranglers.import_ff3(project_name, import_parameters)
 
             FunctionBlock.save_results(self, df=df, statistics=True, plot=False)
             FunctionBlock.report_status_complete(self)

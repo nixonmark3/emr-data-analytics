@@ -19,9 +19,9 @@ class Shift(FunctionBlock):
             FunctionBlock.check_connector_has_one_wire(self, 'delay')
             time_delays = results_table[self.input_connectors['delay'][0]]
 
-            shifted_df = pd.DataFrame()
+            shifted_df = time_shift(df, time_delays)
 
-            # FunctionBlock.save_results(self, df=shifted_df, statistics=True, plot=True)
+            FunctionBlock.save_results(self, df=shifted_df, statistics=True, plot=True)
 
             FunctionBlock.report_status_complete(self)
 
@@ -32,3 +32,9 @@ class Shift(FunctionBlock):
             FunctionBlock.report_status_failure(self)
             print(err.args, file=sys.stderr)
 
+
+def time_shift(df, delays):
+    df_out = df.copy(deep=True)
+    for key, delay in delays.items():
+        df_out[key] = df_out[key].shift(delay)
+    return df_out
