@@ -21,7 +21,7 @@ public class DiagramsService {
     public DiagramsService(HashMap<String, Definition> definitions){
         _definitions = definitions;
 
-        sourceBlock = definitions.get("Kafka");
+        sourceBlock = definitions.get("PollingStream");
         sinkBlock = definitions.get("RESTPost");
     }
 

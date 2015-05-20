@@ -34,6 +34,7 @@ public class DefinitionGenerator {
         createSaveCSVBlock();
         createSaveDBBlock();
         createKafkaBlock();
+        createPollingStreamBlock();
     }
 
     private void generateFilters() {
@@ -349,6 +350,45 @@ public class DefinitionGenerator {
         parameters.add(new ParameterDefinition("Topics",
                 DataType.STRING.toString(),
                 "runtime",
+                new ArrayList<String>(),
+                null));
+
+        definition.setParameters(parameters);
+
+        _definitions.save(definition);
+    }
+
+    private void createPollingStreamBlock(){
+
+        Definition definition;
+
+        definition = new Definition("PollingStream", "Polling Stream", Category.DATA_SOURCES.toString());
+        definition.setDescription("Spark streaming block that polls a specified url.");
+        definition.setOnlineOnly(true);
+        definition.setSignature(new Signature("emr.analytics.spark.algorithms.Sources",
+            "Sources",
+            "PollingStream",
+            new String[]{
+                    "ssc",
+                    "parameter:Url",
+                    "parameter:Sleep"
+            })
+        );
+
+        // add output connector
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        definition.setOutputConnectors(outputConnectors);
+
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("Url",
+                DataType.STRING.toString(),
+                "",
+                new ArrayList<String>(),
+                null));
+        parameters.add(new ParameterDefinition("Sleep",
+                DataType.STRING.toString(),
+                "500",
                 new ArrayList<String>(),
                 null));
 
