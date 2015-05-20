@@ -652,13 +652,13 @@ public class DefinitionGenerator {
         definition.setDescription("Post data to a REST API.");
         definition.setOnlineOnly(true);
         definition.setSignature(new Signature("emr.analytics.spark.algorithms.Requests",
-            "Requests",
-            "postOpcValue",
-            new String[]{
-                    "parameter:Url",
-                    "parameter:Tag",
-                    "input:in"
-            })
+                        "Requests",
+                        "postOpcValue",
+                        new String[]{
+                                "parameter:Url",
+                                "parameter:Tag",
+                                "input:in"
+                        })
         );
 
         // add input connector
@@ -990,22 +990,18 @@ public class DefinitionGenerator {
         _definitions.save(threeSigma);
     }
 
-    //
-    // Three Sigma Block Definition
-    //
+
     private void createFillNa() {
-        Definition threeSigma = new Definition("FillNa", "Fill NaN", Category.FILTERS.toString());
+        Definition definition = new Definition("FillNa", "Fill NaN", Category.FILTERS.toString());
 
-        fillNa.setDescription("Fill forward on NaN values");
-
-                List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
         inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
-        threeSigma.setInputConnectors(inputConnectors);
+        definition.setInputConnectors(inputConnectors);
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
-        threeSigma.setOutputConnectors(outputConnectors);
+        definition.setOutputConnectors(outputConnectors);
 
-        _definitions.save(fillNa);
+        _definitions.save(definition);
     }
 }
