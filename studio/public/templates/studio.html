@@ -131,6 +131,7 @@
                 <div ng-if="!compiling" class="diagram-container">
 
                     <diagram id="online-diagram"
+                             ng-if="onlineCanvas"
                              view-model="onlineViewModel"
                              is-online="onlineCanvas"
                              nodes="nodes"
