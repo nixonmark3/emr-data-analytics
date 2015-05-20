@@ -58,6 +58,8 @@ public class DefinitionGenerator {
         createPLSSensitivityBlock();
         createScaleBlock();
         createPLSBlock();
+        createPLSTestBlock();
+        createPredictBlock();
         createWebServicePostBlock();
         createSplitBlock();
         createTimeDelayBlock();
@@ -150,54 +152,6 @@ public class DefinitionGenerator {
 
         _definitions.save(loadDB);
     }
-
-    private void createLoadFF3Block() {
-
-        Definition definition = new Definition("LoadFF3", "Load FF3", Category.DATA_SOURCES.toString());
-
-        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        definition.setOutputConnectors(outputConnectors);
-
-//        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-//
-//        parameters.add(new ParameterDefinition("Project",
-//                DataType.LIST.toString(),
-//                "None",
-//                new ArrayList<String>(),
-//                new ParameterSource("Jar",
-//                        "plugins-1.0-SNAPSHOT.jar",
-//                        "Projects",
-//                        new ArrayList<Argument>())));
-//
-//        List<Argument> arguments = new ArrayList<Argument>();
-//        arguments.add(new Argument("Project", 0, "Project.Value"));
-//
-//        parameters.add(new ParameterDefinition("Data Set",
-//                DataType.LIST.toString(),
-//                "None",
-//                new ArrayList<String>(),
-//                new ParameterSource("Jar",
-//                        "plugins-1.0-SNAPSHOT.jar",
-//                        "DataSets",
-//                        arguments)));
-//
-//        List<String> opts = new ArrayList<String>();
-//        opts.add("True");
-//        opts.add("False");
-//
-//        parameters.add(new ParameterDefinition("Plot",
-//                DataType.LIST.toString(),
-//                "False",
-//                opts,
-//                null));
-//
-//        loadDB.setParameters(parameters);
-
-        _definitions.save(definition);
-    }
-
-
 
     //
     // Save Block Definition
@@ -394,14 +348,14 @@ public class DefinitionGenerator {
         definition.setDescription("Spark streaming block that monitors a topic in Kafka.");
         definition.setOnlineOnly(true);
         definition.setSignature(new Signature("emr.analytics.spark.algorithms.Utilities",
-            "Utilities",
-            "kafkaStream",
-            new String[]{
-                "ssc",
-                "parameter:Zookeeper Quorum",
-                "appName",
-                "parameter:Topics"
-            })
+                        "Utilities",
+                        "kafkaStream",
+                        new String[]{
+                                "ssc",
+                                "parameter:Zookeeper Quorum",
+                                "appName",
+                                "parameter:Topics"
+                        })
         );
 
         // add output connector
@@ -434,13 +388,13 @@ public class DefinitionGenerator {
         definition.setDescription("Spark streaming block that polls a specified url.");
         definition.setOnlineOnly(true);
         definition.setSignature(new Signature("emr.analytics.spark.algorithms.Sources",
-            "Sources",
-            "PollingStream",
-            new String[]{
-                    "ssc",
-                    "parameter:Url",
-                    "parameter:Sleep"
-            })
+                        "Sources",
+                        "PollingStream",
+                        new String[]{
+                                "ssc",
+                                "parameter:Url",
+                                "parameter:Sleep"
+                        })
         );
 
         // add output connector
@@ -474,12 +428,12 @@ public class DefinitionGenerator {
         columns.setDescription("Selects columns from a given data frame");
 
         columns.setSignature(new Signature("emr.analytics.spark.algorithms.Utilities",
-            "Utilities",
-            "columns",
-            new String[]{
-                "input:in",
-                "parameter:Columns"
-            })
+                        "Utilities",
+                        "columns",
+                        new String[]{
+                                "input:in",
+                                "parameter:Columns"
+                        })
         );
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
@@ -509,12 +463,9 @@ public class DefinitionGenerator {
         _definitions.save(columns);
     }
 
-    //
-    // Columns Block Definition
-    //
     private void createPLSSensitivityBlock() {
         Definition plsSensitivity = new Definition("Sensitivity", "PLSSensitivity", Category.TRANSFORMERS.toString());
-        plsSensitivity.setOnlineComplement("PLS");
+        plsSensitivity.setOnlineComplement("Predict");
 
         plsSensitivity.setDescription("Calculates sensitivity of output y to set of inputs X using PLS");
 
@@ -524,49 +475,72 @@ public class DefinitionGenerator {
         plsSensitivity.setInputConnectors(inputConnectors);
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-        outputConnectors.add(new ConnectorDefinition("obj", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("coef", DataType.FRAME.toString()));
+        outputConnectors.add(new ConnectorDefinition("model", DataType.FRAME.toString()));
+        outputConnectors.add(new ConnectorDefinition("coefs", DataType.FRAME.toString()));
         outputConnectors.add(new ConnectorDefinition("r2", DataType.FRAME.toString()));
         plsSensitivity.setOutputConnectors(outputConnectors);
 
         _definitions.save(plsSensitivity);
     }
 
-//    //
-//    // Time Selection Block Definition
-//    //
-//    private void createTimeSelectionBlock() {
-//        Definition timeSelection = new Definition("TimeSelection", "Time Selection", Category.TRANSFORMERS.toString());
-//
-//        timeSelection.setDescription("Selects time range of data from a given data frame");
-//
-//        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
-//        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-//        timeSelection.setInputConnectors(inputConnectors);
-//
-//        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-//        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-//        timeSelection.setOutputConnectors(outputConnectors);
-//
-//        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-//        parameters.add(new ParameterDefinition("From",
-//                DataType.TIMESTAMP.toString(),
-//                "None",
-//                new ArrayList<String>(),
-//                null));
-//        parameters.add(new ParameterDefinition("To",
-//                DataType.TIMESTAMP.toString(),
-//                "None",
-//                new ArrayList<String>(),
-//                null));
-//        timeSelection.setParameters(parameters);
-//
-//        _definitions.save(timeSelection);
-//    }
+    private void createPLSBlock() {
 
-    //
-    // Merge Block Definition
-    //
+        Definition definition = new Definition("PLS", "PLS Analysis", Category.TRANSFORMERS.toString());
+        definition.setOnlineComplement("Predict");
+
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("x", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("y", DataType.FRAME.toString()));
+        definition.setInputConnectors(inputConnectors);
+
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("model", DataType.FRAME.toString()));
+        definition.setOutputConnectors(outputConnectors);
+
+        _definitions.save(definition);
+    }
+
+    private void createPLSTestBlock() {
+
+        Definition definition = new Definition("PLSTest", "PLS Test", Category.TRANSFORMERS.toString());
+
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("model", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("x", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("y", DataType.FRAME.toString()));
+        definition.setInputConnectors(inputConnectors);
+
+        _definitions.save(definition);
+    }
+
+    private void createPredictBlock(){
+
+        Definition definition;
+
+        definition = new Definition("Predict", "Predict", Category.TRANSFORMERS.toString());
+        definition.setOnlineOnly(true);
+        definition.setSignature(new Signature("emr.analytics.spark.algorithms.Utilities",
+                        "Utilities",
+                        "dotProduct",
+                        new String[]{
+                                "input:x",
+                                "block:model"
+                        })
+        );
+
+        // add input connector
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("x", DataType.FRAME.toString()));
+        definition.setInputConnectors(inputConnectors);
+
+        // add output connector
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FLOAT.toString()));
+        definition.setOutputConnectors(outputConnectors);
+
+        _definitions.save(definition);
+    }
+
     private void createMergeBlock() {
         Definition merge = new Definition("Merge", "Merge", Category.TRANSFORMERS.toString());
 
@@ -667,35 +641,6 @@ public class DefinitionGenerator {
         lagCorrelate.setParameters(parameters);
 
         _definitions.save(lagCorrelate);
-    }
-
-    private void createPLSBlock(){
-
-        Definition definition;
-
-        definition = new Definition("PLS", "PLS Predict", Category.TRANSFORMERS.toString());
-        definition.setDescription("Uses PLS model for prediction.");
-        definition.setOnlineOnly(true);
-        definition.setSignature(new Signature("emr.analytics.spark.algorithms.Utilities",
-                        "Utilities",
-                        "dotProduct",
-                        new String[]{
-                                "input:x",
-                                "block:model"
-                        })
-        );
-
-        // add input connector
-        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
-        inputConnectors.add(new ConnectorDefinition("x", DataType.FRAME.toString()));
-        definition.setInputConnectors(inputConnectors);
-
-        // add output connector
-        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-        outputConnectors.add(new ConnectorDefinition("out", DataType.FLOAT.toString()));
-        definition.setOutputConnectors(outputConnectors);
-
-        _definitions.save(definition);
     }
 
     private void createWebServicePostBlock(){

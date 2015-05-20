@@ -31,9 +31,9 @@ class Split(FunctionBlock):
             results = collections.OrderedDict()
             results['Split'] = split
 
-            FunctionBlock.report_status_complete(self)
+            FunctionBlock.save_results(self, df=df_train, statistics=True, plot=False, results=results)
 
-            FunctionBlock.save_results(self, df=df_train, statistics=True, plot=True, results=results)
+            FunctionBlock.report_status_complete(self)
 
             return {FunctionBlock.getFullPath(self, 'train'): df_train, FunctionBlock.getFullPath(self, 'test'): df_test}
 
