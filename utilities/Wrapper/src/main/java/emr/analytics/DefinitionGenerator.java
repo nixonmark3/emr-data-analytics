@@ -47,6 +47,7 @@ public class DefinitionGenerator {
         createRollingAveBlock();
         createRollingStdDevBlock();
         createThreeSigmaBlock();
+        createFillNa();
     }
 
     private void generateTransformers() {
@@ -987,5 +988,24 @@ public class DefinitionGenerator {
         threeSigma.setParameters(parameters);
 
         _definitions.save(threeSigma);
+    }
+
+    //
+    // Three Sigma Block Definition
+    //
+    private void createFillNa() {
+        Definition threeSigma = new Definition("FillNa", "Fill NaN", Category.FILTERS.toString());
+
+        fillNa.setDescription("Fill forward on NaN values");
+
+                List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
+        threeSigma.setInputConnectors(inputConnectors);
+
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
+        threeSigma.setOutputConnectors(outputConnectors);
+
+        _definitions.save(fillNa);
     }
 }
