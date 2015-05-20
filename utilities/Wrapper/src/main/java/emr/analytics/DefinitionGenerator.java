@@ -48,6 +48,7 @@ public class DefinitionGenerator {
         createRollingStdDevBlock();
         createThreeSigmaBlock();
         createFillNa();
+        createDropNa();
     }
 
     private void generateTransformers() {
@@ -990,9 +991,28 @@ public class DefinitionGenerator {
         _definitions.save(threeSigma);
     }
 
-
+    //
+    // Fill NaN Definition
+    //
     private void createFillNa() {
         Definition definition = new Definition("FillNa", "Fill NaN", Category.FILTERS.toString());
+
+        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
+        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
+        definition.setInputConnectors(inputConnectors);
+
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
+        definition.setOutputConnectors(outputConnectors);
+
+        _definitions.save(definition);
+    }
+
+    //
+    // Fill NaN Definition
+    //
+    private void createDropNa() {
+        Definition definition = new Definition("DropNa", "Drop NaN", Category.FILTERS.toString());
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
         inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
