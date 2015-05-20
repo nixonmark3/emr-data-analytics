@@ -153,7 +153,7 @@ public class SourceBlocks {
                 return value.toString();
             }
 
-            String[] items = value.toString().replaceAll("\\[|\\]|\\,", "").split(" ");
+            String[] items = value.toString().replaceAll("\\[|\\]", "").split(", ");
 
             StringBuilder sb = new StringBuilder();
             sb.append("[");

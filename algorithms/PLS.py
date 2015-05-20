@@ -1,3 +1,5 @@
+import numpy as np
+import pandas as pd
 import collections as coll
 import sys
 
@@ -5,7 +7,7 @@ from sklearn.cross_decomposition import PLSRegression
 from FunctionBlock import FunctionBlock
 
 
-class Sensitivity(FunctionBlock):
+class PLS(FunctionBlock):
 
     def __init__(self, name, unique_name):
         FunctionBlock.__init__(self, name, unique_name)
@@ -28,39 +30,30 @@ class Sensitivity(FunctionBlock):
 
             pls_model.fit(x_values, y_values)
 
-            Y_pred = pls_model.predict(x_values)
+            y_prediction = pls_model.predict(x_values)
 
             ss_error_total = sum(y_values**2)
 
             ss_error_residual = 0
 
             for x in range(len(y_values)):
-                ss_error_residual += (y_values[x] - Y_pred[x])**2
+                ss_error_residual += (y_values[x] - y_prediction[x])**2
 
             r2 = 1 - ss_error_residual/ss_error_total
 
             coefficients = [x[0] for x in pls_model.coefs]
 
-            model_scale_coefficients = pls_model.coefs/sum(abs(pls_model.coefs))
+            pls_coefficient = coll.OrderedDict(zip(x_df.columns.values, coefficients))
 
-            scale_coefficients = [x[0] for x in model_scale_coefficients]
+            pls_result = coll.OrderedDict()
+            pls_result['coefficients'] = list(pls_coefficient.items())
+            pls_result['r squared'] = r2[0]
 
-            sensitivity_val = coll.OrderedDict(zip(x_df.columns.values, scale_coefficients))
-
-            sensitivity_coefficients = coll.OrderedDict(zip(x_df.columns.values, coefficients))
-
-            sensitivity_result = coll.OrderedDict()
-            sensitivity_result['scaled coefficients'] = list(sensitivity_val.items())
-            sensitivity_result['coefficients'] = list(sensitivity_coefficients.items())
-            sensitivity_result['r squared'] = r2[0]
-
-            FunctionBlock.save_results(self, results=sensitivity_result)
+            FunctionBlock.save_results(self, results=pls_result)
 
             FunctionBlock.report_status_complete(self)
 
-            return {FunctionBlock.getFullPath(self, 'model'): pls_model,
-                    FunctionBlock.getFullPath(self, 'coefs'): coefficients,
-                    FunctionBlock.getFullPath(self, 'r2'): r2[0]}
+            return {FunctionBlock.getFullPath(self, 'model'): pls_model}
 
         except Exception as err:
             FunctionBlock.save_results(self)
