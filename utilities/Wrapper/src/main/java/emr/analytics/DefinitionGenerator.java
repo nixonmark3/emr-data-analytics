@@ -696,8 +696,8 @@ public class DefinitionGenerator {
         definition.setInputConnectors(inputConnectors);
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-        outputConnectors.add(new ConnectorDefinition("train", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("test", DataType.FRAME.toString()));
+        outputConnectors.add(new ConnectorDefinition("out1", DataType.FRAME.toString()));
+        outputConnectors.add(new ConnectorDefinition("out2", DataType.FRAME.toString()));
         definition.setOutputConnectors(outputConnectors);
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();

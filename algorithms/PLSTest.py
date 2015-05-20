@@ -37,7 +37,7 @@ class PLSTest(FunctionBlock):
 
             pls_test_result = coll.OrderedDict()
             pls_test_result['r squared'] = r2[0]
-            pls_test_result['y predict'] = y_prediction
+            #pls_test_result['y predict'] = list(y_prediction.values())
 
             FunctionBlock.save_results(self, results=pls_test_result)
 

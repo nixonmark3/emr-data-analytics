@@ -3,15 +3,13 @@ package emr.analytics.service.jobs;
 import emr.analytics.models.definition.Definition;
 import emr.analytics.models.diagram.Block;
 import emr.analytics.models.diagram.Diagram;
+import emr.analytics.models.diagram.Wire;
 import emr.analytics.service.SourceBlocks;
 import emr.analytics.service.messages.JobRequest;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.UUID;
+import java.util.*;
 
 public abstract class AnalyticsJob implements Serializable {
 
@@ -55,9 +53,12 @@ public abstract class AnalyticsJob implements Serializable {
         // compile a list of blocks to execute
         SourceBlocks sourceBlocks = new SourceBlocks();
 
+        HashSet<String> queued = new HashSet<String>();
+
         // Initialize queue of blocks to compile
         Queue<Block> queue = new LinkedList<Block>();
         for (Block block : diagram.getRoot()) {
+            queued.add(block.getUniqueName());
             queue.add(block);
         }
 
@@ -67,10 +68,25 @@ public abstract class AnalyticsJob implements Serializable {
 
             // Capture configured blocks and queue descending blocks
             if (block.isConfigured()) {
+
                 sourceBlocks.add(block, diagram.getLeadingWires(block.getUniqueName()));
 
                 for (Block next : diagram.getNext(block.getUniqueName())) {
-                    queue.add(next);
+                    if (!queued.contains(next.getUniqueName())) {
+
+                        // confirm all leading blocks have been previously queued
+                        boolean ready = true;
+                        List<Wire> wires = diagram.getLeadingWires(next.getUniqueName());
+                        for(Wire wire : wires){
+                            if (!queued.contains(wire.getFrom_node()))
+                                ready = false;
+                        }
+
+                        if (ready) {
+                            queue.add(next);
+                            queued.add(next.getUniqueName());
+                        }
+                    }
                 }
             }
         }

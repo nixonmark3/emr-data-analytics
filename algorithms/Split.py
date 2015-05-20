@@ -35,7 +35,7 @@ class Split(FunctionBlock):
 
             FunctionBlock.report_status_complete(self)
 
-            return {FunctionBlock.getFullPath(self, 'train'): df_train, FunctionBlock.getFullPath(self, 'test'): df_test}
+            return {FunctionBlock.getFullPath(self, 'out1'): df_train, FunctionBlock.getFullPath(self, 'out2'): df_test}
 
         except Exception as err:
             FunctionBlock.save_results(self)
