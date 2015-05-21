@@ -20,7 +20,6 @@ public class StreamingSourceBlocks {
     private String _streamingContextName = "pollingstream";
 
     public HashSet<String> packageNames;
-    public StreamingSourceBlock streamingContext;
     public List<StreamingSourceBlock> blocks;
     public List<StreamingModel> models = new ArrayList<StreamingModel>();
 
@@ -31,7 +30,6 @@ public class StreamingSourceBlocks {
         });
 
         packageNames = new HashSet<String>();
-        this.streamingContext = null;
         blocks = new ArrayList<StreamingSourceBlock>();
     }
 
@@ -47,12 +45,7 @@ public class StreamingSourceBlocks {
         if(!packageNames.contains(signature.getPackageName()))
             packageNames.add(signature.getPackageName());
 
-        if (definition.getName().toLowerCase().equals(_streamingContextName)){
-            streamingContext = new StreamingSourceBlock(definition, block, wires);
-        }
-        else{
-            blocks.add(new StreamingSourceBlock(definition, block, wires));
-        }
+        blocks.add(new StreamingSourceBlock(definition, block, wires));
     }
 
     public boolean isEmpty() {

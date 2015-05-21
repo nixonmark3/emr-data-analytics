@@ -13,28 +13,9 @@ val <%variableName%> = Array(<%arguments%>)
 
 val appName = ssc.sparkContext.appName
 
-<%#streamingContext%>
-
-val stream = <%className%>.<%methodName%>(<%& arguments%>)
-
-stream.map(x => x._2).foreachRDD(rdd => {
-
-    if (!rdd.isEmpty()){
-
-        rdd.foreach(point => {
-
-            // parse json
-            val <%variableName%> = JSON.parseFull(point).get
-
-<%/streamingContext%>
-
-            <%#blocks%>
-            val <%variableName%> = <%className%>.<%methodName%>(<%& arguments%>)
-
-            <%/blocks%>
-        })
-    }
-})
+<%#blocks%>
+val <%variableName%> = <%className%>.<%methodName%>(<%& arguments%>)
+<%/blocks%>
 
 ssc.start()
 ssc.awaitTermination()

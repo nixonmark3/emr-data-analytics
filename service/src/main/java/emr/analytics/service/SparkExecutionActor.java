@@ -32,7 +32,7 @@ public class SparkExecutionActor extends AbstractActor {
 
                 // create a spark streaming context
                 SparkConf conf = new SparkConf()
-                    .setMaster("local[4]")
+                    .setMaster("local[2]")
                     .setAppName(job.getDiagramName().replace(" ", ""))
                     .setJars(_jars);
 

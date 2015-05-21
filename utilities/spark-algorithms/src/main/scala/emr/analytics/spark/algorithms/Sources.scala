@@ -3,18 +3,20 @@ package emr.analytics.spark.algorithms
 import org.apache.spark.Logging
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.streaming.StreamingContext
-import org.apache.spark.streaming.dstream.ReceiverInputDStream
+import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.receiver.Receiver
+
+import scala.util.parsing.json._
 
 object Sources {
 
-  def PollingStream(ssc: StreamingContext, url: String, sleep: String): ReceiverInputDStream[(String, String)] = {
+  def PollingStream(ssc: StreamingContext, url: String, sleep: String): DStream[Array[(String, Double)]] = {
 
-    ssc.receiverStream[(String, String)](new PollingSource(url, sleep.toInt))
+    ssc.receiverStream[Array[(String, Double)]](new PollingSource(url, sleep.toInt))
   }
 }
 
-class PollingSource(val url: String, val sleep: Int) extends Receiver[(String, String)](StorageLevel.MEMORY_ONLY) with Logging {
+class PollingSource(val url: String, val sleep: Int) extends Receiver[Array[(String, Double)]](StorageLevel.MEMORY_ONLY) with Logging {
 
   var isRunning = true
 
@@ -34,8 +36,13 @@ class PollingSource(val url: String, val sleep: Int) extends Receiver[(String, S
     while(isRunning){
 
       try{
-        val data = scala.io.Source.fromURL(url).mkString
-        store(("", data))
+        val raw = scala.io.Source.fromURL(url).mkString
+
+        val json = JSON.parseFull(raw).get
+
+        val data = vectorize(json)
+
+        store(data)
       }
       catch{
         case e:Exception => {
@@ -45,5 +52,11 @@ class PollingSource(val url: String, val sleep: Int) extends Receiver[(String, S
 
       Thread.sleep(sleep)
     }
+  }
+
+
+  def vectorize(data: Any):Array[(String, Double)] = data match{
+
+    case data:Map[String, Map[String, String]] => data.map(d => (d._1, d._2.get("Val").get.toDouble)).toArray
   }
 }
