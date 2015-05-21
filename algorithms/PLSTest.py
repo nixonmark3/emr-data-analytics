@@ -1,5 +1,5 @@
 import collections as coll
-import sys
+import pandas as pd
 
 from FunctionBlock import FunctionBlock
 
@@ -37,9 +37,10 @@ class PLSTest(FunctionBlock):
 
             pls_test_result = coll.OrderedDict()
             pls_test_result['r squared'] = r2[0]
-            #pls_test_result['y predict'] = list(y_prediction.values())
 
-            FunctionBlock.save_results(self, results=pls_test_result)
+            data_dict = {'y vals': list(y_test_values[:, 0]), 'y pred': list(y_prediction[:, 0])}
+
+            FunctionBlock.save_results(self, df=(pd.DataFrame(data_dict)), statistics=True, plot=True, results=pls_test_result)
 
             FunctionBlock.report_status_complete(self)
 

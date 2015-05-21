@@ -49,7 +49,9 @@ class PLS(FunctionBlock):
             pls_result['coefficients'] = list(pls_coefficient.items())
             pls_result['r squared'] = r2[0]
 
-            FunctionBlock.save_results(self, results=pls_result)
+            data_dict = {'y vals': list(y_values[:, 0]), 'y pred': list(y_prediction[:, 0])}
+
+            FunctionBlock.save_results(self, df=(pd.DataFrame(data_dict)), statistics=True, plot=True, results=pls_result)
 
             FunctionBlock.report_status_complete(self)
 

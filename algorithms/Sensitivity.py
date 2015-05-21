@@ -1,5 +1,6 @@
 import collections as coll
 import sys
+import pandas as pd
 
 from sklearn.cross_decomposition import PLSRegression
 from FunctionBlock import FunctionBlock
@@ -54,7 +55,9 @@ class Sensitivity(FunctionBlock):
             sensitivity_result['coefficients'] = list(sensitivity_coefficients.items())
             sensitivity_result['r squared'] = r2[0]
 
-            FunctionBlock.save_results(self, results=sensitivity_result)
+            data_dict = {'y vals': list(y_values[:, 0]), 'y pred': list(Y_pred[:, 0])}
+
+            FunctionBlock.save_results(self, df=(pd.DataFrame(data_dict)), statistics=True, plot=True, results=sensitivity_result)
 
             FunctionBlock.report_status_complete(self)
 
