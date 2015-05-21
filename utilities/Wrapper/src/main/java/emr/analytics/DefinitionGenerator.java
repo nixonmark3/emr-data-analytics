@@ -57,8 +57,8 @@ public class DefinitionGenerator {
         createDownSampleBlock();
         createMergeBlock();
         createLagCorrelateBlock();
-        createPLSSensitivityBlock();
         createScaleBlock();
+        createPLSSensitivityBlock();
         createPLSBlock();
         createPLSTestBlock();
         createPredictBlock();
@@ -480,6 +480,7 @@ public class DefinitionGenerator {
         outputConnectors.add(new ConnectorDefinition("model", DataType.FRAME.toString()));
         outputConnectors.add(new ConnectorDefinition("coefs", DataType.FRAME.toString()));
         outputConnectors.add(new ConnectorDefinition("r2", DataType.FRAME.toString()));
+        outputConnectors.add(new ConnectorDefinition("ycomp", DataType.FRAME.toString()));
         plsSensitivity.setOutputConnectors(outputConnectors);
 
         _definitions.save(plsSensitivity);
@@ -497,6 +498,7 @@ public class DefinitionGenerator {
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("model", DataType.FRAME.toString()));
+        outputConnectors.add(new ConnectorDefinition("ycomp", DataType.FRAME.toString()));
         definition.setOutputConnectors(outputConnectors);
 
         _definitions.save(definition);
@@ -511,6 +513,10 @@ public class DefinitionGenerator {
         inputConnectors.add(new ConnectorDefinition("x", DataType.FRAME.toString()));
         inputConnectors.add(new ConnectorDefinition("y", DataType.FRAME.toString()));
         definition.setInputConnectors(inputConnectors);
+
+        List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
+        outputConnectors.add(new ConnectorDefinition("ycomp", DataType.FRAME.toString()));
+        definition.setOutputConnectors(outputConnectors);
 
         _definitions.save(definition);
     }

@@ -1,5 +1,6 @@
 import collections as coll
 import pandas as pd
+import sys
 
 from FunctionBlock import FunctionBlock
 
@@ -44,7 +45,7 @@ class PLSTest(FunctionBlock):
 
             FunctionBlock.report_status_complete(self)
 
-            return {'{0}'.format(self.unique_name): None}
+            return {FunctionBlock.getFullPath(self, 'ycomp'): (pd.DataFrame(data_dict))}
 
         except Exception as err:
             FunctionBlock.save_results(self)

@@ -63,7 +63,8 @@ class Sensitivity(FunctionBlock):
 
             return {FunctionBlock.getFullPath(self, 'model'): pls_model,
                     FunctionBlock.getFullPath(self, 'coefs'): coefficients,
-                    FunctionBlock.getFullPath(self, 'r2'): r2[0]}
+                    FunctionBlock.getFullPath(self, 'r2'): r2[0],
+                    FunctionBlock.getFullPath(self, 'ycomp'): (pd.DataFrame(data_dict))}
 
         except Exception as err:
             FunctionBlock.save_results(self)

@@ -55,7 +55,8 @@ class PLS(FunctionBlock):
 
             FunctionBlock.report_status_complete(self)
 
-            return {FunctionBlock.getFullPath(self, 'model'): pls_model}
+            return {FunctionBlock.getFullPath(self, 'model'): pls_model,
+                    FunctionBlock.getFullPath(self, 'ycomp'): (pd.DataFrame(data_dict))}
 
         except Exception as err:
             FunctionBlock.save_results(self)
