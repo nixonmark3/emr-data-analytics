@@ -18,14 +18,6 @@ public class DefinitionGenerator {
 
     public void generate() {
 
-        /* ALL ALGORITHMS MUST BE GENERATED WITH THERE CATEGORIES */
-        generateDataSources();
-        generateFilters();
-        generateTransformers();
-    }
-
-    private void generateDataSources() {
-
         createAddDataSetBlock();
         createCreateDBBlock();
         createDataBrickBlock();
@@ -35,10 +27,6 @@ public class DefinitionGenerator {
         createSaveDBBlock();
         createKafkaBlock();
         createPollingStreamBlock();
-    }
-
-    private void generateFilters() {
-
         createBoxcarAverageBlock();
         createEWMABlock();
         createEWMStDevBlock();
@@ -49,10 +37,6 @@ public class DefinitionGenerator {
         createThreeSigmaBlock();
         createFillNa();
         createDropNa();
-    }
-
-    private void generateTransformers() {
-
         createColumnsBlock();
         createDownSampleBlock();
         createMergeBlock();
@@ -68,20 +52,15 @@ public class DefinitionGenerator {
         createShiftBlock();
     }
 
-    //
-    // Create Data Brick Block
-    //
     private void createDataBrickBlock() {
-        // Definition
+
         Definition definition = new Definition("DataBrick", "Data Brick", Category.DATA_SOURCES.toString());
         definition.setDescription("Loads a data brick");
 
-        // Output Connectors
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
         definition.setOutputConnectors(outputConnectors);
 
-        // Parameters
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
 
         parameters.add(new ParameterDefinition("Project",
@@ -101,13 +80,9 @@ public class DefinitionGenerator {
 
         definition.setParameters(parameters);
 
-        // Save Definition
         _definitions.save(definition);
     }
 
-    //
-    // Load Block Definition
-    //
     private void createLoadDBBlock() {
         Definition loadDB = new Definition("LoadDB", "Load DB", Category.DATA_SOURCES.toString());
 
@@ -155,9 +130,6 @@ public class DefinitionGenerator {
         _definitions.save(loadDB);
     }
 
-    //
-    // Save Block Definition
-    //
     private void createSaveDBBlock() {
         Definition saveDB = new Definition("SaveDB", "Save DB", Category.DATA_SOURCES.toString());
 
@@ -193,9 +165,7 @@ public class DefinitionGenerator {
         _definitions.save(saveDB);
     }
 
-    //
-    // Load Block Definition
-    //
+
     private void createLoadCSVBlock() {
         Definition load = new Definition("LoadCSV", "Load CSV", Category.DATA_SOURCES.toString());
 
