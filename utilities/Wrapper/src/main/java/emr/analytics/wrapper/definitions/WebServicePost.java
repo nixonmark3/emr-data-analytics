@@ -1,36 +1,42 @@
 package emr.analytics.wrapper.definitions;
 
 import emr.analytics.models.definition.*;
+import emr.analytics.wrapper.BlockDefinition;
 import emr.analytics.wrapper.IExport;
-
-import org.jongo.MongoCollection;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class WebServicePost implements IExport {
+public class WebServicePost extends BlockDefinition implements IExport {
 
-    public void export(MongoCollection definitions) {
+    @Override
+    public Definition createDefinition() {
 
         Definition definition;
 
         definition = new Definition("RESTPost", "REST POST", Category.TRANSFORMERS.toString());
         definition.setDescription("Post data to a REST API.");
         definition.setOnlineOnly(true);
-        definition.setSignature(new Signature("emr.analytics.spark.algorithms.Requests",
-                        "Requests",
-                        "postOpcValue",
-                        new String[]{
-                                "parameter:Url",
-                                "parameter:Tag",
-                                "input:in"
-                        })
-        );
 
-        // add input connector
+        return definition;
+    }
+
+    @Override
+    public List<ConnectorDefinition> createInputConnectors() {
+
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
         inputConnectors.add(new ConnectorDefinition("in", DataType.STRING.toString()));
-        definition.setInputConnectors(inputConnectors);
+        return inputConnectors;
+    }
+
+    @Override
+    public List<ConnectorDefinition> createOutputConnectors() {
+
+        return null;
+    }
+
+    @Override
+    public List<ParameterDefinition> createParameters() {
 
         // todo: add parameters for url, payload pattern
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
@@ -45,8 +51,20 @@ public class WebServicePost implements IExport {
                 new ArrayList<String>(),
                 null));
 
-        definition.setParameters(parameters);
-
-        definitions.save(definition);
+        return parameters;
     }
+
+    @Override
+    public Signature createSignature() {
+
+        return new Signature("emr.analytics.spark.algorithms.Requests",
+                "Requests",
+                "postOpcValue",
+                new String[]{
+                        "parameter:Url",
+                        "parameter:Tag",
+                        "input:in"
+                });
+    }
+
 }

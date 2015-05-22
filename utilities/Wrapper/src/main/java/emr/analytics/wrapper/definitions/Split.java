@@ -1,30 +1,42 @@
 package emr.analytics.wrapper.definitions;
 
 import emr.analytics.models.definition.*;
+import emr.analytics.wrapper.BlockDefinition;
 import emr.analytics.wrapper.IExport;
-
-import org.jongo.MongoCollection;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Split implements IExport {
+public class Split extends BlockDefinition implements IExport {
 
-    public void export(MongoCollection definitions) {
+    @Override
+    public Definition createDefinition() {
 
         Definition definition = null;
-
         definition = new Definition("Split", "Split", Category.TRANSFORMERS.toString());
         definition.setDescription("Splits a data frame into training and testing data frames");
+        return definition;
+    }
+
+    @Override
+    public List<ConnectorDefinition> createInputConnectors() {
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
         inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-        definition.setInputConnectors(inputConnectors);
+        return inputConnectors;
+    }
+
+    @Override
+    public List<ConnectorDefinition> createOutputConnectors() {
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("out1", DataType.FRAME.toString()));
         outputConnectors.add(new ConnectorDefinition("out2", DataType.FRAME.toString()));
-        definition.setOutputConnectors(outputConnectors);
+        return outputConnectors;
+    }
+
+    @Override
+    public List<ParameterDefinition> createParameters() {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
         parameters.add(new ParameterDefinition("Split",
@@ -32,8 +44,12 @@ public class Split implements IExport {
                 75,
                 new ArrayList<String>(),
                 null));
-        definition.setParameters(parameters);
+        return parameters;
+    }
 
-        definitions.save(definition);
+    @Override
+    public Signature createSignature() {
+
+        return null;
     }
 }

@@ -1,29 +1,39 @@
 package emr.analytics.wrapper.definitions;
 
 import emr.analytics.models.definition.*;
+import emr.analytics.wrapper.BlockDefinition;
 import emr.analytics.wrapper.IExport;
-
-import org.jongo.MongoCollection;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TimeDelay implements IExport {
+public class TimeDelay extends BlockDefinition implements IExport {
 
-    public void export(MongoCollection definitions) {
+    @Override
+    public Definition createDefinition() {
 
-        Definition definition = null;
+        return new Definition("TimeDelay", "Time Delay", Category.TRANSFORMERS.toString());
+    }
 
-        definition = new Definition("TimeDelay", "Time Delay", Category.TRANSFORMERS.toString());;
+    @Override
+    public List<ConnectorDefinition> createInputConnectors() {
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
         inputConnectors.add(new ConnectorDefinition("x", DataType.FRAME.toString()));
         inputConnectors.add(new ConnectorDefinition("y", DataType.FRAME.toString()));
-        definition.setInputConnectors(inputConnectors);
+        return inputConnectors;
+    }
+
+    @Override
+    public List<ConnectorDefinition> createOutputConnectors() {
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        definition.setOutputConnectors(outputConnectors);
+        return outputConnectors;
+    }
+
+    @Override
+    public List<ParameterDefinition> createParameters() {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
         parameters.add(new ParameterDefinition("Max Lag",
@@ -31,8 +41,13 @@ public class TimeDelay implements IExport {
                 10,
                 new ArrayList<String>(),
                 null));
-        definition.setParameters(parameters);
-
-        definitions.save(definition);
+        return parameters;
     }
+
+    @Override
+    public Signature createSignature() {
+
+        return null;
+    }
+
 }

@@ -1,24 +1,38 @@
 package emr.analytics.wrapper.definitions;
 
 import emr.analytics.models.definition.*;
+import emr.analytics.wrapper.BlockDefinition;
 import emr.analytics.wrapper.IExport;
-
-import org.jongo.MongoCollection;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LoadCSV implements IExport{
+public class LoadCSV extends BlockDefinition implements IExport {
 
-    public void export(MongoCollection definitions) {
+    @Override
+    public Definition createDefinition() {
 
         Definition definition = new Definition("LoadCSV", "Load CSV", Category.DATA_SOURCES.toString());
-
         definition.setDescription("Loads a data set from a csv file");
+        return definition;
+    }
+
+    @Override
+    public List<ConnectorDefinition> createInputConnectors() {
+
+        return null;
+    }
+
+    @Override
+    public List<ConnectorDefinition> createOutputConnectors() {
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        definition.setOutputConnectors(outputConnectors);
+        return outputConnectors;
+    }
+
+    @Override
+    public List<ParameterDefinition> createParameters() {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
 
@@ -38,8 +52,13 @@ public class LoadCSV implements IExport{
                 opts,
                 null));
 
-        definition.setParameters(parameters);
-
-        definitions.save(definition);
+        return parameters;
     }
+
+    @Override
+    public Signature createSignature() {
+
+        return null;
+    }
+
 }

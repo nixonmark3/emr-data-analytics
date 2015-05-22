@@ -1,30 +1,46 @@
 package emr.analytics.wrapper.definitions;
 
-import emr.analytics.models.definition.Category;
-import emr.analytics.models.definition.ConnectorDefinition;
-import emr.analytics.models.definition.DataType;
-import emr.analytics.models.definition.Definition;
+import emr.analytics.models.definition.*;
+import emr.analytics.wrapper.BlockDefinition;
 import emr.analytics.wrapper.IExport;
-
-import org.jongo.MongoCollection;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DropNaN implements IExport {
+public class DropNaN extends BlockDefinition implements IExport {
 
-    public void export(MongoCollection definitions) {
+    @Override
+    public Definition createDefinition() {
 
-        Definition definition = new Definition("DropNa", "Drop NaN", Category.FILTERS.toString());
+        return new Definition("DropNa", "Drop NaN", Category.FILTERS.toString());
+    }
+
+    @Override
+    public List<ConnectorDefinition> createInputConnectors() {
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
         inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
-        definition.setInputConnectors(inputConnectors);
+        return inputConnectors;
+    }
+
+    @Override
+    public List<ConnectorDefinition> createOutputConnectors() {
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
-        definition.setOutputConnectors(outputConnectors);
-
-        definitions.save(definition);
+        return outputConnectors;
     }
+
+    @Override
+    public List<ParameterDefinition> createParameters() {
+
+        return null;
+    }
+
+    @Override
+    public Signature createSignature() {
+
+        return null;
+    }
+
 }

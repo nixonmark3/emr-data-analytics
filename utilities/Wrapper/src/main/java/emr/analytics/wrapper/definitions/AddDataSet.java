@@ -1,18 +1,41 @@
 package emr.analytics.wrapper.definitions;
 
 import emr.analytics.models.definition.*;
+import emr.analytics.wrapper.BlockDefinition;
 import emr.analytics.wrapper.IExport;
-
-import org.jongo.MongoCollection;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddDataSet implements IExport {
+public class AddDataSet extends BlockDefinition implements IExport {
 
-    public void export(MongoCollection definitions) {
+    @Override
+    public Definition createDefinition() {
 
-        Definition definition = new Definition("AddDataSet", "Add Data Set", Category.DATA_SOURCES.toString());
+        return new Definition("AddDataSet", "Add Data Set", Category.DATA_SOURCES.toString());
+    }
+
+    @Override
+    public Signature createSignature() {
+
+        return null;
+    }
+
+    @Override
+    public List<ConnectorDefinition> createInputConnectors() {
+
+        return null;
+    }
+
+
+    @Override
+    public List<ConnectorDefinition> createOutputConnectors() {
+
+        return null;
+    }
+
+    @Override
+    public List<ParameterDefinition> createParameters() {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
 
@@ -47,8 +70,6 @@ public class AddDataSet implements IExport {
                 new ArrayList<String>(),
                 null));
 
-        definition.setParameters(parameters);
-
-        definitions.save(definition);
+        return parameters;
     }
 }
