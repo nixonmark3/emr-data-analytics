@@ -12,16 +12,25 @@ public class Main {
 
         System.out.println("Creating Definitions...");
 
-        createDefinitions();
+        boolean status = createDefinitions();
 
-        System.out.println("Complete!");
+        if (status) {
+            System.out.println("Complete!");
+        }
+        else {
+            System.out.println("Failed!");
+        }
     }
 
-    public static void createDefinitions() {
+    public static boolean createDefinitions() {
+
+        boolean status = true;
+
+        MongoClient connection = null;
 
         try {
 
-            MongoClient connection = new MongoClient();
+            connection = new MongoClient();
 
             DB db = connection.getDB("emr-data-analytics-studio");
 
@@ -36,15 +45,22 @@ public class Main {
 
             generator.generate();
 
-            connection.close();
         }
         catch (java.net.UnknownHostException exception) {
 
+            status = false;
             exception.printStackTrace();
         }
         catch (Exception exception) {
 
+            status = false;
             exception.printStackTrace();
         }
+        finally {
+
+            connection.close();
+        }
+
+        return status;
     }
 }

@@ -7,14 +7,11 @@ import emr.analytics.wrapper.IExport;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DownSample extends BlockDefinition implements IExport {
+public class CenterNormal extends BlockDefinition implements IExport {
 
     @Override
     public Definition createDefinition() {
-
-        Definition definition = new Definition("DownSample", "Down Sample", Category.TRANSFORMERS.toString());
-        definition.setDescription("Down sample a given data frame");
-        return definition;
+        return new Definition("CenterNormal", "Center Normal", Category.TRANSFORMERS.toString());
     }
 
     @Override
@@ -38,20 +35,19 @@ public class DownSample extends BlockDefinition implements IExport {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
 
-        parameters.add(new ParameterDefinition("SampleSize",
-                DataType.INT.toString(),
-                100,
-                new ArrayList<String>(),
+        List<String> opts = new ArrayList<String>();
+        opts.add("True");
+        opts.add("False");
+
+        parameters.add(new ParameterDefinition("Subtract Mean",
+                DataType.LIST.toString(),
+                "True",
+                opts,
                 null));
 
-        List<String> opts = new ArrayList<String>();
-        opts.add("First");
-        opts.add("Last");
-        opts.add("Mean");
-
-        parameters.add(new ParameterDefinition("Interpolation",
+        parameters.add(new ParameterDefinition("Divide Std",
                 DataType.LIST.toString(),
-                "Last",
+                "True",
                 opts,
                 null));
 
