@@ -13,7 +13,7 @@ class CenterNormal(FunctionBlock):
     def execute(self, results_table):
         try:
             FunctionBlock.report_status_executing(self)
-            
+
             FunctionBlock.check_connector_has_one_wire(self, 'in')
 
             df_scale = results_table[self.input_connectors['in'][0]]
