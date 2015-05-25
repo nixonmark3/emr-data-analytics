@@ -13,9 +13,21 @@ val <%variableName%> = Array(<%arguments%>)
 
 val appName = ssc.sparkContext.appName
 
-<%#blocks%>
+<%#streamingOperations%>
 val <%variableName%> = <%className%>.<%methodName%>(<%& arguments%>)
-<%/blocks%>
+<%/streamingOperations%>
+
+<%#hasRddOperations%>
+
+<%streamingVariable%>.foreachRDD(<%rddVariable%> => {
+
+<%#rddOperations%>
+val <%variableName%> = <%className%>.<%methodName%>(<%& arguments%>)
+<%/rddOperations%>
+
+})
+
+<%/hasRddOperations%>
 
 ssc.start()
 ssc.awaitTermination()

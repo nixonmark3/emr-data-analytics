@@ -23,6 +23,12 @@ public class StreamingSourceBlocks {
     public List<StreamingSourceBlock> blocks;
     public List<StreamingModel> models = new ArrayList<StreamingModel>();
 
+    public boolean hasRddOperations = false;
+    public String streamingVariable;
+    public String rddVariable;
+    public List<StreamingSourceBlock> streamingOperations;
+    public List<StreamingSourceBlock> rddOperations;
+
     public StreamingSourceBlocks(HashMap<String, String> models) {
 
         models.forEach((k, v) -> {
@@ -53,6 +59,12 @@ public class StreamingSourceBlocks {
     }
 
     public String compile(String template) throws IOException {
+
+        streamingOperations = new ArrayList<StreamingSourceBlock>();
+        rddOperations = new ArrayList<StreamingSourceBlock>();
+
+
+
         MustacheFactory mf = new DefaultMustacheFactory();
         Mustache mustache = mf.compile(template);
 
