@@ -195,13 +195,18 @@ button.diagram-evaluating { color: #2ca02c; }
     margin: 10px;
     padding: 5px;
     box-shadow: 0px 6px 12px rgba(0,0,0,0.200);
-    height: auto;
+    max-height: 35px;
+    overflow: hidden;
+    -webkit-transition: max-height 1s ease-out;
 }
 
-.diagrams-menu-body-item-container {
-    height: 30px;
-    width: 100%;
-}
+.diagrams-menu-body-item-animate { max-height: 500px; -webkit-transition: max-height 1s ease-in; }
+
+.fade-properties.ng-hide-remove { transition: 1.25s linear all; opacity: 1; }
+
+.fade-properties.ng-hide { transition: 1.25s linear all; opacity: 0; }
+
+.diagrams-menu-body-item-container { height: 30px; width: 100%; }
 
 .diagrams-menu-body-item-name {
     float: left;
@@ -227,7 +232,11 @@ button.diagram-evaluating { color: #2ca02c; }
 
 .diagrams-menu-body-item-expand:hover { cursor: pointer; color: #3182bd }
 
-.diagrams-menu-body-item-expand-container { opacity: 1; height: auto; width: 100%; }
+.diagrams-menu-body-item-expand-container {
+    opacity: 1;
+    height: auto;
+    width: 100%;
+}
 
 .diagrams-menu-body-item-expand-row { opacity: 1; height: 30px; width: 100%; }
 

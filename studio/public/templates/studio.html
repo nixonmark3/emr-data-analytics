@@ -15,7 +15,8 @@
         </div>
 
         <div class="diagrams-menu-body">
-            <div class="diagrams-menu-body-item" ng-model="diagrams" ng-repeat="d in diagrams">
+
+            <div class="diagrams-menu-body-item ng-class:{'diagrams-menu-body-item-animate': d.showProperties}" ng-model="diagrams" ng-repeat="d in diagrams">
                 <div class="diagrams-menu-body-item-container">
                     <div class="diagrams-menu-body-item-name ng-class:{'selected-diagram-text': d.selected}" ng-click="loadDiagram(d.name)">
                         {{d.name}}
@@ -24,7 +25,7 @@
                         <i class="fa fa-ellipsis-v"></i>
                     </div>
                 </div>
-                <div class="fade diagrams-menu-body-item-expand-container" ng-show="d.showProperties">
+                <div class="fade-properties diagrams-menu-body-item-expand-container" ng-show="d.showProperties">
                     <div class="diagrams-menu-body-item-expand-row">
                         <div class="diagrams-menu-body-item-delete" ng-click="deleteDiagram(d.name)">
                             <i class="fa fa-trash-o fa-lg"></i>
