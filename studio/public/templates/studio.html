@@ -27,8 +27,9 @@
                 </div>
                 <div class="fade-properties diagrams-menu-body-item-expand-container" ng-show="d.showProperties">
                     <div class="diagrams-menu-body-item-expand-row">
-                        <div class="diagrams-menu-body-item-delete" ng-click="deleteDiagram(d.name)">
-                            <i class="fa fa-trash-o fa-lg"></i>
+                        <div class="diagrams-menu-body-item-delete" ng-click="waitingForDelete = !waitingForDelete;deleteDiagram(d.name)">
+                            <i ng-show="!waitingForDelete" class="fa fa-trash-o fa-lg"></i>
+                            <i ng-show="waitingForDelete" class="fa fa-spinner fa-spin"></i>
                         </div>
                     </div>
                     <div class="diagrams-menu-body-item-expand-row" ng-show="d.owner">

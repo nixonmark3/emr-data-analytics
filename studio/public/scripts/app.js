@@ -62,11 +62,14 @@ var analyticsApp = angular.module('analyticsApp',
                 }
                 else if (data.messageType == 'DeleteDiagram') {
                     $scope.$apply(function() {
+
                         $scope.diagrams.forEach(function(element, index, array){
                             if(element.name === data.name){
                                 $scope.diagrams.splice(index, 1);
                             }
                         });
+
+                        $scope.waitingForDelete = false;
                     });
                     updateSelectedDiagram();
                 }
@@ -106,6 +109,8 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.onlineCanvas = false;
         // indicates whether the diagram is being compiled
         $scope.compiling = false;
+
+        $scope.waitingForDelete = false;
 
         //
         // load data from the service
@@ -301,9 +306,9 @@ var analyticsApp = angular.module('analyticsApp',
             diagramService.deleteDiagram(diagramName).then(
                 function (data) {
                     // TODO report success back to the user
+
                     diagramService.item().then(
                         function (data) {
-                            //$scope.diagramViewModel = new viewmodels.diagramViewModel(data);
                         },
                         function (code) {
                             console.log(code); // TODO show exception

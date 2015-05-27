@@ -210,25 +210,23 @@ button.diagram-evaluating { color: #2ca02c; }
 
 .diagrams-menu-body-item-name {
     float: left;
-    height: 30px;
+    height: 25px;
     width: 140px;
     text-align: center;
     vertical-align: middle;
+    line-height: 25px;
 }
-
-.diagrams-menu-body-item-name:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
 
 .diagrams-menu-body-item-name:hover { cursor: pointer; color: #3182bd }
 
 .diagrams-menu-body-item-expand {
     float: right;
-    height: 30px;
+    height: 25px;
     width: calc(100% - 140px);
     text-align: center;
     vertical-align: middle;
+    line-height: 25px;
 }
-
-.diagrams-menu-body-item-expand:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
 
 .diagrams-menu-body-item-expand:hover { cursor: pointer; color: #3182bd }
 
@@ -261,10 +259,8 @@ button.diagram-evaluating { color: #2ca02c; }
     height: 30px;
     width: calc(100% - 140px);
     text-align: center;
-    vertical-align: middle;
+    line-height: 30px;
 }
-
-.diagrams-menu-body-item-delete:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
 
 .diagrams-menu-body-item-delete:hover { cursor: pointer; color: #3182bd }
 
@@ -287,18 +283,16 @@ button.diagram-evaluating { color: #2ca02c; }
     height: 50px;
     vertical-align: middle;
     text-align: center;
+    line-height: 50px;
 }
-
-.diagrams-menu-footer-name:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
 
 .diagrams-menu-footer-company {
     width: 100%;
     height: 25px;
     vertical-align: middle;
     text-align: center;
+    line-height: 25px;
 }
-
-.diagrams-menu-footer-company:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
 
 .selected-diagram-text { font-weight: bold; }
 
