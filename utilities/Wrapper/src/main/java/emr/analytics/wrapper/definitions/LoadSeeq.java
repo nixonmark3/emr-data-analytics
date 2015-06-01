@@ -37,12 +37,6 @@ public class LoadSeeq extends BlockDefinition implements IExport {
                 new ArrayList<String>(),
                 null));
 
-        parameters.add(new ParameterDefinition("Project Name",
-                DataType.STRING.toString(),
-                "",
-                new ArrayList<String>(),
-                null));
-
         parameters.add(new ParameterDefinition("Capsule Name",
                 DataType.STRING.toString(),
                 "",

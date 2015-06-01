@@ -67,7 +67,7 @@ class Series():
             payload['interpolationMethod'] = self.interpolationMethod
         if not self.unitOfMeasure is None:
             payload['unitOfMeasure'] = self.unitOfMeasure
-        print("posting", url, payload)
+        # print("posting", url, payload)
         headers = {'content-type': 'application/json'}
         response = requests.post(url, data=json.dumps(payload), headers=headers)
         response_dict = json.loads(response.content.decode("utf-8"))
@@ -89,7 +89,7 @@ class Series():
         url = "%s%s/values" % (connection.endpoint, self.href)
         x = requests.get(url, params={'offset':offset, 'limit':limit, 'start':seeq_format(startTime), 'end':seeq_format(endTime)})
         result = json.loads(x.content.decode("utf-8"))
-        print(result)
+        # print(result)
         dataPoints = result['dataPoints'] if 'dataPoints' in result else None
         vals = []
         ts = []
@@ -109,10 +109,10 @@ class Series():
             item = {'index':seeq_format(index),'value':row[col]}
             items.append(item)
         payload = {'dataPoints':items}
-        print("posting", url, payload)
+        # print("posting", url, payload)
         headers = {'content-type': 'application/json'}
         response = requests.post(url, data=json.dumps(payload), headers=headers)
-        print(response)
+        # print(response)
         # response_dict = json.loads(response.content.decode("utf-8"))
         # print(response_dict)
 
@@ -245,15 +245,15 @@ class Capsule():
     def get_items(self, offset=0, limit=1000, startTime=None, endTime=None):
         series = self.get_series()
         names = {x[0].name for x in series}
-        print(names)
+        # print(names)
         named_dfs = []
         for name in names:
             tag_items = [x for x in series if x[0].name==name]
             time_sorted_items = sorted(tag_items, key=lambda x: x[1])
-            print(time_sorted_items)
+            # print(time_sorted_items)
             dfs = [x[0].get_values(offset=offset, limit=limit, startTime=x[1], endTime=x[2]) for x in time_sorted_items]
             actual_dfs = [x for x in dfs if not x is None]
-            print(actual_dfs)
+            # print(actual_dfs)
             if len(actual_dfs) > 0:
                 concat_df = pd.concat(dfs)
                 named_dfs.append((name,concat_df,))
@@ -263,5 +263,6 @@ class Capsule():
             return None
 
 
-def Import_SEEQ_Capsule(project, parameters):
-    return pd.DataFrame()
+def Import_SEEQ_Capsule(capsule_name):
+    capsule_dict = {x.name: x for x in Capsule.get_all()}
+    return capsule_dict[capsule_name].get_items()
