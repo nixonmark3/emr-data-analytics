@@ -1,0 +1,73 @@
+<div id="charts-container">
+
+    <div id="chart-tabs">
+
+        <ul class="vertical-tabs">
+            <li class="vertical-tab ng-class:{ active: (activeIndex==0) }" ng-click="setActiveIndex(0)">
+                <div class="tab-icon"><i class="fa fa-table fa-2x"></i></div>
+                <div class="tab-text">Data</div>
+            </li>
+            <li class="vertical-tab ng-class:{ active: (activeIndex==1) }" ng-click="setActiveIndex(1)">
+                <div class="tab-icon"><i class="fa fa-bar-chart fa-2x"></i></div>
+                <div class="tab-text">Layout</div>
+            </li>
+        </ul>
+
+    </div>
+
+    <div id="chart-section">
+
+        <div id="chart-menus">
+
+            <div class="chart-toolbar">
+                <div class="toolbar-right">
+                    <div class="toolbar-icon">
+                        <div id="collapse-icon"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-menu-container ng-class:{ active: (activeIndex==0) }">
+
+                <div class="chart-menu">
+
+                    <div class="chart-feature" ng-repeat="(key, value) in features">
+                        <div class="feature-color" ng-style="{'background-color':value.color}" ng-click="value.selected != value.selected">
+                            <i ng-if="value.selected" class="fa fa-check"></i>
+                        </div>
+                        <div class="feature-name">{{key}}</div>
+                        <div class="feature-ellipsis">
+                            <i class="fa fa-ellipsis-v"></i>
+                        </div>
+                        <div class="feature-stats"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="chart-menu-container ng-class:{ active: (activeIndex==1) }">
+
+            </div>
+
+        </div>
+
+        <div id="chart-content">
+
+            <div class="chart-toolbar">
+                <div class="toolbar-left">
+                    <div class="toolbar-icon" ng-click="render()">
+                        <i class="fa fa-refresh"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div id="chart-container">
+                <time-series-chart ng-if="!loading" id="time-series-chart" chart-data="chartData"></time-series-chart>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

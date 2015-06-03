@@ -84,13 +84,13 @@
 
             <div id="offline-canvas" class="studio-canvas">
 
-                <div class="library-controls">
+                <div id="library-controls" class="studio-controls">
                     <button type="button" class="btn btn-default" ng-click="toggleLibrary($event)">
                         <i class="fa fa-th"></i>
                     </button>
                 </div>
 
-                <div class="studio-controls btn-group">
+                <div id="offline-controls" class="studio-controls btn-group">
                     <button type="button" class="btn btn-default" ng-click="toggleDiagramConfiguration($event)">
                         <i class="fa fa-wrench"></i>
                     </button>
@@ -106,23 +106,31 @@
                     </button>
                 </div>
 
+                <div ng-if="selectionCount > 1" id="grouping-controls" class="studio-controls">
+                    <button type="button" class="btn btn-default" ng-click="onBlockGrouping($event)">
+                        <i class="fa fa-compress"></i>
+                    </button>
+                </div>
+
                 <div class="diagram-container">
 
                     <diagram id="offline-diagram"
+                             on-configure="onBlockConfigure"
                              view-model="diagramViewModel"
                              is-online="onlineCanvas"
                              nodes="nodes"
                              library="library"
                              load-sources="loadSources"
                              get-block-data="getBlockData"
-                             blur-background="blurBackground"></diagram>
+                             blur-background="blurBackground"
+                             selection-count="selectionCount"></diagram>
 
                 </div>
             </div>
 
             <div id="online-canvas" class="studio-canvas">
 
-                <div class="studio-controls btn-group">
+                <div id="online-controls" class="studio-controls btn-group">
                     <button type="button" class="btn btn-default" ng-click="deploy($event)">
                         <i class="fa fa-rocket"></i>
                     </button>

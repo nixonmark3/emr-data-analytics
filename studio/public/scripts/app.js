@@ -3,7 +3,9 @@
 var analyticsApp = angular.module('analyticsApp',
     ['diagramApp',
         'browserApp',
-        'popupApp',
+        'emr.ui.charts',
+        'emr.ui.modal',
+        'emr.ui.popup',
         'ngRoute',
         'ngSanitize',
         'ngAnimate'])
@@ -21,8 +23,8 @@ var analyticsApp = angular.module('analyticsApp',
             return $sce.trustAsHtml(val);
         };
     }])
-    .controller('analyticsController', ['$scope', '$timeout', 'diagramService', 'popupService',
-        function($scope, $timeout, diagramService, popupService) {
+    .controller('analyticsController', ['$scope', '$timeout', 'diagramService', 'modalService', 'popupService',
+        function($scope, $timeout, diagramService, modalService, popupService) {
 
         //
         // Initialize web socket connection
@@ -106,6 +108,11 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.onlineCanvas = false;
         // indicates whether the diagram is being compiled
         $scope.compiling = false;
+        // number of blocks that are currently selected
+        $scope.selectionCount = 0;
+
+        // tracks whether a block is currently being configured
+        $scope.configuringBlock = false;
 
         //
         // load data from the service
@@ -294,6 +301,103 @@ var analyticsApp = angular.module('analyticsApp',
 
             evt.stopPropagation();
             evt.preventDefault();
+        };
+
+
+        $scope.onBlockConfigure = function(position, block){
+
+            switch(block.definitionType()){
+
+                case "CHART":
+
+                    var modalPosition = {
+                        centerX: (position.x + block.width() / 2),
+                        centerY: (position.y + block.height() / 2)
+                    };
+
+                    $scope.blurBackground = true;
+
+                    modalService.show({
+                        templateUrl: '/assets/scripts/views/charts.html',
+                        controller: 'chartsController',
+                        position: modalPosition
+                    }).then(function (modal) {
+
+                        modal.close.then(function (result) {
+
+                            $scope.blurBackground = false;
+
+                            if (result) {
+
+                            }
+                        });
+                    });
+
+                    break;
+                default:
+
+                    // all other definition types should be configured using the conventional mechanism
+
+                    if ($scope.configuringBlock){  // if a block is already being configured - save it
+
+                        $scope.blockConfiguration.controller.save();
+                    }
+                    else {  // show the block configuration popup
+
+                        // retrieve the block's definition definition
+                        var definition = $scope.library[block.definition()];
+
+                        // convert it to a config block
+                        var configBlock = new viewmodels.configuringBlockViewModel(definition, block.data);
+
+                        // show the popup
+                        var result = popupService.show({
+                            templateUrl: '/assets/scripts/components/diagram/blockProperties.html',
+                            controller: 'blockConfigController',
+                            inputs: {
+                                block: configBlock,
+                                position: position,
+                                loadSources: $scope.loadSources
+                            }
+                        }).then(function (popup) {
+
+                            $scope.configuringBlock = true;
+                            $scope.blockConfiguration = popup;
+
+                            // when the block configuration is closed - save the resulting config block
+                            $scope.blockConfiguration.close.then(function (configBlock) {
+
+                                if (configBlock)
+                                    $scope.diagramViewModel.updateBlock(configBlock);
+
+                                $scope.configuringBlock = false;
+                                delete $scope.blockConfiguration;
+                            });
+                        });
+                    }
+
+                    break;
+            }
+        };
+
+        $scope.onBlockGrouping = function(evt){
+
+            modalService.show({
+                templateUrl: '/assets/scripts/views/blockGroup.html',
+                controller: 'blockGroupController'
+            }).then(function (modal) {
+
+                $scope.blurBackground = true;
+
+                modal.close.then(function (result) {
+
+                    $scope.blurBackground = false;
+
+                    if (result) {
+
+                    }
+                });
+            });
         };
 
         // delete the current diagram

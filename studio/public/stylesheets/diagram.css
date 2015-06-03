@@ -14,7 +14,7 @@
 
 .block{ fill: #ffffff; stroke-width: 1; }
 .block-unselected{ stroke: #d8d8d8; }
-.block-selected{ stroke: #7f7f7f; }
+.block-selected{ stroke: #7f7f7f; stroke-dasharray: 5; }
 
 .block-delete { cursor: pointer; opacity: 0; -webkit-transition: opacity 0.4s ease-in-out; transition: opacity 0.4s ease-in-out; }
 .block-delete-circle { fill: #ffffff; stroke: #7f7f7f; stroke-width: 1; }
@@ -389,4 +389,6 @@
     -webkit-transition: all 0.5s ease;
     box-shadow: 0px 6px 12px rgba(0,0,0,0.175);
 }
+
+#drag-selection-rect { fill: #1f77b4; fill-opacity: 0.2; stroke: #1f77b4; stroke-width: 1; stroke-dasharray: 10; }
 

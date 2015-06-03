@@ -4,7 +4,8 @@ public enum Category {
     DATA_SOURCES("Data Sources"),
     TRANSFORMERS("Transformers"),
     FILTERS("Filters"),
-    CLEANERS("Cleaners");
+    CLEANERS("Cleaners"),
+    VISUALIZATIONS("Visualizations");
 
     private final String stringValue;
 

@@ -2,6 +2,7 @@ package emr.analytics.models.diagram;
 
 import emr.analytics.models.definition.ConnectorDefinition;
 import emr.analytics.models.definition.Definition;
+import emr.analytics.models.definition.DefinitionType;
 import emr.analytics.models.definition.ParameterDefinition;
 
 import java.io.Serializable;
@@ -14,10 +15,11 @@ import java.util.UUID;
  */
 public class Block implements Serializable {
 
-    private boolean configured;
+    private DefinitionType definitionType;
     private String name;
     private String uniqueName;
     private String definition;
+    private boolean configured;             // unused, currently required for serialization, use jsonignore
     private boolean onlineOnly = false;
     private String offlineComplement = null;
     private int state;
@@ -37,6 +39,7 @@ public class Block implements Serializable {
         this.state = state;
         this.x = x;
         this.y = y;
+        this.definitionType = definition.getDefinitionType();
         this.definition = definition.getName();
         this.w = definition.getW();
         this.onlineOnly = definition.isOnlineOnly();
@@ -46,6 +49,8 @@ public class Block implements Serializable {
         this.outputConnectors = createConnectors(definition.getOutputConnectors());
         this.parameters = createParameters(definition.getParameters());
     }
+
+    public DefinitionType getDefinitionType() { return definitionType; }
 
     /**
      * Returns the name of this Block.
@@ -226,10 +231,6 @@ public class Block implements Serializable {
      */
     public void setParameters(List<Parameter> parameters) {
         this.parameters = parameters;
-    }
-
-    public void setConfigured(boolean configured) {
-        this.configured = configured;
     }
 
     private List<Connector> createConnectors(List<ConnectorDefinition> connectorDefinitions){

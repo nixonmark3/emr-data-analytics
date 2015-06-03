@@ -1,6 +1,7 @@
 'use strict';
 
-var blockDataViewerApp = angular.module('blockDataViewerApp', []).directive('blockDataViewer', function ($timeout) {
+var blockDataViewerApp = angular.module('blockDataViewerApp', [])
+    .directive('blockDataViewer', function ($timeout) {
 
         return {
             restrict: 'E',

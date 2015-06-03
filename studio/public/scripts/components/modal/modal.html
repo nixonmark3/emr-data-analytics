@@ -1,0 +1,17 @@
+<div class="emr-modal"
+     ng-style="{top: position.startY, left: position.startX, width: position.width, height: position.height }">
+
+    <div class="emr-modal-header">
+        <span class="header-text">{{modal.name}}</span>
+    </div>
+
+    <div class="emr-modal-body">
+        <ng-transclude></ng-transclude>
+    </div>
+
+    <div class="emr-modal-footer">
+        <button type="button" class="btn btn-default" ng-click="onClose()">Cancel{{modal.cancel}}</button>
+        <button type="button" class="btn btn-success" ng-click="onSave()">Save{{modal.save}}</button>
+    </div>
+
+</div>

@@ -1,44 +1,13 @@
 'use strict';
 
-angular.module('popupApp', ['ngAnimate'])
-    .factory('popupService', ['$document', '$compile', '$controller', '$http', '$rootScope', '$q', '$templateCache', '$animate', '$timeout',
-        function($document, $compile, $controller, $http, $rootScope, $q, $templateCache, $animate, $timeout) {
+angular.module('emr.ui.popup', ['emr.ui.shared', 'ngAnimate'])
+    .factory('popupService', ['$document', '$compile', '$controller', '$rootScope', '$q', 'sharedService', '$animate', '$timeout',
+        function($document, $compile, $controller, $rootScope, $q, sharedService, $animate, $timeout) {
 
             // reference the document body
             var body = $document.find('body');
 
             function PopupService() {
-
-                var template = function(templateUrl) {
-
-                    var deferred = $q.defer();
-
-                    if(templateUrl) {
-
-                        // check to see if the template has already been loaded
-                        var cachedTemplate = $templateCache.get(templateUrl);
-                        if(cachedTemplate !== undefined) {
-                            deferred.resolve(cachedTemplate);
-                        }
-                        // if not, grab the template for the first time
-                        else {
-
-                            $http({method: 'GET', url: templateUrl, cache: true})
-                                .then(function(result) {
-
-                                    // save template into the cache and return the template
-                                    $templateCache.put(templateUrl, result.data);
-                                    deferred.resolve(result.data);
-                                },
-                                function(error) {
-                                    deferred.reject(error);
-                                });
-                        }
-                    } else {
-                        deferred.reject("A template has not been specified.");
-                    }
-                    return deferred.promise;
-                };
 
                 var append = function(parent, child, isAnimated){
                     if (isAnimated){
@@ -60,7 +29,6 @@ angular.module('popupApp', ['ngAnimate'])
 
                 this.show = function(options) {
 
-                    //  Create a deferred we'll resolve when the modal is ready.
                     var deferred = $q.defer();
 
                     //  Validate the input parameters.
@@ -71,7 +39,7 @@ angular.module('popupApp', ['ngAnimate'])
                     }
 
                     //  Get the actual html of the template.
-                    template(options.templateUrl)
+                    sharedService.getTemplate(options.template, options.templateUrl)
                         .then(function(template) {
 
                             //  Create a new scope for the popup.

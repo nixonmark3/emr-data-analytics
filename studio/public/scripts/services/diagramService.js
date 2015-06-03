@@ -249,6 +249,36 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
                 });
 
             return deferred.promise;
+        },
+
+        getFeatures: function(){
+
+            var deferred = $q.defer();
+
+            $http({ method: 'GET', url: '/assets/data/results/features.json' })
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
+
+        getSampleData: function(){
+
+            var deferred = $q.defer();
+
+            $http({ method: 'GET', url: '/assets/data/results/data.json' })
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
         }
 
     };

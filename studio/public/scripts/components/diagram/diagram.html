@@ -2,7 +2,7 @@
 <svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
      ng-mousemove="mouseMove($event)"
-     ng-click="diagramClick($event);">
+     ng-mousedown="diagramMouseDown($event);">
 
     <defs>
         <filter id="dropshadow" width="200%" height="130%">
@@ -98,7 +98,7 @@
         <!-- block configuration button -->
         <g class="block-button-wrapper"
            ng-if="!isOnline || (isOnline && block.data.onlineOnly)"
-           ng-click="toggleBlockConfiguration($event, block);">
+           ng-click="onBlockConfigure($event, block);">
 
             <rect class="block-button"
                   ry="6"
@@ -303,5 +303,13 @@
                 ng-attr-cy="{{dragPoint2.y}}">
         </circle>
     </g>
+
+    <rect ng-if="draggingSelection"
+          id="drag-selection-rect"
+          ng-attr-x="{{dragSelectionRect.x}}"
+          ng-attr-y="{{dragSelectionRect.y}}"
+          ng-attr-width="{{dragSelectionRect.width}}"
+          ng-attr-height="{{dragSelectionRect.height}}">
+    </rect>
 
 </svg>

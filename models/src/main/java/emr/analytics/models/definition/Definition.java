@@ -3,6 +3,7 @@ package emr.analytics.models.definition;
 import java.util.*;
 
 public class Definition {
+    private DefinitionType definitionType;
     private String name = null;
     private String description = null;
     private String category = null;
@@ -19,10 +20,20 @@ public class Definition {
     private Definition() {}
 
     public Definition(String name, String friendlyName, String category) {
+        this.definitionType = DefinitionType.GENERAL;
         this.name = name;
         this.friendlyName = friendlyName;
         this.category = category;
     }
+
+    public Definition(DefinitionType definitionType, String name, String friendlyName, String category) {
+        this.definitionType = definitionType;
+        this.name = name;
+        this.friendlyName = friendlyName;
+        this.category = category;
+    }
+
+    public DefinitionType getDefinitionType() { return definitionType; }
 
     public int getW() {
         return w;

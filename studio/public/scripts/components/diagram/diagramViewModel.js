@@ -92,6 +92,13 @@ viewmodels.blockViewModel = function (data) {
     };
 
     //
+    // Enumeration repressenting the type of definition
+    //
+    this.definitionType = function(){
+        return this.data.definitionType;
+    };
+
+    //
     // Name of the block
     //
     this.name = function () {
@@ -783,6 +790,7 @@ viewmodels.diagramViewModel = function(data) {
         this.name = configBlock.name;
         this.uniqueName = configBlock.uniqueName;
         this.definition = configBlock.definition.name;
+        this.definitionType = configBlock.definition.definitionType;
         this.state = 0;
         this.w = configBlock.definition.w;
         this.x = configBlock.x;
@@ -843,9 +851,12 @@ viewmodels.diagramViewModel = function(data) {
     //
     this.selectAll = function () {
 
+        var selectionCount = 0;
+
         var blocks = this.blocks;
         for (var i = 0; i < blocks.length; ++i) {
             var block = blocks[i];
+            selectionCount++;
             block.select();
         }
 
@@ -854,10 +865,12 @@ viewmodels.diagramViewModel = function(data) {
             var wire = wires[i];
             wire.select();
         }
+
+        return selectionCount;
     };
 
     //
-    // Deselect all nodes and connections in the chart.
+    // Deselect all blocks and wires in the diagram, return the number of selected blocks (0)
     //
     this.deselectAll = function () {
 
@@ -872,12 +885,16 @@ viewmodels.diagramViewModel = function(data) {
             var wire = wires[j];
             wire.deselect();
         }
+
+        return 0;
     };
 
     this.selectBlock = function(block){
 
         this.deselectAll();
         block.select();
+
+        return 1;
     };
 
     this.deleteBlock = function(block){
@@ -903,9 +920,9 @@ viewmodels.diagramViewModel = function(data) {
     //
     // Handle mouse click on a particular block.
     //
-    this.handleBlockClicked = function (block) {
+    this.onBlockClicked = function (block) {
 
-        this.selectBlock(block);
+        var selectionCount = this.selectBlock(block);
 
         // Move node to the end of the list so it is rendered after all the other.
         // This is the way Z-order is done in SVG.
@@ -916,12 +933,14 @@ viewmodels.diagramViewModel = function(data) {
         }
         this.blocks.splice(blockIndex, 1);
         this.blocks.push(block);
+
+        return selectionCount;
     };
 
     //
     // Handle mouse down on a wire.
     //
-    this.handleWireMouseDown = function (wire, ctrlKey) {
+    this.onWireMouseDown = function (wire, ctrlKey) {
 
         if (ctrlKey) {
             wire.toggleSelected();
@@ -993,23 +1012,27 @@ viewmodels.diagramViewModel = function(data) {
         this.data.blocks = newBlocks;
         this.wires = newWireViewModels;
         this.data.wires = newWires;
+
+        return 0;
     };
 
     //
-    // Select nodes and connections that fall within the selection rect.
+    // Select blocks and wires that fall within the selection rect
     //
     this.applySelectionRect = function (selectionRect) {
 
-        this.deselectAll();
+        var selectionCount = this.deselectAll();
 
         for (var i = 0; i < this.blocks.length; ++i) {
             var block = this.blocks[i];
             if (block.x() >= selectionRect.x &&
                 block.y() >= selectionRect.y &&
                 block.x() + block.width() <= selectionRect.x + selectionRect.width &&
-                block.y() + block.height() <= selectionRect.y + selectionRect.height)
-            {
-                // Select nodes that are within the selection rect.
+                block.y() + block.height() <= selectionRect.y + selectionRect.height) {
+
+                selectionCount++;
+
+                // Select blocks that are within the selection rect
                 block.select();
             }
         }
@@ -1017,13 +1040,14 @@ viewmodels.diagramViewModel = function(data) {
         for (var j = 0; j < this.wires.length; ++j) {
             var wire = this.wires[j];
             if (wire.source.parent().selected() &&
-                wire.target.parent().selected())
-            {
-                // Select the connection if both its parent nodes are selected.
+                wire.target.parent().selected()) {
+
+                // Select the wire if both its parent blocks are selected
                 wire.select();
             }
         }
 
+        return selectionCount;
     };
 
     //
