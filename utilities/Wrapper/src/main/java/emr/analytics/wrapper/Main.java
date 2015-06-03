@@ -10,16 +10,20 @@ public class Main {
 
     public static void main(String[] args) throws java.net.UnknownHostException {
 
-        System.out.println("Creating Definitions...");
+        System.out.println("Wrapper started.");
+
+        System.out.println("Creating definitions.");
 
         boolean status = createDefinitions();
 
         if (status) {
-            System.out.println("Complete!");
+            System.out.println("Definitions created successfully.");
         }
         else {
-            System.out.println("Failed!");
+            System.out.println("Failed to create definitions.");
         }
+
+        System.out.println("Wrapper stopped.");
     }
 
     public static boolean createDefinitions() {

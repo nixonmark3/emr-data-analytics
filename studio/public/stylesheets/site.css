@@ -199,39 +199,46 @@ body { font-family: Roboto, arial, sans-serif; background-color: #c5c5c5; overfl
     margin: 10px;
     padding: 5px;
     box-shadow: 0px 6px 12px rgba(0,0,0,0.200);
-    height: auto;
+    max-height: 35px;
+    overflow: hidden;
+    -webkit-transition: max-height 1s ease-out;
 }
 
-.diagrams-menu-body-item-container {
-    height: 30px;
-    width: 100%;
-}
+.diagrams-menu-body-item-animate { max-height: 500px; -webkit-transition: max-height 1s ease-in; }
+
+.fade-properties.ng-hide-remove { transition: 1.25s linear all; opacity: 1; }
+
+.fade-properties.ng-hide { transition: 1.25s linear all; opacity: 0; }
+
+.diagrams-menu-body-item-container { height: 30px; width: 100%; }
 
 .diagrams-menu-body-item-name {
     float: left;
-    height: 30px;
+    height: 25px;
     width: 140px;
     text-align: center;
     vertical-align: middle;
+    line-height: 25px;
 }
-
-.diagrams-menu-body-item-name:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
 
 .diagrams-menu-body-item-name:hover { cursor: pointer; color: #3182bd }
 
 .diagrams-menu-body-item-expand {
     float: right;
-    height: 30px;
+    height: 25px;
     width: calc(100% - 140px);
     text-align: center;
     vertical-align: middle;
+    line-height: 25px;
 }
-
-.diagrams-menu-body-item-expand:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
 
 .diagrams-menu-body-item-expand:hover { cursor: pointer; color: #3182bd }
 
-.diagrams-menu-body-item-expand-container { opacity: 1; height: auto; width: 100%; }
+.diagrams-menu-body-item-expand-container {
+    opacity: 1;
+    height: auto;
+    width: 100%;
+}
 
 .diagrams-menu-body-item-expand-row { opacity: 1; height: 30px; width: 100%; }
 
@@ -256,10 +263,8 @@ body { font-family: Roboto, arial, sans-serif; background-color: #c5c5c5; overfl
     height: 30px;
     width: calc(100% - 140px);
     text-align: center;
-    vertical-align: middle;
+    line-height: 30px;
 }
-
-.diagrams-menu-body-item-delete:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
 
 .diagrams-menu-body-item-delete:hover { cursor: pointer; color: #3182bd }
 
@@ -282,18 +287,16 @@ body { font-family: Roboto, arial, sans-serif; background-color: #c5c5c5; overfl
     height: 50px;
     vertical-align: middle;
     text-align: center;
+    line-height: 50px;
 }
-
-.diagrams-menu-footer-name:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
 
 .diagrams-menu-footer-company {
     width: 100%;
     height: 25px;
     vertical-align: middle;
     text-align: center;
+    line-height: 25px;
 }
-
-.diagrams-menu-footer-company:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
 
 .selected-diagram-text { font-weight: bold; }
 
