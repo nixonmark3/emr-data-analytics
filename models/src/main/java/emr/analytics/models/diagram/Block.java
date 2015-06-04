@@ -8,6 +8,7 @@ import emr.analytics.models.definition.ParameterDefinition;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -273,9 +274,24 @@ public class Block implements Serializable {
         return this.hasConnector(name, this.inputConnectors);
     }
 
-    public Connector getInputConnector(String name){
+    public void addInputConnector(Connector connector){
+
+        this.inputConnectors.add(connector);
+    }
+
+    public void addOutputConnector(Connector connector){
+
+        this.outputConnectors.add(connector);
+    }
+
+    public Optional<Connector> getInputConnector(String name){
 
         return this.getConnector(name, this.inputConnectors);
+    }
+
+    public Optional<Connector> getOutputConnector(String name){
+
+        return this.getConnector(name, this.outputConnectors);
     }
 
     private boolean hasConnector(String name, List<Connector> connectors){
@@ -283,8 +299,8 @@ public class Block implements Serializable {
         return (connectors.stream().anyMatch(c -> c.getName().equals(name)));
     }
 
-    private Connector getConnector(String name, List<Connector> connectors){
+    private Optional<Connector> getConnector(String name, List<Connector> connectors){
 
-        return (connectors.stream().filter(c -> c.getName().equals(name)).findFirst().get());
+        return (connectors.stream().filter(c -> c.getName().equals(name)).findFirst());
     }
 }

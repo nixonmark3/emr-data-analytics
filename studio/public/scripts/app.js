@@ -385,11 +385,14 @@ var analyticsApp = angular.module('analyticsApp',
             }
         };
 
-        $scope.onBlockGrouping = function(evt){
+        $scope.onGroup = function(evt){
 
             modalService.show({
                 templateUrl: '/assets/scripts/views/blockGroup.html',
-                controller: 'blockGroupController'
+                controller: 'blockGroupController',
+                inputs: {
+                    diagram: $scope.diagramViewModel
+                }
             }).then(function (modal) {
 
                 $scope.blurBackground = true;
@@ -400,6 +403,8 @@ var analyticsApp = angular.module('analyticsApp',
 
                     if (result) {
 
+                        console.log(result);
+                        $scope.diagramViewModel = result;
                     }
                 });
             });

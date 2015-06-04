@@ -14,12 +14,19 @@ public class Diagram implements Serializable {
     private String owner = "";
     private List<Wire> wires = new ArrayList<Wire>();
     private List<Block> blocks = new ArrayList<Block>();
+    private List<DiagramConnector> inputs = new ArrayList<DiagramConnector>();
+    private List<DiagramConnector> outputs = new ArrayList<DiagramConnector>();
+    private List<Diagram> diagrams = new ArrayList<Diagram>();
     private int version = 0;
 
     public Diagram(String name, String description, String owner){
         this.name = name;
         this.description = description;
         this.owner = owner;
+    }
+
+    public Diagram(String name){
+        this(name, "", "");
     }
 
     private Diagram() {}
@@ -123,6 +130,22 @@ public class Diagram implements Serializable {
     }
 
     /**
+     * Returns a list of Groups that belong to this Diagram.
+     * @return list of Groups
+     */
+    public List<Diagram> getDiagrams() {
+        return diagrams;
+    }
+
+    /**
+     * Sets the Diagrams that belong to this Diagram.
+     * @param diagrams list of diagrams
+     */
+    public void setDiagrams(List<Diagram> diagrams) {
+        this.diagrams = diagrams;
+    }
+
+    /**
      * Returns the version of this Diagram.
      * @return diagram version
      */
@@ -181,6 +204,21 @@ public class Diagram implements Serializable {
                 .collect(Collectors.toList());
     }
 
+    public List<Wire> getOutputWires(String uniqueName){
+
+        return this.wires.stream()
+                .filter(w -> w.getFrom_node().equals(uniqueName))
+                .collect(Collectors.toList());
+    }
+
+    public List<Wire> getOutputWires(String uniqueName, String connectorName){
+
+        return this.wires.stream()
+                .filter(w -> w.getFrom_node().equals(uniqueName)
+                        && w.getFrom_connector().equals(connectorName))
+                .collect(Collectors.toList());
+    }
+
     /**
      * Add a new block
      */
@@ -189,6 +227,11 @@ public class Diagram implements Serializable {
         // todo: verify block has a unique name
 
         this.blocks.add(block);
+    }
+
+    public boolean removeBlock(Block block){
+
+        return this.blocks.remove(block);
     }
 
     /**
@@ -201,9 +244,30 @@ public class Diagram implements Serializable {
         this.wires.add(wire);
     }
 
+    public boolean removeWire(Wire wire){
+
+        return this.wires.remove(wire);
+    }
+
+    public void addDiagram(Diagram diagram){
+        this.diagrams.add(diagram);
+    }
+
     public List<Block> getBlocksWithOfflineComplements(){
         return this.blocks.stream()
                 .filter(b -> b.hasOfflineComplement())
                 .collect(Collectors.toList());
     }
+
+    public List<DiagramConnector> getInputs(){
+        return this.inputs;
+    }
+
+    public List<DiagramConnector> getOutputs(){
+        return this.outputs;
+    }
+
+    public void addInput(DiagramConnector connector){ this.inputs.add(connector); }
+
+    public void addOutput(DiagramConnector connector) { this.outputs.add(connector); }
 }

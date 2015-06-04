@@ -37,10 +37,42 @@ analyticsApp
     ])
 
 
-    .controller('blockGroupController', ['$scope', '$element', 'position', 'close',
-        function($scope, $element, position, close){
+    .controller('blockGroupController', ['$scope', '$element', '$timeout', 'diagramService', 'position', 'diagram', 'close',
+        function($scope, $element, $timeout, diagramService, position, diagram, close){
 
+            $scope.loading = true;
             $scope.position = position;
+
+            // generate the list of the selected blocks by unique name
+            var blocks = diagram.getSelectedBlocks().map(function(block){ return block.uniqueName() });
+
+            // create a unique for the new group
+            var name = diagram.generateBlockName("Group");
+
+            // package up the group request
+            var request = {
+                name: name,
+                diagram: diagram.data,
+                blocks: blocks
+            };
+
+            console.log(request);
+
+            $timeout(function(){
+                diagramService.group(request).then(
+
+                    function (data) {
+
+                        $scope.diagram = new viewmodels.diagramViewModel(data);
+
+                        $scope.loading = false;
+                    },
+                    function (code) {
+
+                        $scope.loading = false;
+                    }
+                );
+            }, 600);
 
             $scope.close = function(transitionDelay){
 
@@ -49,7 +81,7 @@ analyticsApp
 
             $scope.save = function(transitionDelay){
 
-                close(null, transitionDelay);
+                close($scope.diagram, transitionDelay);
             };
         }
     ])

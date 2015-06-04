@@ -724,6 +724,9 @@ viewmodels.diagramViewModel = function(data) {
             this.data.blocks = [];
         }
 
+        // capture new block name
+        blockNames[block.name] = true;
+
         //
         // Update the data model.
         //
@@ -767,17 +770,13 @@ viewmodels.diagramViewModel = function(data) {
 
     this.getBlockDescription = function(x, y, definition){
 
-        return new BlockDescription(x, y, definition);
-    };
-
-    var BlockDescription = function(x, y, definition){
-
-        // initialize block properties
-        this.name = generateBlockName(definition.name);
-        this.uniqueName = generateUniqueName();
-        this.definition = definition.name;
-        this.x = x;
-        this.y = y;
+        return {
+            name: this.generateBlockName(definition.name),
+            uniqueName: generateUniqueName(),
+            definition: definition.name,
+            x: x,
+            y: y
+        };
     };
 
     var getDataBlock = function(configBlock){
@@ -818,7 +817,7 @@ viewmodels.diagramViewModel = function(data) {
         this.parameters = parameters;
     };
 
-    var generateBlockName = function(definitionName){
+    this.generateBlockName = function(definitionName){
 
         // generate unique block name
         var index = 1;
@@ -828,9 +827,6 @@ viewmodels.diagramViewModel = function(data) {
             index++;
         }
         while(name in blockNames);
-
-        // capture new block name
-        blockNames[name] = true;
 
         return name;
     };

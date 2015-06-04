@@ -1,164 +1,194 @@
 package services;
 
-import emr.analytics.models.definition.*;
+import emr.analytics.models.definition.Definition;
+import emr.analytics.models.definition.DefinitionType;
 import emr.analytics.models.diagram.*;
+import models.project.GroupRequest;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class DiagramsService {
 
-    private HashSet<String> _onlineBlocks;
-    private HashMap<String, String> _dataSources;
+    /**
+     * Create a group of blocks
+     * @param request contains the diagram, the block group name, and list of blocks contained in the new proposed block group
+     * @return resulting diagram
+     */
+    public Diagram group(GroupRequest request){
 
-    private HashMap<String, Definition> _definitions;
+        // reference the parent diagram
+        Diagram parent = request.getDiagram();
+        // create a set of block ids for reference
+        Set<String> blockIds = new HashSet<String>(Arrays.asList(request.getBlocks()));
+        // create a new diagram
+        Diagram diagram = new Diagram(request.getName());
 
-    private Definition sourceBlock;
-    private Definition sinkBlock;
+        // create variables to track the group's collective minimum position position
+        int x = Integer.MAX_VALUE, y = Integer.MAX_VALUE, xOrigin = 100, yOrigin = 50;
 
-    public DiagramsService(HashMap<String, Definition> definitions){
-        _definitions = definitions;
+        // and a complimentary block
+        Block block = new Block(request.getName(),
+                Integer.MAX_VALUE,
+                Integer.MAX_VALUE,
+                Integer.MAX_VALUE,
+                new Definition(DefinitionType.CONTAINER,
+                        request.getName(),
+                        request.getName(),
+                        "Block Group"));
 
-        sourceBlock = definitions.get("PollingStream");
-        sinkBlock = definitions.get("RESTPost");
-    }
+        parent.addBlock(block);
 
-    public Diagram compile(Diagram offline){
+        // iterate over each block
+        for(String blockId : request.getBlocks()){
 
-        Diagram online = new Diagram(offline.getName(),
-            offline.getDescription(),
-            offline.getOwner());
+            // find the specified block
+            Block groupBlock = parent.getBlockByUniqueName(blockId);
 
-        _onlineBlocks = new HashSet<>();
-        _dataSources = new HashMap<>();
+            // remove it from the diagram
+            parent.removeBlock(groupBlock);
 
-        // iterate over offline blocks to find model block
-        for(Block block : offline.getBlocks()){
+            // add it to the block group
+            diagram.addBlock(groupBlock);
 
-            Definition offlineDefinition = _definitions.get(block.getDefinition());
+            // track the group block's origin
+            if (groupBlock.getX() < x)
+                x = groupBlock.getX();
+            if (groupBlock.getY() < y)
+                y = groupBlock.getY();
 
-            if (offlineDefinition.hasOnlineComplement()){
+            // capture the group block's dimensions that are closest to the top
+            if (groupBlock.getY() < block.getY()){
+                block.setX(groupBlock.getX());
+                block.setY(groupBlock.getY());
+            }
 
-                // reference online definition
-                Definition onlineDefinition = _definitions.get(offlineDefinition.getOnlineComplement());
+            // capture the group block's state that is lowest
+            if (groupBlock.getState() < block.getState())
+                block.setState(groupBlock.getState());
 
-                // create online block
-                Block onlineBlock = this.createBlock(onlineDefinition,
-                        block.getState(),
-                        block.getX(),
-                        block.getY());
-                // reference offline complement
-                onlineBlock.setOfflineComplement(block.getUniqueName());
+            // iterate over each input connector - creating group connectors
+            for(Connector connector : groupBlock.getInputConnectors()){
 
-                // set collected parameter values
-                for(Parameter parameter : block.getParameters()){
+                List<Wire> wires = parent.getLeadingWires(blockId, connector.getName());
 
-                    // todo: bad assumption that model contains all block parameters
-                    if (parameter.isCollected())
-                        onlineBlock.setParameter(parameter.getName(), parameter.getValue());
+                Connector groupConnector;;
+                if (wires.size() == 0){
+                    groupConnector = new Connector(connector.getName(), connector.getType());
+                    block.addInputConnector(groupConnector);
                 }
 
-                // add online block to diagram
-                online.addBlock(onlineBlock);
+                boolean isGroupConnector = false;
+                for(int i = 0; i < wires.size(); i++){
 
-                // follow the offline diagram to its root (collecting blocks along the way)
-                int index = 0;
-                boolean sourceConnector = false;
-                for(Connector connector : onlineBlock.getInputConnectors()){
+                    Wire wire = wires.get(i);
 
-                    String connectorName = connector.getName();
-                    if (connectorName.toLowerCase().equals("x"))
-                        sourceConnector = true;
+                    if (!blockIds.contains(wire.getFrom_node())) {
 
-                    if (block.hasInputConnector(connector.getName())){
+                        // flag as a group connector
+                        isGroupConnector = true;
 
-                        for(Wire wire : offline.getLeadingWires(block.getUniqueName(), connector.getName())){
+                        // get or create the specified block connector
+                        Optional<Connector> optional = block.getInputConnector(connector.getName());
+                        if (optional.isPresent()) {
+                            groupConnector = optional.get();
+                        }
+                        else{
+                            groupConnector = new Connector(connector.getName(), connector.getType());
+                            block.addInputConnector(groupConnector);
+                        }
 
-                            Wire onlineWire = new Wire(wire.getFrom_node(),
+                        // create a wire from this wire's source to our new block
+                        parent.addWire(new Wire(wire.getFrom_node(),
                                 wire.getFrom_connector(),
                                 wire.getFrom_connectorIndex(),
-                                onlineBlock.getUniqueName(),
-                                connector.getName(),
-                                index);
+                                block.getUniqueName(),
+                                groupConnector.getName(),
+                                0));  // todo: invalid connector index -> do we use connector index
 
-                            this.addLeadingPath(onlineWire, offline, online, sourceConnector);
-                        }
+                        // remove this wire from the diagram
+                        parent.removeWire(wire);
                     }
-
-                    index++;
                 }
 
-                // add a result block to the output of the model block
-                Block postBlock = this.createBlock(this.sinkBlock,
-                    3,
-                    onlineBlock.getX(),
-                    (onlineBlock.getY() + 120));
-                online.addBlock(postBlock);
-                online.addWire(new Wire(
-                    onlineBlock.getUniqueName(),
-                    onlineBlock.getOutputConnectors().get(0).getName(),
-                    0,
-                    postBlock.getUniqueName(),
-                    postBlock.getInputConnectors().get(0).getName(),
-                    0));
+                if (isGroupConnector){
+                    diagram.addInput(new DiagramConnector(UUID.fromString(blockId),
+                        String.format("%s_%s", groupBlock.getName(), connector.getName()),
+                        connector.getType()));
+                }
+            }
+
+            // iterate over each output connector - consuming wires and creating group connectors
+            for(Connector connector : groupBlock.getOutputConnectors()){
+
+                boolean isGroupConnector = false;
+                List<Wire> wires = parent.getOutputWires(blockId, connector.getName());
+
+                Connector groupConnector;;
+                if (wires.size() == 0){
+                    groupConnector = new Connector(connector.getName(), connector.getType());
+                    block.addOutputConnector(groupConnector);
+                }
+
+                for(int i = 0; i < wires.size(); i++){
+
+                    Wire wire = wires.get(i);
+
+                    if (!blockIds.contains(wire.getTo_node())) {
+                        // this wire does not connect to a block destined for this group -
+                        // therefore it is a group connector
+                        isGroupConnector = true;
+
+                        // get or create the specified block connector
+                        Optional<Connector> optional = block.getOutputConnector(connector.getName());
+                        if (optional.isPresent()) {
+                            groupConnector = optional.get();
+                        }
+                        else{
+                            groupConnector = new Connector(connector.getName(), connector.getType());
+                            block.addOutputConnector(groupConnector);
+                        }
+
+                        // create a wire from our new block to this wires destination
+                        parent.addWire(new Wire(block.getUniqueName(),
+                                groupConnector.getName(),
+                                0,                          // todo: invalid connector index -> do we use connector index
+                                wire.getTo_node(),
+                                wire.getTo_connector(),
+                                wire.getTo_connectorIndex()));
+
+                        // remove this wire from the diagram
+                        parent.removeWire(wire);
+                    }
+                    else{
+                        // leads to a block destined for this group - consume wire
+                        diagram.addWire(wire);
+                    }
+                }
+
+                if (isGroupConnector){
+                    diagram.addOutput(new DiagramConnector(UUID.fromString(blockId),
+                            String.format("%s_%s", groupBlock.getName(), connector.getName()),
+                            connector.getType()));
+                }
             }
         }
 
-        return online;
-    }
+        // calculate group origin delta and adjust each group block's position
+        int xDelta = x - xOrigin;
+        int yDelta = y - yOrigin;
+        for(Block groupBlock : diagram.getBlocks()){
 
-    private Block createBlock(Definition definition, int state, int x, int y){
-
-        // create name
-        String name = "";
-        int index = 1;
-        do{
-            name = definition.getName() + index;
-            index++;
-        }while(_onlineBlocks.contains(name));
-
-        _onlineBlocks.add(name);
-
-        return new Block(name, state, x, y, definition);
-    }
-
-    private void addLeadingPath(Wire wire, Diagram source, Diagram destination, boolean isSourceConnector){
-
-        // todo: update to make copies
-
-        String blockUniqueName = wire.getFrom_node();
-        Block block = source.getBlockByUniqueName(blockUniqueName);
-
-        if (isSourceConnector && block.getInputConnectors().size() == 0) {
-
-            if (_dataSources.containsKey(block.getName())) {
-                block = destination.getBlock(_dataSources.get(block.getName()));
-            }
-            else {
-                String name = block.getName();
-                int state = block.getState();
-                int x = block.getX();
-                int y = block.getY();
-                block = createBlock(this.sourceBlock, state, x, y);
-                destination.addBlock(block);
-
-                _dataSources.put(name, block.getName());
-            }
-
-            wire.setFrom_node(block.getUniqueName());
+            groupBlock.setX(groupBlock.getX() - xDelta);
+            groupBlock.setY(groupBlock.getY() - yDelta);
         }
 
-        if (!_onlineBlocks.contains(block.getName())){
+        // remove group wires from the diagram
+        for(Wire wire : diagram.getWires())
+            parent.removeWire(wire);
 
-            destination.addBlock(block);
-            _onlineBlocks.add(block.getName());
-        }
+        // add this new group to the diagram
+        parent.addDiagram(diagram);
 
-        destination.addWire(wire);
-
-        for (Wire leadingWire : source.getLeadingWires(blockUniqueName))
-            this.addLeadingPath(leadingWire, source, destination, isSourceConnector);
+        return parent;
     }
 }

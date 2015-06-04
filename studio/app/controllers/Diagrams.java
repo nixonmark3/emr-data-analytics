@@ -4,23 +4,19 @@ import actors.ClientActorManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.BasicDBObject;
 import com.mongodb.WriteResult;
 import emr.analytics.models.definition.Definition;
 import emr.analytics.models.diagram.*;
 
 import emr.analytics.service.jobs.JobMode;
+import models.project.GroupRequest;
 import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Result;
 
 import org.jongo.*;
-import services.BlockResultsService;
-import services.DefinitionsService;
-import services.DiagramsService;
-import services.EvaluationService;
+import services.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.UUID;
@@ -101,8 +97,8 @@ public class Diagrams extends ControllerBase {
         ObjectMapper objectMapper = new ObjectMapper();
         Diagram offline = objectMapper.convertValue(request().body().asJson(), Diagram.class);
 
-        DiagramsService service = new DiagramsService(_definitions);
-        Diagram online = service.compile(offline);
+        DiagramCompiler diagramCompiler = new DiagramCompiler(_definitions);
+        Diagram online = diagramCompiler.compile(offline);
 
         return ok(Json.toJson(online));
     }
@@ -131,6 +127,28 @@ public class Diagrams extends ControllerBase {
 
         if (diagram == null) {
             return notFound("The diagram '%s' could not be found.", diagramName);
+        }
+
+        return ok(Json.toJson(diagram));
+    }
+
+    @BodyParser.Of(BodyParser.Json.class)
+    public static Result group() {
+
+        GroupRequest request;
+        Diagram diagram = null;
+
+        try {
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            request = objectMapper.convertValue(request().body().asJson(), GroupRequest.class);
+
+            DiagramsService service = new DiagramsService();
+            diagram = service.group(request);
+        }
+        catch (Exception exception) {
+            exception.printStackTrace();
+            return internalServerError(String.format("Failed to group blocks."));
         }
 
         return ok(Json.toJson(diagram));

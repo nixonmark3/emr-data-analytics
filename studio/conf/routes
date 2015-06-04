@@ -19,7 +19,8 @@ POST        /saveDiagram                      controllers.Diagrams.saveDiagram()
 POST        /evaluate/:clientId               controllers.Diagrams.evaluate(clientId: String)
 POST        /loadSources                      controllers.Sources.load()
 POST        /deploy                           controllers.Diagrams.deploy()
-POST        /compile                           controllers.Diagrams.compile()
+POST        /compile                          controllers.Diagrams.compile()
+POST        /group                            controllers.Diagrams.group()
 GET         /kill/:jobId                      controllers.Diagrams.kill(jobId: String)
 
 # Map static resources from the /public folder to the /assets URL path

@@ -69,8 +69,12 @@ public class Connector implements Serializable {
     private String position;
 
     public Connector(ConnectorDefinition connectorDefinition){
-        this.type = connectorDefinition.getType();
-        this.name = connectorDefinition.getName();
+        this(connectorDefinition.getName(), connectorDefinition.getType());
+    }
+
+    public Connector(String name, String type){
+        this.type = type;
+        this.name = name;
 
         // todo: position ?
         this.position = "";
