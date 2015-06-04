@@ -19,6 +19,16 @@ public class BlockResults extends ControllerBase {
         return ok(Json.toJson(BlockResultsService.getStatistics(blockName)));
     }
 
+    public static Result getFeatures(String blockName) {
+
+        return ok(Json.toJson(BlockResultsService.getFeatures(blockName)));
+    }
+
+    public static Result getChartData(String blockName) {
+
+        return ok(Json.toJson(BlockResultsService.getChartData(blockName)));
+    }
+
     public static Result getPlot(String blockName) {
 
         byte[] image = BlockResultsService.getPlot(blockName);

@@ -54,17 +54,19 @@ analyticsApp
         }
     ])
 
-    .controller('chartsController', ['$scope', '$element', '$timeout', 'diagramService', 'position', 'close',
-        function($scope, $element, $timeout, diagramService, position, close){
+    .controller('chartsController', ['$scope', '$element', '$timeout', 'block', 'diagramService', 'position', 'close',
+        function($scope, $element, $timeout, block, diagramService, position, close){
 
+            $scope.block = block;
             $scope.loading = true;
             $scope.rendering = false;
             $scope.position = position;
             $scope.activeIndex = 0;
 
             // loading data after zoom animation has completed
-            $timeout(function(){
-                diagramService.getFeatures().then(
+            $timeout(function() {
+
+                diagramService.getFeatures($scope.block.uniqueName()).then(
 
                     function (data) {
 
@@ -79,16 +81,16 @@ analyticsApp
                 );
             }, 600);
 
-            $scope.close = function(transitionDelay){
+            $scope.close = function(transitionDelay) {
 
                 close(null, transitionDelay);
             };
 
-            $scope.render = function(){
+            $scope.render = function() {
 
                 $scope.rendering = true;
 
-                diagramService.getSampleData().then(
+                diagramService.getChartData($scope.block.uniqueName()).then(
 
                     function (data) {
 
@@ -104,18 +106,18 @@ analyticsApp
 
             };
 
-            $scope.save = function(transitionDelay){
+            $scope.save = function(transitionDelay) {
 
                 close(null, transitionDelay);
             };
 
-            $scope.setActiveIndex = function(index){
+            $scope.setActiveIndex = function(index) {
                 $scope.activeIndex = index;
             };
 
             /*  take the raw set of features and prepare for display
              */
-            var prepare = function(features){
+            var prepare = function(features) {
 
                 // get list of keys
                 var keys = Object.keys(features);
