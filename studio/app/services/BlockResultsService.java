@@ -1,5 +1,7 @@
 package services;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBList;
 import com.mongodb.DB;
@@ -7,6 +9,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBCollection;
 import com.mongodb.gridfs.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -53,6 +56,30 @@ public class BlockResultsService {
         }
 
         return (model.length() > 0) ? model.substring(0, model.length() - 1) : "";
+    }
+
+    public static BasicDBObject getFeatures(String blockName) {
+
+        BasicDBObject features = new BasicDBObject();
+
+        BasicDBObject results = BlockResultsService.getResults(blockName);
+
+        if (results != null) {
+
+            BasicDBList blockStatistics = (BasicDBList) results.get("Statistics");
+
+            blockStatistics.forEach(featureStatisticsObj -> {
+
+                BasicDBList tuple = (BasicDBList)featureStatisticsObj;
+
+                if (tuple.size() == 2) {
+
+                    features.put(tuple.get(0).toString(), tuple.get(1));
+                }
+            });
+        }
+
+        return features;
     }
 
     public static List<BasicDBObject> getStatistics(String blockName) {
@@ -266,5 +293,40 @@ public class BlockResultsService {
         }
 
         return tupleDataAsDictionary;
+    }
+
+    public static JsonNode getChartData(String blockName) {
+
+        JsonNode chartData = null;
+
+        try {
+
+            MongoDBPlugin mongoPlugin = MongoDBPlugin.getMongoDbPlugin();
+
+            DB db = mongoPlugin.getMongoDBInstance(mongoPlugin.getStudioDatabaseName());
+
+            String filename = blockName + "_data";
+
+            GridFS gridFS = new GridFS(db);
+
+            GridFSDBFile gridFSDBFile = gridFS.findOne(filename);
+
+            if (gridFSDBFile != null) {
+
+                ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+                gridFSDBFile.writeTo(os);
+
+                String out = new String(os.toByteArray(), "UTF-8");
+
+                chartData = new ObjectMapper().readValue(out, JsonNode.class);
+            }
+        }
+        catch (java.io.IOException exception) {
+
+            exception.printStackTrace();
+        }
+
+        return chartData;
     }
 }

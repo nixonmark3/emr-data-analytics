@@ -266,30 +266,34 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
             return deferred.promise;
         },
 
-        getFeatures: function(){
+        getFeatures: function(blockName){
 
             var deferred = $q.defer();
 
-            $http({ method: 'GET', url: '/assets/data/results/features.json' })
+            $http.get('/getFeatures/' + blockName)
                 .success(function (data, status, headers, config) {
+
                     deferred.resolve(data);
                 })
                 .error(function (data, status, headers, config){
+
                     deferred.reject(status);
                 });
 
             return deferred.promise;
         },
 
-        getSampleData: function(){
+        getChartData: function(blockName) {
 
             var deferred = $q.defer();
 
-            $http({ method: 'GET', url: '/assets/data/results/data.json' })
+            $http.get('/getChartData/' + blockName)
                 .success(function (data, status, headers, config) {
+
                     deferred.resolve(data);
                 })
                 .error(function (data, status, headers, config){
+
                     deferred.reject(status);
                 });
 

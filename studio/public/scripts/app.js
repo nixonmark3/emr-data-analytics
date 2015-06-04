@@ -325,6 +325,9 @@ var analyticsApp = angular.module('analyticsApp',
                     modalService.show({
                         templateUrl: '/assets/scripts/views/charts.html',
                         controller: 'chartsController',
+                        inputs: {
+                            block: block
+                        },
                         position: modalPosition
                     }).then(function (modal) {
 

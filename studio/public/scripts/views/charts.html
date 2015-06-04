@@ -63,6 +63,11 @@
             </div>
 
             <div id="chart-container">
+
+                <div class="rendering-spin-container">
+                    <i ng-if="rendering" class="fa fa-circle-o-notch fa-spin fa-5x"></i>
+                </div>
+
                 <time-series-chart ng-if="!loading" id="time-series-chart" chart-data="chartData"></time-series-chart>
             </div>
 
