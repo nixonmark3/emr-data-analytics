@@ -36,7 +36,6 @@ analyticsApp
         }
     ])
 
-
     .controller('blockGroupController', ['$scope', '$element', '$timeout', 'diagramService', 'position', 'diagram', 'close',
         function($scope, $element, $timeout, diagramService, position, diagram, close){
 
@@ -46,24 +45,23 @@ analyticsApp
             // generate the list of the selected blocks by unique name
             var blocks = diagram.getSelectedBlocks().map(function(block){ return block.uniqueName() });
 
-            // create a unique for the new group
-            var name = diagram.generateBlockName("Group");
-
             // package up the group request
             var request = {
-                name: name,
+                name: diagram.generateBlockName("Group"), // create a unique for the new group
                 diagram: diagram.data,
                 blocks: blocks
             };
-
-            console.log(request);
 
             $timeout(function(){
                 diagramService.group(request).then(
 
                     function (data) {
 
+                        // reference the resulting diagram
                         $scope.diagram = new viewmodels.diagramViewModel(data);
+
+                        // reference the nested diagram
+                        $scope.nestedDiagram = $scope.diagram.findDiagram(request.name);
 
                         $scope.loading = false;
                     },

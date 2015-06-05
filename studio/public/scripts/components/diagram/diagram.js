@@ -10,14 +10,14 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'emr.ui.popup', '
             templateUrl: '/assets/scripts/components/diagram/diagram.html',
             scope: {
                 diagram: '=viewModel',
-                onConfigure: '=',
-                isOnline: '=',
-                nodes: '=',
-                library: '=',
-                loadSources: "=",
-                getBlockData: "=",
-                blurBackground: "=",
-                selectionCount: "="
+                onConfigure: '=?',
+                isOnline: '=?',
+                nodes: '=?',
+                library: '=?',
+                loadSources: "=?",
+                getBlockData: "=?",
+                blurBackground: "=?",
+                selectionCount: "=?"
             },
             link: function($scope, element, attrs) {
 

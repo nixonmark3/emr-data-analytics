@@ -2,7 +2,7 @@
 
 angular.module('emr.ui.charts', [])
 
-    .directive('timeSeriesChart', ['$window', function($window){
+    .directive('timeSeriesChartCanvas', ['$window', function($window){
 
         return {
             restrict: 'E',
@@ -15,18 +15,9 @@ angular.module('emr.ui.charts', [])
                 // setup constant variables
                 var margin = { top: 20, right: 20, bottom: 30, left: 50 };
 
-                // create svg
-                var svg = d3.select(element[0])
-                    .append("svg")
-                        .style('width', '100%')
-                        .style('height', '100%')
-                    .append("g")
-                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-                angular.element($window).bind("resize", function () {
-
-                    render();
-                });
+                // create canvas element
+                var canvas = d3.select(element[0]).append("canvas");
+                var context = canvas.node().getContext('2d');
 
                 $scope.$watch("chartData", function () {
 
@@ -37,78 +28,65 @@ angular.module('emr.ui.charts', [])
 
                     if (!$scope.chartData) return;
 
-                    console.log("rendering time series chart.");
-
-                    // remove all previous items before render
-                    svg.selectAll('*').remove();
-
                     // setup variables
-                    var width = element.width() - margin.left - margin.right,
-                        height = element.height() - margin.top - margin.bottom;
+                    var width = element.width(),
+                        height = element.height();
+
+                    canvas.attr("width", width).attr("height", height);
 
                     // create chart scales and axes
                     var color = d3.scale.category20(),
 
                         xScale = d3.time.scale()
-                            .range([0, width]),
+                            .range([margin.left, width-margin.right]),
 
                         yScale = d3.scale.linear()
-                            .range([height, 0]),
+                            .range([height-margin.top, margin.bottom]);
 
-                        xAxis = d3.svg.axis()
-                            .scale(xScale)
-                            .orient("bottom"),
+                    var labels = $scope.chartData[0];
+                    var dates = $scope.chartData[1];
+                    var features = $scope.chartData.filter(function(value, index){ return (index > 1); });
 
-                        yAxis = d3.svg.axis()
-                            .scale(yScale)
-                            .orient("left");
+                    color.domain(labels);
 
-                    var line = d3.svg.line()
-                        .interpolate("basis")
-                        .x(function(d) { return xScale(d.date); })
-                        .y(function(d) { return yScale(d.value); });
+                    xScale.domain([dates[0], dates[dates.length - 1]]);
 
-                    color.domain(d3.keys($scope.chartData));
+                    var yMin = d3.min(features.map(function(feature){ return d3.min(feature); }));
+                    var yMax = d3.max(features.map(function(feature){ return d3.max(feature); }));
+                    yScale.domain([yMin, yMax]);
 
-                    var features = color.domain().map(function(name){
-                        return {
-                            name: name,
-                            values: $scope.chartData[name].sort(function(a, b){
-                                return a.date - b.date;
-                            }).map(function(d) {
-                                return { date: new Date(d.date*1000), value: d.value }
-                            })
-                        }
-                    });
+                    // setup zoom
+                    canvas.call(d3.behavior.zoom()
+                        .x(xScale)
+                        .scaleExtent([1, 1000])
+                        .on("zoom", zoom));
 
-                    xScale.domain([
-                        d3.min(features, function(d) { return d3.min(d.values, function(p) { return p.date; }); }),
-                        d3.max(features, function(d) { return d3.max(d.values, function(p) { return p.date; }); })
-                    ]);
+                    draw();
 
-                    yScale.domain([
-                        d3.min(features, function(d) { return d3.min(d.values, function(p) { return p.value; }); }),
-                        d3.max(features, function(d) { return d3.max(d.values, function(p) { return p.value; }); })
-                    ]);
+                    function zoom(){
+                        context.clearRect(0, 0, width, height);
+                        draw();
+                    }
 
-                    svg.append("g")
-                        .attr("class", "x axis")
-                        .attr("transform", "translate(0," + height + ")")
-                        .call(xAxis);
+                    function draw(){
 
-                    svg.append("g")
-                        .attr("class", "y axis")
-                        .call(yAxis);
+                        features.forEach(function(feature, index){
 
-                    var feature = svg.selectAll(".feature")
-                        .data(features)
-                        .enter().append("g")
-                        .attr("class", "feature");
+                            var i = 0;
+                            var n = feature.length;
 
-                    feature.append("path")
-                        .attr("class", "line")
-                        .attr("d", function(d) { return line(d.values); })
-                        .style("stroke", function(d) { return color(d.name); });
+                            context.strokeStyle = color(labels[index]);
+                            context.lineWidth = 1;
+                            context.lineCap = "round";
+                            context.beginPath();
+                            context.moveTo(xScale(dates[i]), yScale(feature[i]));
+                            while(++i < n){
+
+                                context.lineTo(xScale(dates[i]), yScale(feature[i]));
+                            }
+                            context.stroke();
+                        });
+                    }
                 };
 
                 render();

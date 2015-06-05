@@ -287,7 +287,8 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
 
             var deferred = $q.defer();
 
-            $http.get('/getChartData/' + blockName)
+            $http({ method: 'GET', url: '/assets/data/results/tinyData.json' })
+            // $http.get('/getChartData/' + blockName)
                 .success(function (data, status, headers, config) {
 
                     deferred.resolve(data);

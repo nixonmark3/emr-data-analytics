@@ -518,6 +518,19 @@ viewmodels.diagramViewModel = function(data) {
         return models;
     };
 
+    this.createDiagramViewModels = function(diagramsData){
+        var models = [];
+
+        if (diagramsData){
+            for (var i = 0; i < diagramsData.length; ++i) {
+
+                models.push(new viewmodels.diagramViewModel(diagramsData[i]));
+            }
+        }
+
+        return models;
+    };
+
     this.computeConnectorPos = function (block, connectorIndex, inputConnector) {
         return {
             x: block.x() + block.calculateConnectorX(connectorIndex, inputConnector),
@@ -534,6 +547,20 @@ viewmodels.diagramViewModel = function(data) {
             var block = this.blocks[i];
             if (block.data.uniqueName == name) {
                 return block;
+            }
+        }
+
+        throw new Error("Failed to find block " + name);
+    };
+
+    //
+    // Find the specified nested diagram
+    //
+    this.findDiagram = function(name){
+        for (var i = 0; i < this.diagrams.length; ++i) {
+            var diagram = this.diagrams[i];
+            if (diagram.data.name == name) {
+                return diagram;
             }
         }
 
@@ -603,6 +630,9 @@ viewmodels.diagramViewModel = function(data) {
 
     // create a view model for each wire
     this.wires = this.createWireViewModels(this.data.wires);
+
+    // create a view model for each nested diagram
+    this.diagrams = this.createDiagramViewModels(this.data.diagrams);
 
     //
     // Bezier curve calculations
