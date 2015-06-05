@@ -295,9 +295,9 @@ public class BlockResultsService {
         return tupleDataAsDictionary;
     }
 
-    public static JsonNode getChartData(String blockName) {
+    public static BasicDBList getChartData(String blockName) {
 
-        JsonNode chartData = null;
+        BasicDBList chartData = null;
 
         try {
 
@@ -319,7 +319,7 @@ public class BlockResultsService {
 
                 String out = new String(os.toByteArray(), "UTF-8");
 
-                chartData = new ObjectMapper().readValue(out, JsonNode.class);
+                chartData = new ObjectMapper().readValue(out, BasicDBList.class);
             }
         }
         catch (java.io.IOException exception) {

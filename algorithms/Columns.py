@@ -28,7 +28,7 @@ class Columns(FunctionBlock):
 
             df = df[columns]
 
-            FunctionBlock.save_results(self, df=df, statistics=True, plot=True)
+            FunctionBlock.save_results(self, df=df, statistics=True)
 
             FunctionBlock.report_status_complete(self)
 
