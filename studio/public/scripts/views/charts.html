@@ -39,9 +39,19 @@
                 <div class="chart-menu">
                     <div class="chart-feature ng-class:{'chart-feature-animate': value.showStatistics}" ng-repeat="(key, value) in features">
                         <div class="feature-container">
-                            <div class="feature-color" ng-style="{'background-color':value.color}" ng-click="value.selected != value.selected">
-                                <i ng-if="value.selected" class="fa fa-check"></i>
+
+                            <div class="feature-selector ng-class:{'front-to-back': value.flipToBack,'back-to-front': value.flipToFront}" ng-click="featureSelectClick(value)">
+
+                                <div class="feature-color face front" ng-style="{'background-color':value.color}">
+                                    <i class="fa fa-check"></i>
+                                </div>
+
+                                <div class="feature-color face back" ng-style="{'background-color':value.color}">
+                                    <i class="fa close"></i>
+                                </div>
+
                             </div>
+
                             <div class="feature-name">{{key}}</div>
                             <div class="feature-ellipsis" ng-click="value.showStatistics = !value.showStatistics">
                                 <i class="fa fa-ellipsis-v"></i>

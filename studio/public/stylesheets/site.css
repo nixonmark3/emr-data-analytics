@@ -333,7 +333,59 @@ body { font-family: Roboto, arial, sans-serif; background-color: #c5c5c5; overfl
 .chart-feature-animate { max-height: 500px; -webkit-transition: max-height 1s ease-in; }
 
 .feature-container { height: 28px; width: 100%; }
-.feature-color { float: left; width: 28px; height: 28px; border-radius: 50%; color: #f9f9f9; line-height: 28px; text-align: center; vertical-align: middle; cursor: pointer; }
+
+.feature-selector {
+    float: left;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    vertical-align: middle;
+    -webkit-transform-style: preserve-3d;
+    -ms-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+}
+
+.face {
+    -webkit-backface-visibility: hidden;
+        -ms-backface-visibility: hidden;
+            backface-visibility: hidden;
+}
+
+.back {
+    -webkit-transform: rotateY( 180deg );
+    -ms-transform: rotateY( 180deg );
+    transform: rotateY( 180deg );
+}
+
+.feature-color {
+    float: left;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    color: #f9f9f9;
+    line-height: 28px;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    position: absolute;
+}
+
+.front-to-back {
+    -webkit-transition: 1s ease-in-out;
+    -webkit-transform: rotateY( 180deg );
+}
+
+.back-to-front {
+    -webkit-transition: 1s ease-in-out;
+    -webkit-transform: rotateY( 360deg );
+}
+
+
+
+
+
+
 .feature-name { float: left; margin-left: 10px; line-height: 28px; vertical-align: middle; }
 .feature-name:hover { cursor: default;}
 .feature-ellipsis { float: right; line-height: 28px; vertical-align: middle; }

@@ -146,6 +146,22 @@ analyticsApp
                 $scope.activeIndex = index;
             };
 
+            $scope.featureSelectClick = function(feature) {
+
+                feature.selected = !feature.selected;
+
+                if (feature.selected) {
+
+                    feature.flipToBack = false;
+                    feature.flipToFront = true;
+                }
+                else {
+
+                    feature.flipToBack = true;
+                    feature.flipToFront = false;
+                }
+            }
+
             /*  take the raw set of features and prepare for display
              */
             var prepare = function(features) {
@@ -169,6 +185,8 @@ analyticsApp
                     feature.twentyFive = feature.twentyFive.toFixed(5);
                     feature.fifty = feature.fifty.toFixed(5);
                     feature.seventyFive = feature.seventyFive.toFixed(5);
+                    feature.flipToFront = false;
+                    feature.flipToBack = false;
                 }
 
                 return features;
