@@ -20,6 +20,14 @@
         <div id="chart-menus">
 
             <div class="chart-toolbar">
+                <div class="toolbar-center">
+                    <label class="radio-inline">
+                        <input type="radio" ng-model="chartType" value="0" name="selectedChartType"> Chart
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" ng-model="chartType" value="1" name="selectedChartType"> Grid
+                    </label>
+                </div>
                 <div class="toolbar-right">
                     <div class="toolbar-icon">
                         <div id="collapse-icon"></div>
@@ -53,7 +61,6 @@
         </div>
 
         <div id="chart-content">
-
             <div class="chart-toolbar">
                 <div class="toolbar-left">
                     <div class="toolbar-icon" ng-click="render()">
@@ -61,17 +68,17 @@
                     </div>
                 </div>
             </div>
-
-            <div id="chart-container">
-
+            <div id="chart-wrapper">
                 <div id="loader-overlay" ng-if="rendering" style="background-color: #fff">
                     <div class="loader"></div>
                 </div>
-
-                <time-series-chart-canvas ng-if="!loading" id="time-series-chart" chart-data="chartData"></time-series-chart-canvas>
-
+                <div ng-if="!loading">
+                    <div ng-switch="chartType" id="chart-container">
+                        <time-series-chart-canvas  id="time-series-chart" chart-data="chartData" ng-switch-when="0"></time-series-chart-canvas>
+                        <time-series-grid id="time-series-grid-container" chart-data="chartData" ng-switch-when="1"></time-series-grid>
+                    </div>
+                </div>
             </div>
-
         </div>
 
     </div>

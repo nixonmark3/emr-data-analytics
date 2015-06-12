@@ -92,6 +92,7 @@ analyticsApp
             $scope.rendering = false;
             $scope.position = position;
             $scope.activeIndex = 0;
+            $scope.chartType = 0;
 
             // loading data after zoom animation has completed
             $timeout(function() {

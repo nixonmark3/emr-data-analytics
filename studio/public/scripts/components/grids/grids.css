@@ -1,0 +1,30 @@
+.grid-column-container {
+    width: 1000px;
+    height: auto;
+    overflow-x: auto;
+}
+
+.grid-column {
+    float: left;
+    width: auto;
+    height: auto;
+}
+
+.grid-timestamp {
+    width: 175px;
+    height: 25px;
+    inline-height: 25px;
+    text-align: center;
+}
+
+.grid-timestamp:hover { cursor: default; }
+
+.grid-value {
+    width: 125px;
+    height: 25px;
+    inline-height: 25px;
+    text-align: right;
+}
+
+.grid-value:hover { cursor: default; }
+

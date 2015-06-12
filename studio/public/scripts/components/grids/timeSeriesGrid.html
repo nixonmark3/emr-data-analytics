@@ -1,0 +1,10 @@
+<div class="grid-column-container">
+    <div class="grid-column" ng-repeat="column in showing track by $index" ng-switch on="$index">
+        <div class="grid-timestamp" ng-repeat="value in column track by $index" ng-switch-when="0">
+            {{value}}
+        </div>
+        <div class="grid-value" ng-repeat="value in column track by $index" ng-switch-default>
+            {{value}}
+        </div>
+    </div>
+</div>
