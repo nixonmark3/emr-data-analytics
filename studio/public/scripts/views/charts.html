@@ -36,22 +36,53 @@
             </div>
 
             <div class="chart-menu-container ng-class:{ active: (activeIndex==0) }">
-
                 <div class="chart-menu">
-
-                    <div class="chart-feature" ng-repeat="(key, value) in features">
-                        <div class="feature-color" ng-style="{'background-color':value.color}" ng-click="value.selected != value.selected">
-                            <i ng-if="value.selected" class="fa fa-check"></i>
+                    <div class="chart-feature ng-class:{'chart-feature-animate': value.showStatistics}" ng-repeat="(key, value) in features">
+                        <div class="feature-container">
+                            <div class="feature-color" ng-style="{'background-color':value.color}" ng-click="value.selected != value.selected">
+                                <i ng-if="value.selected" class="fa fa-check"></i>
+                            </div>
+                            <div class="feature-name">{{key}}</div>
+                            <div class="feature-ellipsis" ng-click="value.showStatistics = !value.showStatistics">
+                                <i class="fa fa-ellipsis-v"></i>
+                            </div>
                         </div>
-                        <div class="feature-name">{{key}}</div>
-                        <div class="feature-ellipsis">
-                            <i class="fa fa-ellipsis-v"></i>
+                        <div class="feature-stats feature-stats-fade" ng-show="value.showStatistics">
+                            <div class="feature-stats-item">
+                                <div class="feature-stats-name">Count</div>
+                                <div class="feature-stats-value">{{value.count}}</div>
+                            </div>
+                            <div class="feature-stats-item">
+                                <div class="feature-stats-name">Mean</div>
+                                <div class="feature-stats-value">{{value.mean}}</div>
+                            </div>
+                            <div class="feature-stats-item">
+                                <div class="feature-stats-name">Std</div>
+                                <div class="feature-stats-value">{{value.std}}</div>
+                            </div>
+                            <div class="feature-stats-item">
+                                <div class="feature-stats-name">Min</div>
+                                <div class="feature-stats-value">{{value.min}}</div>
+                            </div>
+                            <div class="feature-stats-item">
+                                <div class="feature-stats-name">25%</div>
+                                <div class="feature-stats-value">{{value.twentyFive}}</div>
+                            </div>
+                            <div class="feature-stats-item">
+                                <div class="feature-stats-name">50%</div>
+                                <div class="feature-stats-value">{{value.fifty}}</div>
+                            </div>
+                            <div class="feature-stats-item">
+                                <div class="feature-stats-name">75%</div>
+                                <div class="feature-stats-value">{{value.seventyFive}}</div>
+                            </div>
+                            <div class="feature-stats-item">
+                                <div class="feature-stats-name">Max</div>
+                                <div class="feature-stats-value">{{value.max}}</div>
+                            </div>
                         </div>
-                        <div class="feature-stats"></div>
                     </div>
-
                 </div>
-
             </div>
 
             <div class="chart-menu-container ng-class:{ active: (activeIndex==1) }">

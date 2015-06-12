@@ -70,11 +70,32 @@ public class BlockResultsService {
 
             blockStatistics.forEach(featureStatisticsObj -> {
 
-                BasicDBList tuple = (BasicDBList)featureStatisticsObj;
+                BasicDBList tuple = (BasicDBList) featureStatisticsObj;
 
                 if (tuple.size() == 2) {
 
-                    features.put(tuple.get(0).toString(), tuple.get(1));
+                    BasicDBObject statistics = new BasicDBObject();
+
+                    BasicDBObject featureStatistics = (BasicDBObject) tuple.get(1);
+                    featureStatistics.forEach((statistic, statisticValue) -> {
+
+                        if (statistic.contains("25")) {
+
+                            statistic = "twentyFive";
+                        }
+                        else if (statistic.contains("50")) {
+
+                            statistic = "fifty";
+                        }
+                        else if (statistic.contains("75")) {
+
+                            statistic = "seventyFive";
+                        }
+
+                        statistics.put(statistic, statisticValue);
+                    });
+
+                    features.put(tuple.get(0).toString(), statistics);
                 }
             });
         }

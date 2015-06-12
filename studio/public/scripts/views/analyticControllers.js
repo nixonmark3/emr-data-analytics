@@ -156,10 +156,19 @@ analyticsApp
                 var colors = d3.scale.category20().domain(keys);
 
                 // for each feature - created a selected flag and a color
-                for (var i = 0; i < keys.length; i++){
+                for (var i = 0; i < keys.length; i++) {
+
                     var feature = features[keys[i]];
                     feature.selected = true;
                     feature.color = colors(keys[i]);
+                    feature.showStatistics = false;
+                    feature.min = feature.min.toFixed(5);
+                    feature.mean = feature.mean.toFixed(5);
+                    feature.std = feature.std.toFixed(5);
+                    feature.max = feature.max.toFixed(5);
+                    feature.twentyFive = feature.twentyFive.toFixed(5);
+                    feature.fifty = feature.fifty.toFixed(5);
+                    feature.seventyFive = feature.seventyFive.toFixed(5);
                 }
 
                 return features;

@@ -328,11 +328,22 @@ body { font-family: Roboto, arial, sans-serif; background-color: #c5c5c5; overfl
 .chart-menu-container { position: absolute; top: 28px; left: 0; visibility: hidden; height: -webkit-calc(100% - 28px); width: 100%; overflow-x: hidden; overflow-y: auto; }
 .chart-menu-container.active { visibility: visible; }
 .chart-menu { width: 100%; }
-.chart-feature { position: relative; background-color: #fff; margin: 10px; padding: 10px; border: 1px solid #e9e9e9; color: #666; }
+
+.chart-feature { position: relative; background-color: #fff; margin: 10px; padding: 10px; border: 1px solid #e9e9e9; color: #666; overflow: hidden; max-height: 50px; -webkit-transition: max-height 0.5s ease-out; }
+.chart-feature-animate { max-height: 500px; -webkit-transition: max-height 1s ease-in; }
+
+.feature-container { height: 28px; width: 100%; }
 .feature-color { float: left; width: 28px; height: 28px; border-radius: 50%; color: #f9f9f9; line-height: 28px; text-align: center; vertical-align: middle; cursor: pointer; }
 .feature-name { float: left; margin-left: 10px; line-height: 28px; vertical-align: middle; }
+.feature-name:hover { cursor: default;}
 .feature-ellipsis { float: right; line-height: 28px; vertical-align: middle; }
-.feature-stats { clear: both; }
+.feature-ellipsis:hover { cursor: pointer; color: #3182bd }
+.feature-stats { width: 100%; height: auto; margin-top: 12px; }
+.feature-stats-fade.ng-hide-remove { transition: 1s linear all; opacity: 1; }
+.feature-stats-fade.ng-hide { transition: 0.5s linear all; opacity: 0; }
+.feature-stats-item { width: calc(100% - 37px); height: 20px; margin-top: 5px; margin-left: 20px }
+.feature-stats-name { float: left; }
+.feature-stats-value { float: right; }
 
 .chart-toolbar { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 4px 16px 4px 10px; }
 .toolbar-left { position: relative; float: left; }
