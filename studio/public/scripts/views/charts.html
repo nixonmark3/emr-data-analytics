@@ -41,15 +41,13 @@
                         <div class="feature-container">
 
                             <div class="feature-selector ng-class:{'front-to-back': value.flipToBack,'back-to-front': value.flipToFront}" ng-click="featureSelectClick(value)">
-
-                                <div class="feature-color face front" ng-style="{'background-color':value.color}">
+                                <div class="face front" ng-style="{'background-color':value.color}">
                                     <i class="fa fa-check"></i>
                                 </div>
-
-                                <div class="feature-color face back" ng-style="{'background-color':value.color}">
-                                    <i class="fa close"></i>
+                                <div class="face back" ng-style="{'background-color':value.color}">
+                                    x
+                                    <!--<i class="fa close"></i>-->
                                 </div>
-
                             </div>
 
                             <div class="feature-name">{{key}}</div>

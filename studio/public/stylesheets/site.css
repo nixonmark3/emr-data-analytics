@@ -353,12 +353,22 @@ body { font-family: Roboto, arial, sans-serif; background-color: #c5c5c5; overfl
 }
 
 .back {
+    float: left;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    color: #f9f9f9;
+    line-height: 28px;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    position: absolute;
     -webkit-transform: rotateY( 180deg );
-    -ms-transform: rotateY( 180deg );
-    transform: rotateY( 180deg );
+        -ms-transform: rotateY( 180deg );
+        transform: rotateY( 180deg );
 }
 
-.feature-color {
+.front {
     float: left;
     width: 28px;
     height: 28px;
@@ -380,11 +390,6 @@ body { font-family: Roboto, arial, sans-serif; background-color: #c5c5c5; overfl
     -webkit-transition: 1s ease-in-out;
     -webkit-transform: rotateY( 360deg );
 }
-
-
-
-
-
 
 .feature-name { float: left; margin-left: 10px; line-height: 28px; vertical-align: middle; }
 .feature-name:hover { cursor: default;}
