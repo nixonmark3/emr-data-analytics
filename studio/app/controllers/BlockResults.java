@@ -24,9 +24,9 @@ public class BlockResults extends ControllerBase {
         return ok(Json.toJson(BlockResultsService.getFeatures(blockName)));
     }
 
-    public static Result getChartData(String blockName) {
+    public static Result getChartData(String blockName, String selectedFeatures) {
 
-        return ok(Json.toJson(BlockResultsService.getChartData(blockName)));
+        return ok(Json.toJson(BlockResultsService.getChartData(blockName, selectedFeatures)));
     }
 
     public static Result getPlot(String blockName) {

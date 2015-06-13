@@ -12,6 +12,7 @@ import com.mongodb.gridfs.*;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -316,9 +317,9 @@ public class BlockResultsService {
         return tupleDataAsDictionary;
     }
 
-    public static BasicDBList getChartData(String blockName) {
+    public static BasicDBList getChartData(String blockName, String selectedFeatures) {
 
-        BasicDBList chartData = null;
+        BasicDBList chartData = new BasicDBList();
 
         try {
 
@@ -340,7 +341,20 @@ public class BlockResultsService {
 
                 String out = new String(os.toByteArray(), "UTF-8");
 
-                chartData = new ObjectMapper().readValue(out, BasicDBList.class);
+                BasicDBList resultChartData = new ObjectMapper().readValue(out, BasicDBList.class);
+
+                if (resultChartData != null) {
+
+                    ArrayList<String> resultFeatures = (ArrayList<String>) resultChartData.get(0);
+
+                    chartData.add(selectedFeatures.split(","));
+                    chartData.add(resultChartData.get(1));
+
+                    for (String featureName : selectedFeatures.split(",")) {
+
+                        chartData.add(resultChartData.get(resultFeatures.indexOf(featureName) + 2));
+                    }
+                }
             }
         }
         catch (java.io.IOException exception) {

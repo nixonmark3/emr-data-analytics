@@ -119,22 +119,26 @@ analyticsApp
 
             $scope.render = function() {
 
-                $scope.rendering = true;
+                var selectedFeatures = getSelectedFeatures();
 
-                diagramService.getChartData($scope.block.uniqueName()).then(
+                if (selectedFeatures.length != 0) {
 
-                    function (data) {
+                    $scope.rendering = true;
 
-                        $scope.chartData = data;
+                    diagramService.getChartData($scope.block.uniqueName(), selectedFeatures.toString()).then(
+                        function (data) {
 
-                        $scope.rendering = false;
-                    },
-                    function (code) {
+                            $scope.chartData = data;
 
-                        $scope.rendering = false;
-                    }
-                );
+                            $scope.rendering = false;
+                        },
+                        function (code) {
 
+                            $scope.rendering = false;
+                        }
+                    );
+
+                }
             };
 
             $scope.save = function(transitionDelay) {
@@ -191,5 +195,20 @@ analyticsApp
 
                 return features;
             };
+
+            var getSelectedFeatures = function() {
+
+                var selectedFeatures = [];
+
+                for (var key in $scope.features) {
+
+                    if ($scope.features[key].selected) {
+
+                        selectedFeatures.push(key);
+                    }
+                }
+
+                return selectedFeatures;
+            }
         }
     ]);
