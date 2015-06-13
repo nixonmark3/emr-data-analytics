@@ -324,7 +324,10 @@ body { font-family: Roboto, arial, sans-serif; background-color: #c5c5c5; overfl
 
 #chart-section { display: block; position: relative; float: left; height: 100%; width: -webkit-calc(100% - 70px); }
 
-#chart-menus { position: absolute; top: 0; left: 0; background-color: #f9f9f9; height: 100%; width: 25%; border-right: 1px solid #e5e5e5; }
+.chart-menus { position: absolute; top: 0; left: 0; background-color: #f9f9f9; height: 100%; width: 25%; border-right: 1px solid #e5e5e5; -webkit-transition: width 0.75s ease-in; }
+.chart-menus-fade.ng-hide-remove { transition: 0.5s linear all; opacity: 1; }
+.chart-menus-fade.ng-hide { transition: 0.5s linear all; opacity: 0; }
+
 .chart-menu-container { position: absolute; top: 28px; left: 0; visibility: hidden; height: -webkit-calc(100% - 28px); width: 100%; overflow-x: hidden; overflow-y: auto; }
 .chart-menu-container.active { visibility: visible; }
 .chart-menu { width: 100%; }
@@ -416,8 +419,9 @@ body { font-family: Roboto, arial, sans-serif; background-color: #c5c5c5; overfl
 #collapse-icon:after { -webkit-transform: rotate(-45deg); }
 #collapse-icon:hover:before, #collapse-icon:hover:after { background-color: #3182bd; }
 
-#chart-content { position: absolute; top: 0; right: 0; height: 100%; width: 75%; }
-#chart-content .chart-toolbar { background-color: #f9f9f9; border-bottom: 1px solid #e9e9e9; }
+.chart-content { position: absolute; top: 0; right: 0; height: 100%; width: 75%; -webkit-transition: width 0.75s ease-in; }
+.chart-content .chart-toolbar { background-color: #f9f9f9; border-bottom: 1px solid #e9e9e9; }
+.expand { width: 100%; -webkit-transition: width 0.75s ease-out; }
 
 #chart-wrapper { position: absolute; top: 28px; left: 0; height: -webkit-calc(100% - 28px); width: 100%; overflow: hidden; }
 #chart-container { position: absolute; left: 0; height: -webkit-calc(100% - 28px); width: 100%; overflow: hidden; }

@@ -93,6 +93,7 @@ analyticsApp
             $scope.position = position;
             $scope.activeIndex = 0;
             $scope.chartType = 0;
+            $scope.hideChartMenus = false;
 
             // loading data after zoom animation has completed
             $timeout(function() {
@@ -146,8 +147,15 @@ analyticsApp
                 close(null, transitionDelay);
             };
 
+            $scope.collapseChartMenusClick = function() {
+
+                $scope.hideChartMenus = true;
+            };
+
             $scope.setActiveIndex = function(index) {
+
                 $scope.activeIndex = index;
+                $scope.hideChartMenus = false;
             };
 
             $scope.featureSelectClick = function(feature) {
