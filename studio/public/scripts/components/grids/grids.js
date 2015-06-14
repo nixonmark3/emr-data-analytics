@@ -1,7 +1,6 @@
 'use strict';
 
 angular.module('emr.ui.grids', [])
-
     .directive('timeSeriesGrid', ['$window', function($window) {
 
         return {
@@ -37,12 +36,7 @@ angular.module('emr.ui.grids', [])
 
                 var loadMoreData = function() {
 
-                    for (var column = 1; column < $scope.chartData.length; column++) {
-
-                        var columnData = $scope.chartData[column].slice($scope.currentIndex, ($scope.currentIndex + windowSize));
-
-                        $scope.showing[column-1] = $scope.showing[column-1].concat(formatData(column, columnData));
-                    }
+                    formatData();
 
                     $scope.currentIndex = $scope.currentIndex + windowSize;
                 };
@@ -52,48 +46,48 @@ angular.module('emr.ui.grids', [])
                     if (!$scope.chartData) return;
 
                     $scope.showing = [];
-                    $scope.columnNames = ['', 'Timestamp'];
                     $scope.currentIndex = 0;
 
-                    $scope.columnNames = $scope.columnNames.concat($scope.chartData[0]);
+                    var columnNames = ['Timestamp'];
+                    $scope.showing.push(columnNames.concat($scope.chartData[0]));
 
-                    for (var column = 1; column < $scope.chartData.length; column++) {
-
-                        var columnData = $scope.chartData[column].slice(0, windowSize);
-
-                        columnData = formatData(column, columnData);
-
-                        columnData.unshift($scope.columnNames[column]);
-
-                        $scope.showing.push(columnData);
-                    }
+                    formatData();
 
                     $scope.currentIndex = windowSize;
-                };
-
-                var formatData = function(index, data) {
-
-                    if (index == 1) {
-
-                        data = data.map(formatUnixTime);
-                    }
-                    else {
-
-                        data = data.map(formatNumber);
-                    }
-
-                    return data;
                 };
 
                 var formatUnixTime = function(item) {
 
                     var date = new Date(item * 1000);
                     return date.toISOString().replace('T', ' ').replace('Z', '');
-                }
+                };
 
                 var formatNumber = function(item) {
 
                     return item.toFixed(5);
+                };
+
+                var formatData = function() {
+
+                    for (var rowIndex = $scope.currentIndex; rowIndex <= ($scope.currentIndex + windowSize); rowIndex++) {
+
+                        var row = [];
+
+                        for (var column = 1; column < $scope.chartData.length; column++) {
+
+                            if (column == 1) {
+
+                                row.push(formatUnixTime($scope.chartData[column][rowIndex]));
+                            }
+                            else {
+
+                                row.push(formatNumber($scope.chartData[column][rowIndex]));
+                            }
+                        }
+
+                        $scope.showing.push(row);
+                    }
+
                 };
 
                 prepareData();
