@@ -1,6 +1,6 @@
 .grid-container {
-    width: 1000px;
-    height: 2000px;
+    width: 100%;
+    height: auto;
     padding: 25px;
 }
 
@@ -16,15 +16,13 @@
 }
 
 .time-series-grid-row {
-    width: 1000px;
+    width: auto;
     height: 40px;
     border-bottom: 1px solid lightgrey;
 }
 
 .header {
-    /*font-weight: bold;*/
     border-bottom: 2px solid grey;
-
 }
 
 .time-series-grid-value {

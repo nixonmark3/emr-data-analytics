@@ -20,6 +20,7 @@ angular.module('emr.ui.grids', [])
                 $scope.showing = [];
                 $scope.columnNames = [];
                 $scope.currentIndex = 0;
+                $scope.gridWidth = 0;
 
                 element.bind('scroll', function() {
 
@@ -49,11 +50,15 @@ angular.module('emr.ui.grids', [])
                     $scope.currentIndex = 0;
 
                     var columnNames = ['Timestamp'];
-                    $scope.showing.push(columnNames.concat($scope.chartData[0]));
+                    columnNames = columnNames.concat($scope.chartData[0]);
+                    $scope.showing.push(columnNames);
 
                     formatData();
 
                     $scope.currentIndex = windowSize;
+
+                    var calculatedGridWidth = (175 * columnNames.length) + 100;
+                    $scope.gridWidth = calculatedGridWidth;
                 };
 
                 var formatUnixTime = function(item) {
