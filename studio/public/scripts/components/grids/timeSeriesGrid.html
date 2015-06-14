@@ -2,9 +2,9 @@
 
     <div class="time-series-grid-container">
 
-        <div class="time-series-grid-row ng-class:{ header: $index==0 }" ng-repeat="row in showing">
+        <div class="time-series-grid-row ng-class:{ header: $index==0 }" ng-repeat="row in showing track by $index">
 
-            <div class="time-series-grid-value" ng-repeat="value in row">
+            <div class="time-series-grid-value" ng-repeat="value in row track by $index">
                 {{value}}
             </div>
 

@@ -9,12 +9,6 @@
     height: 100%;
 }
 
-.time-series-grid-header {
-    width: 1000px;
-    height: 45px;
-    background: lightgrey;
-}
-
 .time-series-grid-row {
     width: auto;
     height: 40px;

@@ -57,17 +57,29 @@ angular.module('emr.ui.grids', [])
 
                     $scope.currentIndex = windowSize;
 
-                    var calculatedGridWidth = (175 * columnNames.length) + 100;
-                    $scope.gridWidth = calculatedGridWidth;
+                    $scope.gridWidth = ((175 * columnNames.length) + 110);
                 };
 
                 var formatUnixTime = function(item) {
 
                     var date = new Date(item * 1000);
+
+                    var validDate = !isNaN(date.valueOf());
+
+                    if (!validDate) {
+
+                        return item;
+                    }
+
                     return date.toISOString().replace('T', ' ').replace('Z', '');
                 };
 
                 var formatNumber = function(item) {
+
+                    if (isNaN(item)) {
+
+                        return 'NaN';
+                    }
 
                     return item.toFixed(5);
                 };
