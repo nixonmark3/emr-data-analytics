@@ -14,7 +14,7 @@ angular.module('emr.ui.grids', [])
             },
             link: function ($scope, element, attrs) {
 
-                var windowSize = 100;
+                var windowSize = 50;
                 var raw = element[0];
 
                 $scope.showing = [];
