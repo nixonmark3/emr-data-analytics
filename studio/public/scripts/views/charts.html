@@ -20,14 +20,6 @@
         <div class="chart-menus chart-menus-fade" ng-show="!hideChartMenus">
 
             <div class="chart-toolbar">
-                <div class="toolbar-center">
-                    <label class="radio-inline">
-                        <input type="radio" ng-model="chartType" value="0" name="selectedChartType"> Chart
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" ng-model="chartType" value="1" name="selectedChartType"> Grid
-                    </label>
-                </div>
                 <div class="toolbar-right">
                     <div class="toolbar-icon">
                         <div id="collapse-icon" ng-click="collapseChartMenusClick()"></div>
@@ -104,6 +96,14 @@
                     <div class="toolbar-icon" ng-click="render()">
                         <i class="fa fa-refresh"></i>
                     </div>
+                </div>
+                <div class="toolbar-center">
+                    <label class="radio-inline">
+                        <input type="radio" ng-model="chartType" value="0" name="selectedChartType"> Chart
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" ng-model="chartType" value="1" name="selectedChartType"> Grid
+                    </label>
                 </div>
             </div>
             <div id="chart-wrapper">
