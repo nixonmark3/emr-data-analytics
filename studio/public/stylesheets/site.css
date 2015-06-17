@@ -328,7 +328,7 @@ body { font-family: Roboto, arial, sans-serif; background-color: #c5c5c5; overfl
 .chart-menus-fade.ng-hide-remove { transition: 0.5s linear all; opacity: 1; }
 .chart-menus-fade.ng-hide { transition: 0.5s linear all; opacity: 0; }
 
-.chart-menu-container { position: absolute; top: 28px; left: 0; visibility: hidden; height: -webkit-calc(100% - 28px); width: 100%; overflow-x: hidden; overflow-y: auto; }
+.chart-menu-container { background-color: #f9f9f9; position: absolute; top: 28px; left: 0; visibility: hidden; height: -webkit-calc(100% - 28px); width: 100%; overflow-x: hidden; overflow-y: auto; }
 .chart-menu-container.active { visibility: visible; }
 .chart-menu { width: 100%; }
 
@@ -385,12 +385,12 @@ body { font-family: Roboto, arial, sans-serif; background-color: #c5c5c5; overfl
 }
 
 .front-to-back {
-    -webkit-transition: 1s ease-in-out;
+    -webkit-transition: 0.5s ease-in-out;
     -webkit-transform: rotateY( 180deg );
 }
 
 .back-to-front {
-    -webkit-transition: 1s ease-in-out;
+    -webkit-transition: 0.5s ease-in-out;
     -webkit-transform: rotateY( 360deg );
 }
 
