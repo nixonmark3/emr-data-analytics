@@ -10,6 +10,8 @@ public class BasicDiagram implements Serializable {
     private String name = "New Diagram";
     private String description = "";
     private String owner = "";
+    private int height = 1000;
+    private int width = 1000;
 
     /**
      * Create a basic diagram with required properties only.
@@ -57,6 +59,26 @@ public class BasicDiagram implements Serializable {
 
     public void setOwner(String owner) {
         this.owner = owner;
+    }
+
+    public int getHeight() {
+
+        return height;
+    }
+
+    public void setHeight(int height) {
+
+        this.height = height;
+    }
+
+    public int getWidth() {
+
+        return width;
+    }
+
+    public void setWidth(int width) {
+
+        this.width = width;
     }
 
     /**

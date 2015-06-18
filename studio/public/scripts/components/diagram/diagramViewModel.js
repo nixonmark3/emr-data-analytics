@@ -1096,11 +1096,14 @@ viewmodels.diagramViewModel = function(data) {
     // Get the array of wires that are currently selected.
     //
     this.getSelectedWires = function () {
+
         var selectedWires = [];
 
         for (var i = 0; i < this.wires.length; ++i) {
+
             var wire = this.wires[i];
             if (wire.selected()) {
+
                 selectedWires.push(wire);
             }
         }
@@ -1108,18 +1111,78 @@ viewmodels.diagramViewModel = function(data) {
         return selectedWires;
     };
 
-    //
-    // Updates the enumerated blocks with their new state.
-    //
     this.updateStatusOfBlocks = function(blockStates) {
 
-        console.log(JSON.stringify(blockStates));
-
         for (var i = 0; i < blockStates.length; ++i) {
+
             var block = this.findBlock(blockStates[i].name);
             block.updateProgress(blockStates[i].state);
         }
     }
+
+    this.getHeight = function() {
+
+        return this.data.height;
+    };
+
+    this.setHeight = function(newHeight) {
+
+        this.data.height = newHeight;
+    };
+
+    this.getWidth = function() {
+
+        return this.data.width;
+    };
+
+    this.setWidth = function(newWidth) {
+
+        this.data.width = newWidth;
+    };
+
+    this.getResizeHeightDelta = function() {
+
+        return this.getHeight() * 0.10;
+    };
+
+    this.getResizeWidthDelta = function() {
+
+        return this.getWidth() * 0.10;
+    };
+
+    this.isPointInHeightIncreaseZone = function(yPosition) {
+
+        var increaseSize = false;
+
+        if (yPosition >= (this.getHeight() - this.getResizeHeightDelta())) {
+
+            increaseSize = true;
+        }
+
+        return increaseSize;
+    };
+
+    this.isPointInWidthIncreaseZone = function(xPosition) {
+
+        var increaseSize = false;
+
+        if (xPosition >= (this.getWidth() - this.getResizeWidthDelta())) {
+
+            increaseSize = true;
+        }
+
+        return increaseSize;
+    };
+
+    this.increaseHeight = function() {
+
+        this.data.height = this.data.height + this.getResizeHeightDelta();
+    };
+
+    this.increaseWidth = function() {
+
+        this.data.width = this.data.width + this.getResizeWidthDelta();
+    };
 };
 
 viewmodels.configuringBlockViewModel = function (definition, block) {
