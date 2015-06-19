@@ -7,7 +7,7 @@ from FunctionBlock import FunctionBlock
 
 
 def prepare_data(df):
-    df.index = df.index.astype(np.int64) // 10**9
+    df.index = df.index.astype(np.int64) / 10**9
     data = []
     features = df.columns.tolist()
     data.append(features)
