@@ -45,9 +45,6 @@ var analyticsApp = angular.module('analyticsApp',
         // indicates whether the diagram is being compiled
         $scope.compiling = false;
 
-        // number of blocks that are currently selected
-        $scope.selectionCount = 0;
-
         // tracks whether a block is currently being configured
         $scope.configuringBlock = false;
 
@@ -175,6 +172,16 @@ var analyticsApp = angular.module('analyticsApp',
                 // show the studio properties panel
                 $scope.studioPropertiesPanel.isVisible = true;
             }
+        };
+
+        /*
+        ** Diagram deselection stops editing all items
+         */
+        $scope.onDiagramDeselection = function(){
+            $scope.studioPropertiesPanel.isDirty = false;
+            $scope.studioPropertiesPanel.isVisible = false;
+
+            delete $scope.studioProperties;
         };
 
         /*

@@ -504,6 +504,8 @@ viewmodels.diagramViewModel = function(data) {
     // tracks the current set of block names
     var blockNames = {};
 
+    var selectionCount = 0;
+
     this.createBlockViewModels = function (blocksData) {
         var models = [];
 
@@ -886,7 +888,7 @@ viewmodels.diagramViewModel = function(data) {
     //
     this.selectAll = function () {
 
-        var selectionCount = 0;
+        selectionCount = 0;
 
         var blocks = this.blocks;
         for (var i = 0; i < blocks.length; ++i) {
@@ -900,8 +902,6 @@ viewmodels.diagramViewModel = function(data) {
             var wire = wires[i];
             wire.select();
         }
-
-        return selectionCount;
     };
 
     //
@@ -921,7 +921,7 @@ viewmodels.diagramViewModel = function(data) {
             wire.deselect();
         }
 
-        return 0;
+        selectionCount = 0;
     };
 
     this.selectBlock = function(block){
@@ -929,7 +929,7 @@ viewmodels.diagramViewModel = function(data) {
         this.deselectAll();
         block.select();
 
-        return 1;
+        selectionCount = 1;
     };
 
     this.deleteBlock = function(block){
@@ -957,7 +957,7 @@ viewmodels.diagramViewModel = function(data) {
     //
     this.onBlockClicked = function (block) {
 
-        var selectionCount = this.selectBlock(block);
+        this.selectBlock(block);
 
         // Move node to the end of the list so it is rendered after all the other.
         // This is the way Z-order is done in SVG.
@@ -968,8 +968,6 @@ viewmodels.diagramViewModel = function(data) {
         }
         this.blocks.splice(blockIndex, 1);
         this.blocks.push(block);
-
-        return selectionCount;
     };
 
     //
@@ -1056,7 +1054,7 @@ viewmodels.diagramViewModel = function(data) {
     //
     this.applySelectionRect = function (selectionRect) {
 
-        var selectionCount = this.deselectAll();
+        selectionCount = 0;
 
         for (var i = 0; i < this.blocks.length; ++i) {
             var block = this.blocks[i];
@@ -1081,8 +1079,6 @@ viewmodels.diagramViewModel = function(data) {
                 wire.select();
             }
         }
-
-        return selectionCount;
     };
 
     //
@@ -1100,6 +1096,11 @@ viewmodels.diagramViewModel = function(data) {
 
         return selectedBlocks;
     };
+
+    /*
+    ** retrieve the number of selected blocks
+     */
+    this.getSelectionCount = function() { return selectionCount; };
 
     //
     // Get the array of wires that are currently selected.

@@ -11,13 +11,14 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
             scope: {
                 diagram: '=viewModel',
                 onConfigure: '=?',
+                onDisplay: '=?',
                 onSelection: '=?',
+                onDeselection: '=?',
                 nodes: '=?',
                 library: '=?',
                 loadSources: "=?",
                 getBlockData: "=?",
-                blurBackground: "=?",
-                selectionCount: "=?"
+                blurBackground: "=?"
             },
             link: function($scope, element, attrs) {
 
@@ -501,15 +502,17 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                         clicked: function () {
 
-                            if ($scope.configuringBlock)
-                                endBlockConfiguration(true);
+                            // diagram click
 
-                            if ($scope.showingBlockData)
-                                hideBlockData();
+                            if ($scope.diagram.getSelectionCount() > 0) {
 
-                            if ($scope.selectionCount > 0) {
-                                $scope.$apply(function(){
-                                    $scope.selectionCount = $scope.diagram.deselectAll();
+                                // if configured, fire the deselection event
+                                if ($scope.onDeselection)
+                                    $scope.onDeselection();
+
+
+                                $scope.$apply(function () {
+                                    $scope.diagram.deselectAll();
                                 });
                             }
                         }

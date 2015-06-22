@@ -130,11 +130,14 @@
                     </button>
                 </div>
 
-                <div ng-if="selectionCount > 1" id="grouping-controls" class="studio-controls">
-                    <button type="button" class="btn btn-default" ng-click="onGroup($event)">
-                        <i class="fa fa-compress"></i>
+                <!--<div id="" class="btn-group">
+                    <button type="button" class="btn btn-default">
+                        <i class="fa fa-wrench"></i>
                     </button>
-                </div>
+                    <button type="button" class="btn btn-default">
+                        <i class="fa fa-save"></i>
+                    </button>
+                </div>-->
 
                 <div class="diagram-container">
 
@@ -142,12 +145,12 @@
                              view-model="diagramViewModel"
                              on-configure="onBlockConfigure"
                              on-selection="onBlockSelection"
+                             on-deselection="onDiagramDeselection"
                              nodes="nodes"
                              library="library"
                              load-sources="loadSources"
                              get-block-data="getBlockData"
-                             blur-background="blurBackground"
-                             selection-count="selectionCount"></diagram>
+                             blur-background="blurBackground"></diagram>
 
                 </div>
             </div>
