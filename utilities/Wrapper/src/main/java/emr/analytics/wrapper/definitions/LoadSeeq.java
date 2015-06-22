@@ -15,18 +15,27 @@ public class LoadSeeq extends BlockDefinition implements IExport {
     }
 
     @Override
-    public List<ConnectorDefinition> createInputConnectors() {
-        return null;
+    public ModeDefinition createOfflineMode(){
+
+        ModeDefinition modeDefinition = new ModeDefinition();
+        modeDefinition.setOutputs(createOutputConnectors());
+        modeDefinition.setParameters(createParameters());
+
+        return modeDefinition;
     }
 
     @Override
+    public ModeDefinition createOnlineMode(){
+
+        return null;
+    }
+
     public List<ConnectorDefinition> createOutputConnectors() {
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
         return outputConnectors;
     }
 
-    @Override
     public List<ParameterDefinition> createParameters() {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
@@ -44,10 +53,5 @@ public class LoadSeeq extends BlockDefinition implements IExport {
                 null));
 
         return parameters;
-    }
-
-    @Override
-    public Signature createSignature() {
-        return null;
     }
 }

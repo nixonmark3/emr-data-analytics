@@ -1,25 +1,23 @@
 package emr.analytics.models.messages;
 
+import java.util.UUID;
+
 public class BlockStatus {
-    private String blockName = "";
+    private UUID id = null;
     private int state = 0;
 
     private BlockStatus() {}
 
-    public BlockStatus(String blockName, int state)
+    public BlockStatus(UUID id, int state) { this.id = id; this.state = state; }
+
+    public UUID getId()
     {
-        this.blockName = blockName;
-        this.state = state;
+        return this.id;
     }
 
-    public String getBlockName()
+    public void setId(UUID id)
     {
-        return blockName;
-    }
-
-    public void setBlockName(String blockName)
-    {
-        this.blockName = blockName;
+        this.id = id;
     }
 
     public int getState() {

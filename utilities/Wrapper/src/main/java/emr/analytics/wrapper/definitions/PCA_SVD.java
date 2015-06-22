@@ -15,13 +15,28 @@ public class PCA_SVD extends BlockDefinition implements IExport {
     }
 
     @Override
+    public ModeDefinition createOfflineMode(){
+
+        ModeDefinition modeDefinition = new ModeDefinition();
+        modeDefinition.setInputs(createInputConnectors());
+        modeDefinition.setOutputs(createOutputConnectors());
+        modeDefinition.setParameters(createParameters());
+
+        return modeDefinition;
+    }
+
+    @Override
+    public ModeDefinition createOnlineMode(){
+
+        return null;
+    }
+
     public List<ConnectorDefinition> createInputConnectors() {
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
         inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
         return inputConnectors;
     }
 
-    @Override
     public List<ConnectorDefinition> createOutputConnectors() {
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("scores", DataType.FRAME.toString()));
@@ -29,7 +44,6 @@ public class PCA_SVD extends BlockDefinition implements IExport {
         return outputConnectors;
     }
 
-    @Override
     public List<ParameterDefinition> createParameters() {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
@@ -41,10 +55,5 @@ public class PCA_SVD extends BlockDefinition implements IExport {
                 null));
 
         return parameters;
-    }
-
-    @Override
-    public Signature createSignature() {
-        return null;
     }
 }

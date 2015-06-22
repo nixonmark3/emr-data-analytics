@@ -29,8 +29,8 @@ public class JobCompilationActor extends AbstractActor {
                 Diagram diagram = request.getDiagram();
 
                 AnalyticsJob job;
-                switch(request.getJobMode()){
-                    case Online:
+                switch(request.getMode()){
+                    case ONLINE:
                         job = new SparkStreamingJob(request, _definitions);
                         break;
                     default:

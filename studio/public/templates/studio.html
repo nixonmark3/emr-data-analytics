@@ -74,7 +74,27 @@
                     <span class="navbar-tab ng-class:{'selected': onlineCanvas}" ng-click="toggleCanvas(true);">Online</span>
                 </div>
                 <div class="col-xs-4">
-                    &#160;
+
+                    <div ng-if="!onlineCanvas" class="btn-group pull-right">
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="toggleDiagramConfiguration($event)">
+                            <i class="fa fa-wrench"></i>
+                        </button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="save($event)">
+                            <i class="fa fa-save"></i>
+                        </button>
+                        <button type="button"
+                                class="btn btn-default navbar-btn ng-class:{ 'diagram-evaluating' : evaluating }"
+                                ng-disabled="evaluating"
+                                ng-click="evaluate($event)">
+
+                            <i class="fa ng-class:{ 'fa-cog fa-spin': evaluating, 'fa-play': !evaluating }"></i>
+                        </button>
+                    </div>
+
+                    <button ng-if="onlineCanvas" type="button" class="btn btn-default navbar-btn pull-right" ng-click="deploy($event)">
+                        <i class="fa fa-rocket"></i>
+                    </button>
+
                 </div>
             </div>
         </div>
@@ -82,29 +102,31 @@
 
     <div id="studio-container">
 
+        <panel id="studio-properties"
+               config="studioPropertiesPanel"
+               title="studioProperties.viewModel.name"
+               min-width="180"
+               on-save="studioPropertiesSave"
+               on-cancel="studioPropertiesCancel">
+
+            <div ng-switch on="studioProperties.type">
+
+                <block-config ng-switch-when="BLOCK"
+                              block="studioProperties.viewModel"
+                              load-sources="loadSources"
+                              on-change="studioPropertiesChange">
+                </block-config>
+
+            </div>
+        </panel>
+
         <div id="studio-canvases" ng-class="{'flipped': onlineCanvas}">
 
             <div id="offline-canvas" class="studio-canvas">
 
                 <div id="library-controls" class="studio-controls">
-                    <button type="button" class="btn btn-default" ng-click="toggleLibrary($event)">
-                        <i class="fa fa-th"></i>
-                    </button>
-                </div>
-
-                <div id="offline-controls" class="studio-controls btn-group">
-                    <button type="button" class="btn btn-default" ng-click="toggleDiagramConfiguration($event)">
-                        <i class="fa fa-wrench"></i>
-                    </button>
-                    <button type="button" class="btn btn-default" ng-click="save($event)">
-                        <i class="fa fa-save"></i>
-                    </button>
-                    <button type="button"
-                            class="btn btn-default ng-class:{ 'diagram-evaluating' : evaluating }"
-                            ng-disabled="evaluating"
-                            ng-click="evaluate($event)">
-
-                        <i class="fa ng-class:{ 'fa-cog fa-spin': evaluating, 'fa-play': !evaluating }"></i>
+                    <button type="button" class="btn btn-default" ng-click="libraryToggle($event)">
+                        <i class="fa fa-cubes"></i>
                     </button>
                 </div>
 
@@ -117,9 +139,9 @@
                 <div class="diagram-container">
 
                     <diagram id="offline-diagram"
-                             on-configure="onBlockConfigure"
                              view-model="diagramViewModel"
-                             is-online="onlineCanvas"
+                             on-configure="onBlockConfigure"
+                             on-selection="onBlockSelection"
                              nodes="nodes"
                              library="library"
                              load-sources="loadSources"
@@ -132,18 +154,11 @@
 
             <div id="online-canvas" class="studio-canvas">
 
-                <div id="online-controls" class="studio-controls btn-group">
-                    <button type="button" class="btn btn-default" ng-click="deploy($event)">
-                        <i class="fa fa-rocket"></i>
-                    </button>
-                </div>
-
                 <div ng-if="!compiling" class="diagram-container">
 
                     <diagram id="online-diagram"
                              ng-if="onlineCanvas"
                              view-model="onlineViewModel"
-                             is-online="onlineCanvas"
                              nodes="nodes"
                              library="library"
                              load-sources="loadSources"

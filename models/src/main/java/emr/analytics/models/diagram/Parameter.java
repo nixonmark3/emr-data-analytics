@@ -10,6 +10,7 @@ import java.io.Serializable;
 public class Parameter implements Serializable {
     private String name = "";
     private Object value = null;
+    private String type = "";
     private boolean collected = false;
 
     private Parameter() {}
@@ -17,6 +18,7 @@ public class Parameter implements Serializable {
     public Parameter(ParameterDefinition parameterDefinition){
 
         this.name = parameterDefinition.getName();
+        this.type = parameterDefinition.getType();
         this.value = parameterDefinition.getValue();
     }
 
@@ -50,6 +52,14 @@ public class Parameter implements Serializable {
      */
     public void setValue(Object value) {
         this.value = value;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     /**

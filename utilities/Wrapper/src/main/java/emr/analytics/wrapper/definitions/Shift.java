@@ -16,6 +16,21 @@ public class Shift extends BlockDefinition  implements IExport {
     }
 
     @Override
+    public ModeDefinition createOfflineMode(){
+
+        ModeDefinition modeDefinition = new ModeDefinition();
+        modeDefinition.setInputs(createInputConnectors());
+        modeDefinition.setOutputs(createOutputConnectors());
+
+        return modeDefinition;
+    }
+
+    @Override
+    public ModeDefinition createOnlineMode(){
+
+        return null;
+    }
+
     public List<ConnectorDefinition> createInputConnectors() {
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
@@ -24,24 +39,10 @@ public class Shift extends BlockDefinition  implements IExport {
         return inputConnectors;
     }
 
-    @Override
     public List<ConnectorDefinition> createOutputConnectors() {
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
         return outputConnectors;
     }
-
-    @Override
-    public List<ParameterDefinition> createParameters() {
-
-        return null;
-    }
-
-    @Override
-    public Signature createSignature() {
-
-        return null;
-    }
-
 }

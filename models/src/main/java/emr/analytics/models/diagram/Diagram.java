@@ -1,8 +1,14 @@
 package emr.analytics.models.diagram;
 
+import com.sun.org.apache.xpath.internal.operations.Mod;
+import emr.analytics.models.definition.DefinitionType;
+import emr.analytics.models.definition.Mode;
+import emr.analytics.models.definition.TargetEnvironments;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -12,6 +18,8 @@ public class Diagram implements Serializable {
     private String name = "";
     private String description = "";
     private String owner = "";
+    private Mode mode = Mode.OFFLINE;
+    private TargetEnvironments targetEnvironment = TargetEnvironments.PYTHON;
     private List<Wire> wires = new ArrayList<Wire>();
     private List<Block> blocks = new ArrayList<Block>();
     private List<DiagramConnector> inputs = new ArrayList<DiagramConnector>();
@@ -30,6 +38,10 @@ public class Diagram implements Serializable {
     }
 
     private Diagram() {}
+
+    public static Diagram Create() {
+        return new Diagram("New Diagram", "", "");
+    }
 
     /**
      * Returns the name of this Diagram.
@@ -80,6 +92,38 @@ public class Diagram implements Serializable {
     }
 
     /**
+     * Gets this diagram's mode
+     * @return diagram's mode
+     */
+    public Mode getMode() {
+        return this.mode;
+    }
+
+    /**
+     * Sets this diagram's mode
+     * @param mode the mode to set this diagram to.
+     */
+    public void setMode(Mode mode) {
+        this.mode = mode;
+    }
+
+    /**
+     * Gets this diagram's target environment
+     * @return diagram's target environment
+     */
+    public TargetEnvironments getTargetEnvironment() {
+        return this.targetEnvironment;
+    }
+
+    /**
+     * Sets this diagram's target environment
+     * @param targetEnvironment the target environment to set the diagram to.
+     */
+    public void setTargetEnvironment(TargetEnvironments targetEnvironment) {
+        this.targetEnvironment = targetEnvironment;
+    }
+
+    /**
      * Returns a list of Wires that belong to this Diagram.
      * @return list of wires
      */
@@ -104,6 +148,25 @@ public class Diagram implements Serializable {
     }
 
     /**
+     * Returns blocks by Definition Type
+     * @return list of blocks
+     */
+    public List<Block> getBlocks(DefinitionType definitionType){
+        return this.blocks
+            .stream()
+            .filter(b -> b.getDefinitionType().equals(definitionType))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns the list of blocks that have at least one persisted output
+     * @return list of blocks
+     */
+    public List<Block> getBlocksWithPersistedOutputs(){
+        return this.blocks.stream().filter(b -> b.hasPersistedOutputs()).collect(Collectors.toList());
+    }
+
+    /**
      * Returns the specified block
      * @return Block
      */
@@ -114,9 +177,9 @@ public class Diagram implements Serializable {
                 .get();
     }
 
-    public Block getBlockByUniqueName(String uniqueName){
+    public Block getBlock(UUID id){
         return blocks.stream()
-            .filter(b -> b.getUniqueName().equals(uniqueName))
+            .filter(b -> b.getId().equals(id))
             .findFirst()
             .get();
     }
@@ -174,47 +237,47 @@ public class Diagram implements Serializable {
     /**
      * Retrieve the next set of blocks that spawn from the name of specified block
      */
-    public List<Block> getNext(String uniqueName){
+    public List<Block> getNext(UUID blockId){
 
-        List<String> uniqueNames = this.wires.stream()
-                .filter(w -> w.getFrom_node().equals(uniqueName))
+        List<UUID> ids = this.wires.stream()
+                .filter(w -> w.getFrom_node().equals(blockId))
                 .map(w -> w.getTo_node())
                 .collect(Collectors.toList());
 
         return this.blocks.stream()
-                .filter(b -> uniqueNames.contains(b.getUniqueName()))
+                .filter(b -> ids.contains(b.getId()))
                 .collect(Collectors.toList());
     }
 
     /**
      * Retrieve the wires that lead to the specified block
      */
-    public List<Wire> getLeadingWires(String uniqueName){
+    public List<Wire> getLeadingWires(UUID blockId){
 
         return this.wires.stream()
-                .filter(w -> w.getTo_node().equals(uniqueName))
+                .filter(w -> w.getTo_node().equals(blockId))
                 .collect(Collectors.toList());
     }
 
-    public List<Wire> getLeadingWires(String uniqueName, String connectorName){
+    public List<Wire> getLeadingWires(UUID blockId, String connectorName){
 
         return this.wires.stream()
-                .filter(w -> w.getTo_node().equals(uniqueName)
+                .filter(w -> w.getTo_node().equals(blockId)
                         && w.getTo_connector().equals(connectorName))
                 .collect(Collectors.toList());
     }
 
-    public List<Wire> getOutputWires(String uniqueName){
+    public List<Wire> getOutputWires(UUID blockId){
 
         return this.wires.stream()
-                .filter(w -> w.getFrom_node().equals(uniqueName))
+                .filter(w -> w.getFrom_node().equals(blockId))
                 .collect(Collectors.toList());
     }
 
-    public List<Wire> getOutputWires(String uniqueName, String connectorName){
+    public List<Wire> getOutputWires(UUID blockId, String connectorName){
 
         return this.wires.stream()
-                .filter(w -> w.getFrom_node().equals(uniqueName)
+                .filter(w -> w.getFrom_node().equals(blockId)
                         && w.getFrom_connector().equals(connectorName))
                 .collect(Collectors.toList());
     }
@@ -251,12 +314,6 @@ public class Diagram implements Serializable {
 
     public void addDiagram(Diagram diagram){
         this.diagrams.add(diagram);
-    }
-
-    public List<Block> getBlocksWithOfflineComplements(){
-        return this.blocks.stream()
-                .filter(b -> b.hasOfflineComplement())
-                .collect(Collectors.toList());
     }
 
     public List<DiagramConnector> getInputs(){

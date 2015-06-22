@@ -17,11 +17,8 @@
 .browser-definition { padding: 8px; background-color: #f5f5f5; height: 100%; }
 .browser-definition button { margin-top: 6px; }
 
-/*
-.browser-parameter { margin-bottom: 8px; }
-.browser-parameter span { display: block; }
-.browser-parameter input { display: block; width: 100%; }
-*/
+.block-parameter { margin-top: 10px; height: 65px; }
+.block-parameter label { color: #989898; font-weight: normal; margin-bottom: 2px; }
 
 /*
  * Ghost
@@ -29,36 +26,10 @@
 
 #ghost { position: absolute; background-color: #fff; z-index: 1101; opacity: 0.6; border-radius: 10px; }
 
-.error_container {
-    opacity: 1;
-    color: red;
-}
-
-.error_message {
-    opacity: 1;
-}
-
-.fade.ng-hide-remove {
-    transition:0.4s linear all;
-    opacity:1;
-}
-
-.fade.ng-hide {
-    transition:0.4s linear all;
-    opacity:0;
-}
-
 .block-config-container {
     width: 100%;
-    height: 100%;
     padding: 10px;
-    border-radius: 10px;
-    overflow: auto;
 }
 
-.block-name-form input.ng-invalid {
-    color: red;
-    border: 1px solid red;
-}
 
 

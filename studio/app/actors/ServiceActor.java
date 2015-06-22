@@ -41,7 +41,7 @@ public class ServiceActor extends AbstractActor
 
                     if (evaluationStatus.getState() == 0) {
                         evaluationStatus.getBlockStatusList().stream()
-                                .forEach(b -> diagramState.setBlockState(b.getBlockName(), b.getState()));
+                                .forEach(b -> diagramState.setBlockState(b.getId(), b.getState()));
                     }
 
                     DiagramStates.saveDiagramState(diagramState);

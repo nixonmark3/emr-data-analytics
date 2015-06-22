@@ -5,9 +5,9 @@ import akka.actor.ActorSystem;
 
 import com.typesafe.config.ConfigFactory;
 import emr.analytics.models.definition.Definition;
+import emr.analytics.models.definition.Mode;
 import emr.analytics.models.diagram.Diagram;
 import emr.analytics.service.JobClientActor;
-import emr.analytics.service.jobs.JobMode;
 import emr.analytics.service.messages.JobKillRequest;
 import emr.analytics.service.messages.JobRequest;
 
@@ -25,15 +25,15 @@ public class EvaluationService {
         client = system.actorOf(JobClientActor.props(path, definitions), "job-client");
     }
 
-    public UUID sendRequest(JobMode mode, Diagram diagram){
+    public UUID sendRequest(Diagram diagram){
 
-        return this.sendRequest(mode, diagram, new HashMap<String, String>());
+        return this.sendRequest(diagram, new HashMap<String, String>());
     }
 
-    public UUID sendRequest(JobMode mode, Diagram diagram, HashMap<String, String> models){
+    public UUID sendRequest(Diagram diagram, HashMap<String, String> models){
 
         // create the job request
-        JobRequest request = new JobRequest(mode, diagram, models);
+        JobRequest request = new JobRequest(diagram, models);
 
         // pass it to the job request actor
         client.tell(request, null);

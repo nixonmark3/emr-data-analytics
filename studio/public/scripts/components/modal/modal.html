@@ -10,8 +10,8 @@
     </div>
 
     <div class="emr-modal-footer">
-        <button type="button" class="btn btn-default" ng-click="onClose()">Cancel{{modal.cancel}}</button>
-        <button type="button" class="btn btn-success" ng-click="onSave()">Save{{modal.save}}</button>
+        <button type="button" class="btn btn-default" ng-click="onClose()">{{::modal.cancel || Cancel}}</button>
+        <button type="button" class="btn btn-success" ng-click="onSave()">{{::modal.save || Save}}</button>
     </div>
 
 </div>

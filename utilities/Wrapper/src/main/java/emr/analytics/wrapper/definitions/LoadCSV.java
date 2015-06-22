@@ -18,12 +18,21 @@ public class LoadCSV extends BlockDefinition implements IExport {
     }
 
     @Override
-    public List<ConnectorDefinition> createInputConnectors() {
+    public ModeDefinition createOfflineMode(){
+
+        ModeDefinition modeDefinition = new ModeDefinition();
+        modeDefinition.setOutputs(createOutputConnectors());
+        modeDefinition.setParameters(createParameters());
+
+        return modeDefinition;
+    }
+
+    @Override
+    public ModeDefinition createOnlineMode(){
 
         return null;
     }
 
-    @Override
     public List<ConnectorDefinition> createOutputConnectors() {
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
@@ -31,7 +40,6 @@ public class LoadCSV extends BlockDefinition implements IExport {
         return outputConnectors;
     }
 
-    @Override
     public List<ParameterDefinition> createParameters() {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
@@ -54,11 +62,4 @@ public class LoadCSV extends BlockDefinition implements IExport {
 
         return parameters;
     }
-
-    @Override
-    public Signature createSignature() {
-
-        return null;
-    }
-
 }

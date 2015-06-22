@@ -7,7 +7,7 @@
 blocks_to_execute = []
 
 <%#blocks%>
-<%variableName%> = <%definitionName%>('<%name%>','<%uniqueName%>')
+<%variableName%> = <%definitionName%>('<%name%>','<%id%>')
 <%variableName%>.parameters = {<%& parameters%>}
 <%variableName%>.input_connectors = {<%& inputs%>}
 blocks_to_execute.append(<%variableName%>)

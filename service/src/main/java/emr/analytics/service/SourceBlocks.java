@@ -3,10 +3,7 @@ package emr.analytics.service;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
@@ -69,7 +66,7 @@ public class SourceBlocks {
 
     public class SourceBlock {
         public String name;
-        public String uniqueName;
+        public UUID id;
         public String variableName;
         public String definitionName;
         public String parameters;
@@ -77,8 +74,8 @@ public class SourceBlocks {
 
         public SourceBlock(Definition definition, Block block, List<Wire> wires) {
             name = block.getName();
-            uniqueName = block.getUniqueName();
-            variableName = createVariableNameFromUniqueName(block.getUniqueName());
+            id = block.getId();
+            variableName = createVariableNameFromUniqueName(block.getId().toString());
             definitionName = block.getDefinition();
 
             // todo: string builders
@@ -92,7 +89,7 @@ public class SourceBlocks {
 
                 Parameter param = params.get(i);
 
-                String parameterType = definition.getTypeOfParameterDefinition(param.getName());
+                String parameterType = param.getType();
 
                 if (parameterType != null) {
 

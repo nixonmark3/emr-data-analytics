@@ -30,7 +30,7 @@ public class ProcessExecutionActor extends AbstractActor {
         receive(ReceiveBuilder
             .match(ProcessJob.class, job -> {
 
-                _jobStatusActor.tell(new JobStarted(job.getId(), job.getJobMode()), self());
+                _jobStatusActor.tell(new JobStarted(job.getId(), job.getMode()), self());
 
                 ProcessBuilder builder = job.getProcess();
 
@@ -45,7 +45,7 @@ public class ProcessExecutionActor extends AbstractActor {
 
                     String lineRead;
                     while ((lineRead = in.readLine()) != null) {
-                        _jobStatusActor.tell(new JobProgress(job.getId(), job.getJobMode(), lineRead), self());
+                        _jobStatusActor.tell(new JobProgress(job.getId(), job.getMode(), lineRead), self());
                     }
 
                     int complete = process.waitFor();
@@ -53,7 +53,7 @@ public class ProcessExecutionActor extends AbstractActor {
                     if (complete != 0) {
                         // job failed
 
-                        JobFailed message = new JobFailed(job.getId(), job.getJobMode());
+                        JobFailed message = new JobFailed(job.getId(), job.getMode());
                         _jobStatusActor.tell(message, self());
 
                         while ((lineRead = err.readLine()) != null) {
@@ -63,7 +63,7 @@ public class ProcessExecutionActor extends AbstractActor {
                         }
                     } else {
 
-                        JobCompleted message = new JobCompleted(job.getId(), job.getJobMode());
+                        JobCompleted message = new JobCompleted(job.getId(), job.getMode());
                         _jobStatusActor.tell(message, self());
                     }
                 } catch (IOException | InterruptedException ex) {

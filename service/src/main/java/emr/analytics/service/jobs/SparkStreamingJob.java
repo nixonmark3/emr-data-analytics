@@ -41,9 +41,9 @@ public class SparkStreamingJob extends AnalyticsJob {
             if (block.isConfigured()) {
                 Definition definition = definitions.get(block.getDefinition());
 
-                sourceBlocks.add(definition, block, diagram.getLeadingWires(block.getUniqueName()));
+                sourceBlocks.add(definition, block, diagram.getLeadingWires(block.getId()));
 
-                for (Block next : diagram.getNext(block.getUniqueName())) {
+                for (Block next : diagram.getNext(block.getId())) {
                     queue.add(next);
                 }
             }

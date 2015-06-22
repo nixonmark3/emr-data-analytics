@@ -1,25 +1,27 @@
 package emr.analytics.models.state;
 
+import java.util.UUID;
+
 public class BlockState {
 
-    private String name = null;
+    private UUID id = null;
     private String friendlyName = null;
     private int state = 0;
 
     private BlockState () {}
 
-    public BlockState(String name, String friendlyName, int state) {
-        this.name = name;
+    public BlockState(UUID id, String friendlyName, int state) {
+        this.id = id;
         this.friendlyName = friendlyName;
         this.state = state;
     }
 
-    public String getName() {
-        return name;
+    public UUID getId() {
+        return id;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public int getState() {

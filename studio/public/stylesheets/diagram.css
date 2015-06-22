@@ -14,18 +14,19 @@
 
 .block{ fill: #ffffff; stroke-width: 1; }
 .block-unselected{ stroke: #d8d8d8; }
-.block-selected{ stroke: #7f7f7f; stroke-dasharray: 5; }
+.block-selected{ stroke: #1f77b4; stroke-width: 2; }
 
 .block-delete { cursor: pointer; opacity: 0; -webkit-transition: opacity 0.4s ease-in-out; transition: opacity 0.4s ease-in-out; }
 .block-delete-circle { fill: #ffffff; stroke: #7f7f7f; stroke-width: 1; }
 .block-delete-text:hover { cursor: pointer; fill: #d62728; }
 
 .block-group:hover .block { stroke: #7f7f7f; }
+.block-group:hover .block.block-selected { stroke: #1f77b4; stroke-width: 2; }
 .block-group:hover .block-delete { opacity: 1; }
 
 .block-header{ stroke: #d8d8d8; stroke-width: 1; }
 
-.block-name{ fill: #686868; font-size: 1.0em; }
+.block-name{ fill: #686868; font-size: 1.1em; }
 .block-definition{ fill: #b8b8b8; }
 
 .block-button-wrapper { cursor: pointer; opacity: 0; -webkit-transition: opacity 0.4s ease-in-out; transition: opacity 0.4s ease-in-out; }
@@ -67,79 +68,18 @@
 .block-error .progress-text { fill: #ffffff; }
 
 /*
- * Block Configuration
- */
-
-.block-properties {
-    position: absolute;
-    z-index: 3001;
-    border-radius: 10px;
-    border: 1px solid #989898;
-    background-color: white;
-    /*padding: 10px;*/
-    box-shadow: 0px 6px 12px rgba(0,0,0,0.175);
-}
-
-.block-properties.ng-enter { -webkit-animation: fadeIn 0.4s; }
-
-.block-properties.ng-leave { -webkit-animation: fadeOut 0.4s; }
-
-.block-properties.align-left:before {
-    content: "";
-    position: absolute;
-    top: 15px;
-    right: -16px;
-    border-top: 17px solid transparent;
-    border-bottom: 17px solid transparent;
-    border-left: 17px solid #989898;
-}
-
-.block-properties.align-left:after {
-    content: "";
-    position: absolute;
-    top: 16px;
-    right: -15px;
-    border-top: 16px solid transparent;
-    border-bottom: 16px solid transparent;
-    border-left: 16px solid #fff;
-}
-
-.block-properties.align-right:before {
-    content: "";
-    position: absolute;
-    top: 15px;
-    left: -17px;
-    border-top: 17px solid transparent;
-    border-bottom: 17px solid transparent;
-    border-right: 17px solid #989898;
-}
-
-.block-properties.align-right:after {
-    content: "";
-    position: absolute;
-    top: 16px;
-    left: -16px;
-    border-top: 16px solid transparent;
-    border-bottom: 16px solid transparent;
-    border-right: 16px solid #fff;
-}
-
-.block-parameter { margin-top: 10px; height: 65px; }
-.block-parameter label { color: #989898; font-weight: normal; margin-bottom: 2px; }
-
-/*
  * Diagram Configuration
  */
 
 .diagram-properties {
     position: absolute;
     z-index: 1000;
-    top: 120px;
+    top: 70px;
     right: 10px;
     width: 250px;
-    height: calc(100% - 144px);
-    height: -webkit-calc(100% - 144px);
-    height: -moz-calc(100% - 144px);
+    height: calc(100% - 94px);
+    height: -webkit-calc(100% - 94px);
+    height: -moz-calc(100% - 94px);
     border-radius: 10px;
     border: 1px solid #989898;
     background-color: white;

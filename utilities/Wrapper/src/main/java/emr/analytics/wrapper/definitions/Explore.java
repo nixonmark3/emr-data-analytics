@@ -21,29 +21,24 @@ public class Explore extends BlockDefinition implements IExport {
     }
 
     @Override
+    public ModeDefinition createOfflineMode(){
+
+        ModeDefinition modeDefinition = new ModeDefinition();
+        modeDefinition.setInputs(createInputConnectors());
+
+        return modeDefinition;
+    }
+
+    @Override
+    public ModeDefinition createOnlineMode(){
+
+        return null;
+    }
+
     public List<ConnectorDefinition> createInputConnectors() {
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
         inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString().toString()));
         return inputConnectors;
     }
-
-    @Override
-    public List<ConnectorDefinition> createOutputConnectors() {
-
-        return null;
-    }
-
-    @Override
-    public List<ParameterDefinition> createParameters() {
-
-        return null;
-    }
-
-    @Override
-    public Signature createSignature() {
-
-        return null;
-    }
-
 }

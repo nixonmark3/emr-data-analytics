@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('browserApp', ['ngAnimate', 'draggableApp'])
+angular.module('browserApp', ['ngAnimate', 'emr.ui.interact'])
     .directive('browser', ['$document', '$compile', function ($document, $compile) {
 
         return {
@@ -152,25 +152,39 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
 
         return {
             restrict: 'E',
-            replace: false,
+            replace: true,
             templateUrl: '/assets/scripts/components/browser/blockConfig.html',
             scope: {
                 block: "=",
-                loadSources: "="
+                loadSources: "=",
+                onChange: "="
             },
             link: function ($scope, element, attrs) {
 
                 // list of dependants for reverse lookup
-                $scope.dependants = {};
+                $scope.dependants = null;
+
+                /*
+                ** Re-initialize this directive when the block changes
+                 */
+                $scope.$watch('block', function() {
+                    init();
+                });
 
                 var init = function(){
 
+                    if (!$scope.block)
+                        return;
+
+                    $scope.dependants = {};
+
                     // assemble initial list of dynamic parameters
                     var dynamicSourceRequests = {
-                        name: $scope.block.uniqueName,
+                        name: $scope.block.id,
                         parameters: [],
                         diagram: null
                     };
+
                     $scope.block.parameters.forEach(function(parameter){
 
                         if (parameter.source()) {
@@ -204,7 +218,7 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
                                 }
                                 else if (argument.type === 1) { // represents a block name
 
-                                    argument.value = $scope.block.uniqueName;
+                                    argument.value = $scope.block.id;
                                 }
                             });
 
@@ -285,7 +299,7 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
                         var dependants = $scope.dependants[parameter.name()];
 
                         var dynamicSourceRequests = {
-                            name: $scope.block.uniqueName,
+                            name: $scope.block.id,
                             parameters: [],
                             diagram: null
                         };
@@ -321,10 +335,10 @@ angular.module('browserApp', ['ngAnimate', 'draggableApp'])
 
                         loadDynamicSources(dynamicSourceRequests);
                     }
-                };
 
-                // initialize
-                init();
+                    if ($scope.onChange)
+                        $scope.onChange();
+                };
             }
         }
     }]);

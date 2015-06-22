@@ -16,25 +16,20 @@ public class AddDataSet extends BlockDefinition implements IExport {
     }
 
     @Override
-    public Signature createSignature() {
+    public ModeDefinition createOfflineMode(){
+
+        ModeDefinition modeDefinition = new ModeDefinition();
+        modeDefinition.setParameters(createParameters());
+
+        return modeDefinition;
+    }
+
+    @Override
+    public ModeDefinition createOnlineMode(){
 
         return null;
     }
 
-    @Override
-    public List<ConnectorDefinition> createInputConnectors() {
-
-        return null;
-    }
-
-
-    @Override
-    public List<ConnectorDefinition> createOutputConnectors() {
-
-        return null;
-    }
-
-    @Override
     public List<ParameterDefinition> createParameters() {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();

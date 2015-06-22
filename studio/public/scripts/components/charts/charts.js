@@ -2,7 +2,7 @@
 
 angular.module('emr.ui.charts', [])
 
-    .directive('timeSeriesChartCanvas', ['$window', function($window) {
+    .directive('timeSeriesChartCanvas', [function() {
 
         return {
             restrict: 'E',

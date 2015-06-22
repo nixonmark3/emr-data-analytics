@@ -1,9 +1,6 @@
 package emr.analytics.models.diagram;
 
-import emr.analytics.models.definition.ConnectorDefinition;
-import emr.analytics.models.definition.Definition;
-import emr.analytics.models.definition.DefinitionType;
-import emr.analytics.models.definition.ParameterDefinition;
+import emr.analytics.models.definition.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,12 +14,10 @@ import java.util.UUID;
 public class Block implements Serializable {
 
     private DefinitionType definitionType;
+    private UUID id;
     private String name;
-    private String uniqueName;
     private String definition;
     private boolean configured;             // unused, currently required for serialization, use jsonignore
-    private boolean onlineOnly = false;
-    private String offlineComplement = null;
     private int state;
     private int x;
     private int y;
@@ -33,22 +28,23 @@ public class Block implements Serializable {
 
     private Block() { }
 
-    public Block(String name, int state, int x, int y, Definition definition){
+    public Block(String name, int state, int x, int y, Mode mode, Definition definition){
 
+        this.id = UUID.randomUUID();
         this.name = name;
-        this.uniqueName = UUID.randomUUID().toString();
         this.state = state;
         this.x = x;
         this.y = y;
         this.definitionType = definition.getDefinitionType();
         this.definition = definition.getName();
         this.w = definition.getW();
-        this.onlineOnly = definition.isOnlineOnly();
-        this.offlineComplement = null;
 
-        this.inputConnectors = createConnectors(definition.getInputConnectors());
-        this.outputConnectors = createConnectors(definition.getOutputConnectors());
-        this.parameters = createParameters(definition.getParameters());
+        // reference the appropriate model
+        ModeDefinition modeDefinition = definition.getModel(mode);
+
+        this.inputConnectors = createConnectors(modeDefinition.getInputs());
+        this.outputConnectors = createConnectors(modeDefinition.getOutputs());
+        this.parameters = createParameters(modeDefinition.getParameters());
     }
 
     public DefinitionType getDefinitionType() { return definitionType; }
@@ -69,20 +65,12 @@ public class Block implements Serializable {
         this.name = name;
     }
 
-    /**
-     * Returns the unique name of this Block.
-     * @return get unique block name
-     */
-    public String getUniqueName() {
-        return uniqueName;
+    public UUID getId() {
+        return this.id;
     }
 
-    /**
-     * Sets the unique name of this Block.
-     * @param uniqueName block unique name
-     */
-    public void setUniqueName(String uniqueName) {
-        this.uniqueName = uniqueName;
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     /**
@@ -116,16 +104,6 @@ public class Block implements Serializable {
     public void setState(int state) {
         this.state = state;
     }
-
-    public boolean isOnlineOnly() { return onlineOnly; }
-
-    public void setOnlineOnly(boolean onlineOnly) { this.onlineOnly = onlineOnly; }
-
-    public boolean hasOfflineComplement(){ return !(offlineComplement == null); }
-
-    public String getOfflineComplement(){ return offlineComplement; }
-
-    public void setOfflineComplement(String value){ offlineComplement = value; }
 
     /**
      * Sets the x position of this Block in Diagram.
@@ -267,6 +245,15 @@ public class Block implements Serializable {
         // configuration criteria is that all parameters have a value
 
         return (!this.parameters.stream().anyMatch(p -> p.getValue().equals(null)));
+    }
+
+    /**
+     * Specifies whether this block contains any persisted outputs
+     * @return boolean value that indicates whether there are any persisted outputs
+     */
+    public boolean hasPersistedOutputs(){
+
+        return (!this.outputConnectors.stream().anyMatch(c -> c.getPersisted()));
     }
 
     public boolean hasInputConnector(String name){

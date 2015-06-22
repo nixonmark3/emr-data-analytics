@@ -56,6 +56,22 @@ public class Connector implements Serializable {
         this.position = position;
     }
 
+    public boolean getVisible() {
+        return this.visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+
+    public boolean getPersisted() {
+        return this.persisted;
+    }
+
+    public void setPersisted(boolean persisted) {
+        this.persisted = persisted;
+    }
+
     /**
      * Hidden Jackson constructor.
      */
@@ -67,14 +83,26 @@ public class Connector implements Serializable {
     private String type;
     private String name;
     private String position;
+    private boolean visible;
+    private boolean persisted;
 
     public Connector(ConnectorDefinition connectorDefinition){
-        this(connectorDefinition.getName(), connectorDefinition.getType());
+        this(connectorDefinition.getName(),
+                connectorDefinition.getType(),
+                connectorDefinition.getVisible(),
+                connectorDefinition.getPersisted());
     }
 
-    public Connector(String name, String type){
-        this.type = type;
+    public Connector(String name, String type) {
         this.name = name;
+        this.type = type;
+    }
+
+    public Connector(String name, String type, boolean visible, boolean persisted){
+        this(name, type);
+
+        this.visible = visible;
+        this.persisted = persisted;
 
         // todo: position ?
         this.position = "";

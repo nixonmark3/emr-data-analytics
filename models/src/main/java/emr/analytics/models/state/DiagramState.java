@@ -56,16 +56,16 @@ public class DiagramState {
         DiagramState diagramState = new DiagramState(diagram.getName(), jobId);
 
         List<BlockState> blockStateList = new ArrayList<BlockState>();
-        diagram.getBlocks().stream().forEach(b -> blockStateList.add(new BlockState(b.getUniqueName(), b.getName(), b.getState())));
+        diagram.getBlocks().stream().forEach(b -> blockStateList.add(new BlockState(b.getId(), b.getName(), b.getState())));
 
         diagramState.setBlockStates(blockStateList);
 
         return diagramState;
     }
 
-    public void setBlockState(String blockName, int blockState) {
+    public void setBlockState(UUID blockId, int blockState) {
         this.blockStates.stream()
-                .filter(b -> b.getName().equals(blockName))
+                .filter(b -> b.getId().equals(blockId))
                 .forEach(b -> b.setState(blockState));
     }
 }

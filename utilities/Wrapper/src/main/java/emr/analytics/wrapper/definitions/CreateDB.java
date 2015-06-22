@@ -16,18 +16,20 @@ public class CreateDB extends BlockDefinition implements IExport {
     }
 
     @Override
-    public List<ConnectorDefinition> createInputConnectors() {
+    public ModeDefinition createOfflineMode(){
+
+        ModeDefinition modeDefinition = new ModeDefinition();
+        modeDefinition.setParameters(createParameters());
+
+        return modeDefinition;
+    }
+
+    @Override
+    public ModeDefinition createOnlineMode(){
 
         return null;
     }
 
-    @Override
-    public List<ConnectorDefinition> createOutputConnectors() {
-
-        return null;
-    }
-
-    @Override
     public List<ParameterDefinition> createParameters() {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
@@ -61,11 +63,5 @@ public class CreateDB extends BlockDefinition implements IExport {
                 null));
 
         return parameters;
-    }
-
-    @Override
-    public Signature createSignature() {
-
-        return null;
     }
 }

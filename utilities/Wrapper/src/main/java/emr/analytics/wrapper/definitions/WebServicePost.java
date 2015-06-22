@@ -16,12 +16,28 @@ public class WebServicePost extends BlockDefinition implements IExport {
 
         definition = new Definition("RESTPost", "REST POST", Category.TRANSFORMERS.toString());
         definition.setDescription("Post data to a REST API.");
-        definition.setOnlineOnly(true);
 
         return definition;
     }
 
     @Override
+    public ModeDefinition createOfflineMode(){
+
+        ModeDefinition modeDefinition = new ModeDefinition();
+        modeDefinition.setSignature(createSignature());
+        modeDefinition.setInputs(createInputConnectors());
+        modeDefinition.setOutputs(createOutputConnectors());
+        modeDefinition.setParameters(createParameters());
+
+        return modeDefinition;
+    }
+
+    @Override
+    public ModeDefinition createOnlineMode(){
+
+        return null;
+    }
+
     public List<ConnectorDefinition> createInputConnectors() {
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
@@ -29,13 +45,11 @@ public class WebServicePost extends BlockDefinition implements IExport {
         return inputConnectors;
     }
 
-    @Override
     public List<ConnectorDefinition> createOutputConnectors() {
 
         return null;
     }
 
-    @Override
     public List<ParameterDefinition> createParameters() {
 
         // todo: add parameters for url, payload pattern
@@ -54,7 +68,6 @@ public class WebServicePost extends BlockDefinition implements IExport {
         return parameters;
     }
 
-    @Override
     public Signature createSignature() {
 
         return new Signature("emr.analytics.spark.algorithms.Requests",

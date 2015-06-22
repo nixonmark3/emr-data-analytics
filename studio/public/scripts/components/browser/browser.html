@@ -9,10 +9,6 @@
         <i class="fa fa-arrow-left"></i><span>{{pageHeader[(pageIndex - 1)]}}</span>
     </div>
 
-    <!--
-    <div ng-if="loading" class="page-loader text-center"><i class="fa fa-2x fa-spin fa-spinner"></i></div>
-    -->
-
     <div class="browser-item browser-categories"
          ng-repeat="category in page.categories"
          ng-click="pageForward(category);">
@@ -25,11 +21,11 @@
     </div>
 
     <div class="browser-item browser-definitions"
-         ng-repeat="definition in page.definitions | filter: {onlineOnly:false}"
+         ng-repeat="definition in page.definitions"
          ng-mousedown="mouseDown($event, definition);"
          ng-click="show(definition);">
 
-        <i class="fa fa-th"></i><span>{{definition.name}}</span>
+        <i class="fa fa-cube"></i><span>{{definition.name}}</span>
         <div ng-if="isConfigurable()" class="pull-right">
             <i class="fa fa-chevron-right"></i>
         </div>

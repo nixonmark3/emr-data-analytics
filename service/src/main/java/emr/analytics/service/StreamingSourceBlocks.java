@@ -3,9 +3,7 @@ package emr.analytics.service;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
-import emr.analytics.models.definition.DataType;
-import emr.analytics.models.definition.Definition;
-import emr.analytics.models.definition.Signature;
+import emr.analytics.models.definition.*;
 import emr.analytics.models.diagram.Block;
 import emr.analytics.models.diagram.Parameter;
 import emr.analytics.models.diagram.Wire;
@@ -18,6 +16,7 @@ import java.util.stream.Collectors;
 public class StreamingSourceBlocks {
 
     private String _streamingContextName = "pollingstream";
+    private Mode _mode = Mode.ONLINE;
 
     public HashSet<String> packageNames;
     public List<StreamingSourceBlock> blocks;
@@ -41,7 +40,9 @@ public class StreamingSourceBlocks {
 
     public void add(Definition definition, Block block, List<Wire> wires) {
 
-        Signature signature = definition.getSignature();
+        ModeDefinition modeDefinition = definition.getModel(_mode);
+
+        Signature signature = modeDefinition.getSignature();
         if (signature == null){
             // todo: create exception
             return;
@@ -51,7 +52,7 @@ public class StreamingSourceBlocks {
         if(!packageNames.contains(signature.getPackageName()))
             packageNames.add(signature.getPackageName());
 
-        blocks.add(new StreamingSourceBlock(definition, block, wires));
+        blocks.add(new StreamingSourceBlock(modeDefinition, block, wires));
     }
 
     public boolean isEmpty() {
@@ -84,17 +85,17 @@ public class StreamingSourceBlocks {
         public String methodName;
         public String arguments;
 
-        public StreamingSourceBlock(Definition definition, Block block, List<Wire> wires) {
+        public StreamingSourceBlock(ModeDefinition modeDefinition, Block block, List<Wire> wires) {
 
-            Signature signature = definition.getSignature();
+            Signature signature = modeDefinition.getSignature();
 
             if (block.getOutputConnectors().size() > 0) {
                 this.variableName = block.getOutputConnectors().stream()
-                        .map(c -> String.format("%s_%s", createVariableName(block.getUniqueName()), c.getName()))
+                        .map(c -> String.format("%s_%s", createVariableName(block.getId().toString()), c.getName()))
                         .collect(Collectors.joining(", "));
             }
             else{
-                this.variableName = createVariableName(block.getUniqueName());
+                this.variableName = createVariableName(block.getId().toString());
             }
 
             this.className = signature.getClassName();
@@ -117,7 +118,7 @@ public class StreamingSourceBlocks {
                             if (optionalParameter.isPresent()){
 
                                 Parameter parameter = optionalParameter.get();
-                                String parameterType = definition.getTypeOfParameterDefinition(parameter.getName());
+                                String parameterType = parameter.getType();
 
                                 String value;
                                 if (parameterType.equals(DataType.MULTI_SELECT_LIST.toString())) {
@@ -150,7 +151,7 @@ public class StreamingSourceBlocks {
                             if (optionalWire.isPresent()){
                                 Wire wire = optionalWire.get();
                                 argumentBuilder.append(String.format("%s_%s",
-                                    createVariableName(wire.getFrom_node()),
+                                    createVariableName(wire.getFrom_node().toString()),
                                     wire.getFrom_connector()));
                             }
                             else{
@@ -164,12 +165,8 @@ public class StreamingSourceBlocks {
                             switch(properties[1]){
                                 case "model":
 
-                                    if(block.hasOfflineComplement()){
-                                        argumentBuilder.append(createVariableName(block.getOfflineComplement()));
-                                    }
-                                    else{
-                                        argumentBuilder.append(argument);
-                                    }
+                                    // todo: without an offline compliment, this is now broken
+                                    // argumentBuilder.append(createVariableName(block.getOfflineComplement()));
 
                                     break;
                             }

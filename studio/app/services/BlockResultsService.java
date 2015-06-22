@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import emr.analytics.models.diagram.Block;
 import plugins.MongoDBPlugin;
 
 
@@ -38,11 +39,11 @@ public class BlockResultsService {
         return availableResults;
     }
 
-    public static String getModel(String blockName){
+    public static String getPersistedOutput(Block block){
 
         StringBuilder model = new StringBuilder();
 
-        List<BasicDBObject> results = getOutputResults(blockName);
+        List<BasicDBObject> results = getOutputResults(block.getId().toString());
         Optional<BasicDBObject> result = results.stream().filter(r -> r.containsValue("scaled_coef")).findFirst();
         if (result.isPresent()){
             BasicDBObject data = (BasicDBObject)result.get().get("data");

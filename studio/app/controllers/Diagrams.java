@@ -8,7 +8,6 @@ import com.mongodb.WriteResult;
 import emr.analytics.models.definition.Definition;
 import emr.analytics.models.diagram.*;
 
-import emr.analytics.service.jobs.JobMode;
 import models.project.GroupRequest;
 import play.libs.Json;
 import play.mvc.BodyParser;
@@ -46,16 +45,15 @@ public class Diagrams extends ControllerBase {
         ObjectMapper objectMapper = new ObjectMapper();
         Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
 
-        // retrieve models
-        HashMap<String, String> models = new HashMap<>();
-        BlockResultsService service = new BlockResultsService();
-        for(Block block : diagram.getBlocksWithOfflineComplements()){
+        // retrieve persisted outputs
+        HashMap<String, String> persistedOutputs = new HashMap<>();
+        for(Block block : diagram.getBlocksWithPersistedOutputs()){
 
-            String model = BlockResultsService.getModel(block.getOfflineComplement());
-            models.put(block.getOfflineComplement(), model);
+            String persistedOutput = BlockResultsService.getPersistedOutput(block);
+            persistedOutputs.put(block.getId().toString(), persistedOutput);
         }
 
-        UUID jobId = _evaluationService.sendRequest(JobMode.Online, diagram, models);
+        UUID jobId = _evaluationService.sendRequest(diagram, persistedOutputs);
         if (jobId == null) {
             return internalServerError("Error requesting evaluation.");
         }
@@ -79,7 +77,7 @@ public class Diagrams extends ControllerBase {
 
         saveDiagram(diagram);
 
-        UUID jobId = _evaluationService.sendRequest(JobMode.Offline, diagram);
+        UUID jobId = _evaluationService.sendRequest(diagram);
         if (jobId != null) {
             _mapJobIdToClientId.put(jobId, UUID.fromString(clientId));
 
@@ -282,7 +280,7 @@ public class Diagrams extends ControllerBase {
      * @return Json representing a blank diagram
      */
     public static Result getBlankDiagram() {
-        return ok(Json.toJson(BasicDiagram.CreateBasicDiagram()));
+        return ok(Json.toJson(Diagram.Create()));
     }
 
     /**

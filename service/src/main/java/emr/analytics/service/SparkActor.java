@@ -53,7 +53,7 @@ public class SparkActor extends AbstractActor {
                 System.out.println("Kill received.");
 
                 // notify the job status actor that the job is being stopped
-                _jobStatusActor.tell(new JobStopped(job.getId(), job.getJobMode()), self());
+                _jobStatusActor.tell(new JobStopped(job.getId(), job.getMode()), self());
             })
             .match(String.class, s -> s.equals("finalize"), s -> {
 

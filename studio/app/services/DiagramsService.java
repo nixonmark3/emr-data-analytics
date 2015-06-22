@@ -2,6 +2,7 @@ package services;
 
 import emr.analytics.models.definition.Definition;
 import emr.analytics.models.definition.DefinitionType;
+import emr.analytics.models.definition.Mode;
 import emr.analytics.models.diagram.*;
 import models.project.GroupRequest;
 
@@ -27,10 +28,12 @@ public class DiagramsService {
         int x = Integer.MAX_VALUE, y = Integer.MAX_VALUE, xOrigin = 100, yOrigin = 50;
 
         // and a complimentary block
+
         Block block = new Block(request.getName(),
                 Integer.MAX_VALUE,
                 Integer.MAX_VALUE,
                 Integer.MAX_VALUE,
+                Mode.OFFLINE,
                 new Definition(DefinitionType.CONTAINER,
                         request.getName(),
                         request.getName(),
@@ -39,10 +42,12 @@ public class DiagramsService {
         parent.addBlock(block);
 
         // iterate over each block
-        for(String blockId : request.getBlocks()){
+        for(String blockIdString : request.getBlocks()){
+
+            UUID blockId = UUID.fromString(blockIdString);
 
             // find the specified block
-            Block groupBlock = parent.getBlockByUniqueName(blockId);
+            Block groupBlock = parent.getBlock(blockId);
 
             // remove it from the diagram
             parent.removeBlock(groupBlock);
@@ -101,7 +106,7 @@ public class DiagramsService {
                         parent.addWire(new Wire(wire.getFrom_node(),
                                 wire.getFrom_connector(),
                                 wire.getFrom_connectorIndex(),
-                                block.getUniqueName(),
+                                block.getId(),
                                 groupConnector.getName(),
                                 0));  // todo: invalid connector index -> do we use connector index
 
@@ -111,7 +116,7 @@ public class DiagramsService {
                 }
 
                 if (isGroupConnector){
-                    diagram.addInput(new DiagramConnector(UUID.fromString(blockId),
+                    diagram.addInput(new DiagramConnector(blockId,
                         String.format("%s_%s", groupBlock.getName(), connector.getName()),
                         connector.getType()));
                 }
@@ -149,7 +154,7 @@ public class DiagramsService {
                         }
 
                         // create a wire from our new block to this wires destination
-                        parent.addWire(new Wire(block.getUniqueName(),
+                        parent.addWire(new Wire(block.getId(),
                                 groupConnector.getName(),
                                 0,                          // todo: invalid connector index -> do we use connector index
                                 wire.getTo_node(),
@@ -166,7 +171,7 @@ public class DiagramsService {
                 }
 
                 if (isGroupConnector){
-                    diagram.addOutput(new DiagramConnector(UUID.fromString(blockId),
+                    diagram.addOutput(new DiagramConnector(blockId,
                             String.format("%s_%s", groupBlock.getName(), connector.getName()),
                             connector.getType()));
                 }

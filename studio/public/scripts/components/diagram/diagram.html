@@ -19,7 +19,7 @@
     </defs>
 
     <!-- root connector -->
-    <g ng-if="!isOnline && diagram.blocks.length==0"
+    <g ng-if="diagramMode()=='OFFLINE' && diagram.blocks.length==0"
        ng-attr-transform="translate({{diagramWidth/2}})"
        id="root-connector-container"
         ng-click="showLibraryPopup($event)">
@@ -96,8 +96,7 @@
         </g>
 
         <!-- block configuration button -->
-        <g class="block-button-wrapper"
-           ng-if="!isOnline || (isOnline && block.data.onlineOnly)"
+        <!--<g class="block-button-wrapper"
            ng-click="onBlockConfigure($event, block);">
 
             <rect class="block-button"
@@ -118,11 +117,11 @@
                 &#xf0ad
             </text>
 
-        </g>
+        </g>-->
 
         <!-- block data button -->
         <g class="block-button-wrapper"
-           ng-if="!isOnline"
+           ng-if="diagramMode()=='OFFLINE'"
            ng-click="toggleBlockData($event, block);">
 
             <rect class="block-button"
@@ -146,7 +145,7 @@
         </g>
 
         <g class="block-delete"
-           ng-if="!isOnline"
+           ng-if="diagramMode()=='OFFLINE'"
            ng-click="deleteBlock($event, block)">
 
             <circle class="block-delete-circle"

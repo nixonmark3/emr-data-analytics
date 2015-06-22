@@ -16,6 +16,22 @@ public class TimeDelay extends BlockDefinition implements IExport {
     }
 
     @Override
+    public ModeDefinition createOfflineMode(){
+
+        ModeDefinition modeDefinition = new ModeDefinition();
+        modeDefinition.setInputs(createInputConnectors());
+        modeDefinition.setOutputs(createOutputConnectors());
+        modeDefinition.setParameters(createParameters());
+
+        return modeDefinition;
+    }
+
+    @Override
+    public ModeDefinition createOnlineMode(){
+
+        return null;
+    }
+
     public List<ConnectorDefinition> createInputConnectors() {
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
@@ -24,7 +40,6 @@ public class TimeDelay extends BlockDefinition implements IExport {
         return inputConnectors;
     }
 
-    @Override
     public List<ConnectorDefinition> createOutputConnectors() {
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
@@ -32,7 +47,6 @@ public class TimeDelay extends BlockDefinition implements IExport {
         return outputConnectors;
     }
 
-    @Override
     public List<ParameterDefinition> createParameters() {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
@@ -43,11 +57,4 @@ public class TimeDelay extends BlockDefinition implements IExport {
                 null));
         return parameters;
     }
-
-    @Override
-    public Signature createSignature() {
-
-        return null;
-    }
-
 }

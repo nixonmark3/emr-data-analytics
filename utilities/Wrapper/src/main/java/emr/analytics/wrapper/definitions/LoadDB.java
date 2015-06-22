@@ -18,12 +18,15 @@ public class LoadDB extends BlockDefinition implements IExport {
     }
 
     @Override
-    public List<ConnectorDefinition> createInputConnectors() {
+    public ModeDefinition createOfflineMode(){
 
-        return null;
+        ModeDefinition modeDefinition = new ModeDefinition();
+        modeDefinition.setOutputs(createOutputConnectors());
+        modeDefinition.setParameters(createParameters());
+
+        return modeDefinition;
     }
 
-    @Override
     public List<ConnectorDefinition> createOutputConnectors() {
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
@@ -31,7 +34,6 @@ public class LoadDB extends BlockDefinition implements IExport {
         return outputConnectors;
     }
 
-    @Override
     public List<ParameterDefinition> createParameters() {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
@@ -71,8 +73,63 @@ public class LoadDB extends BlockDefinition implements IExport {
     }
 
     @Override
-    public Signature createSignature() {
+    public ModeDefinition createOnlineMode(){
 
-        return null;
+        ModeDefinition modeDefinition = new ModeDefinition();
+
+        // create outputs
+        List<ConnectorDefinition> outputs = new ArrayList<ConnectorDefinition>();
+        outputs.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        modeDefinition.setOutputs(outputs);
+
+        // create parameters
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+
+        /*parameters.add(new ParameterDefinition("Zookeeper Quorum",
+                DataType.STRING.toString(),
+                "localhost:2181",
+                new ArrayList<String>(),
+                null));
+        parameters.add(new ParameterDefinition("Topics",
+                DataType.STRING.toString(),
+                "runtime",
+                new ArrayList<String>(),
+                null));*/
+
+        parameters.add(new ParameterDefinition("Url",
+                DataType.STRING.toString(),
+                "",
+                new ArrayList<String>(),
+                null));
+        parameters.add(new ParameterDefinition("Sleep",
+                DataType.STRING.toString(),
+                "500",
+                new ArrayList<String>(),
+                null));
+
+        modeDefinition.setParameters(parameters);
+
+        // create signature
+        /*Signature signature = new Signature("emr.analytics.spark.algorithms.Utilities",
+                "Utilities",
+                "kafkaStream",
+                new String[]{
+                        "ssc",
+                        "parameter:Zookeeper Quorum",
+                        "appName",
+                        "parameter:Topics"
+                });*/
+
+        Signature signature = new Signature("emr.analytics.spark.algorithms.Sources",
+                "Sources",
+                "PollingStream",
+                new String[]{
+                        "ssc",
+                        "parameter:Url",
+                        "parameter:Sleep"
+                });
+        modeDefinition.setSignature(signature);
+
+        return modeDefinition;
     }
 }

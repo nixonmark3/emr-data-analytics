@@ -38,24 +38,7 @@ diagramApp
             };
         }
     ])
-    .controller('libraryBrowserController',
-    ['$scope', '$element', 'nodes', 'onDrag', 'onDrop', 'close',
-        function($scope, $element, nodes, onDrag, onDrop, close) {
 
-            $scope.nodes = nodes;
-
-            $scope.onDrag = onDrag;
-
-            $scope.onDrop = onDrop;
-
-            $scope.close = function(){
-
-                close();
-            };
-
-            this.close = $scope.close;
-        }
-    ])
     .controller('blockDataController',
     ['$scope', '$element', '$window', '$timeout', 'block', 'position', 'getBlockData', 'close',
         function($scope, $element, $window, $timeout, block, position, getBlockData, close){

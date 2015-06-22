@@ -13,12 +13,20 @@ public class PLSSensitivity extends BlockDefinition implements IExport {
     public Definition createDefinition() {
 
         Definition definition = new Definition("Sensitivity", "PLSSensitivity", Category.TRANSFORMERS.toString());
-        definition.setOnlineComplement("Predict");
         definition.setDescription("Calculates sensitivity of output y to set of inputs X using PLS");
         return definition;
     }
 
     @Override
+    public ModeDefinition createOfflineMode(){
+
+        ModeDefinition modeDefinition = new ModeDefinition();
+        modeDefinition.setInputs(createInputConnectors());
+        modeDefinition.setOutputs(createOutputConnectors());
+
+        return modeDefinition;
+    }
+
     public List<ConnectorDefinition> createInputConnectors() {
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
@@ -27,7 +35,6 @@ public class PLSSensitivity extends BlockDefinition implements IExport {
         return inputConnectors;
     }
 
-    @Override
     public List<ConnectorDefinition> createOutputConnectors() {
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
@@ -39,15 +46,25 @@ public class PLSSensitivity extends BlockDefinition implements IExport {
     }
 
     @Override
-    public List<ParameterDefinition> createParameters() {
+    public ModeDefinition createOnlineMode(){
 
-        return null;
+        ModeDefinition modeDefinition = new ModeDefinition();
+        List<ConnectorDefinition> inputs = new ArrayList<ConnectorDefinition>();
+        inputs.add(new ConnectorDefinition("x", DataType.FRAME.toString()));
+        modeDefinition.setInputs(inputs);
+
+        List<ConnectorDefinition> outputs = new ArrayList<ConnectorDefinition>();
+        outputs.add(new ConnectorDefinition("out", DataType.FLOAT.toString()));
+        modeDefinition.setInputs(outputs);
+
+        modeDefinition.setSignature(new Signature("emr.analytics.spark.algorithms.Utilities",
+                "Utilities",
+                "dotProduct",
+                new String[]{
+                        "input:x",
+                        "block:model"
+                }));
+
+        return modeDefinition;
     }
-
-    @Override
-    public Signature createSignature() {
-
-        return null;
-    }
-
 }

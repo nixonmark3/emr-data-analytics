@@ -3,10 +3,7 @@ package services;
 import emr.analytics.models.definition.*;
 import emr.analytics.models.diagram.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class DiagramCompiler {
 
@@ -15,14 +12,12 @@ public class DiagramCompiler {
 
     private HashMap<String, Definition> _definitions;
 
-    private Definition sourceBlock;
-    private Definition sinkBlock;
+    private Definition terminatingDefinition;
 
     public DiagramCompiler(HashMap<String, Definition> definitions){
         _definitions = definitions;
 
-        sourceBlock = definitions.get("PollingStream");
-        sinkBlock = definitions.get("RESTPost");
+        terminatingDefinition = definitions.get("RESTPost");
     }
 
     public Diagram compile(Diagram offline){
@@ -35,130 +30,111 @@ public class DiagramCompiler {
         _dataSources = new HashMap<>();
 
         // iterate over offline blocks to find model block
-        for(Block block : offline.getBlocks()){
+        for(Block block : offline.getBlocks(DefinitionType.MODEL)){
 
-            Definition offlineDefinition = _definitions.get(block.getDefinition());
+            Block onlineBlock = this.createOnlineBlock(block.getName(), block);
 
-            if (offlineDefinition.hasOnlineComplement()){
+            // add online block to diagram
+            online.addBlock(onlineBlock);
 
-                // reference online definition
-                Definition onlineDefinition = _definitions.get(offlineDefinition.getOnlineComplement());
+            // follow the offline diagram to its root (collecting blocks along the way)
+            int index = 0;
+            for(Connector connector : onlineBlock.getInputConnectors()){
 
-                // create online block
-                Block onlineBlock = this.createBlock(onlineDefinition,
-                        block.getState(),
-                        block.getX(),
-                        block.getY());
-                // reference offline complement
-                onlineBlock.setOfflineComplement(block.getUniqueName());
+                if (block.hasInputConnector(connector.getName())){
 
-                // set collected parameter values
-                for(Parameter parameter : block.getParameters()){
+                    for(Wire wire : offline.getLeadingWires(block.getId(), connector.getName())){
 
-                    // todo: bad assumption that model contains all block parameters
-                    if (parameter.isCollected())
-                        onlineBlock.setParameter(parameter.getName(), parameter.getValue());
-                }
+                        Wire onlineWire = new Wire(wire.getFrom_node(),
+                            wire.getFrom_connector(),
+                            wire.getFrom_connectorIndex(),
+                            onlineBlock.getId(),
+                            connector.getName(),
+                            index);
 
-                // add online block to diagram
-                online.addBlock(onlineBlock);
-
-                // follow the offline diagram to its root (collecting blocks along the way)
-                int index = 0;
-                boolean sourceConnector = false;
-                for(Connector connector : onlineBlock.getInputConnectors()){
-
-                    String connectorName = connector.getName();
-                    if (connectorName.toLowerCase().equals("x"))
-                        sourceConnector = true;
-
-                    if (block.hasInputConnector(connector.getName())){
-
-                        for(Wire wire : offline.getLeadingWires(block.getUniqueName(), connector.getName())){
-
-                            Wire onlineWire = new Wire(wire.getFrom_node(),
-                                wire.getFrom_connector(),
-                                wire.getFrom_connectorIndex(),
-                                onlineBlock.getUniqueName(),
-                                connector.getName(),
-                                index);
-
-                            this.addLeadingPath(onlineWire, offline, online, sourceConnector);
-                        }
+                        this.addLeadingPath(onlineWire, offline, online);
                     }
-
-                    index++;
                 }
 
-                // add a result block to the output of the model block
-                Block postBlock = this.createBlock(this.sinkBlock,
-                    3,
-                    onlineBlock.getX(),
-                    (onlineBlock.getY() + 120));
-                online.addBlock(postBlock);
-                online.addWire(new Wire(
-                    onlineBlock.getUniqueName(),
-                    onlineBlock.getOutputConnectors().get(0).getName(),
-                    0,
-                    postBlock.getUniqueName(),
-                    postBlock.getInputConnectors().get(0).getName(),
-                    0));
+                index++;
             }
+
+            // add a result block to the output of the model block
+            Block postBlock = this.createBlock(this.generateBlockName(this.terminatingDefinition.getName()),
+                3,
+                onlineBlock.getX(),
+                (onlineBlock.getY() + 120),
+                this.terminatingDefinition);
+
+            online.addBlock(postBlock);
+
+            online.addWire(new Wire(
+                onlineBlock.getId(),
+                onlineBlock.getOutputConnectors().get(0).getName(),
+                0,
+                postBlock.getId(),
+                postBlock.getInputConnectors().get(0).getName(),
+                0));
         }
 
         return online;
     }
 
-    private Block createBlock(Definition definition, int state, int x, int y){
+    private Block createOnlineBlock(String name, Block block){
 
-        // create name
+        // retrieve the definition
+        Definition definition = _definitions.get(block.getDefinition());
+
+        // create online block
+        Block onlineBlock = createBlock(name,
+            block.getState(),
+            block.getX(),
+            block.getY(),
+            definition);
+
+        // set collected parameter values
+        for(Parameter parameter : block.getParameters()){
+
+            if (parameter.isCollected())
+                onlineBlock.setParameter(parameter.getName(), parameter.getValue());
+        }
+
+        return onlineBlock;
+    }
+
+    private Block createBlock(String name, int state, int x, int y, Definition definition){
+
+        _onlineBlocks.add(name);
+        return new Block(name, state, x, y, Mode.ONLINE, definition);
+    }
+
+    private String generateBlockName(String definitionName){
+
         String name = "";
         int index = 1;
         do{
-            name = definition.getName() + index;
+            name = definitionName + index;
             index++;
         }while(_onlineBlocks.contains(name));
 
-        _onlineBlocks.add(name);
-
-        return new Block(name, state, x, y, definition);
+        return name;
     }
 
-    private void addLeadingPath(Wire wire, Diagram source, Diagram destination, boolean isSourceConnector){
+    private void addLeadingPath(Wire wire, Diagram source, Diagram destination){
 
-        // todo: update to make copies
+        UUID blockId = wire.getFrom_node();
+        Block block = source.getBlock(blockId);
+        String blockName = block.getName();
 
-        String blockUniqueName = wire.getFrom_node();
-        Block block = source.getBlockByUniqueName(blockUniqueName);
+        if (!_onlineBlocks.contains(blockName)){
 
-        if (isSourceConnector && block.getInputConnectors().size() == 0) {
-
-            if (_dataSources.containsKey(block.getName())) {
-                block = destination.getBlock(_dataSources.get(block.getName()));
-            }
-            else {
-                String name = block.getName();
-                int state = block.getState();
-                int x = block.getX();
-                int y = block.getY();
-                block = createBlock(this.sourceBlock, state, x, y);
-                destination.addBlock(block);
-
-                _dataSources.put(name, block.getName());
-            }
-
-            wire.setFrom_node(block.getUniqueName());
-        }
-
-        if (!_onlineBlocks.contains(block.getName())){
-
-            destination.addBlock(block);
-            _onlineBlocks.add(block.getName());
+            Block onlineBlock = this.createOnlineBlock(blockName, block);
+            destination.addBlock(onlineBlock);
         }
 
         destination.addWire(wire);
 
-        for (Wire leadingWire : source.getLeadingWires(blockUniqueName))
-            this.addLeadingPath(leadingWire, source, destination, isSourceConnector);
+        for (Wire leadingWire : source.getLeadingWires(blockId))
+            this.addLeadingPath(leadingWire, source, destination);
     }
 }

@@ -43,7 +43,7 @@ analyticsApp
             $scope.position = position;
 
             // generate the list of the selected blocks by unique name
-            var blocks = diagram.getSelectedBlocks().map(function(block){ return block.uniqueName() });
+            var blocks = diagram.getSelectedBlocks().map(function(block){ return block.id() });
 
             // package up the group request
             var request = {
@@ -98,7 +98,7 @@ analyticsApp
             // loading data after zoom animation has completed
             $timeout(function() {
 
-                diagramService.getFeatures($scope.block.uniqueName()).then(
+                diagramService.getFeatures($scope.block.id()).then(
 
                     function (data) {
 
@@ -126,7 +126,7 @@ analyticsApp
 
                     $scope.rendering = true;
 
-                    diagramService.getChartData($scope.block.uniqueName(), selectedFeatures.toString()).then(
+                    diagramService.getChartData($scope.block.id(), selectedFeatures.toString()).then(
                         function (data) {
 
                             $scope.chartData = data;
@@ -218,5 +218,23 @@ analyticsApp
 
                 return selectedFeatures;
             }
+        }
+    ])
+
+    .controller('libraryBrowserController', ['$scope', '$element', 'nodes', 'onDrag', 'onDrop', 'close',
+        function($scope, $element, nodes, onDrag, onDrop, close) {
+
+            $scope.nodes = nodes;
+
+            $scope.onDrag = onDrag;
+
+            $scope.onDrop = onDrop;
+
+            $scope.close = function(){
+
+                close();
+            };
+
+            this.close = $scope.close;
         }
     ]);

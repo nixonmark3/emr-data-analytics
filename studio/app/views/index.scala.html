@@ -17,6 +17,7 @@
     <script type="text/javascript" src="@routes.Assets.at("scripts/components/shared/shared.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("scripts/components/popup/popupService.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("scripts/components/modal/modal.js")"></script>
+    <script type="text/javascript" src="@routes.Assets.at("scripts/components/panel/panel.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("scripts/components/diagram/diagramController.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("scripts/components/blockDataViewer/blockDataViewer.js")"></script>
     <script type="text/javascript" src="@routes.Assets.at("scripts/app.js")"></script>
@@ -27,7 +28,26 @@
 @main(title)(styles)(scripts){
     <body ng-app="analyticsApp" draggable>
 
-        <ng-view></ng-view>
+        <div id="main-tabs">
+
+            <ul class="vertical-tabs">
+                <li class="vertical-tab active">
+                    <div class="tab-icon"><i class="fa fa-sitemap fa-2x"></i></div>
+                    <div class="tab-text">Studio</div>
+                </li>
+                <li class="vertical-tab">
+                    <div class="tab-icon"><i class="fa fa-pie-chart fa-2x"></i></div>
+                    <div class="tab-text">Dashboard</div>
+                </li>
+            </ul>
+
+        </div>
+
+        <div id="main-content">
+
+            <ng-view></ng-view>
+
+        </div>
 
     </body>
 }

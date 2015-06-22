@@ -108,8 +108,8 @@ viewmodels.blockViewModel = function (data) {
     //
     // Unique Name of the block
     //
-    this.uniqueName = function () {
-        return this.data.uniqueName;
+    this.id = function () {
+        return this.data.id;
     };
 
     //
@@ -501,6 +501,7 @@ viewmodels.diagramViewModel = function(data) {
     // reference the diagram data model
     this.data = data;
 
+    // tracks the current set of block names
     var blockNames = {};
 
     this.createBlockViewModels = function (blocksData) {
@@ -541,11 +542,11 @@ viewmodels.diagramViewModel = function(data) {
     //
     // Find a specific block within this diagram
     //
-    this.findBlock = function (name) {
+    this.findBlock = function (id) {
 
         for (var i = 0; i < this.blocks.length; ++i) {
             var block = this.blocks[i];
-            if (block.data.uniqueName == name) {
+            if (block.data.id == id) {
                 return block;
             }
         }
@@ -633,6 +634,13 @@ viewmodels.diagramViewModel = function(data) {
 
     // create a view model for each nested diagram
     this.diagrams = this.createDiagramViewModels(this.data.diagrams);
+
+    //
+    // gets the diagram's mode
+    //
+    this.mode = function(){
+        return this.data.mode;
+    };
 
     //
     // Bezier curve calculations
@@ -723,10 +731,10 @@ viewmodels.diagramViewModel = function(data) {
         }
 
         var wireDataModel = {
-            from_node: (startConnectorType == 'output') ? startBlock.data.uniqueName : endBlock.data.uniqueName,
+            from_node: (startConnectorType == 'output') ? startBlock.data.id : endBlock.data.id,
             from_connectorIndex: (startConnectorType == 'output') ? startConnectorIndex : endConnectorIndex,
             from_connector: (startConnectorType == 'output') ? startConnector.name() : endConnector.name(),
-            to_node: (startConnectorType == 'output') ? endBlock.data.uniqueName : startBlock.data.uniqueName,
+            to_node: (startConnectorType == 'output') ? endBlock.data.id : startBlock.data.id,
             to_connectorIndex: (startConnectorType == 'output') ? endConnectorIndex : startConnectorIndex,
             to_connector: (startConnectorType == 'output') ? endConnector.name() : startConnector.name()
         };
@@ -770,7 +778,7 @@ viewmodels.diagramViewModel = function(data) {
 
     this.updateBlock = function(configBlock){
 
-        var block = this.findBlock(configBlock.uniqueName);
+        var block = this.findBlock(configBlock.id);
 
         if ((configBlock.name) && (!blockNames[configBlock.name])) {
             block.data.name = configBlock.name;
@@ -801,9 +809,9 @@ viewmodels.diagramViewModel = function(data) {
     this.getBlockDescription = function(x, y, definition){
 
         return {
-            name: this.generateBlockName(definition.name),
-            uniqueName: generateUniqueName(),
-            definition: definition.name,
+            name: this.generateBlockName(definition.name()),
+            id: generateUniqueName(),
+            definition: definition.name(),
             x: x,
             y: y
         };
@@ -817,15 +825,15 @@ viewmodels.diagramViewModel = function(data) {
     var DataBlock = function(configBlock){
 
         this.name = configBlock.name;
-        this.uniqueName = configBlock.uniqueName;
-        this.definition = configBlock.definition.name;
-        this.definitionType = configBlock.definition.definitionType;
+        this.id = configBlock.id;
+        this.definition = configBlock.definition.name();
+        this.definitionType = configBlock.definition.definitionType();
         this.state = 0;
-        this.w = configBlock.definition.w;
+        this.w = configBlock.definition.w();
         this.x = configBlock.x;
         this.y = configBlock.y;
-        this.inputConnectors = angular.copy(configBlock.definition.inputConnectors); // todo copy over only what we need from definition
-        this.outputConnectors = angular.copy(configBlock.definition.outputConnectors); // todo copy over only what we need from definition
+        this.inputConnectors = angular.copy(configBlock.definition.inputs()); // todo copy over only what we need from definition
+        this.outputConnectors = angular.copy(configBlock.definition.outputs()); // todo copy over only what we need from definition
 
         var parameters = [];
         var configured = true;
@@ -836,6 +844,7 @@ viewmodels.diagramViewModel = function(data) {
 
             parameters.push({
                 name:parameter.name(),
+                type:parameter.type(),
                 value:parameter.value,
                 collected:parameter.collected
             });
@@ -1004,7 +1013,7 @@ viewmodels.diagramViewModel = function(data) {
             else {
                 // Keep track of blocks that were deleted, so their wires can also
                 // be deleted.
-                deletedBlocks.push(block.data.uniqueName);
+                deletedBlocks.push(block.data.id);
             }
         }
 
@@ -1116,7 +1125,7 @@ viewmodels.diagramViewModel = function(data) {
         console.log(JSON.stringify(blockStates));
 
         for (var i = 0; i < blockStates.length; ++i) {
-            var block = this.findBlock(blockStates[i].name);
+            var block = this.findBlock(blockStates[i].id);
             block.updateProgress(blockStates[i].state);
         }
     }
@@ -1125,18 +1134,19 @@ viewmodels.diagramViewModel = function(data) {
 viewmodels.configuringBlockViewModel = function (definition, block) {
 
     this.name = block.name;
-    this.uniqueName = block.uniqueName;
+    this.id = block.id;
     this.x = block.x;
     this.y = block.y;
     this.state = block.state;
 
+    this.block = block;
     this.definition = definition;
 
     var blockParameters = block.parameters;
 
-    // capture parameters
+    // capture the block's parameters
     var parameters = [];
-    definition.parameters.forEach(function(parameterDefinition){
+    this.definition.parameters().forEach(function(parameterDefinition){
 
         // if exists - reference block parameter
         var blockParameter;
@@ -1158,6 +1168,10 @@ viewmodels.configuringBlockViewModel = function (definition, block) {
         parameters.push(parameter);
     });
     this.parameters = parameters;
+
+    this.reset = function() {
+        return new viewmodels.configuringBlockViewModel(this.definition, this.block);
+    }
 };
 
 viewmodels.configuringParameterViewModel = function (definitionParameter, blockParameter) {
@@ -1195,3 +1209,59 @@ viewmodels.configuringParameterViewModel = function (definitionParameter, blockP
         return this.data.source;
     }
 };
+
+viewmodels.definitionViewModel = function (mode, data) {
+
+    // reference the mode and the data
+    this.mode = mode;
+    this.data = data;
+
+    //
+    // get the definition type
+    //
+    this.definitionType = function(){ return this.data.definitionType; };
+
+    //
+    // get the input connectors
+    //
+    this.inputs = function(){ return this.modeDefinition().inputs; };
+
+    //
+    // returns the mode definition according to the specified mode
+    //
+    this.modeDefinition = function(){
+
+        var modeDefinition;
+        switch(this.mode){
+            case "OFFLINE":
+                modeDefinition = this.data.offlineDefinition;
+                break;
+            case "ONLINE":
+                modeDefinition = this.data.onlineDefinition;
+                break;
+        }
+
+        return modeDefinition;
+    };
+
+    //
+    // get the definitions name
+    //
+    this.name = function(){ return this.data.name; };
+
+    //
+    // get the output connectors
+    //
+    this.outputs = function(){ return this.modeDefinition().outputs; };
+
+    //
+    // get the parameters
+    //
+    this.parameters = function(){ return this.modeDefinition().parameters; };
+
+    //
+    // get the width
+    //
+    this.w = function(){ return this.data.w; };
+};
+

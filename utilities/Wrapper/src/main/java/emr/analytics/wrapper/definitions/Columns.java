@@ -18,6 +18,23 @@ public class Columns extends BlockDefinition implements IExport {
     }
 
     @Override
+    public ModeDefinition createOfflineMode(){
+
+        ModeDefinition modeDefinition = new ModeDefinition();
+        modeDefinition.setSignature(createSignature());
+        modeDefinition.setInputs(createInputConnectors());
+        modeDefinition.setOutputs(createOutputConnectors());
+        modeDefinition.setParameters(createParameters());
+
+        return modeDefinition;
+    }
+
+    @Override
+    public ModeDefinition createOnlineMode(){
+
+        return null;
+    }
+
     public Signature createSignature() {
 
         return new Signature("emr.analytics.spark.algorithms.Utilities",
@@ -29,7 +46,6 @@ public class Columns extends BlockDefinition implements IExport {
                         });
     }
 
-    @Override
     public List<ConnectorDefinition> createInputConnectors() {
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
@@ -37,7 +53,6 @@ public class Columns extends BlockDefinition implements IExport {
         return inputConnectors;
     }
 
-    @Override
     public List<ConnectorDefinition> createOutputConnectors() {
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
@@ -45,7 +60,6 @@ public class Columns extends BlockDefinition implements IExport {
         return outputConnectors;
     }
 
-    @Override
     public List<ParameterDefinition> createParameters() {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();

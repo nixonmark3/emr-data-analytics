@@ -1,0 +1,26 @@
+<div ng-show="config.isVisible" class="emr-panel ng-class:{'minimized': isMinimized};" ng-style="{top: config.y, left: config.x, width: config.width, height: config.height}">
+    <div class="emr-panel-header" ng-mousedown="onDrag($event);">
+        <div class="emr-panel-icon">
+            <i class="fa fa-cube"></i>
+        </div>
+        <input type="text" class="emr-panel-title" ng-model="title" ng-change="onTitleChange()" />
+        <div class="emr-panel-minimize">
+            <i class="fa ng-class:{'fa-minus': !isMinimized, 'fa-plus': isMinimized};" ng-click="toggleMinimize()"></i>
+        </div>
+    </div>
+    <div class="emr-panel-container">
+        <div ng-show="config.isDirty && !isMinimized" class="emr-panel-controls">
+            <button type="button" class="btn btn-success btn-sm pull-right" ng-click="save()">
+                <i class="fa fa-check"></i>
+            </button>
+            <button type="button" class="btn btn-default btn-sm pull-right" ng-click="cancel()">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class="emr-panel-content" ng-transclude></div>
+    </div>
+    <div class="emr-panel-footer"></div>
+    <div class="resizable-handle resizable-e" ng-mousedown="onResize($event, 'e')"></div>
+    <div class="resizable-handle resizable-s" ng-mousedown="onResize($event, 's')"></div>
+    <div class="resizable-handle resizable-se" ng-mousedown="onResize($event, 'se')"></div>
+</div>

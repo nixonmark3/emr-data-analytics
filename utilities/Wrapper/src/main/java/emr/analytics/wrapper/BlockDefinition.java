@@ -1,9 +1,6 @@
 package emr.analytics.wrapper;
 
-import emr.analytics.models.definition.ConnectorDefinition;
-import emr.analytics.models.definition.Definition;
-import emr.analytics.models.definition.ParameterDefinition;
-import emr.analytics.models.definition.Signature;
+import emr.analytics.models.definition.*;
 
 import org.jongo.MongoCollection;
 
@@ -15,17 +12,18 @@ public abstract class BlockDefinition implements IExport {
 
         Definition definition = createDefinition();
 
-        definition.setSignature(createSignature());
-        definition.setInputConnectors(createInputConnectors());
-        definition.setOutputConnectors(createOutputConnectors());
-        definition.setParameters(createParameters());
+        ModeDefinition modeDefinition = createOfflineMode();
+        if (modeDefinition != null)
+            definition.setModel(Mode.OFFLINE, modeDefinition);
+
+        modeDefinition = createOnlineMode();
+        if (modeDefinition != null)
+            definition.setModel(Mode.ONLINE, modeDefinition);
 
         definitions.save(definition);
     }
 
     public abstract Definition createDefinition();
-    public abstract Signature createSignature();
-    public abstract List<ConnectorDefinition> createInputConnectors();
-    public abstract List<ConnectorDefinition> createOutputConnectors();
-    public abstract List<ParameterDefinition> createParameters();
+    public abstract ModeDefinition createOnlineMode();
+    public abstract ModeDefinition createOfflineMode();
 }

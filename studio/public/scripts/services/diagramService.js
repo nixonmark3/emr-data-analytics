@@ -160,7 +160,6 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
 
             var deferred = $q.defer();
 
-            //$http({ method: 'GET', url: '/assets/data/definitions/list.json' })
             $http.get('/getDefinitions')
                 .success(function (data, status, headers, config) {
 

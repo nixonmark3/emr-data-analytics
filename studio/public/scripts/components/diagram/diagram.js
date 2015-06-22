@@ -1,6 +1,6 @@
 'use strict';
 
-var diagramApp = angular.module('diagramApp', ['draggableApp', 'emr.ui.popup', 'ngAnimate', 'blockDataViewerApp'])
+var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup', 'ngAnimate', 'blockDataViewerApp'])
     .directive('diagram', ['$compile', '$window', '$location', '$timeout', 'popupService',
         function ($compile, $window, $location, $timeout, popupService) {
 
@@ -11,7 +11,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'emr.ui.popup', '
             scope: {
                 diagram: '=viewModel',
                 onConfigure: '=?',
-                isOnline: '=?',
+                onSelection: '=?',
                 nodes: '=?',
                 library: '=?',
                 loadSources: "=?",
@@ -63,7 +63,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'emr.ui.popup', '
 
                 $scope.$on("createBlock", function (event, args) {
 
-                    if (!$scope.isOnline) {
+                    if ($scope.diagramMode() == "OFFLINE") {
 
                         // translate diagram (svg) coordinates into application coordinates
                         var point = translateCoordinates(args.x, args.y, args.evt);
@@ -152,7 +152,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'emr.ui.popup', '
                 var translateCoordinates = function (x, y, evt) {
 
                     var elementName;
-                    if ($scope.isOnline)
+                    if ($scope.diagramMode() == "ONLINE")
                         elementName = "online-diagram";
                     else
                         elementName = "offline-diagram";
@@ -168,7 +168,7 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'emr.ui.popup', '
                 var inverseCoordinates = function (x, y) {
 
                     var elementName;
-                    if ($scope.isOnline)
+                    if ($scope.diagramMode() == "ONLINE")
                         elementName = "online-diagram";
                     else
                         elementName = "offline-diagram";
@@ -181,22 +181,23 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'emr.ui.popup', '
                     };
                 };
 
+                //
+                // create a block configuration viewmodel
+                //
                 var getConfigBlock = function (x, y, definitionName) {
 
-                    // retrieve definition
-                    var definition = getDefinition(definitionName);
+                    // using the current diagram's mode and specified definition -
+                    // create a definition view model
+                    var definition = new viewmodels.definitionViewModel($scope.diagram.mode(),
+                        $scope.library[definitionName]);
 
-                    // get block description
+                    // create a block description
                     var block = $scope.diagram.getBlockDescription(x, y, definition);
 
                     // create config block
                     return new viewmodels.configuringBlockViewModel(definition, block);
                 };
 
-                var getDefinition = function (definitionName) {
-
-                    return $scope.library[definitionName];
-                };
 
                 $scope.mouseMove = function (evt) {
 
@@ -233,6 +234,9 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'emr.ui.popup', '
                             // if necessary - select the block
                             if (!block.selected()) {
                                 $scope.selectionCount = diagram.selectBlock(block);
+
+                                if ($scope.onSelection)
+                                    $scope.onSelection([block]);
                             }
                         },
 
@@ -249,7 +253,10 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'emr.ui.popup', '
 
                         clicked: function () {
 
-                            $scope.$apply(function(){$scope.selectionCount = diagram.onBlockClicked(block)});
+                            if ($scope.onSelection)
+                                $scope.onSelection([block]);
+
+                            $scope.$apply(diagram.onBlockClicked(block));
                         }
                     });
 
@@ -350,8 +357,6 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'emr.ui.popup', '
                     evt.stopPropagation();
                     evt.preventDefault();
                 };
-
-
 
                 //
                 // handles diagram mouse down event: drag allows users to select multiple blocks and click sets focus to
@@ -468,6 +473,15 @@ var diagramApp = angular.module('diagramApp', ['draggableApp', 'emr.ui.popup', '
 
                     evt.stopPropagation();
                     evt.preventDefault();
+                };
+
+                $scope.diagramMode = function(){
+
+                    var mode = "UNKNOWN";
+                    if ($scope.diagram)
+                        mode = $scope.diagram.mode();
+
+                    return mode;
                 };
 
                 var showBlockData = function (block) {

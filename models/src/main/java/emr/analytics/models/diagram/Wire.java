@@ -1,6 +1,7 @@
 package emr.analytics.models.diagram;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 /**
  * Jackson schema for a Diagram Wire.
@@ -10,7 +11,7 @@ public class Wire implements Serializable {
      * Returns the name of the from node of this Wire.
      * @return name of from node
      */
-    public String getFrom_node() {
+    public UUID getFrom_node() {
         return from_node;
     }
 
@@ -18,7 +19,7 @@ public class Wire implements Serializable {
      * Sets the name of the from node of this Wire.
      * @param from_node name of from node
      */
-    public void setFrom_node(String from_node) {
+    public void setFrom_node(UUID from_node) {
         this.from_node = from_node;
     }
 
@@ -42,7 +43,7 @@ public class Wire implements Serializable {
      * Returns the name of the to node of this Wire.
      * @return name of to node
      */
-    public String getTo_node() {
+    public UUID getTo_node() {
         return to_node;
     }
 
@@ -50,7 +51,7 @@ public class Wire implements Serializable {
      * Sets the name of the to node of this Wire.
      * @param to_node name of node
      */
-    public void setTo_node(String to_node) {
+    public void setTo_node(UUID to_node) {
         this.to_node = to_node;
     }
 
@@ -107,7 +108,7 @@ public class Wire implements Serializable {
      */
     private Wire() {}
 
-    public Wire(String from, String from_connector, int from_index, String to, String to_connector, int to_index){
+    public Wire(UUID from, String from_connector, int from_index, UUID to, String to_connector, int to_index){
 
         this.from_node = from;
         this.from_connector = from_connector;
@@ -120,10 +121,10 @@ public class Wire implements Serializable {
     /**
      * Private members.
      */
-    private String from_node;
+    private UUID from_node;
     private int from_connectorIndex;
     private String from_connector;
-    private String to_node;
+    private UUID to_node;
     private int to_connectorIndex;
     private String to_connector;
 }
