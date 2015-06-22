@@ -21,6 +21,7 @@ public class FillNaN extends BlockDefinition implements IExport {
         ModeDefinition modeDefinition = new ModeDefinition();
         modeDefinition.setInputs(createInputConnectors());
         modeDefinition.setOutputs(createOutputConnectors());
+        modeDefinition.setParameters(createParameters());
 
         return modeDefinition;
     }
@@ -43,6 +44,26 @@ public class FillNaN extends BlockDefinition implements IExport {
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString().toString()));
         return outputConnectors;
+    }
+
+    public List<ParameterDefinition> createParameters() {
+
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+
+        List<String> opts = new ArrayList<String>();
+        opts.add("backfill");
+        opts.add("bfill");
+        opts.add("pad");
+        opts.add("ffill");
+        opts.add("mean");
+
+        parameters.add(new ParameterDefinition("Fill Method",
+                DataType.LIST.toString(),
+                "ffill",
+                opts,
+                null));
+
+        return parameters;
     }
 
 }

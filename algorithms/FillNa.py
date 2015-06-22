@@ -1,6 +1,5 @@
 __author__ = 'noelbell'
 
-
 import sys
 import pandas as pd
 import numpy as np
@@ -22,9 +21,14 @@ class FillNa(FunctionBlock):
 
             df = results_table[self.input_connectors['in'][0]]
 
-            df_filled = df.fillna(method='ffill')
+            interpolation = self.parameters['Fill Method']
 
-            FunctionBlock.save_results(self, df=df_filled, statistics=True, plot=True, results=None)
+            if interpolation == 'mean':
+                df_filled = df.fillna(value=df.mean())
+            else:
+                df_filled = df.fillna(method=interpolation)
+
+            FunctionBlock.save_results(self, df=df_filled, statistics=True, plot=False, results=None)
 
             FunctionBlock.report_status_complete(self)
 
