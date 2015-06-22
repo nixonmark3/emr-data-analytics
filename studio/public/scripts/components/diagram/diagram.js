@@ -21,6 +21,8 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
             },
             link: function($scope, element, attrs) {
 
+                var mainWindow = angular.element($window);
+
                 $scope.configuringBlock = false;
                 $scope.configuringDiagram = false;
                 $scope.creatingBlock = false;
@@ -30,31 +32,115 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                 $scope.mouseOverConnector = null;
                 $scope.showingBlockData = false;
                 $scope.selectionCount = 0;
-
-                // capture the diagram's width
-                $scope.diagramWidth = element.width();
-
                 $scope.absUrl = $location.absUrl();
+                $scope.mainWindowWidth = mainWindow.width();
 
-                //
-                // listen for window resizes
-                //
-                angular.element($window).bind("resize", function () {
+                mainWindow.bind("resize", function () {
 
-                    // update the width property on window resize
                     $scope.$apply(function () {
 
-                        $scope.diagramWidth = element.width();
+                        $scope.mainWindowWidth = mainWindow.width();
                     });
                 });
 
+                $scope.getDiagramWidth = function() {
+
+                    if ($scope.diagram != undefined) {
+
+                        var diagram = $scope.diagram;
+
+                        if (diagram.blocks.length == 0) {
+
+                            diagram.setWidth(mainWindow.width());
+
+                            return diagram.getWidth();
+                        }
+                        else {
+
+                            return diagram.getWidth();
+                        }
+                    }
+
+                    return mainWindow.width();
+                };
+
+                $scope.getDiagramHeight = function() {
+
+                    if ($scope.diagram != undefined) {
+
+                        var diagram = $scope.diagram;
+
+                        if (diagram.blocks.length == 0) {
+
+                            diagram.setHeight(getDefaultDiagramHeight());
+
+                            return diagram.getHeight();
+                        }
+                        else {
+
+                            return diagram.getHeight();
+                        }
+                    }
+
+                    return getDefaultDiagramHeight();
+                };
+
+                $scope.showRootConnector = function() {
+
+                    if ($scope.diagram != undefined) {
+
+                        var diagram = $scope.diagram;
+
+                        if (diagram.blocks.length == 0) {
+
+                            diagram.setWidth(mainWindow.width());
+                            diagram.setHeight(getDefaultDiagramHeight());
+                            return true;
+                        }
+                    }
+
+                    return false;
+                };
+
+                var adjustDiagramSizeIfRequired = function(point) {
+
+                    var diagram = $scope.diagram;
+
+                    var increaseHeight = diagram.isPointInHeightIncreaseZone(point.y);
+
+                    var increaseWidth = diagram.isPointInWidthIncreaseZone(point.x);
+
+                    if (increaseHeight) {
+
+                        $scope.$applyAsync(function() {
+
+                            diagram.increaseHeight();
+                        });
+                    }
+
+                    if (increaseWidth) {
+
+                        $scope.$applyAsync(function() {
+
+                            diagram.increaseWidth();
+                        });
+                    }
+                };
+
+                var getDefaultDiagramHeight = function() {
+
+                    return mainWindow.height() - 55;
+                };
+
                 var jQuery = function (element) {
+
                     return $(element);
                 };
 
                 var beginDragEvent = function (x, y, config) {
 
                     $scope.$root.$broadcast("beginDrag", {
+
                         x: x,
                         y: y,
                         config: config
@@ -72,21 +158,27 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                         // create the block
                         $scope.diagram.createBlock(configBlock);
+
+                        adjustDiagramSizeIfRequired(point);
                     }
                 });
 
                 var hasClassSVG = function (obj, has) {
+
                     var classes = obj.attr('class');
                     if (!classes) {
+
                         return false;
                     }
 
                     var index = classes.search(has);
 
                     if (index == -1) {
+
                         return false;
                     }
                     else {
+
                         return true;
                     }
                 };
@@ -249,6 +341,8 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                             diagram.updateSelectedBlocksLocation(deltaX, deltaY);
 
                             coords = curCoords;
+
+                            adjustDiagramSizeIfRequired(coords);
                         },
 
                         clicked: function () {
@@ -450,7 +544,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                                 // todo: temp coordinates
 
-                                configBlock.x = ($scope.diagramWidth / 2) - 100;
+                                configBlock.x = ($scope.mainWindowWidth / 2) - 100;
                                 configBlock.y = 50;
 
                                 $scope.diagram.createBlock(configBlock);

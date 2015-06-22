@@ -2,7 +2,8 @@
 <svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
      ng-mousemove="mouseMove($event)"
-     ng-mousedown="diagramMouseDown($event);">
+     ng-mousedown="diagramMouseDown($event);"
+     ng-style="{'height': getDiagramHeight(), 'width': getDiagramWidth()}">
 
     <defs>
         <filter id="dropshadow" width="200%" height="130%">
@@ -19,10 +20,10 @@
     </defs>
 
     <!-- root connector -->
-    <g ng-if="diagramMode()=='OFFLINE' && diagram.blocks.length==0"
-       ng-attr-transform="translate({{diagramWidth/2}})"
+    <g ng-if="diagramMode()=='OFFLINE' && showRootConnector()"
+       ng-attr-transform="translate({{mainWindowWidth/2}})"
        id="root-connector-container"
-        ng-click="showLibraryPopup($event)">
+       ng-click="showLibraryPopup($event)">
 
         <circle id="root-connector"
                 r="16"

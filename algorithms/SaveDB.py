@@ -35,7 +35,8 @@ class SaveDB(FunctionBlock):
             results = collections.OrderedDict()
             results['Size'] = size
 
-            FunctionBlock.save_results(self, df=df, statistics=True, plot=True, results=results)
+            FunctionBlock.save_results(self, df=df, statistics=True, plot=False, results=results)
+
             FunctionBlock.report_status_complete(self)
 
             return {FunctionBlock.getFullPath(self, 'out'): df}

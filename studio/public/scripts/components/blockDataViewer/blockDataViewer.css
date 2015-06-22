@@ -57,7 +57,7 @@
 .page-right.ng-hide-add { -webkit-animation: slideOutRight 0.4s; }
 .page-right.ng-hide-remove { -webkit-animation: slideInLeft 0.4s; }
 
-.grid-container { position: relative; height: 100%; width: 100%; }
+.stats-grid-container { position: relative; height: 100%; width: 100%; }
 
 .grid-fixed-col{
     position: absolute;

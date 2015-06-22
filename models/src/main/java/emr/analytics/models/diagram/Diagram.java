@@ -15,11 +15,15 @@ import java.util.stream.Collectors;
  * Jackson schema for Diagram.
  */
 public class Diagram implements Serializable {
+
     private String name = "";
     private String description = "";
     private String owner = "";
     private Mode mode = Mode.OFFLINE;
     private TargetEnvironments targetEnvironment = TargetEnvironments.PYTHON;
+    private int height = 1000;
+    private int width = 1000;
+
     private List<Wire> wires = new ArrayList<Wire>();
     private List<Block> blocks = new ArrayList<Block>();
     private List<DiagramConnector> inputs = new ArrayList<DiagramConnector>();
@@ -41,6 +45,22 @@ public class Diagram implements Serializable {
 
     public static Diagram Create() {
         return new Diagram("New Diagram", "", "");
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
     }
 
     /**
