@@ -10,14 +10,12 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
             templateUrl: '/assets/scripts/components/diagram/diagram.html',
             scope: {
                 diagram: '=viewModel',
-                onConfigure: '=?',
                 onDisplay: '=?',
                 onSelection: '=?',
                 onDeselection: '=?',
                 nodes: '=?',
                 library: '=?',
                 loadSources: "=?",
-                getBlockData: "=?",
                 blurBackground: "=?"
             },
             link: function($scope, element, attrs) {
@@ -31,8 +29,6 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                 $scope.draggingWire = false;
                 $scope.mouseOverBlock = null;
                 $scope.mouseOverConnector = null;
-                $scope.showingBlockData = false;
-                $scope.selectionCount = 0;
                 $scope.absUrl = $location.absUrl();
                 $scope.mainWindowWidth = mainWindow.width();
 
@@ -148,6 +144,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                     });
                 };
 
+                // todo: move out to app.js
                 $scope.$on("createBlock", function (event, args) {
 
                     if ($scope.diagramMode() == "OFFLINE") {
@@ -326,7 +323,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                             // if necessary - select the block
                             if (!block.selected()) {
-                                $scope.selectionCount = diagram.selectBlock(block);
+                                diagram.selectBlock(block);
 
                                 if ($scope.onSelection)
                                     $scope.onSelection([block]);
@@ -436,23 +433,6 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                     evt.preventDefault();
                 };
 
-                $scope.onBlockConfigure = function (evt, block) {
-
-                    //
-                    if ($scope.onConfigure) {
-
-                        // capture the block's coordinates and set the popup's width and height
-                        var position = inverseCoordinates(block.x(), block.y());
-                        position.width = 250;
-                        position.height = 300;
-
-                        $scope.onConfigure(position, block);
-                    }
-
-                    evt.stopPropagation();
-                    evt.preventDefault();
-                };
-
                 //
                 // handles diagram mouse down event: drag allows users to select multiple blocks and click sets focus to
                 // the diagram canvas
@@ -494,7 +474,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                             $scope.$apply(function(){
                                 $scope.draggingSelection = false;
-                                $scope.selectionCount = $scope.diagram.applySelectionRect($scope.dragSelectionRect);
+                                $scope.diagram.applySelectionRect($scope.dragSelectionRect);
                             });
 
                             delete $scope.dragSelectionRect;
@@ -522,6 +502,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                     evt.preventDefault();
                 };
 
+                // todo: move to app.js
                 $scope.showLibraryPopup = function (evt) {
 
                     popupService.show({
@@ -559,13 +540,16 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                     evt.preventDefault();
                 };
 
-                $scope.toggleBlockData = function (evt, block) {
+                $scope.onBlockDisplay = function (evt, block){
 
-                    if ($scope.showingBlockData) {
-                        hideBlockData();
-                    }
-                    else {
-                        showBlockData(block);
+                    if ($scope.onDisplay) {
+
+                        // capture the block's coordinates and set the popup's width and height
+                        var position = inverseCoordinates(block.x(), block.y());
+                        position.width = 250;
+                        position.height = 300;
+
+                        $scope.onDisplay(position, block);
                     }
 
                     evt.stopPropagation();
@@ -579,37 +563,6 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                         mode = $scope.diagram.mode();
 
                     return mode;
-                };
-
-                var showBlockData = function (block) {
-
-                    var position = inverseCoordinates(block.x(), block.y());
-                    position.width = 750;
-                    position.height = 550;
-
-                    popupService.show({
-                        templateUrl: '/assets/scripts/components/diagram/blockData.html',
-                        controller: 'blockDataController',
-                        isAnimated: false,
-                        inputs: {
-                            block: block,
-                            position: position,
-                            getBlockData: $scope.getBlockData
-                        }
-                    }).then(function (popup) {
-
-                        $scope.showingBlockData = true;
-                        $scope.blurBackground = true;
-                        $scope.blockDataPopup = popup;
-                    });
-                };
-
-                var hideBlockData = function () {
-                    $scope.blockDataPopup.controller.close();
-
-                    $scope.showingBlockData = false;
-                    $scope.blurBackground = false;
-                    delete $scope.blockDataPopup;
                 };
             }
         }

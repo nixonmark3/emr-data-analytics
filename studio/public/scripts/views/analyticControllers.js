@@ -2,37 +2,78 @@
 
 analyticsApp
 
-    .controller('blockConfigController', ['$scope', '$element', 'block', 'position', 'loadSources', 'close',
-        function($scope, $element, block, position, loadSources, close) {
-
-            $scope.block = block;
-            $scope.loadSources = loadSources;
-
-            // calculate position based on block dimensions
-            if ((position.x - position.width - 20) > 0) {         // left align
-                $scope.alignLeft = true;
-                position.x = position.x - position.width - 20;
-            }
-            else {                                                // right align
-                $scope.alignLeft = false;
-                position.x = position.x + block.w + 20;
-            }
+    .controller('blockDataController',
+    ['$scope', '$element', '$window', '$timeout', 'diagramService', 'block', 'position', 'close',
+        function($scope, $element, $window, $timeout, diagramService, block, position, close){
 
             $scope.position = position;
+            $scope.block = block.data;
 
-            $scope.cancel = function(){
+            /*// calculate transitions for popup destination
+            var transX = ($window.innerWidth / 2 - position.width / 2) - position.x;
+            var transY = ($window.innerHeight / 2 - position.height / 2) - position.y;
+            var transform = "translate(" + transX + "px," + transY + "px) scale(1)";
 
-                close();
+            $timeout(
+                function(){
+                    $element.css({ "-webkit-transform": transform });
+                },
+                30);*/
+
+            $scope.close = function(){
+
+                close(null, 500);
+
+                $element.css({
+                    "-webkit-transform": "translate(0, 0) scale(0.01)"
+                });
             };
 
-            $scope.save = function(){
+            $scope.getBlockData = function(type, key, success){
 
-                close(block);
+                switch(type){
+                    case "Pages":
+                        diagramService.availableBlockResults(key).then(
+                            function(data){
+                                success(data);
+                            },
+                            function (code) {
+                                console.log(code); // TODO show exception
+                            }
+                        );
+                        break;
+                    case "Statistics":
+                        diagramService.blockStatistics(key).then(
+                            function(data){
+                                success(data);
+                            },
+                            function (code) {
+                                console.log(code); // TODO show exception
+                            }
+                        );
+                        break;
+                    case "Plot":
+                        diagramService.blockPlot(key).then(
+                            function(data){
+                                success(data);
+                            },
+                            function (code) {
+                                console.log(code); // TODO show exception
+                            }
+                        );
+                        break;
+                    case "Results":
+                        diagramService.blockOutputResults(key).then(
+                            function(data){
+                                success(data);
+                            },
+                            function (code) {
+                                console.log(code); // TODO show exception
+                            }
+                        );
+                        break;
+                }
             };
-
-            this.cancel = $scope.close;
-
-            this.save = $scope.save;
         }
     ])
 
@@ -172,7 +213,7 @@ analyticsApp
                     feature.flipToBack = true;
                     feature.flipToFront = false;
                 }
-            }
+            };
 
             /*  take the raw set of features and prepare for display
              */

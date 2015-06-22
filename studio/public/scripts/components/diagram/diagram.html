@@ -96,34 +96,10 @@
 
         </g>
 
-        <!-- block configuration button -->
-        <!--<g class="block-button-wrapper"
-           ng-click="onBlockConfigure($event, block);">
-
-            <rect class="block-button"
-                  ry="6"
-                  rx="6"
-                  x="6"
-                  ng-attr-y="{{block.height() - 33}}"
-                  width="34"
-                  height="28">
-
-            </rect>
-
-            <text class="block-icon"
-                  x="23"
-                  ng-attr-y="{{block.height() - 19}}"
-                  text-anchor="middle"
-                  alignment-baseline="central">
-                &#xf0ad
-            </text>
-
-        </g>-->
-
         <!-- block data button -->
         <g class="block-button-wrapper"
            ng-if="diagramMode()=='OFFLINE'"
-           ng-click="toggleBlockData($event, block);">
+           ng-click="onBlockDisplay($event, block);">
 
             <rect class="block-button"
                   ry="6"

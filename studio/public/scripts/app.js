@@ -319,18 +319,18 @@ var analyticsApp = angular.module('analyticsApp',
         };
 
 
-        $scope.onBlockConfigure = function(position, block){
+        $scope.onBlockDisplay = function(position, block){
+
+            var modalPosition = {
+                centerX: (position.x + block.width() / 2),
+                centerY: (position.y + block.height() / 2)
+            };
+
+            $scope.blurBackground = true;
 
             switch(block.definitionType()){
 
                 case "CHART":
-
-                    var modalPosition = {
-                        centerX: (position.x + block.width() / 2),
-                        centerY: (position.y + block.height() / 2)
-                    };
-
-                    $scope.blurBackground = true;
 
                     modalService.show({
                         templateUrl: '/assets/scripts/views/charts.html',
@@ -354,45 +354,24 @@ var analyticsApp = angular.module('analyticsApp',
                     break;
                 default:
 
-                    // all other definition types should be configured using the conventional mechanism
+                    modalService.show({
+                        templateUrl: '/assets/scripts/views/blockData.html',
+                        controller: 'blockDataController',
+                        inputs: {
+                            block: block
+                        },
+                        position: modalPosition
+                    }).then(function (modal) {
 
-                    if ($scope.configuringBlock){  // if a block is already being configured - save it
+                        modal.close.then(function (result) {
 
-                        $scope.blockConfiguration.controller.save();
-                    }
-                    else {  // show the block configuration popup
+                            $scope.blurBackground = false;
 
-                        // retrieve the block's definition definition
-                        var definition = $scope.library[block.definition()];
+                            if (result) {
 
-                        // convert it to a config block
-                        var configBlock = new viewmodels.configuringBlockViewModel(definition, block.data);
-
-                        // show the popup
-                        var result = popupService.show({
-                            templateUrl: '/assets/scripts/components/diagram/blockProperties.html',
-                            controller: 'blockConfigController',
-                            inputs: {
-                                block: configBlock,
-                                position: position,
-                                loadSources: $scope.loadSources
                             }
-                        }).then(function (popup) {
-
-                            $scope.configuringBlock = true;
-                            $scope.blockConfiguration = popup;
-
-                            // when the block configuration is closed - save the resulting config block
-                            $scope.blockConfiguration.close.then(function (configBlock) {
-
-                                if (configBlock)
-                                    $scope.diagramViewModel.updateBlock(configBlock);
-
-                                $scope.configuringBlock = false;
-                                delete $scope.blockConfiguration;
-                            });
                         });
-                    }
+                    });
 
                     break;
             }
@@ -442,52 +421,6 @@ var analyticsApp = angular.module('analyticsApp',
                     console.log(code); // TODO show exception
                 }
             );
-        };
-
-        $scope.getBlockData = function(type, key, success){
-
-            switch(type){
-                case "Pages":
-                    diagramService.availableBlockResults(key).then(
-                       function(data){
-                           success(data);
-                       },
-                        function (code) {
-                            console.log(code); // TODO show exception
-                        }
-                    );
-                    break;
-                case "Statistics":
-                    diagramService.blockStatistics(key).then(
-                        function(data){
-                            success(data);
-                        },
-                        function (code) {
-                            console.log(code); // TODO show exception
-                        }
-                    );
-                    break;
-                case "Plot":
-                    diagramService.blockPlot(key).then(
-                        function(data){
-                            success(data);
-                        },
-                        function (code) {
-                            console.log(code); // TODO show exception
-                        }
-                    );
-                    break;
-                case "Results":
-                    diagramService.blockOutputResults(key).then(
-                        function(data){
-                            success(data);
-                        },
-                        function (code) {
-                            console.log(code); // TODO show exception
-                        }
-                    );
-                    break;
-            }
         };
 
         /*

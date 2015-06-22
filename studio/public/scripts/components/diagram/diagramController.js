@@ -37,42 +37,5 @@ diagramApp
                 close();
             };
         }
-    ])
-
-    .controller('blockDataController',
-    ['$scope', '$element', '$window', '$timeout', 'block', 'position', 'getBlockData', 'close',
-        function($scope, $element, $window, $timeout, block, position, getBlockData, close){
-
-            // center popup over block
-            position.x = position.x - (position.width / 2 - block.width() / 2);
-            position.y = position.y - (position.height / 2 - block.height() / 2);
-            $scope.position = position;
-
-            $scope.getBlockData = getBlockData;
-
-            $scope.block = block.data;
-
-            // calculate transitions for popup destination
-            var transX = ($window.innerWidth / 2 - position.width / 2) - position.x;
-            var transY = ($window.innerHeight / 2 - position.height / 2) - position.y;
-            var transform = "translate(" + transX + "px," + transY + "px) scale(1)";
-
-            $timeout(
-                function(){
-                    $element.css({ "-webkit-transform": transform });
-                },
-                30);
-
-            $scope.close = function(){
-
-                close(null, 500);
-
-                $element.css({
-                    "-webkit-transform": "translate(0, 0) scale(0.01)"
-                });
-            };
-
-            this.close = $scope.close;
-        }
     ]);
 
