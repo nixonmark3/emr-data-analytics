@@ -4,8 +4,11 @@ html, body { height: 100%; }
 body { font-family: Roboto, arial, sans-serif; background-color: #c5c5c5; overflow: hidden; }
 
 /* main layout  */
-#main-tabs { display: block; position: relative; float: left; height: 100%; width: 70px; padding: 50px 0 0 0; margin: 0; background-color: #b5b5b5; }
+#main-tabs { display: block; position: relative; float: left; height: 100%; width: 70px; padding: 50px 0 0 0; margin: 0; background-color: #3d3d3d; }
+#main-tabs .vertical-tab { margin-left: 3px; color: #fff; }
+#main-tabs .vertical-tab:hover { color: #3182bd; }
 #main-tabs .vertical-tab.active { background-color: #e5e5e5; color: #737373; border-left: 4px solid #1f77b4; }
+#main-tabs .tab-text { font-size: 0.7em; }
 #main-content { display: block; position: relative; float: left; height: 100%; width: -webkit-calc(100% - 70px); overflow: hidden; }
 
 /*
