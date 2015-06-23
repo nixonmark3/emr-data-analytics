@@ -7,6 +7,7 @@ import collections
 
 from abc import ABCMeta, abstractmethod
 
+studio_db_name = 'emr-data-analytics-studio'
 
 class FunctionBlock():
 
@@ -16,7 +17,7 @@ class FunctionBlock():
         self.unique_name = unique_name
         self.input_connectors = {}
         self.parameters = {}
-        self.results = {'name': self.unique_name, 'friendly_name': self.name}
+        self.results = {'name': self.unique_name, 'friendly_name': self.name, 'Results': collections.OrderedDict()}
 
     @abstractmethod
     def execute(self, results_table):
@@ -40,7 +41,7 @@ class FunctionBlock():
 
     def save_results(self, df=None, statistics=False, plot=False, results=None):
         connection = pymongo.MongoClient()
-        db = connection['emr-data-analytics-studio']
+        db = connection[studio_db_name]
 
         block_results = collections.OrderedDict()
 
@@ -94,3 +95,47 @@ class FunctionBlock():
 
     def getFullPath(self, parameter_name):
         return '{0}/{1}'.format(self.unique_name, parameter_name)
+
+    def add_persisted_connector_result(self, name, value):
+        self.results['Results'][name] = value
+
+    def add_general_results(self, results):
+        self.results['Results']['Results'] = results
+
+    def add_statistics_result(self, df):
+        self.results['Results']['Statistics'] = list(df.describe().to_dict().items())
+
+    def add_plot_result(self, df):
+        connection = pymongo.MongoClient()
+        db = connection[studio_db_name]
+
+        fs = gridfs.GridFS(db)
+
+        if fs.exists(filename=self.unique_name):
+            fp = fs.get_last_version(self.unique_name)
+            fs.delete(fp._id)
+
+        ax = df.plot(legend=True)
+        ax.legend(loc='best', fancybox=True, shadow=True, prop={'size': 7})
+        ax.tick_params(axis='both', which='major', labelsize=8)
+        fig = ax.get_figure()
+        fig.savefig('{0}.png'.format(self.unique_name), dpi=100)
+        plt.close(fig)
+
+        with open('{0}.png'.format(self.unique_name), 'rb') as f:
+            png = f.read()
+
+        stored = fs.put(png, filename=self.unique_name)
+
+        os.remove('{0}.png'.format(self.unique_name))
+
+        self.results['Results']['Plot'] = {'name': self.unique_name, 'ID': stored}
+
+        connection.close()
+
+    def save_all_results(self):
+        connection = pymongo.MongoClient()
+        db = connection[studio_db_name]
+        results = db['results']
+        results.update({'name': self.unique_name}, self.results, upsert=True)
+        connection.close()
