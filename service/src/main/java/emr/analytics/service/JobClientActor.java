@@ -3,6 +3,8 @@ package emr.analytics.service;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import akka.actor.*;
 import akka.japi.pf.ReceiveBuilder;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import emr.analytics.models.definition.Definition;
 import emr.analytics.models.definition.Mode;
@@ -11,13 +13,17 @@ import emr.analytics.models.messages.EvaluationStatus;
 import emr.analytics.models.messages.OnlineNotification;
 import emr.analytics.service.jobs.AnalyticsJob;
 import emr.analytics.service.messages.*;
+import org.apache.spark.streaming.StreamingContext;
 import scala.PartialFunction;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.runtime.BoxedUnit;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class JobClientActor extends AbstractActor {
 
@@ -56,6 +62,14 @@ public class JobClientActor extends AbstractActor {
         );
 
         active = ReceiveBuilder
+            .match(JobCompileRequest.class, request -> {
+
+                Timeout timeout = new Timeout(Duration.create(5, TimeUnit.SECONDS));
+                Future<Object> future = Patterns.ask(_compiler, request.getJobRequest(), timeout);
+                AnalyticsJob job = (AnalyticsJob) Await.result(future, timeout.duration());
+
+                sender().tell(job, self());
+            })
             .match(JobRequest.class, request -> {
 
                 _compiler.tell(request, self());

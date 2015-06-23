@@ -79,6 +79,21 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
             return deferred.promise;
         },
 
+        debug: function (data) {
+
+            var deferred = $q.defer();
+
+            $http.post('/debug', data)
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
+
         deploy: function (data) {
 
             var deferred = $q.defer();

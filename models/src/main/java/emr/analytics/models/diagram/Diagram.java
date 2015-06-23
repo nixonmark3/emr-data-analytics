@@ -23,13 +23,14 @@ public class Diagram implements Serializable {
     private TargetEnvironments targetEnvironment = TargetEnvironments.PYTHON;
     private int height = 1000;
     private int width = 1000;
+    private int version = 0;
 
     private List<Wire> wires = new ArrayList<Wire>();
     private List<Block> blocks = new ArrayList<Block>();
     private List<DiagramConnector> inputs = new ArrayList<DiagramConnector>();
     private List<DiagramConnector> outputs = new ArrayList<DiagramConnector>();
+    private List<PersistedOutput> persistedOutputs = new ArrayList<PersistedOutput>();
     private List<Diagram> diagrams = new ArrayList<Diagram>();
-    private int version = 0;
 
     public Diagram(String name, String description, String owner, Mode mode){
         this.name = name;
@@ -350,4 +351,8 @@ public class Diagram implements Serializable {
     public void addInput(DiagramConnector connector){ this.inputs.add(connector); }
 
     public void addOutput(DiagramConnector connector) { this.outputs.add(connector); }
+
+    public List<PersistedOutput> getPersistedOutputs(){ return this.persistedOutputs; }
+
+    public void addPersistedOutput(PersistedOutput persistedOutput){ this.persistedOutputs.add(persistedOutput); }
 }

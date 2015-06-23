@@ -144,6 +144,67 @@ var analyticsApp = angular.module('analyticsApp',
         };
 
         /*
+        ** Display block details / results
+         */
+        $scope.onBlockDisplay = function(position, block){
+
+            var modalPosition = {
+                centerX: (position.x + block.width() / 2),
+                centerY: (position.y + block.height() / 2)
+            };
+
+            $scope.blurBackground = true;
+
+            switch(block.definitionType()){
+
+                case "CHART":
+
+                    modalService.show({
+                        templateUrl: '/assets/scripts/views/charts.html',
+                        controller: 'chartsController',
+                        inputs: {
+                            block: block
+                        },
+                        position: modalPosition
+                    }).then(function (modal) {
+
+                        modal.close.then(function (result) {
+
+                            $scope.blurBackground = false;
+
+                            if (result) {
+
+                            }
+                        });
+                    });
+
+                    break;
+                default:
+
+                    modalService.show({
+                        templateUrl: '/assets/scripts/views/blockData.html',
+                        controller: 'blockDataController',
+                        inputs: {
+                            block: block
+                        },
+                        position: modalPosition
+                    }).then(function (modal) {
+
+                        modal.close.then(function (result) {
+
+                            $scope.blurBackground = false;
+
+                            if (result) {
+
+                            }
+                        });
+                    });
+
+                    break;
+            }
+        };
+
+        /*
         ** On block[s] selection - show the properties panel
          */
         $scope.onBlockSelection = function(blocks){
@@ -155,6 +216,9 @@ var analyticsApp = angular.module('analyticsApp',
 
                 // a single block has been selected
                 var block = blocks[0];
+
+                // select the block
+                diagram().onBlockClicked(block);
 
                 // reference the current diagram mode
                 var mode = diagram().mode();
@@ -172,9 +236,48 @@ var analyticsApp = angular.module('analyticsApp',
                 // show the studio properties panel
                 $scope.studioPropertiesPanel.isVisible = true;
 
-                // select the block
-                $scope.$apply(diagram().onBlockClicked(block));
             }
+        };
+
+        $scope.debug = function(evt) {
+
+            // retrieve the current diagram's data
+            var data = diagram().data;
+
+            diagramService.debug(data).then(
+                function (source) {
+
+                    // todo: show source
+                    console.log(source);
+                },
+                function (code) {
+                    console.log(code); // TODO show exception
+                }
+            );
+
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
+
+        /*
+        ** Deploy the online diagram
+         */
+        $scope.deploy = function(evt) {
+
+            var data = $scope.onlineViewModel.data;
+
+            diagramService.deploy(data).then(
+                function (jobId) {
+
+                    beginDeploymentNotifications(jobId);
+                },
+                function (code) {
+                    console.log(code); // TODO show exception
+                }
+            );
+
+            evt.stopPropagation();
+            evt.preventDefault();
         };
 
         /*
@@ -304,6 +407,8 @@ var analyticsApp = angular.module('analyticsApp',
             evt.preventDefault();
         };
 
+
+
         $scope.deploy = function(evt) {
 
             var data = $scope.onlineViewModel.data;
@@ -320,65 +425,6 @@ var analyticsApp = angular.module('analyticsApp',
 
             evt.stopPropagation();
             evt.preventDefault();
-        };
-
-
-        $scope.onBlockDisplay = function(position, block){
-
-            var modalPosition = {
-                centerX: (position.x + block.width() / 2),
-                centerY: (position.y + block.height() / 2)
-            };
-
-            $scope.blurBackground = true;
-
-            switch(block.definitionType()){
-
-                case "CHART":
-
-                    modalService.show({
-                        templateUrl: '/assets/scripts/views/charts.html',
-                        controller: 'chartsController',
-                        inputs: {
-                            block: block
-                        },
-                        position: modalPosition
-                    }).then(function (modal) {
-
-                        modal.close.then(function (result) {
-
-                            $scope.blurBackground = false;
-
-                            if (result) {
-
-                            }
-                        });
-                    });
-
-                    break;
-                default:
-
-                    modalService.show({
-                        templateUrl: '/assets/scripts/views/blockData.html',
-                        controller: 'blockDataController',
-                        inputs: {
-                            block: block
-                        },
-                        position: modalPosition
-                    }).then(function (modal) {
-
-                        modal.close.then(function (result) {
-
-                            $scope.blurBackground = false;
-
-                            if (result) {
-
-                            }
-                        });
-                    });
-
-                    break;
-            }
         };
 
         $scope.onGroup = function(evt){

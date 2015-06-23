@@ -14,10 +14,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import emr.analytics.models.diagram.Block;
 import plugins.MongoDBPlugin;
@@ -39,25 +36,27 @@ public class BlockResultsService {
         return availableResults;
     }
 
-    public static String getPersistedOutput(Block block){
+    public static String getOutput(UUID id, String name){
 
-        StringBuilder model = new StringBuilder();
+        StringBuilder outputBuilder = new StringBuilder();
 
-        List<BasicDBObject> results = getOutputResults(block.getId().toString());
-        Optional<BasicDBObject> result = results.stream().filter(r -> r.containsValue("scaled_coef")).findFirst();
-        if (result.isPresent()){
-            BasicDBObject data = (BasicDBObject)result.get().get("data");
-            if (data != null) {
+        BasicDBObject results = BlockResultsService.getResults(id.toString());
+        if (results != null) {
 
-              data.forEach((k, v) -> {
+            BasicDBList output = (BasicDBList) results.get(name);
+            output.forEach(kvPair -> {
 
-                  model.append(v.toString());
-                  model.append(",");
-              });
-            }
+                BasicDBList tuple = (BasicDBList)kvPair;
+
+                if (tuple.size() == 2) {
+
+                    outputBuilder.append(tuple.get(1));
+                    outputBuilder.append(",");
+                }
+            });
         }
 
-        return (model.length() > 0) ? model.substring(0, model.length() - 1) : "";
+        return (outputBuilder.length() > 0) ? outputBuilder.substring(0, outputBuilder.length() - 1) : "";
     }
 
     public static BasicDBObject getFeatures(String blockName) {

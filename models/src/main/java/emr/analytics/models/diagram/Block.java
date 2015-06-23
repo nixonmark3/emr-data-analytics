@@ -3,10 +3,8 @@ package emr.analytics.models.diagram;
 import emr.analytics.models.definition.*;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Jackson schema for Diagram Block.
@@ -297,5 +295,10 @@ public class Block implements Serializable {
     private Optional<Connector> getConnector(String name, List<Connector> connectors){
 
         return (connectors.stream().filter(c -> c.getName().equals(name)).findFirst());
+    }
+
+    public List<Connector> persistedOutputs(){
+
+        return this.outputConnectors.stream().filter(c -> c.getPersisted()).collect(Collectors.toList());
     }
 }

@@ -82,6 +82,9 @@
                         <button type="button" class="btn btn-default navbar-btn" ng-click="save($event)">
                             <i class="fa fa-save"></i>
                         </button>
+                        <!--<button type="button" class="btn btn-default navbar-btn" ng-click="debug($event)">
+                            <i class="fa fa-bug"></i>
+                        </button>-->
                         <button type="button"
                                 class="btn btn-default navbar-btn ng-class:{ 'diagram-evaluating' : evaluating }"
                                 ng-disabled="evaluating"
@@ -91,9 +94,14 @@
                         </button>
                     </div>
 
-                    <button ng-if="onlineCanvas" type="button" class="btn btn-default navbar-btn pull-right" ng-click="deploy($event)">
-                        <i class="fa fa-rocket"></i>
-                    </button>
+                    <div ng-if="onlineCanvas" class="btn-group pull-right">
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="debug($event)">
+                            <i class="fa fa-bug"></i>
+                        </button>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="deploy($event)">
+                            <i class="fa fa-rocket"></i>
+                        </button>
+                    </div>
 
                 </div>
             </div>

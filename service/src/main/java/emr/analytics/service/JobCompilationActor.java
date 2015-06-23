@@ -8,6 +8,7 @@ import emr.analytics.models.diagram.Diagram;
 import emr.analytics.service.jobs.AnalyticsJob;
 import emr.analytics.service.jobs.PythonJob;
 import emr.analytics.service.jobs.SparkStreamingJob;
+import emr.analytics.service.messages.JobCompileRequest;
 import emr.analytics.service.messages.JobRequest;
 
 import java.util.HashMap;

@@ -64,7 +64,11 @@ public class StreamingSourceBlocks {
         streamingOperations = new ArrayList<StreamingSourceBlock>();
         rddOperations = new ArrayList<StreamingSourceBlock>();
 
+        for (StreamingSourceBlock block : this.blocks){
 
+            // todo: implement rdd operations feature
+            streamingOperations.add(block);
+        }
 
         MustacheFactory mf = new DefaultMustacheFactory();
         Mustache mustache = mf.compile(template);
@@ -161,15 +165,10 @@ public class StreamingSourceBlocks {
                             break;
                         case "block":
 
-
-                            switch(properties[1]){
-                                case "model":
-
-                                    // todo: without an offline compliment, this is now broken
-                                    // argumentBuilder.append(createVariableName(block.getOfflineComplement()));
-
-                                    break;
-                            }
+                            // refers to persisted offline output
+                            argumentBuilder.append(String.format("%s_%s",
+                                    createVariableName(block.getId().toString()),
+                                    properties[1]));
 
                             break;
                     }

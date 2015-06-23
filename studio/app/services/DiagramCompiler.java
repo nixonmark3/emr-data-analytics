@@ -31,52 +31,58 @@ public class DiagramCompiler {
         _dataSources = new HashMap<>();
 
         // iterate over offline blocks to find model block
-        for(Block block : offline.getBlocks(DefinitionType.MODEL)){
+        for(Block block : offline.getBlocks()){
 
-            Block onlineBlock = this.createOnlineBlock(block.getName(), block);
+            for (Connector output : block.persistedOutputs())
+                online.addPersistedOutput(new PersistedOutput(block.getId(), output.getName(), output.getType()));
 
-            // add online block to diagram
-            online.addBlock(onlineBlock);
+            if (block.getDefinitionType().equals(DefinitionType.MODEL)) {
 
-            // follow the offline diagram to its root (collecting blocks along the way)
-            int index = 0;
-            for(Connector connector : onlineBlock.getInputConnectors()){
+                Block onlineBlock = this.createOnlineBlock(block.getName(), block);
 
-                if (block.hasInputConnector(connector.getName())){
+                // add online block to diagram
+                online.addBlock(onlineBlock);
 
-                    for(Wire wire : offline.getLeadingWires(block.getId(), connector.getName())){
+                // follow the offline diagram to its root (collecting blocks along the way)
+                int index = 0;
+                for (Connector connector : onlineBlock.getInputConnectors()) {
 
-                        Wire onlineWire = new Wire(wire.getFrom_node(),
-                            wire.getFrom_connector(),
-                            wire.getFrom_connectorIndex(),
-                            onlineBlock.getId(),
-                            connector.getName(),
-                            index);
+                    if (block.hasInputConnector(connector.getName())) {
 
-                        this.addLeadingPath(onlineWire, offline, online);
+                        for (Wire wire : offline.getLeadingWires(block.getId(), connector.getName())) {
+
+                            Wire onlineWire = new Wire(wire.getFrom_node(),
+                                    wire.getFrom_connector(),
+                                    wire.getFrom_connectorIndex(),
+                                    onlineBlock.getId(),
+                                    connector.getName(),
+                                    index);
+
+                            this.addLeadingPath(onlineWire, offline, online);
+                        }
                     }
+
+                    index++;
                 }
 
-                index++;
+                // add a result block to the output of the model block
+                Block postBlock = this.createOnlineBlock(UUID.randomUUID(),
+                        this.generateBlockName(this.terminatingDefinition.getName()),
+                        0,
+                        onlineBlock.getX(),
+                        (onlineBlock.getY() + 120),
+                        this.terminatingDefinition);
+
+                online.addBlock(postBlock);
+
+                online.addWire(new Wire(
+                        onlineBlock.getId(),
+                        onlineBlock.getOutputConnectors().get(0).getName(),
+                        0,
+                        postBlock.getId(),
+                        postBlock.getInputConnectors().get(0).getName(),
+                        0));
             }
-
-            // add a result block to the output of the model block
-            Block postBlock = this.createOnlineBlock(UUID.randomUUID(),
-                this.generateBlockName(this.terminatingDefinition.getName()),
-                0,
-                onlineBlock.getX(),
-                (onlineBlock.getY() + 120),
-                this.terminatingDefinition);
-
-            online.addBlock(postBlock);
-
-            online.addWire(new Wire(
-                onlineBlock.getId(),
-                onlineBlock.getOutputConnectors().get(0).getName(),
-                0,
-                postBlock.getId(),
-                postBlock.getInputConnectors().get(0).getName(),
-                0));
         }
 
         return online;

@@ -36,6 +36,15 @@ public class Diagrams extends ControllerBase {
         return _mapJobIdToClientId.get(jobId);
     }
 
+    @BodyParser.Of(BodyParser.Json.class)
+    public static Result debug() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
+
+        String source = _evaluationService.sendCompileRequest(diagram);
+        return ok(source);
+    }
+
     /**
      * Evaluates the diagram specified in the request body
      * @return temporarily return success message
@@ -45,15 +54,7 @@ public class Diagrams extends ControllerBase {
         ObjectMapper objectMapper = new ObjectMapper();
         Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
 
-        // retrieve persisted outputs
-        HashMap<String, String> persistedOutputs = new HashMap<>();
-        for(Block block : diagram.getBlocksWithPersistedOutputs()){
-
-            String persistedOutput = BlockResultsService.getPersistedOutput(block);
-            persistedOutputs.put(block.getId().toString(), persistedOutput);
-        }
-
-        UUID jobId = _evaluationService.sendRequest(diagram, persistedOutputs);
+        UUID jobId = _evaluationService.sendRequest(diagram);
         if (jobId == null) {
             return internalServerError("Error requesting evaluation.");
         }

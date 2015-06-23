@@ -323,7 +323,6 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                             // if necessary - select the block
                             if (!block.selected()) {
-                                diagram.selectBlock(block);
 
                                 if ($scope.onSelection)
                                     $scope.onSelection([block]);
@@ -345,8 +344,12 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                         clicked: function () {
 
-                            if ($scope.onSelection)
-                                $scope.onSelection([block]);
+                            if ($scope.onSelection) {
+
+                                $scope.$apply(function () {
+                                    $scope.onSelection([block]);
+                                });
+                            }
                         }
                     });
 
