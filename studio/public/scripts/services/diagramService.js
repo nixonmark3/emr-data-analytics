@@ -286,7 +286,7 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
 
             var deferred = $q.defer();
 
-            $http.get('/getChartData/' + blockName + '/' + selectedFeatures)
+            $http.post('/getChartData/' + blockName, {features: selectedFeatures})
                 .success(function (data, status, headers, config) {
 
                     deferred.resolve(data);

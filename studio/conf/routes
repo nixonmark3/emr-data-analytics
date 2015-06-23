@@ -13,7 +13,6 @@ GET         /getServiceSocket                 controllers.Application.serviceSoc
 GET         /getAvailableResults/:name        controllers.BlockResults.getAvailableResults(name: String)
 GET         /getStatistics/:name              controllers.BlockResults.getStatistics(name: String)
 GET         /getFeatures/:name                controllers.BlockResults.getFeatures(name: String)
-GET         /getChartData/:name/:features     controllers.BlockResults.getChartData(name: String, features: String)
 GET         /getPlot/:name                    controllers.BlockResults.getPlot(name: String)
 GET         /getOutputResults/:name           controllers.BlockResults.getOutputResults(name: String)
 
@@ -23,6 +22,7 @@ POST        /loadSources                      controllers.Sources.load()
 POST        /deploy                           controllers.Diagrams.deploy()
 POST        /compile                          controllers.Diagrams.compile()
 POST        /group                            controllers.Diagrams.group()
+POST        /getChartData/:name               controllers.BlockResults.getChartData(name: String)
 GET         /kill/:jobId                      controllers.Diagrams.kill(jobId: String)
 
 # Map static resources from the /public folder to the /assets URL path
