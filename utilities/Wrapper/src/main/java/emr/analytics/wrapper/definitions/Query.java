@@ -7,13 +7,13 @@ import emr.analytics.wrapper.IExport;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataBrick extends BlockDefinition implements IExport {
+public class Query extends BlockDefinition implements IExport {
 
     @Override
     public Definition createDefinition() {
 
-        Definition definition = new Definition("DataBrick", "Data Brick", Category.DATA_SOURCES.toString());
-        definition.setDescription("Loads a data brick");
+        Definition definition = new Definition("Query", "Query", Category.DATA_SOURCES.toString());
+        definition.setDescription("Loads data based on a query");
         return definition;
     }
 
