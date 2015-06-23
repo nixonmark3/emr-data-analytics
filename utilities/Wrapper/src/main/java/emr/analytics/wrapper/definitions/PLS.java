@@ -53,7 +53,7 @@ public class PLS extends BlockDefinition implements IExport {
 
         List<ConnectorDefinition> outputs = new ArrayList<ConnectorDefinition>();
         outputs.add(new ConnectorDefinition("out", DataType.FLOAT.toString()));
-        modeDefinition.setInputs(outputs);
+        modeDefinition.setOutputs(outputs);
 
         modeDefinition.setSignature(new Signature("emr.analytics.spark.algorithms.Utilities",
                 "Utilities",

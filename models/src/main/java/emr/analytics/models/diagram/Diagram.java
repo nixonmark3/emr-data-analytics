@@ -31,11 +31,14 @@ public class Diagram implements Serializable {
     private List<Diagram> diagrams = new ArrayList<Diagram>();
     private int version = 0;
 
-    public Diagram(String name, String description, String owner){
+    public Diagram(String name, String description, String owner, Mode mode){
         this.name = name;
         this.description = description;
         this.owner = owner;
+        this.mode = mode;
     }
+
+    public Diagram(String name, String description, String owner) { this(name, description, owner, Mode.OFFLINE); }
 
     public Diagram(String name){
         this(name, "", "");

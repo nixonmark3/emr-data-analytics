@@ -28,9 +28,9 @@ public class Block implements Serializable {
 
     private Block() { }
 
-    public Block(String name, int state, int x, int y, Mode mode, Definition definition){
+    public Block(UUID id, String name, int state, int x, int y, Mode mode, Definition definition){
 
-        this.id = UUID.randomUUID();
+        this.id = id;
         this.name = name;
         this.state = state;
         this.x = x;
@@ -45,6 +45,10 @@ public class Block implements Serializable {
         this.inputConnectors = createConnectors(modeDefinition.getInputs());
         this.outputConnectors = createConnectors(modeDefinition.getOutputs());
         this.parameters = createParameters(modeDefinition.getParameters());
+    }
+
+    public Block(String name, int state, int x, int y, Mode mode, Definition definition){
+        this(UUID.randomUUID(), name, state, x, y, mode, definition);
     }
 
     public DefinitionType getDefinitionType() { return definitionType; }
@@ -197,11 +201,10 @@ public class Block implements Serializable {
      * Returns the specified parameter
      * @return Parameter
      */
-    public Parameter getParameter(String name){
+    public Optional<Parameter> getParameter(String name){
         return parameters.stream()
                 .filter(p -> p.getName().equals(name))
-                .findFirst()
-                .get();
+                .findFirst();
     }
 
     /**
@@ -230,10 +233,15 @@ public class Block implements Serializable {
         return parameters;
     }
 
-    public void setParameter(String name, Object value){
+    public boolean setParameter(String name, Object value){
 
-        Parameter parameter = this.getParameter(name);
-        parameter.setValue(value);
+        Optional<Parameter> parameter = this.getParameter(name);
+        if (!parameter.isPresent())
+            return false;
+
+        parameter.get().setValue(value);
+
+        return true;
     }
 
     /**

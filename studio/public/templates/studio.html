@@ -161,10 +161,12 @@
                     <diagram id="online-diagram"
                              ng-if="onlineCanvas"
                              view-model="onlineViewModel"
+                             on-deselection="onDiagramDeselection"
+                             on-display="onBlockDisplay"
+                             on-selection="onBlockSelection"
                              nodes="nodes"
                              library="library"
                              load-sources="loadSources"
-                             get-block-data="getBlockData"
                              blur-background="blurBackground"></diagram>
 
                 </div>

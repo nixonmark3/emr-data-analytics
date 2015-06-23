@@ -130,7 +130,7 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.loadSources = function(request, success){
 
             // attach the diagram to the request
-            request.diagram = $scope.diagramViewModel.data;
+            request.diagram = diagram().data;
 
             diagramService.loadSources(request).then(
                 function (response) {
@@ -144,7 +144,7 @@ var analyticsApp = angular.module('analyticsApp',
         };
 
         /*
-         *
+        ** On block[s] selection - show the properties panel
          */
         $scope.onBlockSelection = function(blocks){
 
@@ -171,11 +171,14 @@ var analyticsApp = angular.module('analyticsApp',
 
                 // show the studio properties panel
                 $scope.studioPropertiesPanel.isVisible = true;
+
+                // select the block
+                $scope.$apply(diagram().onBlockClicked(block));
             }
         };
 
         /*
-        ** Diagram deselection stops editing all items
+        ** When all blocks are being deselected - stop editing and hide the studio properties panel
          */
         $scope.onDiagramDeselection = function(){
             $scope.studioPropertiesPanel.isDirty = false;
@@ -213,6 +216,7 @@ var analyticsApp = angular.module('analyticsApp',
             diagram().updateBlock($scope.studioProperties.viewModel);
             $scope.studioPropertiesPanel.isDirty = false;
         };
+
 
 
 
@@ -436,8 +440,7 @@ var analyticsApp = angular.module('analyticsApp',
                 $scope.onlineCanvas = true;
                 $scope.compiling = true;
 
-                // todo: temporarily using timeout to test loading screen
-                $timeout(function(){diagramService.compile($scope.diagramViewModel.data).then(
+                diagramService.compile($scope.diagramViewModel.data).then(
                     function (data) {
 
                         $scope.onlineViewModel = new viewmodels.diagramViewModel(data);
@@ -446,7 +449,7 @@ var analyticsApp = angular.module('analyticsApp',
                     function (code) {
                         console.log(code); // TODO show exception
                     }
-                );}, 0);
+                );
             }
             else if($scope.onlineCanvas && !showOnline){
                 $scope.onlineCanvas = false;

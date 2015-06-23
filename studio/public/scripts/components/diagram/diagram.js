@@ -347,8 +347,6 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                             if ($scope.onSelection)
                                 $scope.onSelection([block]);
-
-                            $scope.$apply(diagram.onBlockClicked(block));
                         }
                     });
 

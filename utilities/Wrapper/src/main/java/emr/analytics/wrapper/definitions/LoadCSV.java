@@ -27,12 +27,6 @@ public class LoadCSV extends BlockDefinition implements IExport {
         return modeDefinition;
     }
 
-    @Override
-    public ModeDefinition createOnlineMode(){
-
-        return null;
-    }
-
     public List<ConnectorDefinition> createOutputConnectors() {
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
@@ -61,5 +55,44 @@ public class LoadCSV extends BlockDefinition implements IExport {
                 null));
 
         return parameters;
+    }
+
+    @Override
+    public ModeDefinition createOnlineMode(){
+
+        ModeDefinition modeDefinition = new ModeDefinition();
+
+        // create outputs
+        List<ConnectorDefinition> outputs = new ArrayList<ConnectorDefinition>();
+        outputs.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        modeDefinition.setOutputs(outputs);
+
+        // create parameters
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+
+        parameters.add(new ParameterDefinition("Url",
+                DataType.STRING.toString(),
+                "",
+                new ArrayList<String>(),
+                null));
+        parameters.add(new ParameterDefinition("Sleep",
+                DataType.STRING.toString(),
+                "500",
+                new ArrayList<String>(),
+                null));
+
+        modeDefinition.setParameters(parameters);
+
+        Signature signature = new Signature("emr.analytics.spark.algorithms.Sources",
+                "Sources",
+                "PollingStream",
+                new String[]{
+                        "ssc",
+                        "parameter:Url",
+                        "parameter:Sleep"
+                });
+        modeDefinition.setSignature(signature);
+
+        return modeDefinition;
     }
 }

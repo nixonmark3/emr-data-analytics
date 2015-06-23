@@ -1303,7 +1303,10 @@ viewmodels.definitionViewModel = function (mode, data) {
                 modeDefinition = this.data.offlineDefinition;
                 break;
             case "ONLINE":
-                modeDefinition = this.data.onlineDefinition;
+                if (this.data.onlineDefinition)
+                    modeDefinition = this.data.onlineDefinition;
+                else
+                    modeDefinition = this.data.offlineDefinition;
                 break;
         }
 

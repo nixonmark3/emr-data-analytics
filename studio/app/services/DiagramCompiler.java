@@ -24,7 +24,8 @@ public class DiagramCompiler {
 
         Diagram online = new Diagram(offline.getName(),
             offline.getDescription(),
-            offline.getOwner());
+            offline.getOwner(),
+            Mode.ONLINE);
 
         _onlineBlocks = new HashSet<>();
         _dataSources = new HashMap<>();
@@ -60,8 +61,9 @@ public class DiagramCompiler {
             }
 
             // add a result block to the output of the model block
-            Block postBlock = this.createBlock(this.generateBlockName(this.terminatingDefinition.getName()),
-                3,
+            Block postBlock = this.createOnlineBlock(UUID.randomUUID(),
+                this.generateBlockName(this.terminatingDefinition.getName()),
+                0,
                 onlineBlock.getX(),
                 (onlineBlock.getY() + 120),
                 this.terminatingDefinition);
@@ -86,26 +88,33 @@ public class DiagramCompiler {
         Definition definition = _definitions.get(block.getDefinition());
 
         // create online block
-        Block onlineBlock = createBlock(name,
-            block.getState(),
-            block.getX(),
-            block.getY(),
-            definition);
+        Block onlineBlock = createOnlineBlock(block.getId(),
+                name,
+                block.getState(),
+                block.getX(),
+                block.getY(),
+                definition);
 
         // set collected parameter values
         for(Parameter parameter : block.getParameters()){
 
-            if (parameter.isCollected())
-                onlineBlock.setParameter(parameter.getName(), parameter.getValue());
+            if (parameter.isCollected()) {
+
+                Optional<Parameter> onlineParameter = onlineBlock.getParameter(parameter.getName());
+                if (onlineParameter.isPresent()) {
+
+                    onlineParameter.get().setValue(parameter.getValue());
+                }
+            }
         }
 
         return onlineBlock;
     }
 
-    private Block createBlock(String name, int state, int x, int y, Definition definition){
+    private Block createOnlineBlock(UUID id, String name, int state, int x, int y, Definition definition){
 
         _onlineBlocks.add(name);
-        return new Block(name, state, x, y, Mode.ONLINE, definition);
+        return new Block(id, name, state, x, y, Mode.ONLINE, definition);
     }
 
     private String generateBlockName(String definitionName){

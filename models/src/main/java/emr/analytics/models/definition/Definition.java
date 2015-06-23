@@ -67,6 +67,10 @@ public class Definition {
             modeDefinition = this.offlineDefinition;
         else if (mode == Mode.ONLINE && this.onlineDefinition != null)
             modeDefinition = this.onlineDefinition;
+        else if (this.offlineDefinition != null)
+            modeDefinition = this.offlineDefinition;
+        else if (this.onlineDefinition != null)
+            modeDefinition = this.onlineDefinition;
         else
             modeDefinition = new ModeDefinition();
 
