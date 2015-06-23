@@ -53,7 +53,7 @@ public class Explore extends BlockDefinition implements IExport {
 
         parameters.add(new ParameterDefinition("Fill NaN",
                 DataType.LIST.toString(),
-                "True",
+                "False",
                 opts,
                 null));
 

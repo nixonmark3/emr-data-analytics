@@ -25,7 +25,7 @@ def json_to_query(json_str):
     return time_ranges, tags, aliases, sample_rate_secs, max_samples
 
 
-class DataBrick(FunctionBlock):
+class Query(FunctionBlock):
 
     def __init__(self, name, unique_name):
         FunctionBlock.__init__(self, name, unique_name)
@@ -70,3 +70,4 @@ class DataBrick(FunctionBlock):
             FunctionBlock.save_results(self)
             FunctionBlock.report_status_failure(self)
             print(err.args, file=sys.stderr)
+

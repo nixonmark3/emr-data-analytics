@@ -1,3 +1,5 @@
+__author__ = 'paulmuston'
+
 import sys
 import pickle
 import pandas as pd
@@ -7,15 +9,19 @@ from pymongo.database import Database
 from bson import ObjectId
 from datetime import datetime, timedelta
 from operator import itemgetter
-from Exceptions import NotFoundException
+#import Pipes.Misc
+
+class NotFoundException(Exception):
+    pass
+
+class ParameterException(Exception):
+    pass
 
 PICKLE_VERSION = 4
 rows_per_brick = 10000
 
-
 class BricksDB:
     bricks_preamble = "bricks-"
-
     def __init__(self, connection, name):
         self.name = name
         self.db = Database(connection, BricksDB.bricks_preamble+name)
@@ -70,7 +76,6 @@ class BricksDB:
             return concat_df.head(n=max_samples)
         else:
             return concat_df
-
 
 class Dataset:
     def __init__(self, bricks_db, name=None, id=None):
@@ -169,35 +174,104 @@ class Dataset:
     def __repr__(self):
         return 'Dataset(project, %s, %s)' % (self.name, self.id)
 
-    def Store_Data(self, df):
+    def Store_Data(self, df, remove_all_existing_data=True):
         db = self.bricks_db.db
-        db.brick.remove({"dataset_id":self.id})
+        if remove_all_existing_data:
+            db.brick.remove({"dataset_id":self.id})
         row_count = df.shape[0]
         pages = int(row_count/rows_per_brick)+1
         total = 0
         for page in range(pages):
             brick = df[page*rows_per_brick:(page+1)*rows_per_brick]
-            print("store columns", brick.columns)
-            p = pickle.dumps(brick, PICKLE_VERSION)
-            start = brick.index[0]
-            end = brick.index[-1]
-            print(sys.getsizeof(p))
-            size = sys.getsizeof(p)
-            db.brick.insert({"dataset_id":self.id, "page":page, "data":p, "size":size, "start":start, "end":end, "tags":self.tags})
-            total += size
+            if len(brick.index) > 0:
+                print("store columns", brick.columns, len(brick.index))
+                p = pickle.dumps(brick, PICKLE_VERSION)
+                start = brick.index[0]
+                end = brick.index[-1]
+                print(sys.getsizeof(p))
+                size = sys.getsizeof(p)
+                db.brick.insert({"dataset_id":self.id, "page":page, "data":p, "size":size, "start":start, "end":end, "tags":self.tags})
+                total += size
         return total
+
+    def _divide_block_at_time(self, dt, include_date_in_earlier_block=True):
+        db = self.bricks_db.db
+        query = {"dataset_id":self.id, '$and':[{'start':{'$lte': dt}}, {'end':{'$gte': dt}}]}
+        page = db.brick.find_one(query)
+        if page:
+            # print("found brick to divide")
+            p = page["data"]
+            page_num = page["page"]
+            brick = pickle.loads(p)
+            brick1 = brick[:dt]
+            brick2 = brick[dt:]
+            if include_date_in_earlier_block:
+                brick2.drop(brick2.index[:1], inplace=True)
+            else:
+                brick1.drop(brick1.index[-1:], inplace=True)
+            p = pickle.dumps(brick1, PICKLE_VERSION)
+            start = brick1.index[0]
+            end = brick1.index[-1]
+            # print(sys.getsizeof(p))
+            size = sys.getsizeof(p)
+            # print("updating",{"_id":page["_id"]})
+            ret = db.brick.update({"_id":page["_id"]}, {"$set": {"data":p, "size":size, "end":end}})
+            # print("update ret", ret)
+            p2 = pickle.dumps(brick2, PICKLE_VERSION)
+            start = brick2.index[0]
+            end = brick2.index[-1]
+            # print(sys.getsizeof(p2))
+            size = sys.getsizeof(p2)
+            ret = db.brick.insert({"dataset_id":self.id, "page":page_num+1, "data":p2, "size":size, "start":start, "end":end, "tags":self.tags})
+            # print("insert ret", ret)
+
+    def Remove_Data(self, start=None, end=None):
+        db = self.bricks_db.db
+        # divide edge blocks
+        if start:
+            self._divide_block_at_time(start, include_date_in_earlier_block=False)
+        else:
+            start = datetime.min
+        if end:
+            self._divide_block_at_time(end, include_date_in_earlier_block=True)
+        else:
+            end = datetime.max
+        # remove blocks whose start and end times fall inside range
+        print("Remove_Data", start, end)
+        query = {"dataset_id":self.id, '$and':[{'start':{'$gte': start}}, {'end':{'$lte': end}}]}
+        db.brick.remove(query)
+
+    def Update_Data(self, df):
+        df_start = df.index[0]
+        df_end = df.index[-1]
+        # print("***Pre Remove***")
+        # self.Debug_Data()
+        self.Remove_Data(df_start, df_end)
+        # print("***Post Remove***")
+        # self.Debug_Data()
+        self.Store_Data(df, False)
 
     def Load_Data(self):
         db = self.bricks_db.db
-        db.brick.ensure_index([("name", ASCENDING),("page", ASCENDING)])
+        db.brick.ensure_index([("name", ASCENDING),("start", ASCENDING)])
         bricks = []
         #store in chunks of n rows per page
-        for page in db.chunk.find({"dataset_id":self.id}).sort("page",ASCENDING):
+        for page in db.brick.find({"dataset_id":self.id}).sort([("name", ASCENDING),("start", ASCENDING)]):
             p = page["data"]
             brick = pickle.loads(p)
             bricks.append(brick)
         return pd.concat(bricks)
 
+    def Debug_Data(self):
+        db = self.bricks_db.db
+        db.brick.ensure_index([("name", ASCENDING),("start", ASCENDING)])
+        #store in chunks of n rows per page
+        n = 0
+        for page in db.brick.find({"dataset_id":self.id}).sort([("name", ASCENDING),("start", ASCENDING)]):
+            p = page["data"]
+            brick = pickle.loads(p)
+            print(n, page["start"], page["end"], page["size"])
+            n += 1
 
 class DataBrick:
     @classmethod
@@ -211,6 +285,7 @@ class DataBrick:
     def query(cls, bricks_db, tags=None, time_range=None, data=False):
         db = bricks_db.db
         projection = None if data else {"data":0}
+        db.brick.ensure_index([("name", ASCENDING),("start", ASCENDING)])
         if not tags is None:
             if not time_range is None:
                 time_query_within = {'$and':[{'start':{'$gte': time_range[0]}}, {'end':{'$lte': time_range[1]}}]}
@@ -219,17 +294,17 @@ class DataBrick:
                 time_query = {'$or':[time_query_within, time_query_straddles_start, time_query_straddles_end]}
                 tags_query = {'$or':[{'tags':x} for x in tags]}
                 query = {'$and':[time_query, tags_query]}
-                return [d for d in db.brick.find(query,projection)]
+                return [d for d in db.brick.find(query,projection).sort([("name", ASCENDING),("start", ASCENDING)])]
             else:
                 tags_query = [{'tags':x} for x in tags]
-                return [d for d in db.brick.find({'$or':tags_query},projection)]
+                return [d for d in db.brick.find({'$or':tags_query},projection).sort([("name", ASCENDING),("start", ASCENDING)])]
         else:
             if not time_range is None:
                 time_query_within = {'$and':[{'start':{'$gte': time_range[0]}}, {'end':{'$lte': time_range[1]}}]}
                 time_query_straddles_start = {'$and':[{'start':{'$lt': time_range[0]}}, {'end':{'$gt': time_range[0]}}]}
                 time_query_straddles_end = {'$and':[{'start':{'$lt': time_range[1]}}, {'end':{'$gt': time_range[1]}}]}
                 time_query = {'$or':[time_query_within, time_query_straddles_start, time_query_straddles_end]}
-                return [d for d in db.brick.find(time_query,projection)]
+                return [d for d in db.brick.find(time_query,projection).sort([("name", ASCENDING),("start", ASCENDING)])]
             else:
                 return []
 

@@ -1,6 +1,10 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.BasicDBObject;
+import emr.analytics.models.diagram.Diagram;
 import play.libs.Json;
+import play.mvc.BodyParser;
 import play.mvc.Result;
 
 import java.util.Base64;
@@ -24,9 +28,15 @@ public class BlockResults extends ControllerBase {
         return ok(Json.toJson(BlockResultsService.getFeatures(blockName)));
     }
 
-    public static Result getChartData(String blockName, String selectedFeatures) {
+    @BodyParser.Of(BodyParser.Json.class)
+    public static Result getChartData(String blockName) {
 
-        return ok(Json.toJson(BlockResultsService.getChartData(blockName, selectedFeatures)));
+        ObjectMapper objectMapper = new ObjectMapper();
+        BasicDBObject selectedFeatures = objectMapper.convertValue(request().body().asJson(), BasicDBObject.class);
+
+        String features = (String)selectedFeatures.get("features");
+
+        return ok(Json.toJson(BlockResultsService.getChartData(blockName, features)));
     }
 
     public static Result getPlot(String blockName) {
