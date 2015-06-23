@@ -2,19 +2,27 @@ import sys
 import numpy as np
 import pymongo
 import gridfs
+import ast
 
 from FunctionBlock import FunctionBlock
 
 
-def prepare_data(df):
-    df.index = df.index.astype(np.int64) / 10**9
+def prepare_data(df, fill_nan, time_series, reindex):
+    if reindex:
+        df = df.reset_index(drop=True)
+        time_series = False
+    if time_series:
+        df.index = df.index.astype(np.int64) / 10**9
     data = []
     features = df.columns.tolist()
     data.append(features)
     time_index = df.index.tolist()
     data.append(time_index)
     for feature in features:
-        data.append(df[feature].tolist())
+        col = df[feature].tolist()
+        if fill_nan:
+            col = ['null' if np.isnan(x) else x for x in col]
+        data.append(col)
     return str(data).replace('\'', '"')
 
 
@@ -42,7 +50,11 @@ class Explore(FunctionBlock):
 
             df = results_table[self.input_connectors['in'][0]]
 
-            self.store_data(prepare_data(df))
+            fill_nan = ast.literal_eval(self.parameters['Fill NaN'])
+            time_series = ast.literal_eval(self.parameters['Time Series'])
+            reindex = ast.literal_eval(self.parameters['Reindex'])
+
+            self.store_data(prepare_data(df, fill_nan, time_series, reindex))
 
             FunctionBlock.save_results(self, df=df, statistics=True)
 

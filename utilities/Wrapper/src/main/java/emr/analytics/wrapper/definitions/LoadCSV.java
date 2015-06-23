@@ -48,6 +48,12 @@ public class LoadCSV extends BlockDefinition implements IExport {
         opts.add("True");
         opts.add("False");
 
+        parameters.add(new ParameterDefinition("Time Series",
+                DataType.LIST.toString(),
+                "True",
+                opts,
+                null));
+
         parameters.add(new ParameterDefinition("Plot",
                 DataType.LIST.toString(),
                 "False",

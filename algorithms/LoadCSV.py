@@ -18,7 +18,12 @@ class LoadCSV(FunctionBlock):
 
             plot = ast.literal_eval(self.parameters['Plot'])
 
-            df = pd.read_csv(filename, parse_dates=True, index_col=0)
+            time_series = ast.literal_eval(self.parameters['Time Series'])
+
+            if time_series:
+                df = pd.read_csv(filename, parse_dates=True, index_col=0)
+            else:
+                df = pd.read_csv(filename, index_col=0)
 
             FunctionBlock.save_results(self, df=df, statistics=True, plot=plot)
             FunctionBlock.report_status_complete(self)

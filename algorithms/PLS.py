@@ -45,13 +45,21 @@ class PLS(FunctionBlock):
 
             pls_coefficient = coll.OrderedDict(zip(x_df.columns.values, coefficients))
 
+            model = list(pls_coefficient.items())
+
             pls_result = coll.OrderedDict()
-            pls_result['coefficients'] = list(pls_coefficient.items())
+            pls_result['coefficients'] = model
             pls_result['r squared'] = r2[0]
 
             data_dict = {'y vals': list(y_values[:, 0]), 'y pred': list(y_prediction[:, 0])}
 
-            FunctionBlock.save_results(self, df=(pd.DataFrame(data_dict)), statistics=True, plot=True, results=pls_result)
+            results_df = pd.DataFrame(data_dict)
+
+            FunctionBlock.add_statistics_result(self, results_df)
+            FunctionBlock.add_plot_result(self, results_df)
+            FunctionBlock.add_general_results(self, pls_result)
+            FunctionBlock.add_persisted_connector_result(self, 'model', model)
+            FunctionBlock.save_all_results(self)
 
             FunctionBlock.report_status_complete(self)
 
