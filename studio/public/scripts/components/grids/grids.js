@@ -37,7 +37,7 @@ angular.module('emr.ui.grids', [])
 
                 var loadMoreData = function() {
 
-                    formatData();
+                    loadDataByRows();
 
                     $scope.currentIndex = $scope.currentIndex + windowSize;
                 };
@@ -49,16 +49,37 @@ angular.module('emr.ui.grids', [])
                     $scope.showing = [];
                     $scope.currentIndex = 0;
 
-                    var columnNames = ['Timestamp'];
+                    var columnNames = ['Index'];
                     columnNames = columnNames.concat($scope.chartData[0]);
                     $scope.showing.push(columnNames);
 
-                    formatData();
+                    loadDataByRows();
 
                     $scope.currentIndex = windowSize;
 
-                    $scope.gridWidth = ((175 * columnNames.length) + 110);
+                    $scope.gridWidth = calculateGridWidth(columnNames.length);
                 };
+
+                var calculateGridWidth = function(numberOfColumns) {
+
+                    var width = 0;
+
+                    if (numberOfColumns < 5) {
+
+                        width = 207 * numberOfColumns;
+                    }
+                    else if (numberOfColumns < 10) {
+
+                        width = 190 * numberOfColumns;
+                    }
+                    else {
+
+                        width = 185 * numberOfColumns;
+                    }
+
+                    return width;
+                };
+
 
                 var formatUnixTime = function(item) {
 
@@ -84,9 +105,18 @@ angular.module('emr.ui.grids', [])
                     return item.toFixed(5);
                 };
 
-                var formatData = function() {
+                var loadDataByRows = function() {
 
-                    for (var rowIndex = $scope.currentIndex; rowIndex <= ($scope.currentIndex + windowSize); rowIndex++) {
+                    var stoppingPoint = $scope.currentIndex + windowSize;
+
+                    var numberOfObservations = $scope.chartData[1].length;
+
+                    if (stoppingPoint >= numberOfObservations) {
+
+                        stoppingPoint = numberOfObservations - 1;
+                    }
+
+                    for (var rowIndex = $scope.currentIndex; rowIndex <= stoppingPoint; rowIndex++) {
 
                         var row = [];
 
