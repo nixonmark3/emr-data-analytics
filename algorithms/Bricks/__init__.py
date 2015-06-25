@@ -50,7 +50,7 @@ class BricksDB:
             for dataset in datasets:
                 sub_frames = []
                 ds_bricks = [x for x in bricks if x["dataset_id"] == dataset]
-                ds_bricks = sorted(ds_bricks, key=itemgetter("page"))
+                # ds_bricks = sorted(ds_bricks, key=itemgetter("page"))
                 for ds_brick in ds_bricks:
                     b = ds_brick["data"]
                     sub_frame = pickle.loads(b)
@@ -64,8 +64,16 @@ class BricksDB:
                     dfs[i] = dfs[i].groupby(level=0).first()
                 dfs[i] = dfs[i].reindex(index=dr, method='ffill', limit=2)
             merge = dfs[0]
+            drop_cols = set(merge.columns) - set(tags)
+            # print(drop_cols)
+            if len(drop_cols) > 0:
+                merge.drop(list(drop_cols), axis=1, inplace=True)
             for i in range(len(dfs)):
                 df = dfs[i]
+                drop_cols = set(df.columns) - set(tags)
+                # print(drop_cols)
+                if len(drop_cols) > 0:
+                    df.drop(list(drop_cols), axis=1, inplace=True)
                 for col in df.columns:
                     merge[col] = df[col]
             time_range_dfs.append(merge)
@@ -131,6 +139,14 @@ class Dataset:
     def update(self, data):
         db = self.bricks_db.db
         db.dataset.update({"_id": ObjectId(self.id)},{ "$set": data })
+
+    @classmethod
+    def Remove(cls, bricks_db, name):
+        db = bricks_db.db
+        ds = db.dataset.find_one({"name":name})
+        db.dataset.remove({"name":name})
+        db.brick.remove( {"dataset_id":ds["_id"]})
+        print("removed", name, ds["_id"])
 
     @classmethod
     def Create(cls, bricks_db, name, tags=[], labels=[]):
