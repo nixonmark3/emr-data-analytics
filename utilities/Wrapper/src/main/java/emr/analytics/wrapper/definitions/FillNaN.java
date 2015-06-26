@@ -19,11 +19,22 @@ public class FillNaN extends BlockDefinition implements IExport {
     public ModeDefinition createOfflineMode(){
 
         ModeDefinition modeDefinition = new ModeDefinition();
+        modeDefinition.setSignature(createSignature());
         modeDefinition.setInputs(createInputConnectors());
         modeDefinition.setOutputs(createOutputConnectors());
         modeDefinition.setParameters(createParameters());
 
         return modeDefinition;
+    }
+
+    public Signature createSignature() {
+
+        return new Signature("emr.analytics.spark.algorithms.Utilities",
+                "Utilities",
+                "fillNa",
+                new String[]{
+                        "input:in"
+                });
     }
 
     @Override
