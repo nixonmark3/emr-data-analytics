@@ -2,6 +2,7 @@ package emr.analytics.spark.algorithms
 
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
+import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.dstream.DStream
 
@@ -39,6 +40,9 @@ object Requests {
     val payload = "%s,%s".format(tag, value.toString)
 
     post.setEntity(new StringEntity(payload))
+
+    val client = HttpClientBuilder.create().build()
+    client.execute(post)
 
     true
   }
