@@ -41,6 +41,8 @@ object Utilities {
       data.zip(y).map(entry => entry._1*entry._2).sum
   }
 
+  def fillNa(data:Any):Any = { data }
+
   def kafkaStream(ssc: StreamingContext,
                   zkQuorum: String,
                   groupId: String,

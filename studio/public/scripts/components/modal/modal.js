@@ -101,6 +101,7 @@ angular.module('emr.ui.modal', ['emr.ui.popup', 'emr.ui.shared'])
                                 inputs: options.inputs || {}
                             };
                             popupOptions.inputs.position = position;
+                            popupOptions.inputs.config = options.config;
 
                             // show modal using the popup service
                             popupService.show(popupOptions).then(function (popup) {

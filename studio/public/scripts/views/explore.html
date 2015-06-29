@@ -1,0 +1,158 @@
+<div id="explore-wrapper">
+
+    <div id="explore-tabs">
+
+        <ul class="vertical-tabs">
+            <li class="vertical-tab ng-class:{active: (activeIndex==0)}" ng-click="setActiveIndex(0)">
+                <div class="tab-icon"><i class="fa fa-line-chart fa-2x"></i></div>
+                <div class="tab-text">Charts</div>
+            </li>
+            <li class="vertical-tab ng-class:{active: (activeIndex==1)}" ng-click="setActiveIndex(1)">
+                <div class="tab-icon"><i class="fa fa-bar-chart fa-2x"></i></div>
+                <div class="tab-text">Statistics</div>
+            </li>
+            <li class="vertical-tab ng-class:{active: (activeIndex==2)}" ng-click="setActiveIndex(2)">
+                <div class="tab-icon"><i class="fa fa-table fa-2x"></i></div>
+                <div class="tab-text">Data</div>
+            </li>
+        </ul>
+
+    </div>
+
+    <div id="explore-container">
+
+        <div class="explore-content ng-class:{active: (activeIndex==0)}">
+
+            <div id="chart-menu-container" class="chart-content">
+
+                <div class="explore-toolbar">
+                    <div class="pull-right">
+                        <i class="fa fa-times"></i>
+                    </div>
+                </div>
+                <div id="chart-menu">
+
+                    <div class="chart-menu-header">
+                        <div class="pull-left">Layout</div>
+                    </div>
+
+                    <select class="form-control chart-menu-item" ng-model="chartOptions.type" ng-change="updateChartType()">
+                        <option value="line">Line</option>
+                        <option value="scatter">XY Scatter</option>
+                    </select>
+
+                    <div class="chart-menu-header">
+                        <div class="pull-left">Series</div>
+                        <div class="pull-right">
+                            <i class="fa fa-plus"></i>
+                            <i class="fa fa-minus"></i>
+                        </div>
+                    </div>
+
+                    <div class="chart-series" ng-repeat="item in chartOptions.series">
+                        <div class="series-color" ng-style="{'background-color':getColor($index)}"></div>
+                        <div class="series-coords"><div ng-show="hasXCoordinate()">{{item.x}}</div><div>{{item.y}}</div></div>
+                        <div style="clear: both;"></div>
+                    </div>
+
+                    <div class="add-series chart-menu-item">
+
+                        <div ng-show="hasXCoordinate()" class="add-series-item input-group">
+                            <span class="input-group-addon">X</span>
+                            <select class="form-control" ng-model="newSeries.x">
+                                <option ng-repeat="(key, value) in features" ng-selected="key==newSeries.x" value="{{key}}">{{key}}</option>
+                            </select>
+                        </div>
+
+                        <div class="add-series-item input-group">
+                            <span class="input-group-addon">Y</span>
+                            <select class="form-control" ng-model="newSeries.y">
+                                <option ng-repeat="(key, value) in features" ng-selected="key==newSeries.y" value="{{key}}">{{key}}</option>
+                            </select>
+                        </div>
+
+                        <div class="add-series-footer">
+                            <button type="button" class="btn btn-success pull-right" ng-click="addSeries()">Add</button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div id="chart-container" class="chart-content">
+                <div id="loader-overlay" ng-if="rendering" style="background-color: #fff">
+                    <div class="loader"></div>
+                </div>
+
+                <chart2d ng-if="!loading" id="explore-chart" methods="chartMethods"></chart2d>
+
+            </div>
+
+        </div>
+
+        <div class="explore-content ng-class:{active: (activeIndex==1)}">
+
+            <div class="feature-cards container-fluid">
+
+                <div class="row">
+
+                    <div class="col-md-4" ng-repeat="(key, value) in features">
+
+                        <div class="feature-card">
+
+                            <div class="feature-header">{{key}}</div>
+
+                            <div class="feature-item row">
+                                <div class="feature-item-name pull-left">Count</div>
+                                <div class="feature-item-value pull-right">{{value.count}}</div>
+                            </div>
+                            <div class="feature-item row">
+                                <div class="feature-item-name pull-left">Mean</div>
+                                <div class="feature-item-value pull-right">{{value.mean}}</div>
+                            </div>
+                            <div class="feature-item row">
+                                <div class="feature-item-name pull-left">Std</div>
+                                <div class="feature-item-value pull-right">{{value.std}}</div>
+                            </div>
+                            <div class="feature-item row">
+                                <div class="feature-item-name pull-left">Min</div>
+                                <div class="feature-item-value pull-right">{{value.min}}</div>
+                            </div>
+                            <div class="feature-item row">
+                                <div class="feature-item-name pull-left">25%</div>
+                                <div class="feature-item-value pull-right">{{value.twentyFive}}</div>
+                            </div>
+                            <div class="feature-item row">
+                                <div class="feature-item-name pull-left">50%</div>
+                                <div class="feature-item-value pull-right">{{value.fifty}}</div>
+                            </div>
+                            <div class="feature-item row">
+                                <div class="feature-item-name pull-left">75%</div>
+                                <div class="feature-item-value pull-right">{{value.seventyFive}}</div>
+                            </div>
+                            <div class="feature-item row">
+                                <div class="feature-item-name pull-left">Max</div>
+                                <div class="feature-item-value pull-right">{{value.max}}</div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="explore-content ng-class:{active: (activeIndex==2)}">
+
+            <!--<time-series-grid ng-if="activeIndex==2" id="time-series-grid-container" chart-data="chartData"></time-series-grid>-->
+
+        </div>
+
+    </div>
+
+</div>

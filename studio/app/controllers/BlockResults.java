@@ -7,7 +7,9 @@ import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Result;
 
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 import services.BlockResultsService;
 
@@ -34,7 +36,7 @@ public class BlockResults extends ControllerBase {
         ObjectMapper objectMapper = new ObjectMapper();
         BasicDBObject selectedFeatures = objectMapper.convertValue(request().body().asJson(), BasicDBObject.class);
 
-        String features = (String)selectedFeatures.get("features");
+        List<String> features = (ArrayList<String>)selectedFeatures.get("features");
 
         return ok(Json.toJson(BlockResultsService.getChartData(blockName, features)));
     }

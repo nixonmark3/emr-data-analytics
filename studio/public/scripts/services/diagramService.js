@@ -64,11 +64,13 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
             return deferred.promise;
         },
 
-        evaluate: function (clientId, data) {
+
+
+        compile: function (data) {
 
             var deferred = $q.defer();
 
-            $http.post('/evaluate/' + clientId, data)
+            $http.post('/compile', data)
                 .success(function (data, status, headers, config) {
                     deferred.resolve(data);
                 })
@@ -109,41 +111,26 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
             return deferred.promise;
         },
 
+        evaluate: function (clientId, data) {
+
+            var deferred = $q.defer();
+
+            $http.post('/evaluate/' + clientId, data)
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
+
         group: function(request){
 
             var deferred = $q.defer();
 
             $http.post('/group', request)
-                .success(function (data, status, headers, config) {
-                    deferred.resolve(data);
-                })
-                .error(function (data, status, headers, config){
-                    deferred.reject(status);
-                });
-
-            return deferred.promise;
-        },
-
-        kill: function (jobId) {
-
-            var deferred = $q.defer();
-
-            $http.get('/kill/' + jobId)
-                .success(function (data, status, headers, config) {
-                    deferred.resolve(data);
-                })
-                .error(function (data, status, headers, config){
-                    deferred.reject(status);
-                });
-
-            return deferred.promise;
-        },
-
-        compile: function (data) {
-
-            var deferred = $q.defer();
-
-            $http.post('/compile', data)
                 .success(function (data, status, headers, config) {
                     deferred.resolve(data);
                 })
@@ -170,6 +157,52 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
 
             return deferred.promise;
         },
+
+        kill: function (jobId) {
+
+            var deferred = $q.defer();
+
+            $http.get('/kill/' + jobId)
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
+
+        upload: function(file){
+
+            var deferred = $q.defer();
+
+            var formData = new FormData();
+            var xhr = new XMLHttpRequest();
+
+            formData.append("file", file);
+
+            xhr.upload.onprogress = function(event){
+                deferred.notify(event);
+            };
+
+            xhr.onload = function(event){
+                if (xhr.status == 200){
+                    var data = angular.fromJson(xhr.responseText);
+                    deferred.resolve(data);
+                }
+                else{
+                    deferred.reject(xhr.status);
+                }
+            };
+
+            xhr.open('POST', '/upload');
+            xhr.send(formData);
+
+            return deferred.promise;
+        },
+
+
 
         listDefinitions: function () {
 
@@ -297,11 +330,11 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
             return deferred.promise;
         },
 
-        getChartData: function(blockName, selectedFeatures) {
+        getChartData: function(blockName, features) {
 
             var deferred = $q.defer();
 
-            $http.post('/getChartData/' + blockName, {features: selectedFeatures})
+            $http.post('/getChartData/' + blockName, {features: features})
                 .success(function (data, status, headers, config) {
 
                     deferred.resolve(data);

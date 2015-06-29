@@ -1235,9 +1235,24 @@ viewmodels.configuringBlockViewModel = function (definition, block) {
     });
     this.parameters = parameters;
 
+    this.getParameter = function(name){
+
+        for(var p = 0; p < this.parameters.length; p++)
+            if (this.parameters[p].name() == name)
+                return this.parameters[p];
+    };
+
     this.reset = function() {
         return new viewmodels.configuringBlockViewModel(this.definition, this.block);
-    }
+    };
+
+    this.setParameter = function(name, value){
+
+        var parameter = this.getParameter(name);
+        parameter.value = value;
+        parameter.dirty = true;
+        parameter.collected = true;
+    };
 };
 
 viewmodels.configuringParameterViewModel = function (definitionParameter, blockParameter) {
@@ -1265,15 +1280,15 @@ viewmodels.configuringParameterViewModel = function (definitionParameter, blockP
 
     this.name = function(){
         return this.data.name;
-    }
+    };
 
     this.type = function(){
         return this.data.type;
-    }
+    };
 
     this.source = function(){
         return this.data.source;
-    }
+    };
 };
 
 viewmodels.definitionViewModel = function (mode, data) {

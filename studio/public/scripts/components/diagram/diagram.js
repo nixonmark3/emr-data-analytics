@@ -16,7 +16,8 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                 nodes: '=?',
                 library: '=?',
                 loadSources: "=?",
-                blurBackground: "=?"
+                blurBackground: "=?",
+                methods: "=?"
             },
             link: function($scope, element, attrs) {
 
@@ -31,6 +32,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                 $scope.mouseOverConnector = null;
                 $scope.absUrl = $location.absUrl();
                 $scope.mainWindowWidth = mainWindow.width();
+                $scope.internalMethods = $scope.methods || {};
 
                 mainWindow.bind("resize", function () {
 
@@ -144,23 +146,6 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                     });
                 };
 
-                // todo: move out to app.js
-                $scope.$on("createBlock", function (event, args) {
-
-                    if ($scope.diagramMode() == "OFFLINE") {
-
-                        // translate diagram (svg) coordinates into application coordinates
-                        var point = translateCoordinates(args.x, args.y, args.evt);
-
-                        var configBlock = getConfigBlock(point.x, point.y, args.definitionName);
-
-                        // create the block
-                        $scope.diagram.createBlock(configBlock);
-
-                        adjustDiagramSizeIfRequired(point);
-                    }
-                });
-
                 var hasClassSVG = function (obj, has) {
 
                     var classes = obj.attr('class');
@@ -239,31 +224,20 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                 //
                 // Translate coordinates so they are relative to the svg element
                 //
-                var translateCoordinates = function (x, y, evt) {
+                $scope.internalMethods.translateCoordinates = function (x, y, evt) {
 
-                    var elementName;
-                    if ($scope.diagramMode() == "ONLINE")
-                        elementName = "online-diagram";
-                    else
-                        elementName = "offline-diagram";
-
-                    var diagram = document.getElementById(elementName);
+                    var diagram = element[0];
                     var matrix = diagram.getScreenCTM();
                     var point = diagram.createSVGPoint();
                     point.x = x - evt.view.scrollX;
                     point.y = y - evt.view.scrollY;
+
                     return point.matrixTransform(matrix.inverse());
                 };
 
                 var inverseCoordinates = function (x, y) {
 
-                    var elementName;
-                    if ($scope.diagramMode() == "ONLINE")
-                        elementName = "online-diagram";
-                    else
-                        elementName = "offline-diagram";
-
-                    var diagram = document.getElementById(elementName);
+                    var diagram = element[0];
                     var matrix = diagram.getScreenCTM().translate(x, y);
 
                     return {
@@ -319,7 +293,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                         dragStarted: function (x, y) {
 
-                            coords = translateCoordinates(x, y, evt);
+                            coords = $scope.internalMethods.translateCoordinates(x, y, evt);
 
                             // if necessary - select the block
                             if (!block.selected()) {
@@ -331,7 +305,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                         dragging: function (x, y) {
 
-                            var curCoords = translateCoordinates(x, y, evt);
+                            var curCoords = $scope.internalMethods.translateCoordinates(x, y, evt);
                             var deltaX = curCoords.x - coords.x;
                             var deltaY = curCoords.y - coords.y;
 
@@ -366,7 +340,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                         dragStarted: function (x, y, evt) {
 
-                            var coords = translateCoordinates(x, y, evt);
+                            var coords = $scope.internalMethods.translateCoordinates(x, y, evt);
 
                             $scope.draggingWire = true;
                             $scope.dragPoint1 = diagram.computeConnectorPos(block, connectorIndex, isInputConnector);
@@ -380,7 +354,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                         dragging: function (x, y, evt) {
 
-                            var coords = translateCoordinates(x, y, evt);
+                            var coords = $scope.internalMethods.translateCoordinates(x, y, evt);
 
                             $scope.dragPoint1 = diagram.computeConnectorPos(block, connectorIndex, isInputConnector);
                             $scope.dragPoint2 = {
@@ -448,7 +422,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                             // capture the initial drag coordinates
 
-                            coords = translateCoordinates(x, y, evt);
+                            coords = $scope.internalMethods.translateCoordinates(x, y, evt);
 
                             $scope.draggingSelection = true;
                             $scope.dragSelectionRect = {x: coords.x, y: coords.y, width: 0, height: 0};
@@ -458,7 +432,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                             // update the selection rectangle's position and dimensions based on the current drag position
 
-                            var curCoords = translateCoordinates(x, y, evt);
+                            var curCoords = $scope.internalMethods.translateCoordinates(x, y, evt);
 
                             var width = curCoords.x - coords.x;
                             if (width < 0)

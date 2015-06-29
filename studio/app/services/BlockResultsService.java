@@ -317,7 +317,7 @@ public class BlockResultsService {
         return tupleDataAsDictionary;
     }
 
-    public static BasicDBList getChartData(String blockName, String selectedFeatures) {
+    public static BasicDBList getChartData(String blockName, List<String> features) {
 
         BasicDBList chartData = new BasicDBList();
 
@@ -347,12 +347,12 @@ public class BlockResultsService {
 
                     ArrayList<String> resultFeatures = (ArrayList<String>) resultChartData.get(0);
 
-                    chartData.add(selectedFeatures.split(","));
+                    chartData.add(features);
                     chartData.add(resultChartData.get(1));
 
-                    for (String featureName : selectedFeatures.split(",")) {
+                    for (String feature : features) {
 
-                        chartData.add(resultChartData.get(resultFeatures.indexOf(featureName) + 2));
+                        chartData.add(resultChartData.get(resultFeatures.indexOf(feature) + 2));
                     }
                 }
             }

@@ -125,26 +125,25 @@ analyticsApp
         }
     ])
 
-    .controller('chartsController', ['$scope', '$element', '$timeout', 'block', 'diagramService', 'position', 'close',
-        function($scope, $element, $timeout, block, diagramService, position, close){
+    .controller('exploreController', ['$scope', '$element', '$timeout', 'diagramService', 'colorService', 'block', 'config', 'position', 'close',
+        function($scope, $element, $timeout, diagramService, colorService, block, config, position, close){
 
             $scope.block = block;
+            $scope.config = config;
+            $scope.position = position;
             $scope.loading = true;
             $scope.rendering = false;
-            $scope.position = position;
             $scope.activeIndex = 0;
-            $scope.chartType = 0;
-            $scope.hideChartMenus = false;
+            $scope.chartMethods = {};
 
-            // loading data after zoom animation has completed
+            // load the set of features after the modal animation has completed
             $timeout(function() {
 
                 diagramService.getFeatures($scope.block.id()).then(
 
                     function (data) {
 
-                        $scope.features = prepare(data);
-
+                        $scope.features = data;
                         $scope.loading = false;
                     },
                     function (code) {
@@ -154,43 +153,28 @@ analyticsApp
                 );
             }, 600);
 
+            // initialize the chart object
+            $scope.chartOptions = {
+                type: "line",
+                colorSet: "default",
+                x: { min: null, max: null },
+                y: { min: null, max: null },
+                series: []
+            };
+
+            // initialize new series object
+            $scope.newSeries = { x: null, y: null };
+
+            /* general methods */
+
             $scope.close = function(transitionDelay) {
 
                 close(null, transitionDelay);
             };
 
-            $scope.render = function() {
-
-                var selectedFeatures = getSelectedFeatures();
-
-                if (selectedFeatures.length != 0) {
-
-                    $scope.rendering = true;
-
-                    diagramService.getChartData($scope.block.id(), selectedFeatures.toString()).then(
-                        function (data) {
-
-                            $scope.chartData = data;
-
-                            $scope.rendering = false;
-                        },
-                        function (code) {
-
-                            $scope.rendering = false;
-                        }
-                    );
-
-                }
-            };
-
             $scope.save = function(transitionDelay) {
 
                 close(null, transitionDelay);
-            };
-
-            $scope.collapseChartMenusClick = function() {
-
-                $scope.hideChartMenus = true;
             };
 
             $scope.setActiveIndex = function(index) {
@@ -199,66 +183,107 @@ analyticsApp
                 $scope.hideChartMenus = false;
             };
 
-            $scope.featureSelectClick = function(feature) {
+            /* chart methods */
 
-                feature.selected = !feature.selected;
+            $scope.addSeries = function(){
 
-                if (feature.selected) {
+                // verify series data has been collected
+                if ($scope.newSeries.y==null) return;
+                if ($scope.hasXCoordinate() && $scope.newSeries.x==null) return;
 
-                    feature.flipToBack = false;
-                    feature.flipToFront = true;
-                }
-                else {
+                // update min and max values for each boundary
+                updateChartBounds($scope.newSeries);
 
-                    feature.flipToBack = true;
-                    feature.flipToFront = false;
-                }
+                // add the new series to the chart object
+                $scope.chartOptions.series.push(angular.copy($scope.newSeries));
+
+                resetSeries();
+
+                // render the chart
+                $scope.render();
             };
 
-            /*  take the raw set of features and prepare for display
-             */
-            var prepare = function(features) {
-
-                // get list of keys
-                var keys = Object.keys(features);
-                // create a set of colors for the list of features
-                var colors = d3.scale.category20().domain(keys);
-
-                // for each feature - created a selected flag and a color
-                for (var i = 0; i < keys.length; i++) {
-
-                    var feature = features[keys[i]];
-                    feature.selected = true;
-                    feature.color = colors(keys[i]);
-                    feature.showStatistics = false;
-                    feature.min = feature.min.toFixed(5);
-                    feature.mean = feature.mean.toFixed(5);
-                    feature.std = feature.std.toFixed(5);
-                    feature.max = feature.max.toFixed(5);
-                    feature.twentyFive = feature.twentyFive.toFixed(5);
-                    feature.fifty = feature.fifty.toFixed(5);
-                    feature.seventyFive = feature.seventyFive.toFixed(5);
-                    feature.flipToFront = false;
-                    feature.flipToBack = false;
-                }
-
-                return features;
+            // retrieve a color by configured color set and index
+            $scope.getColor = function(index){
+                return colorService.getColor($scope.chartOptions.colorSet, index);
             };
 
-            var getSelectedFeatures = function() {
+            // determines whether currently selected chart type has a configurable x coordinate
+            $scope.hasXCoordinate = function(){
+                return ($scope.chartOptions.type == 'scatter');
+            };
 
-                var selectedFeatures = [];
+            // render the chart
+            $scope.render = function() {
 
-                for (var key in $scope.features) {
+                $scope.rendering = true;
 
-                    if ($scope.features[key].selected) {
+                // assemble a distinct list of features
+                // todo: to maintain a dictionary of features as series and added and removed
+                var features = [];
+                for(var i = 0; i < $scope.chartOptions.series.length; i++){
 
-                        selectedFeatures.push(key);
+                    var series = $scope.chartOptions.series[i];
+                    if (series.x != null && features.indexOf(series.x) == -1)
+                        features.push(series.x);
+                    if (features.indexOf(series.y) == -1)
+                        features.push(series.y);
+                }
+
+                diagramService.getChartData($scope.block.id(), features).then(
+                    function (data) {
+
+                        $scope.chartMethods.render($scope.chartOptions, data);
+                        $scope.rendering = false;
+                    },
+                    function (code) {
+
+                        $scope.rendering = false;
                     }
-                }
+                );
+            };
 
-                return selectedFeatures;
+            function resetSeries(){
+                // reset new series
+                $scope.newSeries.y = null;
+                $scope.newSeries.x = null;
             }
+
+            // update the maximum and minimum chart bounds based on the specified feature
+            function updateChartBounds(series){
+
+                var yFeature = $scope.features[series.y];
+                var xFeature = (series.x) ? $scope.features[series.x] : null;
+
+                // update y boundaries
+                if ($scope.chartOptions.y.min==null || yFeature.min < $scope.chartOptions.y.min)
+                    $scope.chartOptions.y.min = yFeature.min;
+                if ($scope.chartOptions.y.max==null || yFeature.max > $scope.chartOptions.y.max)
+                    $scope.chartOptions.y.max = yFeature.max;
+
+                // update x boundaries
+                if (xFeature != null){
+                    if ($scope.chartOptions.x.min==null || xFeature.min < $scope.chartOptions.x.min)
+                        $scope.chartOptions.x.min = xFeature.min;
+                    if ($scope.chartOptions.x.max==null || xFeature.max > $scope.chartOptions.x.max)
+                        $scope.chartOptions.x.max = xFeature.max;
+                }
+                else{
+                    if ($scope.chartOptions.x.min==null || $scope.chartOptions.x.min > 0)
+                        $scope.chartOptions.x.min = 0;
+                    if ($scope.chartOptions.x.max==null || yFeature.count > $scope.chartOptions.x.max)
+                        $scope.chartOptions.x.max = yFeature.count;
+                }
+            }
+
+            $scope.updateChartType = function(){
+
+                $scope.chartOptions.x = { min: null, max: null };
+                $scope.chartOptions.y = { min: null, max: null };
+                $scope.chartOptions.series = [];
+
+                resetSeries();
+            };
         }
     ])
 

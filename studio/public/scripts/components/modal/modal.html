@@ -2,7 +2,7 @@
      ng-style="{top: position.startY, left: position.startX, width: position.width, height: position.height }">
 
     <div class="emr-modal-header">
-        <span class="header-text">{{modal.name}}</span>
+        <span class="header-text">{{config.name}}</span>
     </div>
 
     <div class="emr-modal-body">
@@ -10,8 +10,8 @@
     </div>
 
     <div class="emr-modal-footer">
-        <button type="button" class="btn btn-default" ng-click="onClose()">{{::modal.cancel || Cancel}}</button>
-        <button type="button" class="btn btn-success" ng-click="onSave()">{{::modal.save || Save}}</button>
+        <button type="button" class="btn btn-default" ng-click="onClose()">{{::config.cancel || 'Cancel'}}</button>
+        <button type="button" class="btn btn-success" ng-click="onSave()">{{::config.save || 'Save'}}</button>
     </div>
 
 </div>

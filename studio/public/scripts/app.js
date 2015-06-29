@@ -4,6 +4,7 @@ var analyticsApp = angular.module('analyticsApp',
     ['diagramApp',
         'browserApp',
         'emr.ui.charts',
+        'emr.ui.files',
         'emr.ui.grids',
         'emr.ui.modal',
         'emr.ui.panel',
@@ -49,6 +50,8 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.configuringBlock = false;
 
         $scope.waitingForDelete = false;
+
+        $scope.offlineDiagramMethods = {};
 
         // initialize the studio properties panel to be on the right-side of the canvas
         var studioContainer = angular.element($('#studio-container'));
@@ -124,6 +127,64 @@ var analyticsApp = angular.module('analyticsApp',
 
         /* Scope Level Methods */
 
+        $scope.debug = function(evt) {
+
+            // retrieve the current diagram's data
+            var data = diagram().data;
+
+            diagramService.debug(data).then(
+                function (source) {
+
+                    // todo: show source
+                    console.log(source);
+                },
+                function (code) {
+                    console.log(code); // TODO show exception
+                }
+            );
+
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
+
+        /*
+         ** Deploy the online diagram
+         */
+        $scope.deploy = function(evt) {
+
+            var data = $scope.onlineViewModel.data;
+
+            diagramService.deploy(data).then(
+                function (jobId) {
+
+                    beginDeploymentNotifications(jobId);
+                },
+                function (code) {
+                    console.log(code); // TODO show exception
+                }
+            );
+
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
+
+        function getConfigurationBlock(x, y, evt, definitionName){
+
+            var currentDiagram = diagram();
+
+            // translate diagram coordinates
+            // todo: update to also support online diagram methods
+            var point = $scope.offlineDiagramMethods.translateCoordinates(x, y, evt);
+
+            var definition = new viewmodels.definitionViewModel(currentDiagram.mode(),
+                $scope.library[definitionName]);
+
+            // create a block description
+            var block = currentDiagram.getBlockDescription(point.x, point.y, definition);
+
+            return new viewmodels.configuringBlockViewModel(definition, block);
+        }
+
         /*
          *  Method that loads dynamic block parameter data
          */
@@ -160,10 +221,13 @@ var analyticsApp = angular.module('analyticsApp',
                 case "CHART":
 
                     modalService.show({
-                        templateUrl: '/assets/scripts/views/charts.html',
-                        controller: 'chartsController',
+                        templateUrl: '/assets/scripts/views/explore.html',
+                        controller: 'exploreController',
                         inputs: {
                             block: block
+                        },
+                        config: {
+                            name: 'test'
                         },
                         position: modalPosition
                     }).then(function (modal) {
@@ -239,45 +303,13 @@ var analyticsApp = angular.module('analyticsApp',
             }
         };
 
-        $scope.debug = function(evt) {
+        $scope.onCreateBlock = function(x, y, evt, definitionName){
 
-            // retrieve the current diagram's data
-            var data = diagram().data;
+            // get configuration block
+            var configBlock = getConfigurationBlock(x, y, evt, definitionName);
 
-            diagramService.debug(data).then(
-                function (source) {
-
-                    // todo: show source
-                    console.log(source);
-                },
-                function (code) {
-                    console.log(code); // TODO show exception
-                }
-            );
-
-            evt.stopPropagation();
-            evt.preventDefault();
-        };
-
-        /*
-        ** Deploy the online diagram
-         */
-        $scope.deploy = function(evt) {
-
-            var data = $scope.onlineViewModel.data;
-
-            diagramService.deploy(data).then(
-                function (jobId) {
-
-                    beginDeploymentNotifications(jobId);
-                },
-                function (code) {
-                    console.log(code); // TODO show exception
-                }
-            );
-
-            evt.stopPropagation();
-            evt.preventDefault();
+            // create the block
+            diagram().createBlock(configBlock);
         };
 
         /*
@@ -288,6 +320,25 @@ var analyticsApp = angular.module('analyticsApp',
             $scope.studioPropertiesPanel.isVisible = false;
 
             delete $scope.studioProperties;
+        };
+
+        $scope.onFileDrop = function(files, evt){
+
+            var file = files[0];
+            if (!file) return;
+
+            // todo: make this configurable
+            var definitionName = "LoadCSV";
+
+            // todo: base the offset on the block dimensions
+            var x = evt.pageX - 100, y = evt.pageY - 20;
+
+            // get configuration block
+            var configBlock = getConfigurationBlock(x, y, evt, definitionName);
+            configBlock.setParameter("Filename", file.path);
+
+            // create the block
+            diagram().createBlock(configBlock);
         };
 
         /*
@@ -318,20 +369,6 @@ var analyticsApp = angular.module('analyticsApp',
 
             diagram().updateBlock($scope.studioProperties.viewModel);
             $scope.studioPropertiesPanel.isDirty = false;
-        };
-
-
-
-
-        // fire the event to create a new block given a definition
-        $scope.createBlock = function(x, y, evt, definitionName){
-
-            $scope.$root.$broadcast("createBlock", {
-                x: x,
-                y: y,
-                evt: evt,
-                definitionName: definitionName
-            });
         };
 
         $scope.toggleDiagrams = function() {
@@ -628,7 +665,7 @@ var analyticsApp = angular.module('analyticsApp',
                 inputs: {
                     nodes: $scope.nodes,
                     onDrag: beginDragEvent,
-                    onDrop: $scope.createBlock
+                    onDrop: $scope.onCreateBlock
                 }
             }).then(function (popup) {
 

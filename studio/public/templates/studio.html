@@ -108,7 +108,9 @@
         </div>
     </div>
 
-    <div id="studio-container">
+    <div id="studio-container" file-drop>
+
+        <div id="dropTarget">Drop Data</div>
 
         <panel id="studio-properties"
                config="studioPropertiesPanel"
@@ -157,7 +159,8 @@
                              nodes="nodes"
                              library="library"
                              load-sources="loadSources"
-                             blur-background="blurBackground"></diagram>
+                             blur-background="blurBackground"
+                             methods="offlineDiagramMethods"></diagram>
 
                 </div>
             </div>
