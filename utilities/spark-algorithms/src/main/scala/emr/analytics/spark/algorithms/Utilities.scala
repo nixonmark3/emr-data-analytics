@@ -51,8 +51,4 @@ object Utilities {
     val topicsMap = topics.split(",").map(t => (t,1)).toMap
     KafkaUtils.createStream(ssc, zkQuorum, groupId, topicsMap)
   }
-
-  def fillNa(data:Any):Any = { data }
-
-
 }
