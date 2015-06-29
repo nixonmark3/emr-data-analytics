@@ -31,6 +31,13 @@ object Utilities {
       data.filter(x => featuresSet.contains(x._1)).map(x => x._2)
   }
 
+  def predict(data:Any, model:Array[Double], xMean:Array[Double], xStdev:Array[Double], yMean:Array[Double], yStdev:Array[Double]):Any = {
+
+    val x = normalize(data, xMean, xStdev)
+    val y = dotProduct(x, model)
+    deNormalize(y, yMean(0), yStdev(0))
+  }
+
   def dotProduct(data:Any, y:Array[Double]):Any = data match {
 
     case data:DStream[Array[Double]] =>
@@ -39,6 +46,26 @@ object Utilities {
       data.map(x => x.zip(y).map(entry => entry._1*entry._2).sum)
     case data:Array[Double] =>
       data.zip(y).map(entry => entry._1*entry._2).sum
+  }
+
+  def normalize(data:Any, mean:Array[Double], stdev:Array[Double]):Any = data match {
+
+    case data:DStream[Array[Double]] =>
+      data.map(x => x.zip(mean).map(entry => entry._1-entry._2).zip(stdev).map(entry => entry._1 / entry._2))
+    case data:RDD[Array[Double]] =>
+      data.map(x => x.zip(mean).map(entry => entry._1-entry._2).zip(stdev).map(entry => entry._1 / entry._2))
+    case data:Array[Double] =>
+      data.zip(mean).map(entry => entry._1 - entry._2).zip(stdev).map(entry => entry._1 / entry._2)
+  }
+
+  def deNormalize(data:Any, mean:Double, stdev:Double):Any = data match {
+
+    case data:DStream[Double] =>
+      data.map(x => x * stdev + mean)
+    case data:RDD[Double] =>
+      data.map(x => x * stdev + mean)
+    case data:Double =>
+      data * stdev + mean
   }
 
   def fillNa(data:Any):Any = { data }
@@ -51,8 +78,4 @@ object Utilities {
     val topicsMap = topics.split(",").map(t => (t,1)).toMap
     KafkaUtils.createStream(ssc, zkQuorum, groupId, topicsMap)
   }
-
-  def fillNa(data:Any):Any = { data }
-
-
 }

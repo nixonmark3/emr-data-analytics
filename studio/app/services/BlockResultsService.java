@@ -44,14 +44,21 @@ public class BlockResultsService {
         if (results != null) {
 
             BasicDBList output = (BasicDBList) results.get(name);
-            output.forEach(kvPair -> {
+            output.forEach(item -> {
 
-                BasicDBList tuple = (BasicDBList)kvPair;
+                if (item instanceof Double) {
 
-                if (tuple.size() == 2) {
-
-                    outputBuilder.append(tuple.get(1));
+                    outputBuilder.append(item);
                     outputBuilder.append(",");
+                }
+                else{
+
+                    BasicDBList tuple = (BasicDBList)item;
+                    if (tuple.size() == 2) {
+
+                        outputBuilder.append(tuple.get(1));
+                        outputBuilder.append(",");
+                    }
                 }
             });
         }

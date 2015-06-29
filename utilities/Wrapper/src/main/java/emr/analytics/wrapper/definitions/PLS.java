@@ -62,10 +62,14 @@ public class PLS extends BlockDefinition implements IExport {
 
         modeDefinition.setSignature(new Signature("emr.analytics.spark.algorithms.Utilities",
                 "Utilities",
-                "dotProduct",
+                "predict",
                 new String[]{
                         "input:x",
-                        "block:model"
+                        "block:model",
+                        "block:x_mean",
+                        "block:x_std",
+                        "block:y_mean",
+                        "block:y_std"
                 }));
 
         return modeDefinition;
