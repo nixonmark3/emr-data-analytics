@@ -14,6 +14,7 @@ public class PLS extends BlockDefinition implements IExport {
     public Definition createDefinition() {
 
         Definition definition = new Definition(DefinitionType.MODEL, "PLS", "PLS Analysis", Category.TRANSFORMERS.toString());
+        definition.setW(200);
         return definition;
     }
 
@@ -38,8 +39,12 @@ public class PLS extends BlockDefinition implements IExport {
     public List<ConnectorDefinition> createOutputConnectors() {
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-        outputConnectors.add(new ConnectorDefinition("model", DataType.FRAME.toString(), true, true));
-        outputConnectors.add(new ConnectorDefinition("ycomp", DataType.FRAME.toString()));
+        outputConnectors.add(new ConnectorDefinition("model", DataType.LIST.toString(), true, true));
+        outputConnectors.add(new ConnectorDefinition("x_mean", DataType.LIST.toString(), false, true));
+        outputConnectors.add(new ConnectorDefinition("x_std", DataType.LIST.toString(), false, true));
+        outputConnectors.add(new ConnectorDefinition("y_mean", DataType.LIST.toString(), false, true));
+        outputConnectors.add(new ConnectorDefinition("y_std", DataType.LIST.toString(), false, true));
+        outputConnectors.add(new ConnectorDefinition("y_comp", DataType.FRAME.toString()));
         return outputConnectors;
     }
 

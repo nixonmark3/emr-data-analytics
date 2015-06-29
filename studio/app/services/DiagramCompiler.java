@@ -27,6 +27,9 @@ public class DiagramCompiler {
             offline.getOwner(),
             Mode.ONLINE);
 
+        online.setWidth(offline.getWidth());
+        online.setHeight(offline.getHeight());
+
         _onlineBlocks = new HashSet<>();
         _dataSources = new HashMap<>();
 

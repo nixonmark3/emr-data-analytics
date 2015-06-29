@@ -52,5 +52,7 @@ object Utilities {
     KafkaUtils.createStream(ssc, zkQuorum, groupId, topicsMap)
   }
 
+  def fillNa(data:Any):Any = { data }
+
 
 }
