@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
  */
 public class Diagram implements Serializable {
 
+    private UUID _uniqueID = UUID.randomUUID();
     private String name = "";
     private String description = "";
     private String owner = "";
@@ -31,6 +32,7 @@ public class Diagram implements Serializable {
     private List<DiagramConnector> outputs = new ArrayList<DiagramConnector>();
     private List<PersistedOutput> persistedOutputs = new ArrayList<PersistedOutput>();
     private List<Diagram> diagrams = new ArrayList<Diagram>();
+    private List<ParameterOverride> parameterOverrides = new ArrayList<ParameterOverride>();
 
     public Diagram(String name, String description, String owner, Mode mode){
         this.name = name;
@@ -355,4 +357,22 @@ public class Diagram implements Serializable {
     public List<PersistedOutput> getPersistedOutputs(){ return this.persistedOutputs; }
 
     public void addPersistedOutput(PersistedOutput persistedOutput){ this.persistedOutputs.add(persistedOutput); }
+
+    public List<ParameterOverride> getParameterOverrides() {
+
+        return parameterOverrides;
+    }
+
+    public void setParameterOverrides(List<ParameterOverride> parameterOverrides) {
+
+        this.parameterOverrides = parameterOverrides;
+    }
+
+    public UUID get_uniqueID() {
+        return _uniqueID;
+    }
+
+    public void set_uniqueID(UUID _uniqueID) {
+        this._uniqueID = _uniqueID;
+    }
 }

@@ -1,10 +1,18 @@
 package services;
 
+import actors.ClientActorManager;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.WriteResult;
+import controllers.Diagrams;
 import emr.analytics.models.definition.Definition;
 import emr.analytics.models.definition.DefinitionType;
 import emr.analytics.models.definition.Mode;
 import emr.analytics.models.diagram.*;
 import models.project.GroupRequest;
+import org.jongo.Jongo;
+import org.jongo.MongoCollection;
+import play.libs.Json;
+import plugins.MongoDBPlugin;
 
 import java.util.*;
 
@@ -195,5 +203,93 @@ public class DiagramsService {
         parent.addDiagram(diagram);
 
         return parent;
+    }
+
+    public void save(DiagramContainer diagramContainer) {
+
+        try {
+
+            MongoCollection dbDiagrams = this.getDiagramsDbCollection();
+
+            if (dbDiagrams != null) {
+
+                Diagram offline = diagramContainer.getOffline();
+                Diagram online = diagramContainer.getOnline();
+
+                if (offline != null) {
+
+                    if (online != null) {
+
+                        offline.setParameterOverrides(this.getParameterOverrides(online));
+                    }
+
+                    dbDiagrams.ensureIndex("{name: 1}", "{unique:true}");
+
+                    WriteResult update = dbDiagrams.update(String.format("{name: '%s'}", offline.getName())).upsert().with(offline);
+
+                    // todo determine if the save succeeded?
+
+                    dbDiagrams.update(String.format("{name: '%s'}", offline.getName())).with("{$inc: {version: 1}}");
+
+                    ObjectNode addDiagramMsg = Json.newObject();
+
+                    if (update.isUpdateOfExisting()) {
+
+                        addDiagramMsg.put("messageType", "UpdateDiagram");
+                    }
+                    else {
+
+                        addDiagramMsg.put("messageType", "AddDiagram");
+                    }
+
+                    addDiagramMsg.put("name", offline.getName());
+                    addDiagramMsg.put("description", offline.getDescription());
+                    addDiagramMsg.put("owner", offline.getOwner());
+
+                    ClientActorManager.getInstance().updateClients(addDiagramMsg);
+                }
+            }
+        }
+        catch (Exception exception) {
+
+            exception.printStackTrace();
+        }
+    }
+
+    private MongoCollection getDiagramsDbCollection() {
+
+        MongoCollection diagrams = null;
+
+        MongoDBPlugin mongoPlugin = MongoDBPlugin.getMongoDbPlugin();
+
+        if (mongoPlugin != null) {
+
+            Jongo db = mongoPlugin.getJongoDBInstance(mongoPlugin.getStudioDatabaseName());
+
+            if (db != null) {
+
+                diagrams = db.getCollection("diagrams");
+            }
+        }
+
+        return diagrams;
+    }
+
+    private List<ParameterOverride> getParameterOverrides(Diagram onlineDiagram) {
+
+        List<ParameterOverride> parameterOverrides = new ArrayList<ParameterOverride>();
+
+        if (onlineDiagram != null) {
+
+            onlineDiagram.getBlocks().stream().forEach((block) -> {
+
+                block.getParameters().stream().forEach((parameter) -> {
+
+                    parameterOverrides.add(new ParameterOverride(block.getId(), parameter.getName(), parameter.getValue()));
+                });
+            });
+        }
+
+        return parameterOverrides;
     }
 }
