@@ -331,9 +331,10 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                     evt.preventDefault();
                 };
 
-                $scope.connectorMouseDown = function (evt, block, connector, connectorIndex, isInputConnector) {
+                $scope.connectorMouseDown = function (evt, block, connector) {
 
                     var diagram = $scope.diagram;
+                    var initialPoint;
 
                     // broadcast a drag event
                     beginDragEvent(evt.pageX, evt.pageY, {
@@ -341,9 +342,10 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                         dragStarted: function (x, y, evt) {
 
                             var coords = $scope.internalMethods.translateCoordinates(x, y, evt);
+                            initialPoint = { x: block.x() + connector.x(), y: block.y() + connector.y() };
 
                             $scope.draggingWire = true;
-                            $scope.dragPoint1 = diagram.computeConnectorPos(block, connectorIndex, isInputConnector);
+                            $scope.dragPoint1 = initialPoint;
                             $scope.dragPoint2 = {
                                 x: coords.x,
                                 y: coords.y
@@ -356,7 +358,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                             var coords = $scope.internalMethods.translateCoordinates(x, y, evt);
 
-                            $scope.dragPoint1 = diagram.computeConnectorPos(block, connectorIndex, isInputConnector);
+                            $scope.dragPoint1 = initialPoint;
                             $scope.dragPoint2 = {
                                 x: coords.x,
                                 y: coords.y

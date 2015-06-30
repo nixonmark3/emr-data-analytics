@@ -10,6 +10,7 @@ viewmodels.connectorViewModel = function (data, x, y, parent) {
     this._parent = parent;
     this._x = x;
     this._y = y;
+    this.visible = data.visible;
     this._normalRadius = 6;
     this._expandedRadius = 12;
 
@@ -339,36 +340,37 @@ viewmodels.blockViewModel = function (data) {
     // connector functions
 
     //
-    // count the number of input and output connectors
-    //
-    this.inputConnectorCount = this.data.inputConnectors.length;
-
-    this.outputConnectorCount = this.data.outputConnectors.length;
-
-    //
     // calculate the specified connectors x-coordinate
     //
-    this.calculateConnectorX = function (connectorIndex, isInput) {
+    this.calculateConnectorX = function (visibleIndex, visibleCount) {
 
-        var count = (isInput) ? this.inputConnectorCount : this.outputConnectorCount;
-        var spacing = this.width() / (count + 1);
-
-        return ((connectorIndex + 1) * spacing);
+        var spacing = this.width() / (visibleCount + 1);
+        return ((visibleIndex + 1) * spacing);
     };
 
     //
     // create view models for specified connectors
     //
-    this.createConnectorViewModels = function (connectorsData, y, parent, isInput) {
+    this.createConnectorViewModels = function (connectorsData, y, parent) {
         var viewModels = [];
 
         if (connectorsData) {
 
-            for (var i = 0; i < connectorsData.length; ++i) {
+            var visibleConnectors = [];
+            // capture the set of visible connectors
+            var i;
+            for(i = 0; i  < connectorsData.length; ++i){
+                if (connectorsData[i].visible)
+                    visibleConnectors.push(connectorsData[i]);
+            }
 
+            var visibleIndex = 0;
+            for (i = 0; i < connectorsData.length; ++i) {
+
+                var x = (connectorsData[i].visible) ? this.calculateConnectorX(visibleIndex++, visibleConnectors.length) : 0;
                 var _connectorViewModel =
                     new viewmodels.connectorViewModel(connectorsData[i],
-                        this.calculateConnectorX(i, isInput),
+                        x,
                         y,
                         parent);
 
@@ -384,13 +386,11 @@ viewmodels.blockViewModel = function (data) {
     //
     this.inputConnectors = this.createConnectorViewModels(this.data.inputConnectors,
         0,
-        this,
-        true);
+        this);
 
     this.outputConnectors = this.createConnectorViewModels(this.data.outputConnectors,
         this.height(),
-        this,
-        false);
+        this);
 };
 
 viewmodels.wireViewModel = function (data, parent, sourceConnector, targetConnector) {

@@ -175,10 +175,10 @@
        ng-repeat="block in diagram.blocks"
        ng-attr-transform="translate({{block.x()}}, {{block.y()}})">
 
-        <g ng-repeat="connector in block.inputConnectors">
+        <g ng-repeat="connector in block.inputConnectors | filter:visible">
 
             <g class="connector-group"
-               ng-mousedown="connectorMouseDown($event, block, connector, $index, true)">
+               ng-mousedown="connectorMouseDown($event, block, connector)">
 
                 <circle ng-attr-class="{{connector == mouseOverConnector && 'connector-hover' || 'connector'}}"
                         ng-attr-r="{{connector.radius}}"
@@ -215,10 +215,10 @@
 
         </g>
 
-        <g ng-repeat="connector in block.outputConnectors">
+        <g ng-repeat="connector in block.outputConnectors | filter:{visible:true}">
 
             <g class="connector-group"
-               ng-mousedown="connectorMouseDown($event, block, connector, $index, false)">
+               ng-mousedown="connectorMouseDown($event, block, connector)">
 
                 <circle ng-attr-class="{{connector == mouseOverConnector && 'connector-hover' || 'connector'}}"
                         ng-attr-r="{{connector.radius}}"
