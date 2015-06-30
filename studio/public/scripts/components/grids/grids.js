@@ -1,6 +1,7 @@
 'use strict';
 
 angular.module('emr.ui.grids', [])
+
     .directive('timeSeriesGrid', ['$window', function($window) {
 
         return {
@@ -138,6 +139,45 @@ angular.module('emr.ui.grids', [])
                 };
 
                 prepareData();
+            }
+        }
+    }])
+
+    .directive('featuresGrid', ['$window', function($window){
+
+        return {
+            restrict: 'E',
+            replace: true,
+            templateUrl: '/assets/scripts/components/grids/featuresGrid.html',
+            scope: {
+                features: "=",
+                columnWidth: "=",
+                rowHeaderWidth: "="
+            },
+            link: function ($scope, element, attrs) {
+
+                // initialize position variables
+                $scope.padding = 10;
+                $scope.columnHeight = 36;
+                $scope.columnHeaderPosition = 0;
+                $scope.rowHeaderPosition = 0;
+                $scope.loadedRecordCount = 200;
+                $scope.originX = $scope.rowHeaderWidth + 2 * $scope.padding;
+                $scope.originY = $scope.columnHeight + 2 * $scope.padding;
+
+                var featureCount = Object.keys($scope.features).length;
+                $scope.gridWidth = (featureCount * ($scope.columnWidth + $scope.padding) + $scope.originX);
+                $scope.gridHeight = ($scope.loadedRecordCount * ($scope.columnHeight + $scope.padding) + $scope.originY);
+
+
+                angular.element('#grid-content-container').bind('scroll', function(event) {
+
+                    $scope.$apply(function(){
+                        $scope.columnHeaderPosition = -1 * event.target.scrollLeft;
+                        $scope.rowHeaderPosition = -1 * event.target.scrollTop;
+                    });
+
+                });
             }
         }
     }]);
