@@ -3,24 +3,26 @@ package services;
 import emr.analytics.models.definition.*;
 import emr.analytics.models.diagram.*;
 
+import java.nio.ByteBuffer;
 import java.util.*;
 
 public class DiagramCompiler {
 
     private HashSet<String> _onlineBlocks;
     private HashMap<String, String> _dataSources;
-
     private HashMap<String, Definition> _definitions;
+    private Definition _terminatingDefinition;
+    private List<ParameterOverride> _parameterOverrides = null;
 
-    private Definition terminatingDefinition;
+    public DiagramCompiler(HashMap<String, Definition> definitions) {
 
-    public DiagramCompiler(HashMap<String, Definition> definitions){
         _definitions = definitions;
-
-        terminatingDefinition = definitions.get("RESTPost");
+        _terminatingDefinition = definitions.get("RESTPost");
     }
 
     public Diagram compile(Diagram offline){
+
+        _parameterOverrides = offline.getParameterOverrides();
 
         Diagram online = new Diagram(offline.getName(),
             offline.getDescription(),
@@ -69,12 +71,14 @@ public class DiagramCompiler {
                 }
 
                 // add a result block to the output of the model block
-                Block postBlock = this.createOnlineBlock(UUID.randomUUID(),
-                        this.generateBlockName(this.terminatingDefinition.getName()),
+                Block postBlock = this.createOnlineBlock(offline.get_uniqueID(),
+                        this.generateBlockName(this._terminatingDefinition.getName()),
                         0,
                         onlineBlock.getX(),
                         (onlineBlock.getY() + 120),
-                        this.terminatingDefinition);
+                        this._terminatingDefinition);
+
+                this.applyParameterOverrides(postBlock);
 
                 online.addBlock(postBlock);
 
@@ -117,6 +121,8 @@ public class DiagramCompiler {
             }
         }
 
+        this.applyParameterOverrides(onlineBlock);
+
         return onlineBlock;
     }
 
@@ -134,6 +140,7 @@ public class DiagramCompiler {
             name = definitionName + index;
             index++;
         }while(_onlineBlocks.contains(name));
+
 
         return name;
     }
@@ -154,5 +161,23 @@ public class DiagramCompiler {
 
         for (Wire leadingWire : source.getLeadingWires(blockId))
             this.addLeadingPath(leadingWire, source, destination);
+    }
+
+    private void applyParameterOverrides(Block block) {
+
+        if (_parameterOverrides != null) {
+
+            _parameterOverrides.stream()
+                    .filter(p -> p.get_blockId().equals(block.getId()))
+                    .forEach((override) -> {
+
+                        Optional<Parameter> parameterToOverride = block.getParameter(override.get_name());
+
+                        if (parameterToOverride.isPresent()) {
+
+                            parameterToOverride.get().setValue(override.get_value());
+                        }
+                    });
+        }
     }
 }

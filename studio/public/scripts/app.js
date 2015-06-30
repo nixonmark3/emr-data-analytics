@@ -113,8 +113,10 @@ var analyticsApp = angular.module('analyticsApp',
         // load diagrams
         diagramService.listDiagrams().then(
             function (data) {
+
                 $scope.diagrams = data;
                 $scope.diagrams.forEach(function(item) {
+
                     initializeNavigationItem(item);
                 });
             },
@@ -376,45 +378,55 @@ var analyticsApp = angular.module('analyticsApp',
             $scope.showSidebar = !$scope.showSidebar;
         };
 
-        // load an existing diagram
         $scope.loadDiagram = function(name) {
+
             diagramService.item(name).then(
                 function (data) {
+
                     $scope.toggleDiagrams();
+                    $scope.toggleCanvas(false);
                     $scope.diagramViewModel = new viewmodels.diagramViewModel(data);
+                    $scope.onlineViewModel = {};
                     updateSelectedDiagram();
                 },
                 function (code) {
+
                     console.log(code); // TODO show exception
                 }
             );
         };
 
-        // create a blank diagram
         $scope.createDiagram = function() {
             diagramService.item().then(
                 function (data) {
+
                     $scope.toggleDiagrams();
+                    $scope.toggleCanvas(false);
                     $scope.diagramViewModel = new viewmodels.diagramViewModel(data);
+                    $scope.onlineViewModel = {};
                 },
                 function (code) {
+
                     console.log(code); // TODO show exception
                 }
             );
         };
 
-        // save the current diagram
         $scope.save = function(evt) {
 
-            var data = $scope.diagramViewModel.data;
-            // we need to delete the object id or the save will not work
-            // TODO need a better solution for this
-            delete data._id;
+            var offlineDiagram = $scope.diagramViewModel.data;
+
+            var onlineDiagram = $scope.onlineViewModel.data;
+
+            var data = {'offline': offlineDiagram, 'online': onlineDiagram};
+
             diagramService.saveDiagram(data).then(
                 function (data) {
+
                     // TODO report success back to the user
                 },
                 function (code) {
+
                     console.log(code); // TODO show exception
                 }
             );
@@ -423,19 +435,24 @@ var analyticsApp = angular.module('analyticsApp',
             evt.preventDefault();
         };
 
-        // evaluate the current diagram
         $scope.evaluate = function(evt) {
 
             $scope.evaluating = true;
 
-            var data = $scope.diagramViewModel.data;
+            var offlineDiagram = $scope.diagramViewModel.data;
+
+            var onlineDiagram = $scope.onlineViewModel.data;
+
+            var data = {'offline': offlineDiagram, 'online': onlineDiagram};
 
             diagramService.evaluate($scope.clientId, data).then(
                 function (data) {
+
                     // TODO report success back to the user
                     console.log(data);
                 },
                 function (code) {
+
                     console.log(code); // TODO show exception
                 }
             );
@@ -444,18 +461,21 @@ var analyticsApp = angular.module('analyticsApp',
             evt.preventDefault();
         };
 
-
-
         $scope.deploy = function(evt) {
 
-            var data = $scope.onlineViewModel.data;
+            var offlineDiagram = $scope.diagramViewModel.data;
 
-            diagramService.deploy(data).then(
+            var onlineDiagram = $scope.onlineViewModel.data;
+
+            var diagrams = {'offline': offlineDiagram, 'online': onlineDiagram};
+
+            diagramService.deploy(diagrams).then(
                 function (jobId) {
 
                     beginDeploymentNotifications(jobId);
                 },
                 function (code) {
+
                     console.log(code); // TODO show exception
                 }
             );
@@ -489,30 +509,30 @@ var analyticsApp = angular.module('analyticsApp',
             });
         };
 
-        // delete the current diagram
         $scope.deleteDiagram = function(diagramName) {
+
             diagramService.deleteDiagram(diagramName).then(
                 function (data) {
                     // TODO report success back to the user
 
                     diagramService.item().then(
                         function (data) {
+
                         },
                         function (code) {
+
                             console.log(code); // TODO show exception
                         }
                     );
 
                 },
                 function (code) {
+
                     console.log(code); // TODO show exception
                 }
             );
         };
 
-        /*
-         *
-        */
         $scope.toggleCanvas = function(showOnline){
 
             if (!$scope.onlineCanvas && showOnline){
@@ -523,13 +543,20 @@ var analyticsApp = angular.module('analyticsApp',
                 $scope.onlineCanvas = true;
                 $scope.compiling = true;
 
-                diagramService.compile($scope.diagramViewModel.data).then(
+                var offlineDiagram = $scope.diagramViewModel.data;
+
+                var onlineDiagram = $scope.onlineViewModel.data;
+
+                var diagrams = {'offline': offlineDiagram, 'online': onlineDiagram};
+
+                diagramService.compile(diagrams).then(
                     function (data) {
 
                         $scope.onlineViewModel = new viewmodels.diagramViewModel(data);
                         $scope.compiling = false;
                     },
                     function (code) {
+
                         console.log(code); // TODO show exception
                     }
                 );

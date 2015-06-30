@@ -20,9 +20,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.UUID;
 
-/**
- * Diagrams Controller.
- */
 public class Diagrams extends ControllerBase {
 
     private static HashMap<String, Definition> _definitions = DefinitionsService.getDefinitionsMap();
@@ -45,17 +42,21 @@ public class Diagrams extends ControllerBase {
         return ok(source);
     }
 
-    /**
-     * Evaluates the diagram specified in the request body
-     * @return temporarily return success message
-     */
     @BodyParser.Of(BodyParser.Json.class)
     public static Result deploy() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
 
-        UUID jobId = _evaluationService.sendRequest(diagram);
+        ObjectMapper objectMapper = new ObjectMapper();
+        DiagramContainer diagramContainer = objectMapper.convertValue(request().body().asJson(), DiagramContainer.class);
+
+        DiagramsService diagramsService = new DiagramsService();
+        diagramsService.save(diagramContainer);
+
+        Diagram onlineDiagram = diagramContainer.getOnline();
+
+        UUID jobId = _evaluationService.sendRequest(onlineDiagram);
+
         if (jobId == null) {
+
             return internalServerError("Error requesting evaluation.");
         }
 
@@ -73,40 +74,67 @@ public class Diagrams extends ControllerBase {
 
     @BodyParser.Of(BodyParser.Json.class)
     public static Result evaluate(String clientId) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
 
-        saveDiagram(diagram);
+        try {
 
-        UUID jobId = _evaluationService.sendRequest(diagram);
-        if (jobId != null) {
-            _mapJobIdToClientId.put(jobId, UUID.fromString(clientId));
+            ObjectMapper objectMapper = new ObjectMapper();
+            DiagramContainer diagramContainer = objectMapper.convertValue(request().body().asJson(), DiagramContainer.class);
 
-            DiagramStates.createDiagramState(diagram, jobId);
+            DiagramsService diagramsService = new DiagramsService();
+            diagramsService.save(diagramContainer);
+
+            Diagram offlineDiagram = diagramContainer.getOffline();
+
+            UUID jobId = _evaluationService.sendRequest(offlineDiagram);
+
+            if (jobId != null) {
+
+                _mapJobIdToClientId.put(jobId, UUID.fromString(clientId));
+
+                DiagramStates.createDiagramState(offlineDiagram, jobId);
+            } else {
+
+                return internalServerError("Error requesting evaluation.");
+            }
         }
-        else {
-            return internalServerError("Error requesting evaluation.");
+        catch (Exception exception) {
+
+            exception.printStackTrace();
+            return internalServerError(String.format("Failed to evaluate diagram."));
         }
 
         return ok("Diagram evaluation initiated.");
     }
 
     @BodyParser.Of(BodyParser.Json.class)
-    public static Result compile(){
-        ObjectMapper objectMapper = new ObjectMapper();
-        Diagram offline = objectMapper.convertValue(request().body().asJson(), Diagram.class);
+    public static Result compile() {
 
-        DiagramCompiler diagramCompiler = new DiagramCompiler(_definitions);
-        Diagram online = diagramCompiler.compile(offline);
+        Diagram online = null;
+
+        try {
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            DiagramContainer diagramContainer = objectMapper.convertValue(request().body().asJson(), DiagramContainer.class);
+
+            DiagramsService diagramsService = new DiagramsService();
+            diagramsService.save(diagramContainer);
+
+            Diagram offlineDiagram = diagramContainer.getOffline();
+
+            DiagramCompiler diagramCompiler = new DiagramCompiler(_definitions);
+            online = diagramCompiler.compile(offlineDiagram);
+        }
+        catch (Exception exception) {
+
+            exception.printStackTrace();
+            return internalServerError(String.format("Failed to compile diagram."));
+        }
 
         return ok(Json.toJson(online));
     }
 
-    /**
-     * Returns the specified diagram
-     * @return Json representing requested diagram or failure
-     */
     public static Result getDiagram(String diagramName) {
+
         Diagram diagram = null;
 
         try {
@@ -146,6 +174,7 @@ public class Diagrams extends ControllerBase {
             diagram = service.group(request);
         }
         catch (Exception exception) {
+
             exception.printStackTrace();
             return internalServerError(String.format("Failed to group blocks."));
         }
@@ -153,24 +182,21 @@ public class Diagrams extends ControllerBase {
         return ok(Json.toJson(diagram));
     }
 
-    /**
-     * Save the Diagram sent in the request body.
-     * @return success or failure result
-     */
     @BodyParser.Of(BodyParser.Json.class)
     public static Result saveDiagram() {
 
-        Diagram diagram = null;
+        DiagramContainer diagramContainer = null;
 
         try {
 
             ObjectMapper objectMapper = new ObjectMapper();
-            diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
+            diagramContainer = objectMapper.convertValue(request().body().asJson(), DiagramContainer.class);
 
-            saveDiagram(diagram);
-
+            DiagramsService service = new DiagramsService();
+            service.save(diagramContainer);
         }
         catch (Exception exception) {
+
             exception.printStackTrace();
             return internalServerError(String.format("Failed to save diagram."));
         }
@@ -178,52 +204,6 @@ public class Diagrams extends ControllerBase {
         return ok("Diagram saved successfully.");
     }
 
-    private static void saveDiagram(Diagram diagram) {
-
-        try {
-
-            MongoCollection diagrams = getMongoCollection(DIAGRAMS_COLLECTION);
-
-            if (diagrams != null) {
-
-                // Need to ensure that each diagram has a unique name.
-                diagrams.ensureIndex(DIAGRAM_INDEX, UNIQUE_IS_TRUE);
-                // Update the Diagram document in MongoDB. If it does not exist create a new Diagram document.
-                WriteResult update = diagrams.update(String.format(QUERY_BY_UNIQUE_ID, diagram.getName())).upsert().with(diagram);
-
-                // todo determine if the save succeeded?
-
-                // After we successfully update the diagram bump the version.
-                diagrams.update(String.format(QUERY_BY_UNIQUE_ID, diagram.getName())).with(VERSION_INCREMENT);
-
-                ObjectNode addDiagramMsg = Json.newObject();
-
-                if (update.isUpdateOfExisting()) {
-
-                    addDiagramMsg.put("messageType", "UpdateDiagram");
-                }
-                else {
-
-                    addDiagramMsg.put("messageType", "AddDiagram");
-                }
-
-                addDiagramMsg.put("name", diagram.getName());
-                addDiagramMsg.put("description", diagram.getDescription());
-                addDiagramMsg.put("owner", diagram.getOwner());
-
-                ClientActorManager.getInstance().updateClients(addDiagramMsg);
-            }
-        }
-        catch (Exception expception) {
-
-            expception.printStackTrace();
-        }
-    }
-
-    /**
-     * Returns a collection with the name and description of each available diagram.
-     * @return list of available diagrams
-     */
     public static Result getDiagrams() {
         MongoCursor<BasicDiagram> diagrams = null;
 
@@ -245,11 +225,6 @@ public class Diagrams extends ControllerBase {
         return ok(Json.toJson(diagrams));
     }
 
-    /**
-     * Remove the specified diagram from the database.
-     * @param diagramName name of diagram
-     * @return success of failure result
-     */
     public static Result deleteDiagram(String diagramName) {
         try {
             MongoCollection diagrams = getMongoCollection(DIAGRAMS_COLLECTION);
@@ -276,20 +251,10 @@ public class Diagrams extends ControllerBase {
         return ok("Diagram removed successfully.");
     }
 
-    /**
-     * Returns a blank diagram.
-     * @return Json representing a blank diagram
-     */
     public static Result getBlankDiagram() {
         return ok(Json.toJson(Diagram.Create()));
     }
 
-    /**
-     * Private constants.
-     */
-    private static final String DIAGRAM_INDEX = "{name: 1}";
-    private static final String UNIQUE_IS_TRUE = "{unique:true}";
-    private static final String VERSION_INCREMENT = "{$inc: {version: 1}}";
     private static final String DIAGRAM_PROJECTION = "{_id: 0, name: 1, description: 1, owner: 1}";
     private static final String DIAGRAMS_COLLECTION = "diagrams";
     private static final String QUERY_BY_UNIQUE_ID = "{name: '%s'}";
