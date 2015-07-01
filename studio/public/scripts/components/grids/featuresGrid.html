@@ -27,15 +27,21 @@
 
             </div>
 
+            <div class="grid-row-header" ng-style="{ width: rowHeaderWidth, top: 10 * rowHeight + padding }">
+
+                <div ng-repeat="index in indexes">{{index}}</div>
+
+            </div>
+
         </div>
 
     </div>
 
     <div id="grid-content-container">
 
-        <div class="grid-content" ng-style="{ left: rowHeaderWidth + 2 * padding, top: columnHeight + 2 * padding, height: gridHeight }">
+        <div class="grid-content" ng-style="{ left: rowHeaderWidth + 2 * padding, top: rowHeight + 2 * padding, width: gridWidth, height: gridHeight }">
 
-            <div class="grid-content-row">
+            <div class="grid-content-row" ng-style="{ height: 10 * rowHeight + padding }">
 
                 <div class="grid-content-column" ng-repeat="(key, value) in features" ng-style="{ width: columnWidth, left: $index * (columnWidth + padding) }">
 
@@ -49,6 +55,16 @@
                     <div>{{value.max}}</div>
                     <div>&#160;</div>
                     <div>&#160;</div>
+
+                </div>
+
+            </div>
+
+            <div class="grid-content-row">
+
+                <div class="grid-content-column" ng-repeat="feature in data" ng-style="{ width: columnWidth, left: $index * (columnWidth + padding) }">
+
+                    <div ng-repeat="item in feature track by $index">{{item}}</div>
 
                 </div>
 

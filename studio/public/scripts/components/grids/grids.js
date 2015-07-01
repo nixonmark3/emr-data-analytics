@@ -152,23 +152,27 @@ angular.module('emr.ui.grids', [])
             scope: {
                 features: "=",
                 columnWidth: "=",
-                rowHeaderWidth: "="
+                rowHeaderWidth: "=",
+                onPage: "="
             },
             link: function ($scope, element, attrs) {
 
                 // initialize position variables
                 $scope.padding = 10;
-                $scope.columnHeight = 36;
+                $scope.rowHeight = 36;
                 $scope.columnHeaderPosition = 0;
                 $scope.rowHeaderPosition = 0;
-                $scope.loadedRecordCount = 200;
+                var recordCount = 0;
+                var featureOffset = 2;
                 $scope.originX = $scope.rowHeaderWidth + 2 * $scope.padding;
-                $scope.originY = $scope.columnHeight + 2 * $scope.padding;
+                $scope.originY = $scope.rowHeight + 2 * $scope.padding;
 
                 var featureCount = Object.keys($scope.features).length;
                 $scope.gridWidth = (featureCount * ($scope.columnWidth + $scope.padding) + $scope.originX);
-                $scope.gridHeight = ($scope.loadedRecordCount * ($scope.columnHeight + $scope.padding) + $scope.originY);
+                setGridHeight();
 
+                $scope.indexes = [];
+                $scope.data = [];
 
                 angular.element('#grid-content-container').bind('scroll', function(event) {
 
@@ -178,6 +182,20 @@ angular.module('emr.ui.grids', [])
                     });
 
                 });
+
+                $scope.onPage().then(function(data){
+
+                    $scope.indexes = data[1];
+                    recordCount = $scope.indexes.length;
+                    setGridHeight();
+
+                    for(var feature in $scope.features)
+                        $scope.data.push(data[data[0].indexOf(feature) + featureOffset]);
+                });
+
+                function setGridHeight(){
+                    $scope.gridHeight = ((recordCount + 10) * $scope.rowHeight + 3 * $scope.padding);
+                }
             }
         }
     }]);
