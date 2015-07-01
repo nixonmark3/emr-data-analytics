@@ -38,8 +38,6 @@ object Requests {
   def postOpc(url: String, tag: String, value: Double): Boolean = {
     val post = new HttpPost(url)
 
-    println(value)
-
     val payload = "%s,%s".format(tag, value.toString)
 
     post.setEntity(new StringEntity(payload))

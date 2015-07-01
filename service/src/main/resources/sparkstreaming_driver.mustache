@@ -1,11 +1,14 @@
 {{=<% %>=}}
 
+import org.apache.log4j.PropertyConfigurator
 import org.apache.spark.streaming._
 import scala.util.parsing.json._
 
 <%#packageNames%>
 import <%.%>
 <%/packageNames%>
+
+PropertyConfigurator.configure("log4j.properties")
 
 <%#models%>
 val <%variableName%> = Array(<%arguments%>)
