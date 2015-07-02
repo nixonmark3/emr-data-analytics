@@ -218,8 +218,10 @@ analyticsApp
                 var deferred = $q.defer();
 
                 var features = [];
-                for (var feature in $scope.features)
-                    features.push(feature);
+                for (var feature in $scope.features) {
+                    if (feature > 0)
+                        features.push($scope.features[feature].column);
+                }
 
                 diagramService.getChartData($scope.block.id(), features).then(
                     function (data) {
@@ -276,8 +278,6 @@ analyticsApp
 
                 var yFeature = getFeatureStatistics(series.y);
                 var xFeature = (series.x) ? getFeatureStatistics(series.x) : null;
-
-                console.log(yFeature);
 
                 // update y boundaries
                 if ($scope.chartOptions.y.min==null || yFeature.min < $scope.chartOptions.y.min)

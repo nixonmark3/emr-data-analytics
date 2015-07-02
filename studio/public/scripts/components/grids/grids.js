@@ -169,8 +169,24 @@ angular.module('emr.ui.grids', [])
                 $scope.rowHeaderPosition = 0;
                 $scope.originX = $scope.rowHeaderWidth + 2 * $scope.padding;
                 $scope.originY = $scope.rowHeight + 2 * $scope.padding;
+                $scope.gridFeatures = determineFeatures();
 
-                var featureCount = Object.keys($scope.features).length;
+                function determineFeatures() {
+
+                    var featureList = [];
+
+                    for(var feature in $scope.features) {
+
+                        if (feature > 0) {
+                            featureList.push($scope.features[feature]);
+                        }
+                    }
+
+                    return featureList;
+                }
+
+                //var featureCount = $scope.features.length - 1;
+                var featureCount = $scope.gridFeatures.length;
                 $scope.gridWidth = (featureCount * ($scope.columnWidth + $scope.padding) + $scope.originX);
                 setGridHeight();
 
@@ -187,20 +203,25 @@ angular.module('emr.ui.grids', [])
                 });
 
                 function init(){
-                    $scope.onPage().then(function(data){
+
+                    $scope.onPage().then(function(data) {
 
                         $scope.indexes = data[1].slice((page * pageSize), ((page + 1) * pageSize));
                         recordCount = $scope.indexes.length;
                         setGridHeight();
 
-                        for(var feature in $scope.features)
-                            $scope.data.push(data[data[0].indexOf(feature) + featureOffset].slice((page * pageSize), ((page + 1) * pageSize)));
+                        for(var feature in $scope.gridFeatures) {
+
+                            var featureIndex = data[0].indexOf($scope.gridFeatures[feature].column) + featureOffset;
+                            $scope.data.push(data[featureIndex].slice((page * pageSize), ((page + 1) * pageSize)));
+                        }
 
                         page++;
                     });
                 }
 
                 function setGridHeight(){
+
                     $scope.gridHeight = ((recordCount + 10) * $scope.rowHeight + 3 * $scope.padding);
                 }
 

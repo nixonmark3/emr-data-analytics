@@ -2,8 +2,8 @@
 
     <div class="grid-column-container" ng-style="{ left: columnHeaderPosition, width: gridWidth }">
         <div class="grid-column-headers" ng-style="{ left: originX, top: padding }">
-            <div class="grid-column-header" ng-repeat="(key, value) in features" ng-style="{ width: columnWidth, left: $index * (columnWidth + padding) }">
-                {{key}}
+            <div class="grid-column-header" ng-repeat="feature in gridFeatures" ng-style="{ width: columnWidth, left: $index * (columnWidth + padding) }">
+                {{feature.column}}
             </div>
         </div>
     </div>
@@ -43,18 +43,18 @@
 
             <div class="grid-content-row" ng-style="{ height: 10 * rowHeight + padding }">
 
-                <div class="grid-content-column" ng-repeat="(key, value) in features" ng-style="{ width: columnWidth, left: $index * (columnWidth + padding) }">
+                <div class="grid-content-column" ng-repeat="feature in gridFeatures" ng-style="{ width: columnWidth, left: $index * (columnWidth + padding) }">
 
-                    <div>{{value.count}}</div>
-                    <div>{{value.mean}}</div>
-                    <div>{{value.std}}</div>
-                    <div>{{value.min}}</div>
-                    <div>{{value.twentyFive}}</div>
-                    <div>{{value.fifty}}</div>
-                    <div>{{value.seventyFive}}</div>
-                    <div>{{value.max}}</div>
-                    <div>&#160;</div>
-                    <div>&#160;</div>
+                    <div>{{feature.statistics.count}}</div>
+                    <div>{{feature.statistics.mean}}</div>
+                    <div>{{feature.statistics.std}}</div>
+                    <div>{{feature.statistics.min}}</div>
+                    <div>{{feature.statistics.twentyFive}}</div>
+                    <div>{{feature.statistics.fifty}}</div>
+                    <div>{{feature.statistics.seventyFive}}</div>
+                    <div>{{feature.statistics.max}}</div>
+                    <div>{{feature.statistics.missing}}</div>
+                    <div>{{feature.statistics.dtype}}</div>
 
                 </div>
 
