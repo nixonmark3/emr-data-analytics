@@ -22,13 +22,13 @@ object Utilities {
 
     case data:DStream[Array[(String, Double)]] =>
       val featuresSet = features.split(",")
-      data.map(d => d.filter(x => featuresSet.contains(x._1)).map(x => x._2))
+      data.map(d => featuresSet.flatMap(x => d.filter(c => c._1.equals(x)).map(c => c._2)).to[Array])
     case data:RDD[Array[(String, Double)]] =>
       val featuresSet = features.split(",")
-      data.map(d => d.filter(x => featuresSet.contains(x._1)).map(x => x._2))
+      data.map(d => featuresSet.flatMap(x => d.filter(c => c._1.equals(x)).map(c => c._2)).to[Array])
     case data:Array[(String, Double)] =>
       val featuresSet = features.split(",")
-      data.filter(x => featuresSet.contains(x._1)).map(x => x._2)
+      featuresSet.flatMap(x => data.filter(c => c._1.equals(x)).map(c => c._2)).to[Array]
   }
 
   def predict(data:Any, model:Array[Double], xMean:Array[Double], xStdev:Array[Double], yMean:Array[Double], yStdev:Array[Double]):Any = {

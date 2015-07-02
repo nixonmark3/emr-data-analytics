@@ -1,6 +1,6 @@
 <div ng-show="config.isVisible" class="emr-panel ng-class:{'minimized': isMinimized};" ng-style="{top: config.y, left: config.x, width: config.width, height: config.height}">
-    <div class="emr-panel-header" ng-mousedown="onDrag($event);">
-        <div class="emr-panel-icon">
+    <div class="emr-panel-header">
+        <div class="emr-panel-icon" ng-mousedown="onDrag($event);">
             <i class="fa fa-cube"></i>
         </div>
         <input type="text" class="emr-panel-title" ng-model="title" ng-change="onTitleChange()" />

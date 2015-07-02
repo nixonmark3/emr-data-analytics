@@ -1,0 +1,77 @@
+<div class="grid-container">
+
+    <div class="grid-column-container" ng-style="{ left: columnHeaderPosition, width: gridWidth }">
+        <div class="grid-column-headers" ng-style="{ left: originX, top: padding }">
+            <div class="grid-column-header" ng-repeat="(key, value) in features" ng-style="{ width: columnWidth, left: $index * (columnWidth + padding) }">
+                {{key}}
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-row-container" ng-style="{ top: rowHeaderPosition, width: (rowHeaderWidth + padding), height: gridHeight }">
+
+        <div class="grid-row-headers" ng-style="{ left: padding, top: originY }">
+
+            <div class="grid-row-header" ng-style="{ width: rowHeaderWidth }">
+
+                <div>Count</div>
+                <div>Mean</div>
+                <div>Std Dev</div>
+                <div>Min</div>
+                <div>25%</div>
+                <div>50%</div>
+                <div>75%</div>
+                <div>Max</div>
+                <div>NaN</div>
+                <div>Type</div>
+
+            </div>
+
+            <div class="grid-row-header" ng-style="{ width: rowHeaderWidth, top: 10 * rowHeight + padding }">
+
+                <div ng-repeat="index in indexes">{{index}}</div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="grid-content-container">
+
+        <div class="grid-content" ng-style="{ left: rowHeaderWidth + 2 * padding, top: rowHeight + 2 * padding, width: gridWidth, height: gridHeight }">
+
+            <div class="grid-content-row" ng-style="{ height: 10 * rowHeight + padding }">
+
+                <div class="grid-content-column" ng-repeat="(key, value) in features" ng-style="{ width: columnWidth, left: $index * (columnWidth + padding) }">
+
+                    <div>{{value.count}}</div>
+                    <div>{{value.mean}}</div>
+                    <div>{{value.std}}</div>
+                    <div>{{value.min}}</div>
+                    <div>{{value.twentyFive}}</div>
+                    <div>{{value.fifty}}</div>
+                    <div>{{value.seventyFive}}</div>
+                    <div>{{value.max}}</div>
+                    <div>&#160;</div>
+                    <div>&#160;</div>
+
+                </div>
+
+            </div>
+
+            <div class="grid-content-row">
+
+                <div class="grid-content-column" ng-repeat="feature in data" ng-style="{ width: columnWidth, left: $index * (columnWidth + padding) }">
+
+                    <div ng-repeat="item in feature track by $index">{{item}}</div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

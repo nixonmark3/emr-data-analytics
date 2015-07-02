@@ -125,8 +125,8 @@ analyticsApp
         }
     ])
 
-    .controller('exploreController', ['$scope', '$element', '$timeout', 'diagramService', 'colorService', 'block', 'config', 'position', 'close',
-        function($scope, $element, $timeout, diagramService, colorService, block, config, position, close){
+    .controller('exploreController', ['$scope', '$element', '$timeout', '$q', 'diagramService', 'colorService', 'block', 'config', 'position', 'close',
+        function($scope, $element, $timeout, $q, diagramService, colorService, block, config, position, close){
 
             $scope.block = block;
             $scope.config = config;
@@ -211,6 +211,28 @@ analyticsApp
             // determines whether currently selected chart type has a configurable x coordinate
             $scope.hasXCoordinate = function(){
                 return ($scope.chartOptions.type == 'scatter');
+            };
+
+            $scope.onPage = function(){
+
+                var deferred = $q.defer();
+
+                var features = [];
+                for (var feature in $scope.features)
+                    features.push(feature);
+
+                diagramService.getChartData($scope.block.id(), features).then(
+                    function (data) {
+
+                        deferred.resolve(data);
+                    },
+                    function (code) {
+
+                        deferred.reject(code);
+                    }
+                );
+
+                return deferred.promise;
             };
 
             // render the chart

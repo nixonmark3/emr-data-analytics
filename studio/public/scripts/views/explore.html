@@ -8,10 +8,6 @@
                 <div class="tab-text">Charts</div>
             </li>
             <li class="vertical-tab ng-class:{active: (activeIndex==1)}" ng-click="setActiveIndex(1)">
-                <div class="tab-icon"><i class="fa fa-bar-chart fa-2x"></i></div>
-                <div class="tab-text">Statistics</div>
-            </li>
-            <li class="vertical-tab ng-class:{active: (activeIndex==2)}" ng-click="setActiveIndex(2)">
                 <div class="tab-icon"><i class="fa fa-table fa-2x"></i></div>
                 <div class="tab-text">Data</div>
             </li>
@@ -94,6 +90,12 @@
 
         <div class="explore-content ng-class:{active: (activeIndex==1)}">
 
+            <features-grid ng-if="!loading" features="features" column-width="200" row-header-width="150" on-page="onPage"></features-grid>
+
+        </div>
+
+        <div class="explore-content ng-class:{active: (activeIndex==2)}">
+
             <div class="feature-cards container-fluid">
 
                 <div class="row">
@@ -151,12 +153,6 @@
                 </div>
 
             </div>
-
-        </div>
-
-        <div class="explore-content ng-class:{active: (activeIndex==2)}">
-
-            <!--<time-series-grid ng-if="activeIndex==2" id="time-series-grid-container" chart-data="chartData"></time-series-grid>-->
 
         </div>
 
