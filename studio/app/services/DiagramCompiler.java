@@ -36,6 +36,7 @@ public class DiagramCompiler {
         _dataSources = new HashMap<>();
 
         // iterate over offline blocks to find model block
+        int modelCount = 0;
         for(Block block : offline.getBlocks()){
 
             for (Connector output : block.persistedOutputs())
@@ -71,12 +72,21 @@ public class DiagramCompiler {
                 }
 
                 // add a result block to the output of the model block
-                Block postBlock = this.createOnlineBlock(offline.get_uniqueID(),
+                UUID blockId = UUID.fromString(String.format("00000000-0000-0000-0000-%12s",
+                        Integer.toHexString(modelCount)).replace(" ", "0"));
+                Block postBlock = this.createOnlineBlock(blockId,
                         this.generateBlockName(this._terminatingDefinition.getName()),
                         0,
                         onlineBlock.getX(),
                         (onlineBlock.getY() + 120),
                         this._terminatingDefinition);
+
+                /*Block postBlock = this.createOnlineBlock(offline.get_uniqueID(),
+                        this.generateBlockName(this._terminatingDefinition.getName()),
+                        0,
+                        onlineBlock.getX(),
+                        (onlineBlock.getY() + 120),
+                        this._terminatingDefinition);*/
 
                 this.applyParameterOverrides(postBlock);
 
@@ -89,6 +99,8 @@ public class DiagramCompiler {
                         postBlock.getId(),
                         postBlock.getInputConnectors().get(0).getName(),
                         0));
+
+                modelCount++;
             }
         }
 
