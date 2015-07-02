@@ -252,8 +252,10 @@ analyticsApp
             // update the maximum and minimum chart bounds based on the specified feature
             function updateChartBounds(series){
 
-                var yFeature = $scope.features[series.y];
-                var xFeature = (series.x) ? $scope.features[series.x] : null;
+                var yFeature = getFeatureStatistics(series.y);
+                var xFeature = (series.x) ? getFeatureStatistics(series.x) : null;
+
+                console.log(yFeature);
 
                 // update y boundaries
                 if ($scope.chartOptions.y.min==null || yFeature.min < $scope.chartOptions.y.min)
@@ -274,6 +276,21 @@ analyticsApp
                     if ($scope.chartOptions.x.max==null || yFeature.count > $scope.chartOptions.x.max)
                         $scope.chartOptions.x.max = yFeature.count;
                 }
+            }
+
+            function getFeatureStatistics(selectedFeature) {
+
+                var statistics = null;
+
+                $scope.features.forEach(function (feature) {
+
+                    if (feature.column === selectedFeature) {
+
+                        statistics =  feature.statistics;
+                    }
+                });
+
+                return statistics;
             }
 
             $scope.updateChartType = function(){

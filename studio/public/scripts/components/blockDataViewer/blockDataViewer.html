@@ -20,22 +20,26 @@
                     <div class="grid-fixed-cell">50%</div>
                     <div class="grid-fixed-cell">75%</div>
                     <div class="grid-fixed-cell">Max</div>
+                    <div class="grid-fixed-cell">NaN</div>
+                    <div class="grid-fixed-cell">Type</div>
                 </div>
 
                 <div class="grid-horizontal-scroll">
 
                     <div class="grid-col-container" ng-style="{width: setGridWidth(page.data)}">
 
-                        <div class="grid-col" ng-repeat="point in page.data">
-                            <div class="grid-cell grid-cell-header">{{::point.name}}</div>
-                            <div class="grid-cell">{{::point.count}}</div>
-                            <div class="grid-cell">{{::point.mean}}</div>
-                            <div class="grid-cell">{{::point.std}}</div>
-                            <div class="grid-cell">{{::point.min}}</div>
-                            <div class="grid-cell">{{::point.twentyFive}}</div>
-                            <div class="grid-cell">{{::point.fifty}}</div>
-                            <div class="grid-cell">{{::point.seventyFive}}</div>
-                            <div class="grid-cell">{{::point.max}}</div>
+                        <div class="grid-col" ng-repeat="point in page.data" ng-if="$index > 0">
+                            <div class="grid-cell grid-cell-header">{{::point.column}}</div>
+                            <div class="grid-cell">{{::point.statistics.count}}</div>
+                            <div class="grid-cell">{{::point.statistics.mean}}</div>
+                            <div class="grid-cell">{{::point.statistics.std}}</div>
+                            <div class="grid-cell">{{::point.statistics.min}}</div>
+                            <div class="grid-cell">{{::point.statistics.twentyFive}}</div>
+                            <div class="grid-cell">{{::point.statistics.fifty}}</div>
+                            <div class="grid-cell">{{::point.statistics.seventyFive}}</div>
+                            <div class="grid-cell">{{::point.statistics.max}}</div>
+                            <div class="grid-cell">{{::point.statistics.missing}}</div>
+                            <div class="grid-cell">{{::point.statistics.dtype}}</div>
                         </div>
 
                     </div>

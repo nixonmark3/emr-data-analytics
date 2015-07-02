@@ -4,6 +4,7 @@ import gridfs
 import matplotlib.pyplot as plt
 import os
 import collections
+import numpy as np
 
 from abc import ABCMeta, abstractmethod
 
@@ -46,7 +47,7 @@ class FunctionBlock():
         block_results = collections.OrderedDict()
 
         if statistics:
-            block_results['Statistics'] = list(df.describe().to_dict().items())
+            block_results['Statistics'] = generate_statistics(df)
 
         if plot:
             # get a connection to GridFS
@@ -103,7 +104,7 @@ class FunctionBlock():
         self.results['Results']['Results'] = results
 
     def add_statistics_result(self, df):
-        self.results['Results']['Statistics'] = list(df.describe().to_dict().items())
+        self.results['Results']['Statistics'] = generate_statistics(df)
 
     def add_plot_result(self, df):
         connection = pymongo.MongoClient()
@@ -139,3 +140,38 @@ class FunctionBlock():
         results = db['results']
         results.update({'name': self.unique_name}, self.results, upsert=True)
         connection.close()
+
+
+def generate_statistics(df):
+    df_statistics = list()
+
+    df_statistics.append({'column': 'index', 'dtype': str(df.index.dtype)})
+    df_describe = df.describe().to_dict()
+
+    for column_name in df_describe.keys():
+        for statistic_name, value in df_describe[column_name].items():
+            new_statistic_name = None
+            if statistic_name == '25%':
+                new_statistic_name = 'twentyFive'
+            elif statistic_name == '50%':
+                new_statistic_name = 'fifty'
+            elif statistic_name == '75%':
+                new_statistic_name = 'seventyFive'
+            if new_statistic_name:
+                del df_describe[column_name][statistic_name]
+                df_describe[column_name][new_statistic_name] = value
+
+    for column_name in df.columns.values:
+        column_statistics = df_describe[column_name]
+        column = df[column_name]
+        nan_count = column.isnull().sum()
+        column_statistics['missing'] = int(nan_count)
+        column_statistics['dtype'] = str(column.dtype)
+        if nan_count > 0:
+            data, edges = np.histogram(column.dropna(), bins=5)
+        else:
+            data, edges = np.histogram(column, bins=5)
+        column_statistics['histogram'] = { 'data': data.tolist(), 'edges': edges.tolist() }
+        df_statistics.append({'column': column_name, 'statistics': column_statistics})
+
+    return df_statistics

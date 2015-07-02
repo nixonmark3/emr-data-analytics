@@ -83,7 +83,8 @@ public class EvaluationService {
         HashMap<String, String> persistedOutputs = new HashMap<>();
         for(PersistedOutput persistedOutput : diagram.getPersistedOutputs()){
 
-            String output = BlockResultsService.getOutput(persistedOutput.getId(), persistedOutput.getName());
+            BlockResultsService blockResultsService = new BlockResultsService();
+            String output = blockResultsService.getOutput(persistedOutput.getId(), persistedOutput.getName());
             String variableName = String.format("%s_%s", persistedOutput.getId(), persistedOutput.getName());
 
             persistedOutputs.put(variableName, output);
