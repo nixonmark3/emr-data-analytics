@@ -157,13 +157,16 @@ angular.module('emr.ui.grids', [])
             },
             link: function ($scope, element, attrs) {
 
+                var recordCount = 0;
+                var featureOffset = 2;
+                var page = 0;
+                var pageSize = 100;
+
                 // initialize position variables
                 $scope.padding = 10;
                 $scope.rowHeight = 36;
                 $scope.columnHeaderPosition = 0;
                 $scope.rowHeaderPosition = 0;
-                var recordCount = 0;
-                var featureOffset = 2;
                 $scope.originX = $scope.rowHeaderWidth + 2 * $scope.padding;
                 $scope.originY = $scope.rowHeight + 2 * $scope.padding;
 
@@ -183,19 +186,25 @@ angular.module('emr.ui.grids', [])
 
                 });
 
-                $scope.onPage().then(function(data){
+                function init(){
+                    $scope.onPage().then(function(data){
 
-                    $scope.indexes = data[1];
-                    recordCount = $scope.indexes.length;
-                    setGridHeight();
+                        $scope.indexes = data[1].slice((page * pageSize), ((page + 1) * pageSize));
+                        recordCount = $scope.indexes.length;
+                        setGridHeight();
 
-                    for(var feature in $scope.features)
-                        $scope.data.push(data[data[0].indexOf(feature) + featureOffset]);
-                });
+                        for(var feature in $scope.features)
+                            $scope.data.push(data[data[0].indexOf(feature) + featureOffset].slice((page * pageSize), ((page + 1) * pageSize)));
+
+                        page++;
+                    });
+                }
 
                 function setGridHeight(){
                     $scope.gridHeight = ((recordCount + 10) * $scope.rowHeight + 3 * $scope.padding);
                 }
+
+                init();
             }
         }
     }]);

@@ -44,7 +44,7 @@ public class SparkActor extends AbstractActor {
             .match(String.class, s -> s.equals("start"), s -> {
 
                 // send the job to the execution actor and wait for the spark streaming context to be returned
-                Timeout timeout = new Timeout(Duration.create(5, TimeUnit.SECONDS));
+                Timeout timeout = new Timeout(Duration.create(20, TimeUnit.SECONDS));
                 Future<Object> future = Patterns.ask(_jobExecutionActor, _job, timeout);
                 _streamingContext = (StreamingContext) Await.result(future, timeout.duration());
             })
