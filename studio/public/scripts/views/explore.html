@@ -56,14 +56,14 @@
                         <div ng-show="hasXCoordinate()" class="add-series-item input-group">
                             <span class="input-group-addon">X</span>
                             <select class="form-control" ng-model="newSeries.x">
-                                <option ng-repeat="(key, value) in features" ng-selected="key==newSeries.x" value="{{key}}">{{key}}</option>
+                                <option ng-repeat="feature in features" ng-selected="feature==newSeries.x" value="{{feature.column}}" ng-if="$index > 0">{{feature.column}}</option>
                             </select>
                         </div>
 
                         <div class="add-series-item input-group">
                             <span class="input-group-addon">Y</span>
                             <select class="form-control" ng-model="newSeries.y">
-                                <option ng-repeat="(key, value) in features" ng-selected="key==newSeries.y" value="{{key}}">{{key}}</option>
+                                <option ng-repeat="feature in features" ng-selected="feature.column==newSeries.y" value="{{feature.column}}" ng-if="$index > 0">{{feature.column}}</option>
                             </select>
                         </div>
 
@@ -100,45 +100,52 @@
 
                 <div class="row">
 
-                    <div class="col-md-4" ng-repeat="(key, value) in features">
+                    <div class="col-md-4" ng-repeat="feature in features" ng-if="$index > 0">
 
                         <div class="feature-card">
 
-                            <div class="feature-header">{{key}}</div>
+                            <div class="feature-header">{{feature.column}}</div>
 
                             <div class="feature-item row">
                                 <div class="feature-item-name pull-left">Count</div>
-                                <div class="feature-item-value pull-right">{{value.count}}</div>
+                                <div class="feature-item-value pull-right">{{feature.statistics.count}}</div>
                             </div>
                             <div class="feature-item row">
                                 <div class="feature-item-name pull-left">Mean</div>
-                                <div class="feature-item-value pull-right">{{value.mean}}</div>
+                                <div class="feature-item-value pull-right">{{feature.statistics.mean}}</div>
                             </div>
                             <div class="feature-item row">
                                 <div class="feature-item-name pull-left">Std</div>
-                                <div class="feature-item-value pull-right">{{value.std}}</div>
+                                <div class="feature-item-value pull-right">{{feature.statistics.std}}</div>
                             </div>
                             <div class="feature-item row">
                                 <div class="feature-item-name pull-left">Min</div>
-                                <div class="feature-item-value pull-right">{{value.min}}</div>
+                                <div class="feature-item-value pull-right">{{feature.statistics.min}}</div>
                             </div>
                             <div class="feature-item row">
                                 <div class="feature-item-name pull-left">25%</div>
-                                <div class="feature-item-value pull-right">{{value.twentyFive}}</div>
+                                <div class="feature-item-value pull-right">{{feature.statistics.twentyFive}}</div>
                             </div>
                             <div class="feature-item row">
                                 <div class="feature-item-name pull-left">50%</div>
-                                <div class="feature-item-value pull-right">{{value.fifty}}</div>
+                                <div class="feature-item-value pull-right">{{feature.statistics.fifty}}</div>
                             </div>
                             <div class="feature-item row">
                                 <div class="feature-item-name pull-left">75%</div>
-                                <div class="feature-item-value pull-right">{{value.seventyFive}}</div>
+                                <div class="feature-item-value pull-right">{{feature.statistics.seventyFive}}</div>
                             </div>
                             <div class="feature-item row">
                                 <div class="feature-item-name pull-left">Max</div>
-                                <div class="feature-item-value pull-right">{{value.max}}</div>
+                                <div class="feature-item-value pull-right">{{feature.statistics.max}}</div>
                             </div>
-
+                            <div class="feature-item row">
+                                <div class="feature-item-name pull-left">NaN Count</div>
+                                <div class="feature-item-value pull-right">{{feature.statistics.missing}}</div>
+                            </div>
+                            <div class="feature-item row">
+                                <div class="feature-item-name pull-left">Data Type</div>
+                                <div class="feature-item-value pull-right">{{feature.statistics.dtype}}</div>
+                            </div>
                         </div>
 
                     </div>

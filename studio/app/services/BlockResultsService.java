@@ -16,31 +16,32 @@ import java.lang.reflect.Array;
 import java.net.UnknownHostException;
 import java.util.*;
 
+import controllers.BlockResults;
 import emr.analytics.models.diagram.Block;
 import plugins.MongoDBPlugin;
 
 
 public class BlockResultsService {
 
-    public static List<String> getAvailableResults(String blockName) {
+    public List<String> getAvailableResults(String blockName) {
 
-        List<String> availableResults = new ArrayList<String>();
+        List<String> availableResults = new ArrayList<>();
 
-        BasicDBObject results = BlockResultsService.getResults(blockName);
+        BasicDBObject results = getResults(blockName);
 
         if (results != null) {
 
-            results.keySet().forEach(s -> availableResults.add(s));
+            results.keySet().forEach(resultName -> availableResults.add(resultName));
         }
 
         return availableResults;
     }
 
-    public static String getOutput(UUID id, String name){
+    public String getOutput(UUID id, String name){
 
         StringBuilder outputBuilder = new StringBuilder();
 
-        BasicDBObject results = BlockResultsService.getResults(id.toString());
+        BasicDBObject results = getResults(id.toString());
         if (results != null) {
 
             BasicDBList output = (BasicDBList) results.get(name);
@@ -66,97 +67,26 @@ public class BlockResultsService {
         return (outputBuilder.length() > 0) ? outputBuilder.substring(0, outputBuilder.length() - 1) : "";
     }
 
-    public static BasicDBObject getFeatures(String blockName) {
+    public BasicDBList getStatistics(String blockName) {
 
-        BasicDBObject features = new BasicDBObject();
+        BasicDBList blockStatistics = new BasicDBList();
 
-        BasicDBObject results = BlockResultsService.getResults(blockName);
-
-        if (results != null) {
-
-            BasicDBList blockStatistics = (BasicDBList) results.get("Statistics");
-
-            blockStatistics.forEach(featureStatisticsObj -> {
-
-                BasicDBList tuple = (BasicDBList) featureStatisticsObj;
-
-                if (tuple.size() == 2) {
-
-                    BasicDBObject statistics = new BasicDBObject();
-
-                    BasicDBObject featureStatistics = (BasicDBObject) tuple.get(1);
-                    featureStatistics.forEach((statistic, statisticValue) -> {
-
-                        if (statistic.contains("25")) {
-
-                            statistic = "twentyFive";
-                        }
-                        else if (statistic.contains("50")) {
-
-                            statistic = "fifty";
-                        }
-                        else if (statistic.contains("75")) {
-
-                            statistic = "seventyFive";
-                        }
-
-                        statistics.put(statistic, statisticValue);
-                    });
-
-                    features.put(tuple.get(0).toString(), statistics);
-                }
-            });
-        }
-
-        return features;
-    }
-
-    public static List<BasicDBObject> getStatistics(String blockName) {
-
-        List<BasicDBObject> statistics = new ArrayList<BasicDBObject>();
-
-        BasicDBObject results = BlockResultsService.getResults(blockName);
+        BasicDBObject results = getResults(blockName);
 
         if (results != null) {
 
-            BasicDBList blockStatistics = (BasicDBList)results.get("Statistics");
-
-            blockStatistics.forEach(featureStatisticsObj -> {
-
-                BasicDBList tuple = (BasicDBList) featureStatisticsObj;
-
-                if (tuple.size() == 2) {
-
-                    BasicDBObject blockFeatureStatistics = new BasicDBObject();
-                    blockFeatureStatistics.put("name", tuple.get(0));
-
-                    BasicDBObject featureStatistics = (BasicDBObject) tuple.get(1);
-                    featureStatistics.forEach((statistic, statisticValue) -> {
-
-                        if (statistic.contains("25")) {
-                            statistic = "twentyFive";
-                        } else if (statistic.contains("50")) {
-                            statistic = "fifty";
-                        } else if (statistic.contains("75")) {
-                            statistic = "seventyFive";
-                        }
-
-                        blockFeatureStatistics.put(statistic, statisticValue.toString());
-                    });
-
-                    statistics.add(blockFeatureStatistics);
-                }
-            });
+            blockStatistics = (BasicDBList)results.get("Statistics");
         }
 
-        return statistics;
+        return blockStatistics;
     }
 
-    public static byte[] getPlot(String blockName) {
+    public byte[] getPlot(String blockName) {
 
         byte[] image = null;
 
         try {
+
             MongoDBPlugin mongoPlugin = MongoDBPlugin.getMongoDbPlugin();
 
             DB db = mongoPlugin.getMongoDBInstance(mongoPlugin.getStudioDatabaseName());
@@ -167,7 +97,7 @@ public class BlockResultsService {
 
             if (gridFSDBFile != null) {
 
-                image =  BlockResultsService.toByteArray(gridFSDBFile);
+                image = toByteArray(gridFSDBFile);
             }
         }
         catch (UnknownHostException unknownHostException) {
@@ -182,11 +112,11 @@ public class BlockResultsService {
         return image;
     }
 
-    public static List<BasicDBObject> getOutputResults(String blockName) {
+    public List<BasicDBObject> getOutputResults(String blockName) {
 
         List<BasicDBObject> outputResults = new ArrayList<BasicDBObject>();
 
-        BasicDBObject results = BlockResultsService.getResults(blockName);
+        BasicDBObject results = getResults(blockName);
 
         if (results != null) {
 
@@ -227,7 +157,7 @@ public class BlockResultsService {
         return outputResults;
     }
 
-    private static BasicDBObject getResults(String blockName) {
+    private BasicDBObject getResults(String blockName) {
 
         BasicDBObject results = null;
 
@@ -246,12 +176,16 @@ public class BlockResultsService {
                 DBCursor cursor = resultsCollection.find(query);
 
                 try {
+
                     while (cursor.hasNext()) {
+
                         results = (BasicDBObject) cursor.next().get("Results");
                     }
                 }
                 finally {
+
                     if (cursor != null) {
+
                         cursor.close();
                     }
                 }
@@ -265,7 +199,7 @@ public class BlockResultsService {
         return results;
     }
 
-    private static byte[] toByteArray(GridFSDBFile file) throws IOException {
+    private byte[] toByteArray(GridFSDBFile file) throws IOException {
 
         InputStream is = file.getInputStream();
 
@@ -284,7 +218,7 @@ public class BlockResultsService {
         return b;
     }
 
-    private static boolean isListOfTuples(Object object) {
+    private boolean isListOfTuples(Object object) {
 
         boolean isTuple = false;
 
@@ -306,7 +240,7 @@ public class BlockResultsService {
         return isTuple;
     }
 
-    private static BasicDBObject convertTuplesToDictionary(Object object) {
+    private BasicDBObject convertTuplesToDictionary(Object object) {
 
         BasicDBObject tupleDataAsDictionary = new BasicDBObject();
 
@@ -324,7 +258,7 @@ public class BlockResultsService {
         return tupleDataAsDictionary;
     }
 
-    public static BasicDBList getChartData(String blockName, List<String> features) {
+    public BasicDBList getChartData(String blockName, List<String> features) {
 
         BasicDBList chartData = new BasicDBList();
 
