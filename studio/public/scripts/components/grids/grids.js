@@ -186,7 +186,6 @@ angular.module('emr.ui.grids', [])
                     return featureList;
                 }
 
-                //var featureCount = $scope.features.length - 1;
                 var featureCount = $scope.gridFeatures.length;
                 $scope.gridWidth = (featureCount * ($scope.columnWidth + $scope.padding) + $scope.originX);
                 setGridHeight();
