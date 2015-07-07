@@ -161,6 +161,7 @@ angular.module('emr.ui.grids', [])
                 var featureOffset = 2;
                 var page = 0;
                 var pageSize = 100;
+                var indexType = $scope.features[0].dtype;
 
                 // initialize position variables
                 $scope.padding = 10;
@@ -207,6 +208,22 @@ angular.module('emr.ui.grids', [])
                     $scope.onPage().then(function(data) {
 
                         $scope.indexes = data[1].slice((page * pageSize), ((page + 1) * pageSize));
+
+                        if (indexType == 'datetime64[ns]' || indexType == 'float64') {
+
+                            for (var item in $scope.indexes) {
+
+                                $scope.indexes[item] = formatUnixTime($scope.indexes[item]);
+                            }
+                        }
+                        else {
+
+                            for (var item in $scope.indexes) {
+
+                                $scope.indexes[item] = parseInt(item) + 1;
+                            }
+                        }
+
                         recordCount = $scope.indexes.length;
                         setGridHeight();
 
@@ -224,6 +241,20 @@ angular.module('emr.ui.grids', [])
 
                     $scope.gridHeight = ((recordCount + 10) * $scope.rowHeight + 3 * $scope.padding);
                 }
+
+                var formatUnixTime = function(item) {
+
+                    var date = new Date(item * 1000);
+
+                    var validDate = !isNaN(date.valueOf());
+
+                    if (!validDate) {
+
+                        return item;
+                    }
+
+                    return date.toISOString().replace('T', ' ').replace('Z', '');
+                };
 
                 init();
             }

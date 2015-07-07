@@ -12,7 +12,8 @@ def prepare_data(df, fill_nan, time_series, reindex):
         df = df.reset_index(drop=True)
         time_series = False
     if time_series:
-        df.index = df.index.astype(np.int64) / 10**9
+        if str(df.index.values.dtype) == 'datetime64[ns]':
+            df.index = df.index.astype(np.int64) / 10**9
     data = []
     features = df.columns.tolist()
     data.append(features)
@@ -54,9 +55,11 @@ class Explore(FunctionBlock):
             time_series = ast.literal_eval(self.parameters['Time Series'])
             reindex = ast.literal_eval(self.parameters['Reindex'])
 
+            FunctionBlock.add_statistics_result(self, df)
+
             self.store_data(prepare_data(df, fill_nan, time_series, reindex))
 
-            FunctionBlock.save_results(self, df=df, statistics=True)
+            FunctionBlock.save_all_results(self)
 
             FunctionBlock.report_status_complete(self)
 
