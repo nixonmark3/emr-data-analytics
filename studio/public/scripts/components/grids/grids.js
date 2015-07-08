@@ -195,7 +195,8 @@ angular.module('emr.ui.grids', [])
 
                 angular.element('#grid-content-container').bind('scroll', function(event) {
 
-                    $scope.$apply(function(){
+                    $scope.$apply(function() {
+
                         $scope.columnHeaderPosition = -1 * event.target.scrollLeft;
                         $scope.rowHeaderPosition = -1 * event.target.scrollTop;
                     });
@@ -203,6 +204,17 @@ angular.module('emr.ui.grids', [])
                 });
 
                 function init(){
+
+                    $scope.gridFeatures.forEach(function(feature) {
+
+                        for (var i in feature.statistics) {
+
+                            if (['count', 'missing', 'dtype'].indexOf(i) === -1) {
+
+                                feature.statistics[i] = formatNumber(feature.statistics[i]);
+                            }
+                        }
+                    });
 
                     $scope.onPage().then(function(data) {
 
@@ -229,7 +241,7 @@ angular.module('emr.ui.grids', [])
                         for(var feature in $scope.gridFeatures) {
 
                             var featureIndex = data[0].indexOf($scope.gridFeatures[feature].column) + featureOffset;
-                            $scope.data.push(data[featureIndex].slice((page * pageSize), ((page + 1) * pageSize)));
+                            $scope.data.push(data[featureIndex].slice((page * pageSize), ((page + 1) * pageSize)).map(formatNumber));
                         }
 
                         page++;
@@ -253,6 +265,26 @@ angular.module('emr.ui.grids', [])
                     }
 
                     return date.toISOString().replace('T', ' ').replace('Z', '');
+                };
+
+                var formatNumber = function(item) {
+
+                    if (isNaN(item)) {
+
+                        return 'NaN';
+                    }
+
+                    var n = 0.01;
+
+                    if (item != 0) {
+
+                        if (Math.abs(item) < n) {
+
+                            return item.toExponential(5);
+                        }
+                    }
+
+                    return item.toFixed(5);
                 };
 
                 init();
