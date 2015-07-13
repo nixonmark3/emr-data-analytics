@@ -85,8 +85,6 @@ public class JobStatusActor extends AbstractActor {
 
             case STARTED:
 
-                System.out.println("Received job started message.");
-
                 // verify the job info object is in the created state
                 if (jobInfo.getState() != JobStates.CREATED)
                     throw new AnalyticsJobException(String.format("The job cannot be started because it is in an invalid state: %s.",

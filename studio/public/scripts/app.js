@@ -303,6 +303,7 @@ var analyticsApp = angular.module('analyticsApp',
     .controller('dashboardController', ['$scope', '$window', '$timeout', '$webSockets', 'diagramService', 'modalService', 'popupService',
         function($scope, $window, $timeout, $webSockets, diagramService, modalService, popupService) {
 
+        $webSockets.send({ type: "ping" });
     }])
 
     .controller('studioController', ['$scope', '$window', '$timeout', '$webSockets', 'diagramService', 'modalService', 'popupService',

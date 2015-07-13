@@ -109,7 +109,7 @@ public class JobServiceActor extends AbstractActor {
                 }
             })
 
-            .match(String.class, s -> s.equals("offlineJobs"), s -> {
+            .match(String.class, s -> s.equals("offline-jobs"), s -> {
 
                 // build a list of current jobs
                 List<JobInfo> jobs = new ArrayList<JobInfo>();
@@ -123,7 +123,7 @@ public class JobServiceActor extends AbstractActor {
                 sender().tell(jobs, self());
             })
 
-            .match(String.class, s -> s.equals("onlineJobs"), s -> {
+            .match(String.class, s -> s.equals("online-jobs"), s -> {
 
                 // build a list of current jobs
                 List<JobInfo> jobs = new ArrayList<JobInfo>();
@@ -137,7 +137,7 @@ public class JobServiceActor extends AbstractActor {
                 sender().tell(jobs, self());
             })
 
-            .match(String.class, s -> s.equals("summary"), s -> {
+            .match(String.class, s -> s.equals("jobs-summary"), s -> {
 
                 JobsSummary summary = new JobsSummary(this.offlineJobs.size(), this.onlineJobs.size());
                 sender().tell(summary, self());
@@ -146,13 +146,13 @@ public class JobServiceActor extends AbstractActor {
             .match(Terminated.class, t -> {
 
                 // clean up completed jobs
-
                 UUID jobId = UUID.fromString(t.actor().path().name());
+
                 AnalyticsJob job = jobs.get(jobId);
-                if (job.getMode() == Mode.OFFLINE && this.offlineJobs.containsKey(jobId))
-                    this.offlineJobs.remove(jobId);
-                else if (job.getMode() == Mode.ONLINE && this.onlineJobs.containsKey(jobId))
-                    this.onlineJobs.remove(jobId);
+                if (job.getMode() == Mode.OFFLINE && this.offlineJobs.containsKey(job.getKey().getId()))
+                    this.offlineJobs.remove(job.getKey().getId());
+                else if (job.getMode() == Mode.ONLINE && this.onlineJobs.containsKey(job.getKey().getId()))
+                    this.onlineJobs.remove(job.getKey().getId());
 
                 jobs.remove(jobId);
 
