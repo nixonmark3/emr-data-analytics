@@ -264,4 +264,106 @@ angular.module('emr.ui.charts', [])
                 setCanvasSize();
             }
         }
+    }])
+
+    .directive('statisticsHistogram', ['chartService', 'colorService', function(chartService, colorService) {
+
+        return {
+            restrict: 'E',
+            replace: true,
+            scope: {
+                values: "="
+            },
+            link: function ($scope, element, attrs) {
+
+                function draw() {
+
+                    var margin = {top: 10, right: 10, bottom: 10, left: 10};
+                    var width = 180;
+                    var height = 180;
+
+                    var data = d3.layout.histogram().frequency(false)($scope.values);
+
+                    var maxY = d3.max(data, function(d) { return d.y; });
+
+                    var x = d3.scale.ordinal()
+                        .domain(data)
+                        .rangeBands([0, width], 0.1);
+
+                    var y = d3.scale.linear()
+                        .domain([0, maxY])
+                        .range([0, height]);
+
+                    var svg = d3.select(element[0])
+                        .append("svg:svg")
+                            .attr("width", width + margin.left + margin.right)
+                            .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                    svg.selectAll("rect")
+                        .data(data)
+                        .enter()
+                        .append("svg:rect")
+                            .attr("x", x)
+                            .attr("y", function(d) { return height-y(d.y); })
+                            .attr("width", x.rangeBand())
+                            .attr("height", function(d) { return y(d.y); })
+                            .attr("fill", "steelblue")
+                            .attr("shape-rendering", "crispEdges");
+                }
+
+                draw();
+            }
+        }
+    }])
+
+    .directive('statisticsBarChart', ['chartService', 'colorService', function(chartService, colorService) {
+
+        return {
+            restrict: 'E',
+            replace: true,
+            scope: {
+                values: "="
+            },
+            link: function ($scope, element, attrs) {
+
+                function draw() {
+
+                    var data = $scope.values.histogram;
+
+                    var margin = { top: 10, right: 10, bottom: 10, left: 10 };
+                    var width = 200 - margin.left - margin.right;
+                    var height = 200 - margin.top - margin.bottom;
+
+                    var x = d3.scale.ordinal()
+                        .rangeRoundBands([0, width], .1)
+                        .domain(data.map(function(d) { return d.x; }));
+
+                    var y = d3.scale.linear()
+                        .range([height, 0])
+                        .domain([0, d3.max(data, function(d) { return d.y; })]);
+
+                    var svg = d3.select(element[0])
+                        .append("svg")
+                            .attr("width", width + margin.left + margin.right)
+                            .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                    svg.selectAll(".bar")
+                        .data(data)
+                        .enter()
+                        .append("rect")
+                            .attr("class", "bar")
+                            .attr("x", function(d) { return x(d.x); })
+                            .attr("width", x.rangeBand())
+                            .attr("y", function(d) { return y(d.y); })
+                            .attr("height", function(d) { return height - y(d.y); });
+                }
+
+                draw();
+            }
+        }
     }]);
+

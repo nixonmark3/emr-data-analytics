@@ -125,8 +125,8 @@ analyticsApp
         }
     ])
 
-    .controller('exploreController', ['$scope', '$element', '$timeout', '$q', 'diagramService', 'colorService', 'block', 'config', 'position', 'close',
-        function($scope, $element, $timeout, $q, diagramService, colorService, block, config, position, close){
+    .controller('exploreController', ['$scope', '$element', '$timeout', '$q', '$animate', 'diagramService', 'colorService', 'block', 'config', 'position', 'close',
+        function($scope, $element, $timeout, $q, $animate, diagramService, colorService, block, config, position, close){
 
             $scope.block = block;
             $scope.config = config;
@@ -135,6 +135,8 @@ analyticsApp
             $scope.rendering = false;
             $scope.activeIndex = 0;
             $scope.chartMethods = {};
+            $scope.hideChartMenus = false;
+
 
             // load the set of features after the modal animation has completed
             $timeout(function() {
@@ -163,7 +165,7 @@ analyticsApp
             };
 
             // initialize new series object
-            $scope.newSeries = { x: null, y: null };
+            $scope.newSeries = { x: null, y: null, flipToFront: false, flipToBack: false };
 
             /* general methods */
 
@@ -185,31 +187,111 @@ analyticsApp
 
             /* chart methods */
 
-            $scope.addSeries = function(){
+            $scope.showClose = function(series) {
 
-                // verify series data has been collected
-                if ($scope.newSeries.y==null) return;
-                if ($scope.hasXCoordinate() && $scope.newSeries.x==null) return;
+                series.flipToBack = true;
+                series.flipToFront = false;
+            };
 
-                // update min and max values for each boundary
-                updateChartBounds($scope.newSeries);
+            $scope.showCheck = function(series) {
 
-                // add the new series to the chart object
-                $scope.chartOptions.series.push(angular.copy($scope.newSeries));
+                series.flipToBack = false;
+                series.flipToFront = true;
+            };
+
+            $scope.collapseChartMenusClick = function() {
+
+                $scope.hideChartMenus = true;
+            };
+
+            $scope.addAllSeries = function() {
+
+                if ($scope.chartOptions.type == 'line') {
+
+                    resetSeries();
+
+                    var currentConfiguredSeries = getCurrentConfiguredSeries();
+
+                    for (var featureIndex in $scope.features) {
+
+                        if (featureIndex > 0) {
+
+                            var seriesName = $scope.features[featureIndex].column;
+
+                            if (currentConfiguredSeries.indexOf(seriesName) == -1) {
+
+                                var seriesToAdd = angular.copy($scope.newSeries);
+
+                                seriesToAdd.y = $scope.features[featureIndex].column;
+
+                                $scope.chartOptions.series.push(seriesToAdd);
+                            }
+                        }
+                    }
+
+                    updateChartBounds();
+
+                    $scope.render();
+                }
+            };
+
+            var getCurrentConfiguredSeries = function() {
+
+                var configuredSeries = [];
+
+                for (var series in $scope.chartOptions.series) {
+
+                    configuredSeries.push($scope.chartOptions.series[series].y);
+                }
+
+                return configuredSeries;
+
+            };
+
+            $scope.removeAllSeries = function() {
+
+                $scope.chartOptions.series.length = 0;
+
+                updateChartBounds();
+
+                $scope.render();
+            };
+
+            $scope.removeSeries = function(series) {
+
+                $scope.chartOptions.series.splice($scope.chartOptions.series.indexOf(series), 1);
+
+                updateChartBounds();
+
+                $scope.render();
+            };
+
+            $scope.addSeries = function() {
+
+                if ($scope.newSeries.y == null) return;
+
+                if ($scope.hasXCoordinate() && $scope.newSeries.x == null) return;
+
+                var seriesToAdd = angular.copy($scope.newSeries);
+
+                $scope.chartOptions.series.push(seriesToAdd);
+
+                updateChartBounds();
 
                 resetSeries();
 
-                // render the chart
                 $scope.render();
             };
 
             // retrieve a color by configured color set and index
-            $scope.getColor = function(index){
+            $scope.getColor = function(index) {
+
                 return colorService.getColor($scope.chartOptions.colorSet, index);
             };
 
             // determines whether currently selected chart type has a configurable x coordinate
-            $scope.hasXCoordinate = function(){
+            $scope.hasXCoordinate = function() {
+
                 return ($scope.chartOptions.type == 'scatter');
             };
 
@@ -219,6 +301,7 @@ analyticsApp
 
                 var features = [];
                 for (var feature in $scope.features) {
+
                     if (feature > 0)
                         features.push($scope.features[feature].column);
                 }
@@ -267,37 +350,88 @@ analyticsApp
                 );
             };
 
-            function resetSeries(){
-                // reset new series
+            function resetSeries() {
+
                 $scope.newSeries.y = null;
                 $scope.newSeries.x = null;
+                $scope.newSeries.flipToFront = false;
+                $scope.newSeries.flipToBack = false;
             }
 
-            // update the maximum and minimum chart bounds based on the specified feature
-            function updateChartBounds(series){
+            function updateChartBounds() {
 
-                var yFeature = getFeatureStatistics(series.y);
-                var xFeature = (series.x) ? getFeatureStatistics(series.x) : null;
+                var count = 0;
+                var xMin = 0;
+                var xMax = 0;
+                var yMin = 0;
+                var yMax = 0;
 
-                // update y boundaries
-                if ($scope.chartOptions.y.min==null || yFeature.min < $scope.chartOptions.y.min)
-                    $scope.chartOptions.y.min = yFeature.min;
-                if ($scope.chartOptions.y.max==null || yFeature.max > $scope.chartOptions.y.max)
-                    $scope.chartOptions.y.max = yFeature.max;
+                for (var seriesIndex in $scope.chartOptions.series) {
 
-                // update x boundaries
-                if (xFeature != null){
-                    if ($scope.chartOptions.x.min==null || xFeature.min < $scope.chartOptions.x.min)
-                        $scope.chartOptions.x.min = xFeature.min;
-                    if ($scope.chartOptions.x.max==null || xFeature.max > $scope.chartOptions.x.max)
-                        $scope.chartOptions.x.max = xFeature.max;
+                    var yFeature = getFeatureStatistics($scope.chartOptions.series[seriesIndex].y);
+                    var xFeature = ($scope.chartOptions.series[seriesIndex].x) ? getFeatureStatistics($scope.chartOptions.series[seriesIndex].x) : null;
+
+                    if (count === 0) {
+
+                        count = 1;
+
+                        var yMin = yFeature.min;
+                        var yMax = yFeature.max;
+
+                        if (xFeature != null) {
+
+                            var xMin = xFeature.min;
+                            var xMax = xFeature.max;
+                        }
+                        else {
+
+                            var xMin = 0;
+                            var xMax = yFeature.count;
+                        }
+                    }
+                    else {
+
+                        if (yFeature.min < yMin) {
+
+                            yMin = yFeature.min;
+                        }
+
+                        if (yFeature.max > yMax) {
+
+                            yMax = yFeature.max;
+                        }
+
+                        if (xFeature != null) {
+
+                            if (xFeature.min < xMin) {
+
+                                xMin = xFeature.min;
+                            }
+
+                            if (xFeature.max > xMax) {
+
+                                xMax = xFeature.max;
+                            }
+                        }
+                        else {
+
+                            if (xMin > 0) {
+
+                                xMin = 0;
+                            }
+
+                            if (yFeature.count > xMax) {
+
+                                xMax = yFeature.count;
+                            }
+                        }
+                    }
                 }
-                else{
-                    if ($scope.chartOptions.x.min==null || $scope.chartOptions.x.min > 0)
-                        $scope.chartOptions.x.min = 0;
-                    if ($scope.chartOptions.x.max==null || yFeature.count > $scope.chartOptions.x.max)
-                        $scope.chartOptions.x.max = yFeature.count;
-                }
+
+                $scope.chartOptions.y.min = yMin;
+                $scope.chartOptions.y.max = yMax;
+                $scope.chartOptions.x.min = xMin;
+                $scope.chartOptions.x.max = xMax;
             }
 
             function getFeatureStatistics(selectedFeature) {
