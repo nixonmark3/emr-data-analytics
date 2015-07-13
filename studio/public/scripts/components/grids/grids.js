@@ -161,6 +161,7 @@ angular.module('emr.ui.grids', [])
                 var featureOffset = 2;
                 var page = 0;
                 var pageSize = 100;
+                var indexType = $scope.features[0].dtype;
 
                 // initialize position variables
                 $scope.padding = 10;
@@ -185,7 +186,6 @@ angular.module('emr.ui.grids', [])
                     return featureList;
                 }
 
-                //var featureCount = $scope.features.length - 1;
                 var featureCount = $scope.gridFeatures.length;
                 $scope.gridWidth = (featureCount * ($scope.columnWidth + $scope.padding) + $scope.originX);
                 setGridHeight();
@@ -195,7 +195,8 @@ angular.module('emr.ui.grids', [])
 
                 angular.element('#grid-content-container').bind('scroll', function(event) {
 
-                    $scope.$apply(function(){
+                    $scope.$apply(function() {
+
                         $scope.columnHeaderPosition = -1 * event.target.scrollLeft;
                         $scope.rowHeaderPosition = -1 * event.target.scrollTop;
                     });
@@ -204,16 +205,43 @@ angular.module('emr.ui.grids', [])
 
                 function init(){
 
+                    $scope.gridFeatures.forEach(function(feature) {
+
+                        for (var i in feature.statistics) {
+
+                            if (['count', 'missing', 'dtype'].indexOf(i) === -1) {
+
+                                feature.statistics[i] = formatNumber(feature.statistics[i]);
+                            }
+                        }
+                    });
+
                     $scope.onPage().then(function(data) {
 
                         $scope.indexes = data[1].slice((page * pageSize), ((page + 1) * pageSize));
+
+                        if (indexType == 'datetime64[ns]' || indexType == 'float64') {
+
+                            for (var item in $scope.indexes) {
+
+                                $scope.indexes[item] = formatUnixTime($scope.indexes[item]);
+                            }
+                        }
+                        else {
+
+                            for (var item in $scope.indexes) {
+
+                                $scope.indexes[item] = parseInt(item) + 1;
+                            }
+                        }
+
                         recordCount = $scope.indexes.length;
                         setGridHeight();
 
                         for(var feature in $scope.gridFeatures) {
 
                             var featureIndex = data[0].indexOf($scope.gridFeatures[feature].column) + featureOffset;
-                            $scope.data.push(data[featureIndex].slice((page * pageSize), ((page + 1) * pageSize)));
+                            $scope.data.push(data[featureIndex].slice((page * pageSize), ((page + 1) * pageSize)).map(formatNumber));
                         }
 
                         page++;
@@ -224,6 +252,40 @@ angular.module('emr.ui.grids', [])
 
                     $scope.gridHeight = ((recordCount + 10) * $scope.rowHeight + 3 * $scope.padding);
                 }
+
+                var formatUnixTime = function(item) {
+
+                    var date = new Date(item * 1000);
+
+                    var validDate = !isNaN(date.valueOf());
+
+                    if (!validDate) {
+
+                        return item;
+                    }
+
+                    return date.toISOString().replace('T', ' ').replace('Z', '');
+                };
+
+                var formatNumber = function(item) {
+
+                    if (isNaN(item)) {
+
+                        return 'NaN';
+                    }
+
+                    var n = 0.01;
+
+                    if (item != 0) {
+
+                        if (Math.abs(item) < n) {
+
+                            return item.toExponential(5);
+                        }
+                    }
+
+                    return item.toFixed(5);
+                };
 
                 init();
             }

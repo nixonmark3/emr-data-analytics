@@ -3,6 +3,7 @@ import numpy as np
 import pymongo
 import gridfs
 import ast
+import pandas as pd
 
 from FunctionBlock import FunctionBlock
 
@@ -12,7 +13,8 @@ def prepare_data(df, fill_nan, time_series, reindex):
         df = df.reset_index(drop=True)
         time_series = False
     if time_series:
-        df.index = df.index.astype(np.int64) / 10**9
+        if df.index.values.dtype == np.dtype('datetime64[ns]'):
+            df.index = df.index.astype(np.int64) / 10**9
     data = []
     features = df.columns.tolist()
     data.append(features)
@@ -24,6 +26,22 @@ def prepare_data(df, fill_nan, time_series, reindex):
             col = ['null' if np.isnan(x) else x for x in col]
         data.append(col)
     return str(data).replace('\'', '"')
+
+
+def concat_dfs(dfs):
+
+    all_timestamp = True
+
+    for df in dfs:
+        if df.index.values.dtype != np.dtype('datetime64[ns]'):
+            all_timestamp = False
+            break
+
+    if not all_timestamp:
+        for i, df in enumerate(dfs):
+            dfs[i] = df.reset_index(drop=True)
+
+    return pd.concat(dfs, axis=1), all_timestamp
 
 
 class Explore(FunctionBlock):
@@ -46,17 +64,25 @@ class Explore(FunctionBlock):
         try:
             FunctionBlock.report_status_executing(self)
 
-            FunctionBlock.check_connector_has_one_wire(self, 'in')
-
-            df = results_table[self.input_connectors['in'][0]]
+            dfs = []
+            for input_wire in self.input_connectors['in']:
+                dfs.append(results_table[input_wire])
 
             fill_nan = ast.literal_eval(self.parameters['Fill NaN'])
             time_series = ast.literal_eval(self.parameters['Time Series'])
             reindex = ast.literal_eval(self.parameters['Reindex'])
 
+            if len(dfs) == 1:
+                df = dfs[0]
+            else:
+                df, time_series = concat_dfs(dfs)
+                fill_nan = True
+
+            FunctionBlock.add_statistics_result(self, df)
+
             self.store_data(prepare_data(df, fill_nan, time_series, reindex))
 
-            FunctionBlock.save_results(self, df=df, statistics=True)
+            FunctionBlock.save_all_results(self)
 
             FunctionBlock.report_status_complete(self)
 
