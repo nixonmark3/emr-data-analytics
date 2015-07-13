@@ -1,13 +1,14 @@
 package services;
 
-import actors.ClientActorManager;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.WriteResult;
-import controllers.Diagrams;
+import emr.analytics.diagram.interpreter.CompilerException;
+import emr.analytics.diagram.interpreter.DiagramCompiler;
+import emr.analytics.diagram.interpreter.DiagramOperations;
+import emr.analytics.diagram.interpreter.DiagramTransformer;
 import emr.analytics.models.definition.Definition;
-import emr.analytics.models.definition.DefinitionType;
-import emr.analytics.models.definition.Mode;
 import emr.analytics.models.diagram.*;
+import emr.analytics.models.messages.JobRequest;
 import models.project.GroupRequest;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
@@ -18,195 +19,81 @@ import java.util.*;
 
 public class DiagramsService {
 
+    private static DiagramsService _instance;
+    private HashMap<String, Definition> definitions;
+
+    public DiagramsService(){
+        definitions = DefinitionsService.getDefinitionsMap();
+    }
+
+    public static DiagramsService getInstance() {
+
+        if(_instance == null) {
+            synchronized (AnalyticsService.class) {
+                _instance = new DiagramsService();
+            }
+        }
+        return _instance;
+    }
+
     /**
-     * Create a group of blocks
-     * @param request contains the diagram, the block group name, and list of blocks contained in the new proposed block group
-     * @return resulting diagram
+     * Transform the specified diagram into a source code string
+     * @param diagram
+     * @return source code string
+     * @throws CompilerException
+     */
+    public String compile(Diagram diagram) throws CompilerException {
+
+        HashMap<String, String> outputs = this.getPersistedOutputs(diagram);
+        DiagramCompiler compiler = new DiagramCompiler(definitions);
+
+        return compiler.compile(diagram, outputs);
+    }
+
+    /**
+     * Group the specified collection of blocks
+     * @param request - the group request { group name, parent diagram, and list of block ids to group }
+     * @return diagram containing the new group
      */
     public Diagram group(GroupRequest request){
 
-        // reference the parent diagram
-        Diagram parent = request.getDiagram();
-        // create a set of block ids for reference
-        Set<String> blockIds = new HashSet<String>(Arrays.asList(request.getBlocks()));
-        // create a new diagram
-        Diagram diagram = new Diagram(request.getName());
-
-        // create variables to track the group's collective minimum position position
-        int x = Integer.MAX_VALUE, y = Integer.MAX_VALUE, xOrigin = 100, yOrigin = 50;
-
-        // and a complimentary block
-
-        Block block = new Block(request.getName(),
-                Integer.MAX_VALUE,
-                Integer.MAX_VALUE,
-                Integer.MAX_VALUE,
-                Mode.OFFLINE,
-                new Definition(DefinitionType.CONTAINER,
-                        request.getName(),
-                        request.getName(),
-                        "Block Group"));
-
-        parent.addBlock(block);
-
-        // iterate over each block
-        for(String blockIdString : request.getBlocks()){
-
-            UUID blockId = UUID.fromString(blockIdString);
-
-            // find the specified block
-            Block groupBlock = parent.getBlock(blockId);
-
-            // remove it from the diagram
-            parent.removeBlock(groupBlock);
-
-            // add it to the block group
-            diagram.addBlock(groupBlock);
-
-            // track the group block's origin
-            if (groupBlock.getX() < x)
-                x = groupBlock.getX();
-            if (groupBlock.getY() < y)
-                y = groupBlock.getY();
-
-            // capture the group block's dimensions that are closest to the top
-            if (groupBlock.getY() < block.getY()){
-                block.setX(groupBlock.getX());
-                block.setY(groupBlock.getY());
-            }
-
-            // capture the group block's state that is lowest
-            if (groupBlock.getState() < block.getState())
-                block.setState(groupBlock.getState());
-
-            // iterate over each input connector - creating group connectors
-            for(Connector connector : groupBlock.getInputConnectors()){
-
-                List<Wire> wires = parent.getLeadingWires(blockId, connector.getName());
-
-                Connector groupConnector;;
-                if (wires.size() == 0){
-                    groupConnector = new Connector(connector.getName(), connector.getType());
-                    block.addInputConnector(groupConnector);
-                }
-
-                boolean isGroupConnector = false;
-                for(int i = 0; i < wires.size(); i++){
-
-                    Wire wire = wires.get(i);
-
-                    if (!blockIds.contains(wire.getFrom_node())) {
-
-                        // flag as a group connector
-                        isGroupConnector = true;
-
-                        // get or create the specified block connector
-                        Optional<Connector> optional = block.getInputConnector(connector.getName());
-                        if (optional.isPresent()) {
-                            groupConnector = optional.get();
-                        }
-                        else{
-                            groupConnector = new Connector(connector.getName(), connector.getType());
-                            block.addInputConnector(groupConnector);
-                        }
-
-                        // create a wire from this wire's source to our new block
-                        parent.addWire(new Wire(wire.getFrom_node(),
-                                wire.getFrom_connector(),
-                                wire.getFrom_connectorIndex(),
-                                block.getId(),
-                                groupConnector.getName(),
-                                0));  // todo: invalid connector index -> do we use connector index
-
-                        // remove this wire from the diagram
-                        parent.removeWire(wire);
-                    }
-                }
-
-                if (isGroupConnector){
-                    diagram.addInput(new DiagramConnector(blockId,
-                        String.format("%s_%s", groupBlock.getName(), connector.getName()),
-                        connector.getType()));
-                }
-            }
-
-            // iterate over each output connector - consuming wires and creating group connectors
-            for(Connector connector : groupBlock.getOutputConnectors()){
-
-                boolean isGroupConnector = false;
-                List<Wire> wires = parent.getOutputWires(blockId, connector.getName());
-
-                Connector groupConnector;;
-                if (wires.size() == 0){
-                    groupConnector = new Connector(connector.getName(), connector.getType());
-                    block.addOutputConnector(groupConnector);
-                }
-
-                for(int i = 0; i < wires.size(); i++){
-
-                    Wire wire = wires.get(i);
-
-                    if (!blockIds.contains(wire.getTo_node())) {
-                        // this wire does not connect to a block destined for this group -
-                        // therefore it is a group connector
-                        isGroupConnector = true;
-
-                        // get or create the specified block connector
-                        Optional<Connector> optional = block.getOutputConnector(connector.getName());
-                        if (optional.isPresent()) {
-                            groupConnector = optional.get();
-                        }
-                        else{
-                            groupConnector = new Connector(connector.getName(), connector.getType());
-                            block.addOutputConnector(groupConnector);
-                        }
-
-                        // create a wire from our new block to this wires destination
-                        parent.addWire(new Wire(block.getId(),
-                                groupConnector.getName(),
-                                0,                          // todo: invalid connector index -> do we use connector index
-                                wire.getTo_node(),
-                                wire.getTo_connector(),
-                                wire.getTo_connectorIndex()));
-
-                        // remove this wire from the diagram
-                        parent.removeWire(wire);
-                    }
-                    else{
-                        // leads to a block destined for this group - consume wire
-                        diagram.addWire(wire);
-                    }
-                }
-
-                if (isGroupConnector){
-                    diagram.addOutput(new DiagramConnector(blockId,
-                            String.format("%s_%s", groupBlock.getName(), connector.getName()),
-                            connector.getType()));
-                }
-            }
-        }
-
-        // calculate group origin delta and adjust each group block's position
-        int xDelta = x - xOrigin;
-        int yDelta = y - yOrigin;
-        for(Block groupBlock : diagram.getBlocks()){
-
-            groupBlock.setX(groupBlock.getX() - xDelta);
-            groupBlock.setY(groupBlock.getY() - yDelta);
-        }
-
-        // remove group wires from the diagram
-        for(Wire wire : diagram.getWires())
-            parent.removeWire(wire);
-
-        // add this new group to the diagram
-        parent.addDiagram(diagram);
-
-        return parent;
+        return DiagramOperations.group(request.getName(), request.getDiagram(), request.getBlocks());
     }
 
-    public void save(DiagramContainer diagramContainer) {
+    /**
+     * Create a job request for the specified diagram
+     * @param diagram
+     * @return A job request
+     * @throws CompilerException
+     */
+    public JobRequest getJobRequest(Diagram diagram) throws CompilerException {
 
+        String source = this.compile(diagram);
+
+        JobRequest request = new JobRequest(diagram.getId(),
+            diagram.getMode(),
+            diagram.getTargetEnvironment(),
+            diagram.getName(),
+            source);
+
+        return request;
+    }
+
+    /**
+     * Transforms an offline diagram into an online diagram
+     * @param diagram offline diagram
+     * @return resulting online diagram
+     */
+    public Diagram transform(Diagram diagram){
+
+        DiagramTransformer transformer = new DiagramTransformer(definitions);
+        return transformer.transform(diagram);
+    }
+
+
+    public UUID save(DiagramContainer diagramContainer) {
+
+        UUID diagramId = null;
         try {
 
             MongoCollection dbDiagrams = this.getDiagramsDbCollection();
@@ -223,30 +110,16 @@ public class DiagramsService {
                         offline.setParameterOverrides(this.getParameterOverrides(online));
                     }
 
+                    // create a diagram id for new diagrams
+                    diagramId = offline.getId();
+                    if (diagramId == null){
+                        diagramId = UUID.randomUUID();
+                        offline.setId(UUID.randomUUID());
+                    }
+
                     dbDiagrams.ensureIndex("{name: 1}", "{unique:true}");
 
                     WriteResult update = dbDiagrams.update(String.format("{name: '%s'}", offline.getName())).upsert().with(offline);
-
-                    // todo determine if the save succeeded?
-
-                    dbDiagrams.update(String.format("{name: '%s'}", offline.getName())).with("{$inc: {version: 1}}");
-
-                    ObjectNode addDiagramMsg = Json.newObject();
-
-                    if (update.isUpdateOfExisting()) {
-
-                        addDiagramMsg.put("messageType", "UpdateDiagram");
-                    }
-                    else {
-
-                        addDiagramMsg.put("messageType", "AddDiagram");
-                    }
-
-                    addDiagramMsg.put("name", offline.getName());
-                    addDiagramMsg.put("description", offline.getDescription());
-                    addDiagramMsg.put("owner", offline.getOwner());
-
-                    ClientActorManager.getInstance().updateClients(addDiagramMsg);
                 }
             }
         }
@@ -254,6 +127,8 @@ public class DiagramsService {
 
             exception.printStackTrace();
         }
+
+        return diagramId;
     }
 
     private MongoCollection getDiagramsDbCollection() {
@@ -291,5 +166,20 @@ public class DiagramsService {
         }
 
         return parameterOverrides;
+    }
+
+    private HashMap<String, String> getPersistedOutputs(Diagram diagram){
+
+        HashMap<String, String> persistedOutputs = new HashMap<>();
+        for(PersistedOutput persistedOutput : diagram.getPersistedOutputs()){
+
+            BlockResultsService blockResultsService = new BlockResultsService();
+            String output = blockResultsService.getOutput(persistedOutput.getId(), persistedOutput.getName());
+            String variableName = String.format("%s_%s", persistedOutput.getId(), persistedOutput.getName());
+
+            persistedOutputs.put(variableName, output);
+        }
+
+        return persistedOutputs;
     }
 }

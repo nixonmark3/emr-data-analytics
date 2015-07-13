@@ -1,0 +1,39 @@
+{{=<% %>=}}
+
+import org.apache.log4j.PropertyConfigurator
+import org.apache.spark.streaming._
+import scala.util.parsing.json._
+
+<%#packageNames%>
+import <%.%>
+<%/packageNames%>
+
+PropertyConfigurator.configure("log4j.properties")
+
+<%#models%>
+val <%variableName%> = Array(<%arguments%>)
+<%/models%>
+
+val ssc = new StreamingContext(sc, Seconds(1))
+val appName = sc.appName
+
+<%#streamingOperations%>
+val <%variableName%> = <%className%>.<%methodName%>(<%& arguments%>)
+
+<%/streamingOperations%>
+
+<%#hasRddOperations%>
+
+<%streamingVariable%>.foreachRDD(<%rddVariable%> => {
+
+<%#rddOperations%>
+val <%variableName%> = <%className%>.<%methodName%>(<%& arguments%>)
+
+<%/rddOperations%>
+
+})
+
+<%/hasRddOperations%>
+
+ssc.start()
+ssc.awaitTermination()

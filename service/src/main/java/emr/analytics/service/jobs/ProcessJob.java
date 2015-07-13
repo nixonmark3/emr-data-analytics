@@ -1,8 +1,6 @@
 package emr.analytics.service.jobs;
 
-import emr.analytics.models.definition.Definition;
-import emr.analytics.models.diagram.Diagram;
-import emr.analytics.service.messages.JobRequest;
+import emr.analytics.models.messages.JobRequest;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -13,26 +11,24 @@ import java.util.*;
 
 public abstract class ProcessJob extends AnalyticsJob {
 
-    protected String _path = "../algorithms";
-    protected String _command;
-    protected String _commandPrefix;
-    protected List<String> _commandArguments;
+    protected String path = "../algorithms";
+    protected String command;
+    protected String commandPrefix;
+    protected List<String> commandArguments;
 
-    public ProcessJob(JobRequest request, String template, String command, String commandPrefix, HashMap<String, Definition> definitions){
-        this(request, template, command, commandPrefix, definitions, new ArrayList<String>());
+    public ProcessJob(JobRequest request, String command, String commandPrefix){
+        this(request, command, commandPrefix, new ArrayList<String>());
     }
 
-    public ProcessJob(JobRequest request, String template, String command, String commandPrefix, HashMap<String, Definition> definitions, List<String> arguments){
-        super(request, template, definitions);
-        this._command = command;
-        this._commandPrefix = commandPrefix;
-        this._commandArguments = arguments;
+    public ProcessJob(JobRequest request, String command, String commandPrefix, List<String> arguments){
+        super(request);
+        this.command = command;
+        this.commandPrefix = commandPrefix;
+        this.commandArguments = arguments;
     }
 
     protected String getFileName(){
-        return String.format("%s/%s.py",
-                this._path,
-                this._id.toString());
+        return String.format("%s/%s.py", this.path, this.id.toString());
     }
 
     public ProcessBuilder getProcess(){
@@ -44,17 +40,17 @@ public abstract class ProcessJob extends AnalyticsJob {
         List<String> processArgs = this.processArguments();
 
         // build process command
-        String cmd = this._command;
-        if (this._commandPrefix != null){
+        String cmd = this.command;
+        if (this.commandPrefix != null){
 
             Map<String, String> env = builder.environment();;
-            if (env.containsKey(this._commandPrefix)) {
-                String commandPrefix = env.get(this._commandPrefix);
+            if (env.containsKey(this.commandPrefix)) {
+                String commandPrefix = env.get(this.commandPrefix);
 
                 for (int i = 0; i < processArgs.size(); i++)
-                    processArgs.set(i, processArgs.get(i).replace("$" + this._commandPrefix, commandPrefix));
+                    processArgs.set(i, processArgs.get(i).replace("$" + this.commandPrefix, commandPrefix));
 
-                cmd = String.format("%s/%s", commandPrefix, this._command);
+                cmd = String.format("%s/%s", commandPrefix, this.command);
             }
         }
 
@@ -120,7 +116,7 @@ public abstract class ProcessJob extends AnalyticsJob {
         String fileName = this.getFileName();
         try {
             BufferedWriter out = new BufferedWriter(new FileWriter(fileName));
-            out.write(this._source);
+            out.write(this.source);
             out.close();
         }
         catch(IOException ex) {

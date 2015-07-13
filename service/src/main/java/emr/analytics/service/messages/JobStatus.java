@@ -1,25 +1,22 @@
 package emr.analytics.service.messages;
 
-import emr.analytics.models.definition.Mode;
+import emr.analytics.service.jobs.JobKey;
 
 import java.io.Serializable;
 import java.util.UUID;
 
-public abstract class JobStatus implements Serializable {
+public class JobStatus implements Serializable {
 
-    private UUID _id;
-    private Mode _mode;
+    private UUID jobId;
+    private JobStatusTypes statusType;
 
-    public JobStatus(UUID id, Mode mode){
-        _id = id;
-        _mode = mode;
+    public JobStatus(UUID jobId, JobStatusTypes statusType){
+        this.jobId = jobId;
+        this.statusType = statusType;
     }
 
-    public UUID getJobId(){
-        return _id;
-    }
+    public UUID getJobId(){ return this.jobId; }
 
-
-    public Mode getMode() { return _mode; }
+    public JobStatusTypes getStatusType() { return this.statusType; }
 }
 

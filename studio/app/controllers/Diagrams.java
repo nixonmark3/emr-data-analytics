@@ -1,11 +1,9 @@
 package controllers;
 
-import actors.ClientActorManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.WriteResult;
-import emr.analytics.models.definition.Definition;
+import emr.analytics.diagram.interpreter.CompilerException;
 import emr.analytics.models.diagram.*;
 
 import models.project.GroupRequest;
@@ -16,98 +14,28 @@ import play.mvc.Result;
 import org.jongo.*;
 import services.*;
 
-import java.util.Map;
-import java.util.HashMap;
 import java.util.UUID;
 
 public class Diagrams extends ControllerBase {
 
-    private static HashMap<String, Definition> _definitions = DefinitionsService.getDefinitionsMap();
-
-    // initialize the evaluation service Akka components
-    private static EvaluationService _evaluationService = new EvaluationService(_definitions);
-
-    private static Map<UUID, UUID> _mapJobIdToClientId = new HashMap<UUID, UUID>();
-
-    public static UUID getClientIdForJob(UUID jobId) {
-        return _mapJobIdToClientId.get(jobId);
-    }
-
     @BodyParser.Of(BodyParser.Json.class)
-    public static Result debug() {
+    public static Result compile() {
         ObjectMapper objectMapper = new ObjectMapper();
         Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
 
-        String source = _evaluationService.sendCompileRequest(diagram);
+        String source;
+        try{
+            source = DiagramsService.getInstance().compile(diagram);
+        }
+        catch(CompilerException ex){
+            return internalServerError(String.format("Compile Exception: %s", ex.toString()));
+        }
+
         return ok(source);
     }
 
     @BodyParser.Of(BodyParser.Json.class)
-    public static Result deploy() {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        DiagramContainer diagramContainer = objectMapper.convertValue(request().body().asJson(), DiagramContainer.class);
-
-        DiagramsService diagramsService = new DiagramsService();
-        diagramsService.save(diagramContainer);
-
-        Diagram onlineDiagram = diagramContainer.getOnline();
-
-        UUID jobId = _evaluationService.sendRequest(onlineDiagram);
-
-        if (jobId == null) {
-
-            return internalServerError("Error requesting evaluation.");
-        }
-
-        return ok(jobId.toString());
-    }
-
-    public static Result kill(String jobId) {
-
-        UUID id = UUID.fromString(jobId);
-
-        boolean result = _evaluationService.sendKillRequest(id);
-
-        return ok("Diagram job has been successfully killed.");
-    }
-
-    @BodyParser.Of(BodyParser.Json.class)
-    public static Result evaluate(String clientId) {
-
-        try {
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            DiagramContainer diagramContainer = objectMapper.convertValue(request().body().asJson(), DiagramContainer.class);
-
-            DiagramsService diagramsService = new DiagramsService();
-            diagramsService.save(diagramContainer);
-
-            Diagram offlineDiagram = diagramContainer.getOffline();
-
-            UUID jobId = _evaluationService.sendRequest(offlineDiagram);
-
-            if (jobId != null) {
-
-                _mapJobIdToClientId.put(jobId, UUID.fromString(clientId));
-
-                DiagramStates.createDiagramState(offlineDiagram, jobId);
-            } else {
-
-                return internalServerError("Error requesting evaluation.");
-            }
-        }
-        catch (Exception exception) {
-
-            exception.printStackTrace();
-            return internalServerError(String.format("Failed to evaluate diagram."));
-        }
-
-        return ok("Diagram evaluation initiated.");
-    }
-
-    @BodyParser.Of(BodyParser.Json.class)
-    public static Result compile() {
+    public static Result transform() {
 
         Diagram online = null;
 
@@ -116,13 +44,13 @@ public class Diagrams extends ControllerBase {
             ObjectMapper objectMapper = new ObjectMapper();
             DiagramContainer diagramContainer = objectMapper.convertValue(request().body().asJson(), DiagramContainer.class);
 
-            DiagramsService diagramsService = new DiagramsService();
-            diagramsService.save(diagramContainer);
+            UUID id = DiagramsService.getInstance().save(diagramContainer);
 
-            Diagram offlineDiagram = diagramContainer.getOffline();
+            Diagram offline = diagramContainer.getOffline();
+            if (offline.getId() == null)
+                offline.setId(id);
 
-            DiagramCompiler diagramCompiler = new DiagramCompiler(_definitions);
-            online = diagramCompiler.compile(offlineDiagram);
+            online = DiagramsService.getInstance().transform(offline);
         }
         catch (Exception exception) {
 
@@ -133,7 +61,7 @@ public class Diagrams extends ControllerBase {
         return ok(Json.toJson(online));
     }
 
-    public static Result getDiagram(String diagramName) {
+    public static Result get(String name) {
 
         Diagram diagram = null;
 
@@ -141,7 +69,7 @@ public class Diagrams extends ControllerBase {
             MongoCollection diagrams = getMongoCollection(DIAGRAMS_COLLECTION);
 
             if (diagrams != null) {
-                diagram = diagrams.findOne(String.format(QUERY_BY_UNIQUE_ID, diagramName)).as(Diagram.class);
+                diagram = diagrams.findOne(String.format(QUERY_BY_UNIQUE_ID, name)).as(Diagram.class);
             }
             else {
                 return internalServerError(String.format(COLLECTION_NOT_FOUND, DIAGRAMS_COLLECTION));
@@ -149,11 +77,11 @@ public class Diagrams extends ControllerBase {
         }
         catch (Exception exception) {
             exception.printStackTrace();
-            return internalServerError(String.format("Failed to get diagram '%s'.", diagramName));
+            return internalServerError(String.format("Failed to get diagram '%s'.", name));
         }
 
         if (diagram == null) {
-            return notFound("The diagram '%s' could not be found.", diagramName);
+            return notFound("The diagram '%s' could not be found.", name);
         }
 
         return ok(Json.toJson(diagram));
@@ -183,8 +111,9 @@ public class Diagrams extends ControllerBase {
     }
 
     @BodyParser.Of(BodyParser.Json.class)
-    public static Result saveDiagram() {
+    public static Result save() {
 
+        UUID diagramId = null;
         DiagramContainer diagramContainer = null;
 
         try {
@@ -193,7 +122,7 @@ public class Diagrams extends ControllerBase {
             diagramContainer = objectMapper.convertValue(request().body().asJson(), DiagramContainer.class);
 
             DiagramsService service = new DiagramsService();
-            service.save(diagramContainer);
+            diagramId = service.save(diagramContainer);
         }
         catch (Exception exception) {
 
@@ -201,10 +130,10 @@ public class Diagrams extends ControllerBase {
             return internalServerError(String.format("Failed to save diagram."));
         }
 
-        return ok("Diagram saved successfully.");
+        return ok(diagramId.toString());
     }
 
-    public static Result getDiagrams() {
+    public static Result all() {
         MongoCursor<BasicDiagram> diagrams = null;
 
         try {
@@ -225,12 +154,12 @@ public class Diagrams extends ControllerBase {
         return ok(Json.toJson(diagrams));
     }
 
-    public static Result deleteDiagram(String diagramName) {
+    public static Result delete(String name) {
         try {
             MongoCollection diagrams = getMongoCollection(DIAGRAMS_COLLECTION);
 
             if (diagrams != null) {
-                diagrams.remove(String.format(QUERY_BY_UNIQUE_ID, diagramName));
+                diagrams.remove(String.format(QUERY_BY_UNIQUE_ID, name));
             }
             else {
                 return internalServerError(String.format(COLLECTION_NOT_FOUND, DIAGRAMS_COLLECTION));
@@ -241,17 +170,12 @@ public class Diagrams extends ControllerBase {
             return internalServerError(String.format("Failed to remove diagram."));
         }
 
-        ObjectNode addDiagramMsg = Json.newObject();
-        addDiagramMsg.put("messageType", "DeleteDiagram");
-        addDiagramMsg.put("name", diagramName);
-        ClientActorManager.getInstance().updateClients(addDiagramMsg);
-
         // todo delete all other document related to this diagram
 
         return ok("Diagram removed successfully.");
     }
 
-    public static Result getBlankDiagram() {
+    public static Result empty() {
         return ok(Json.toJson(Diagram.Create()));
     }
 

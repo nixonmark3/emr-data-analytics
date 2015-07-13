@@ -1,6 +1,5 @@
 
 <div id="studio-wrapper"
-     ng-controller="analyticsController"
      ng-class="{'show-sidebar': showSidebar, 'blur-background': blurBackground}">
 
     <div id="diagrams-menu" class="sidebar-offcanvas">
@@ -18,7 +17,7 @@
 
             <div class="diagrams-menu-body-item ng-class:{'diagrams-menu-body-item-animate': d.showProperties}" ng-model="diagrams" ng-repeat="d in diagrams">
                 <div class="diagrams-menu-body-item-container">
-                    <div class="diagrams-menu-body-item-name ng-class:{'selected-diagram-text': d.selected}" ng-click="loadDiagram(d.name)">
+                    <div class="diagrams-menu-body-item-name ng-class:{'selected-diagram-text': d.selected}" ng-click="open(d.name)">
                         {{d.name}}
                     </div>
                     <div class="diagrams-menu-body-item-expand" ng-click="d.showProperties = !d.showProperties">
@@ -70,10 +69,40 @@
                     <span class="navbar-title">{{diagramViewModel.data.name}}</span>
                 </div>
                 <div class="col-xs-4 navbar-tabs">
-                    <span class="navbar-tab ng-class:{'selected': !onlineCanvas}" ng-click="toggleCanvas(false);">Offline</span>
-                    <span class="navbar-tab ng-class:{'selected': onlineCanvas}" ng-click="toggleCanvas(true);">Online</span>
+                    <div class="navbar-tab ng-class:{'selected': !onlineCanvas}" ng-switch on="offlineState" ng-click="toggleCanvas(false);">
+
+                        <i ng-switch-when="0" class="fa fa-circle-o-notch state-icon idle navbar-tab-icon"></i>
+                        <i ng-switch-when="1" class="fa fa-cloud-download state-icon idle navbar-tab-icon"></i>
+                        <i ng-switch-when="2" class="fa fa-bolt state-icon running navbar-tab-icon"></i>
+
+                        <span class="navbar-tab-text">Offline</span>
+                    </div>
+                    <div class="navbar-tab ng-class:{'selected': onlineCanvas}" ng-switch on="onlineState" ng-click="toggleCanvas(true);">
+
+                        <i ng-switch-when="0" class="fa fa-circle-o-notch state-icon idle navbar-tab-icon"></i>
+                        <i ng-switch-when="1" class="fa fa-cloud-download state-icon idle navbar-tab-icon"></i>
+                        <i ng-switch-when="2" class="fa fa-bolt state-icon running navbar-tab-icon"></i>
+
+                        <span class="navbar-tab-text">Online</span>
+                    </div>
                 </div>
                 <div class="col-xs-4">
+
+                    <div ng-if="!onlineCanvas" class="navbar-state pull-right" ng-switch on="offlineState">
+
+                        <i ng-switch-when="0" class="fa fa-circle-o-notch state-icon idle"></i>
+                        <i ng-switch-when="1" class="fa fa-cloud-download state-icon idle"></i>
+                        <i ng-switch-when="2" class="fa fa-bolt state-icon running"></i>
+
+                    </div>
+
+                    <div ng-if="onlineCanvas" class="navbar-state pull-right" ng-switch on="onlineState">
+
+                        <i ng-switch-when="0" class="fa fa-circle-o-notch state-icon idle"></i>
+                        <i ng-switch-when="1" class="fa fa-cloud-download state-icon idle"></i>
+                        <i ng-switch-when="2" class="fa fa-bolt state-icon running"></i>
+
+                    </div>
 
                     <div ng-if="!onlineCanvas" class="btn-group pull-right">
                         <button type="button" class="btn btn-default navbar-btn" ng-click="toggleDiagramConfiguration($event)">
@@ -82,21 +111,18 @@
                         <button type="button" class="btn btn-default navbar-btn" ng-click="save($event)">
                             <i class="fa fa-save"></i>
                         </button>
-                        <!--<button type="button" class="btn btn-default navbar-btn" ng-click="debug($event)">
-                            <i class="fa fa-bug"></i>
-                        </button>-->
                         <button type="button"
-                                class="btn btn-default navbar-btn ng-class:{ 'diagram-evaluating' : evaluating }"
-                                ng-disabled="evaluating"
+                                class="btn btn-default navbar-btn ng-class:{ 'diagram-evaluating' : (offlineState != 0) }"
+                                ng-disabled="(offlineState != 0)"
                                 ng-click="evaluate($event)">
 
-                            <i class="fa ng-class:{ 'fa-cog fa-spin': evaluating, 'fa-play': !evaluating }"></i>
+                            <i class="fa ng-class:{ 'fa-cog fa-spin': (offlineState != 0), 'fa-play': (offlineState == 0) }"></i>
                         </button>
                     </div>
 
                     <div ng-if="onlineCanvas" class="btn-group pull-right">
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="debug($event)">
-                            <i class="fa fa-bug"></i>
+                        <button type="button" class="btn btn-default navbar-btn" ng-click="compile($event)">
+                            <i class="fa fa-code"></i>
                         </button>
                         <button type="button" class="btn btn-default navbar-btn" ng-click="save($event)">
                             <i class="fa fa-save"></i>
@@ -161,7 +187,7 @@
 
             <div id="online-canvas" class="studio-canvas">
 
-                <div ng-if="!compiling" class="diagram-container">
+                <div ng-if="!transforming" class="diagram-container">
 
                     <diagram id="online-diagram"
                              ng-if="onlineCanvas"
@@ -176,7 +202,7 @@
 
                 </div>
 
-                <div id="loader-overlay" ng-if="compiling">
+                <div id="loader-overlay" ng-if="transforming">
                     <div class="loader"></div>
                 </div>
 

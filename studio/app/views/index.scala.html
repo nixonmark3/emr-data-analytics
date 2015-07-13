@@ -27,24 +27,39 @@
 }
 
 @main(title)(styles)(scripts){
-    <body ng-app="analyticsApp" draggable>
+    <body ng-app="analyticsApp" draggable ng-controller="analyticsController">
 
         <div id="main-tabs">
 
             <ul class="vertical-tabs">
-                <li class="vertical-tab active">
+                <li class="vertical-tab ng-class:{active: (activeView==0)}" ng-click="setActiveView(0)">
                     <div class="tab-icon"><i class="fa fa-sitemap fa-2x"></i></div>
                     <div class="tab-text">Studio</div>
                 </li>
-                <li class="vertical-tab">
-                    <div class="tab-icon"><i class="fa fa-tachometer fa-2x"></i></div>
+                <li class="vertical-tab ng-class:{active: (activeView==1)}" ng-click="setActiveView(1)">
+                    <div class="tab-icon">
+                        <i class="fa fa-tachometer fa-2x"></i>
+                    </div>
                     <div class="tab-text">Dashboard</div>
+                    <div ng-if="!serviceAvailable" class="fa-stack tab-badge tab-badge-warning" ng-cloak>
+                        <i class="fa fa-circle fa-stack-1x"></i>
+                        <i class="fa fa-exclamation-circle fa-stack-1x"></i>
+                    </div>
                 </li>
             </ul>
 
         </div>
 
         <div id="main-content">
+
+            <div class="alert-container" ng-repeat="alert in alerts" ng-switch on="alert.type" ng-cloak>
+
+                <div ng-switch-when="serviceUnavailable" class="alert alert-danger">
+                    <i class="alert-icon fa fa-exclamation-triangle pull-left"></i>
+                    <span class="alert-text">{{alert.message}}</span>
+                </div>
+
+            </div>
 
             <ng-view></ng-view>
 

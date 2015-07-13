@@ -1,6 +1,5 @@
 package emr.analytics.models.diagram;
 
-import com.sun.org.apache.xpath.internal.operations.Mod;
 import emr.analytics.models.definition.DefinitionType;
 import emr.analytics.models.definition.Mode;
 import emr.analytics.models.definition.TargetEnvironments;
@@ -16,7 +15,7 @@ import java.util.stream.Collectors;
  */
 public class Diagram implements Serializable {
 
-    private UUID _uniqueID = UUID.randomUUID();
+    private UUID id = null;
     private String name = "";
     private String description = "";
     private String owner = "";
@@ -39,6 +38,10 @@ public class Diagram implements Serializable {
         this.description = description;
         this.owner = owner;
         this.mode = mode;
+
+        if (this.mode == Mode.ONLINE){
+            this.targetEnvironment = TargetEnvironments.SPARK;
+        }
     }
 
     public Diagram(String name, String description, String owner) { this(name, description, owner, Mode.OFFLINE); }
@@ -368,11 +371,11 @@ public class Diagram implements Serializable {
         this.parameterOverrides = parameterOverrides;
     }
 
-    public UUID get_uniqueID() {
-        return _uniqueID;
+    public UUID getId() {
+        return this.id;
     }
 
-    public void set_uniqueID(UUID _uniqueID) {
-        this._uniqueID = _uniqueID;
+    public void setId(UUID id) {
+        this.id = id;
     }
 }
