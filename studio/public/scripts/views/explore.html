@@ -19,11 +19,12 @@
 
         <div class="explore-content ng-class:{active: (activeIndex==0)}">
 
-            <div id="chart-menu-container" class="chart-content">
+            <div id="chart-menu-container" class="chart-content chart-fade ng-class:{ expand: hideChartMenus }" ng-show="!hideChartMenus">
+
 
                 <div class="explore-toolbar">
                     <div class="pull-right">
-                        <i class="fa fa-times"></i>
+                        <i class="hide-chart-menu fa fa-times" ng-click="collapseChartMenusClick()"></i>
                     </div>
                 </div>
                 <div id="chart-menu">
@@ -40,14 +41,32 @@
                     <div class="chart-menu-header">
                         <div class="pull-left">Series</div>
                         <div class="pull-right">
-                            <i class="fa fa-plus"></i>
-                            <i class="fa fa-minus"></i>
+                            <i class="series-expand fa fa-plus" ng-click="addAllSeries()" ng-show="!hasXCoordinate()"></i>
+                            <i class="series-expand fa fa-minus" ng-click="removeAllSeries()"></i>
                         </div>
                     </div>
 
                     <div class="chart-series" ng-repeat="item in chartOptions.series">
-                        <div class="series-color" ng-style="{'background-color':getColor($index)}"></div>
-                        <div class="series-coords"><div ng-show="hasXCoordinate()">{{item.x}}</div><div>{{item.y}}</div></div>
+                        <div class="series-selector ng-class:{'series-front-to-back': item.flipToBack,'series-back-to-front': item.flipToFront}"
+                             ng-mouseenter="showClose(item)"
+                             ng-mouseleave="showCheck(item)"
+                             ng-click="removeSeries(item)">
+                            <div class="series-face series-front" ng-style="{'background-color':getColor($index)}">
+                                <i class="fa fa-check"></i>
+                            </div>
+                            <div class="series-face series-back" ng-style="{'background-color':getColor($index)}">
+                                <i class="fa fa-close"></i>
+                            </div>
+                        </div>
+                        <div class="series-coords">
+                            <div class="x-y-coord-container" ng-show="hasXCoordinate()">
+                                <div class="x-y-coord">{{item.x}}</div>
+                                <div class="x-y-coord">{{item.y}}</div>
+                            </div>
+                            <div class="y-coord" ng-show="!hasXCoordinate()">
+                                {{item.y}}
+                            </div>
+                        </div>
                         <div style="clear: both;"></div>
                     </div>
 

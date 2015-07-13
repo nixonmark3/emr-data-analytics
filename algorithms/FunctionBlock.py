@@ -151,27 +151,37 @@ def generate_statistics(df):
     for column_name in df_describe.keys():
         for statistic_name, value in df_describe[column_name].items():
             new_statistic_name = None
+
             if statistic_name == '25%':
                 new_statistic_name = 'twentyFive'
             elif statistic_name == '50%':
                 new_statistic_name = 'fifty'
             elif statistic_name == '75%':
                 new_statistic_name = 'seventyFive'
+
             if new_statistic_name:
                 del df_describe[column_name][statistic_name]
                 df_describe[column_name][new_statistic_name] = value
 
     for column_name in df.columns.values:
         column_statistics = df_describe[column_name]
+
         column = df[column_name]
+
         nan_count = column.isnull().sum()
+
         column_statistics['missing'] = int(nan_count)
         column_statistics['dtype'] = str(column.dtype)
+
+        number_of_bins = 10
+
         if nan_count > 0:
-            data, edges = np.histogram(column.dropna(), bins=5)
+            data, edges = np.histogram(column.dropna(), bins=number_of_bins)
         else:
-            data, edges = np.histogram(column, bins=5)
-        column_statistics['histogram'] = { 'data': data.tolist(), 'edges': edges.tolist() }
-        df_statistics.append({'column': column_name, 'statistics': column_statistics})
+            data, edges = np.histogram(column, bins=number_of_bins)
+
+        histogram_data = [{'x': index, 'y': y_value} for index, y_value in enumerate(data.tolist())]
+
+        df_statistics.append({'column': column_name, 'statistics': column_statistics, 'histogram': histogram_data})
 
     return df_statistics
