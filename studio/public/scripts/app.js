@@ -12,22 +12,301 @@ var analyticsApp = angular.module('analyticsApp',
         'ngRoute',
         'ngSanitize',
         'ngAnimate'])
+
     .config(function ($routeProvider, $locationProvider) {
-        $routeProvider.when('/studio', {
-            templateUrl: "/assets/templates/studio.html"
-        });
+        $routeProvider
+            .when('/studio', {
+                templateUrl: "/assets/templates/studio.html",
+                controller: "studioController"
+            })
+            .when('/dashboard', {
+                templateUrl: "/assets/templates/dashboard.html",
+                controller: "dashboardController"
+            });
         $routeProvider.otherwise({ redirectTo: '/studio' });
         $locationProvider.html5Mode({
             enabled: true
         });
     })
+
     .filter('unsafe', ['$sce', function ($sce) {
         return function (val) {
             return $sce.trustAsHtml(val);
         };
     }])
-    .controller('analyticsController', ['$scope', '$window', '$timeout', 'diagramService', 'modalService', 'popupService',
-        function($scope, $window, $timeout, diagramService, modalService, popupService) {
+
+    .factory('analyticsService', [function(){
+
+        /**
+         * generate a random guid
+         * @returns {string}
+         */
+        function guid(){
+            var delim = "-";
+
+            function s4() {
+                return Math.floor((1 + Math.random()) * 0x10000)
+                    .toString(16)
+                    .substring(1);
+            }
+
+            return (s4() + s4() + delim + s4() + delim + s4() + delim + s4() + delim + s4() + s4() + s4());
+        }
+
+        return {
+
+            guid: guid,
+
+            /**
+             * retrieve the websocket url
+             */
+            webSocketUrl: function(){
+
+                // todo: retrieve the url prefix from the server
+                var url = "ws://localhost:9000/analytics/socket/";
+                var id;
+
+                // attempt to retrieve the websocket url from session storage
+                if (window.sessionStorage) {
+                    var stored = window.sessionStorage.getItem("sessionId");
+                    if (stored) {
+                        id = stored;
+                    }
+                    else{
+                        // cache the websocket url
+                        id =  guid();
+                        window.sessionStorage.setItem("sessionId", id);
+                    }
+                }
+
+                return url + id;
+            }
+        }
+    }])
+
+    .factory('$webSockets', ['$rootScope', 'analyticsService', function ($rootScope, analyticsService) {
+
+        /**
+         *
+         */
+        return function(){
+
+            var websocket = {};
+            var listeners = [];
+
+            websocket.isConnected = false;
+
+            $rootScope.queuedMessages = [];
+
+            /**
+             *
+             * @param predicate
+             * @param handler
+             */
+            websocket.listen = function (predicate, handler) {
+                listeners.push({ p: predicate, h: handler });
+            };
+
+            /**
+             *
+             */
+            var onopen = function () {
+                $rootScope.websocketAvailable = true;
+                websocket.isConnected = true;
+                $rootScope.$$phase || $rootScope.$apply();
+                if ($rootScope.queuedMessages) {
+                    for (var i = 0; i < $rootScope.queuedMessages.length; i++) {
+                        ws.send(JSON.stringify($rootScope.queuedMessages[i]));
+                    }
+                    $rootScope.queuedMessages = null;
+                    $rootScope.$$phase || $rootScope.$apply();
+                }
+            };
+
+            /**
+             *
+             */
+            var onclose = function () {
+                websocket.isConnected = false;
+                $rootScope.websocketAvailable = false;
+                $rootScope.$$phase || $rootScope.$apply();
+                $rootScope.queuedMessages = $rootScope.queuedMessages || [];
+
+                setTimeout(function () {
+                    ws = connect();
+                }, 5000);
+            };
+
+            /**
+             *
+             * @param msg
+             */
+            var onmessage = function (msg) {
+
+                console.log("message received: " + msg.data);
+
+                var obj = JSON.parse(msg.data);
+                for (var i = 0; i < listeners.length; i++) {
+                    var listener = listeners[i];
+                    if (listener.p(obj))
+                        listener.h(obj);
+                }
+            };
+
+            /**
+             *
+             */
+            var onerror = function () {
+                console.log('onerror');
+            };
+
+            /**
+             *
+             * @param obj
+             */
+            websocket.send = function (obj) {
+
+                if ($rootScope.queuedMessages)
+                    $rootScope.queuedMessages.push(obj);
+                else
+                    ws.send(JSON.stringify(obj));
+            };
+
+            /**
+             *
+             * @param sock
+             */
+            function setHandlers(sock) {
+                sock.onopen = onopen;
+                sock.onclose = onclose;
+                sock.onmessage = onmessage;
+                sock.onerror = onerror;
+            }
+
+            /**
+             *
+             * @returns {WebSocket}
+             */
+            function connect() {
+                var url = analyticsService.webSocketUrl();
+                var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
+                var sock = new WS(url);
+                setHandlers(sock);
+
+                return sock;
+            }
+
+            var ws = connect();
+
+            return websocket;
+        }();
+    }])
+
+    .controller('analyticsController', ['$scope', '$rootScope', '$location', '$webSockets', function($scope, $rootScope, $location, $webSockets){
+
+        //
+        // initialize scope level properties
+        //
+
+        // represents the current view { -1 = splash, 0 = studio, 1 = dashboard }
+        $scope.activeView = -1;
+        // initialize the variable that indicates whether the service is available
+        $rootScope.serviceAvailable = true;
+        // initialize list of alerts
+        $rootScope.alerts = [];
+
+        // listen for analytic service pings
+        $webSockets.listen(function(msg) { return msg.type == "ping"; }, setPing);
+
+        // ping the analytics service
+        $webSockets.send({ type: "ping" });
+
+        /**
+         *
+         * @param type
+         * @param message
+         * @param dismissible
+         */
+        $rootScope.addAlert = function(type, message, dismissible){
+
+            var alert = { type: type, message: message, dismissible: dismissible };
+            if (type == "serviceUnavailable")   // prepend service unavailable alerts
+                $rootScope.alerts.unshift(alert);
+            else
+                $rootScope.alerts.push(alert);
+        };
+
+        /**
+         *
+         * @param message
+         */
+        function setPing(message){
+
+            if (message.value != $rootScope.serviceAvailable){
+                // a change in the service's availability has been observed
+
+                if (message.value){
+                    // the service is now available
+                    $rootScope.serviceAvailable = true;
+
+                    // remove service alert - should always be the first item in the list
+                    $rootScope.removeAlert(0);
+                }
+                else{
+                    // service is not available
+                    $rootScope.serviceAvailable = false;
+
+                    // add service alert
+                    $rootScope.addAlert("serviceUnavailable", "Unable to connect to the Analytics Service.", false);
+                }
+
+                $rootScope.$$phase || $rootScope.$apply();
+            }
+        }
+
+        /**
+         *
+         * @param index
+         */
+        $rootScope.removeAlert = function(index){
+            $rootScope.alerts.splice(index, 1);
+        };
+
+        /**
+         * Set the active view
+         * @param index the new active view index { 0 = studio, 1 = dashboard }
+         */
+        $scope.setActiveView = function(index) {
+
+            if ($scope.activeView != index){
+
+                switch(index){
+
+                    case 0:
+                        $location.path('/studio');
+                        break;
+                    case 1:
+                        $location.path('/dashboard');
+                        break;
+                }
+
+                $scope.activeView = index;
+            }
+        };
+
+        // onload - set the active view to be studio
+        var init = function(){
+            $scope.setActiveView(0);
+        }();
+    }])
+
+    .controller('dashboardController', ['$scope', '$window', '$timeout', '$webSockets', 'diagramService', 'modalService', 'popupService',
+        function($scope, $window, $timeout, $webSockets, diagramService, modalService, popupService) {
+
+    }])
+
+    .controller('studioController', ['$scope', '$window', '$timeout', '$webSockets', 'diagramService', 'modalService', 'popupService',
+        function($scope, $window, $timeout, $webSockets, diagramService, modalService, popupService) {
 
         //
         // initialize scope level properties
@@ -37,19 +316,16 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.showLibrary = false;
         // controls whether the off-canvas sidebar is displayed
         $scope.showSidebar = false;
-        // indicates whether the current diagram is being evaluated
-        $scope.evaluating = false;
         // during some operations, we want to blur the background
         $scope.blurBackground = false;
         // controls whether the offline or online canvas is shown
         $scope.onlineCanvas = false;
-        // indicates whether the diagram is being compiled
-        $scope.compiling = false;
-
-        // tracks whether a block is currently being configured
-        $scope.configuringBlock = false;
-
-        $scope.waitingForDelete = false;
+        // indicates whether the diagram is being transformed
+        $scope.transforming = false;
+        // represents the current state of the offline diagram { 0 = 'idle', 1 = 'downloading', 2 = 'running' }
+        $scope.offlineState = 0;
+        // represents the current state of the online diagram { 0 = 'idle', 1 = 'downloading', 2 = 'running' }
+        $scope.onlineState = 0;
 
         $scope.offlineDiagramMethods = {};
 
@@ -63,6 +339,10 @@ var analyticsApp = angular.module('analyticsApp',
             width: 250,
             height: studioContainer.height() - 20 - 20
         };
+
+        // setup websocket listeners
+        $webSockets.listen(function(msg) { return msg.type == "evaluationStatus"; }, updateEvaluationStatus);
+        $webSockets.listen(function(msg) { return msg.type == "deploymentStatus"; }, updateDeploymentStatus);
 
         //
         // load data from the service
@@ -98,7 +378,7 @@ var analyticsApp = angular.module('analyticsApp',
             }
         );
 
-        // load the specified diagram
+        // load an empty diagram
         diagramService.item().then(
             function (data) {
                 $scope.diagramViewModel = new viewmodels.diagramViewModel(data);
@@ -129,37 +409,16 @@ var analyticsApp = angular.module('analyticsApp',
 
         /* Scope Level Methods */
 
-        $scope.debug = function(evt) {
+        $scope.compile = function(evt) {
 
             // retrieve the current diagram's data
             var data = diagram().data;
 
-            diagramService.debug(data).then(
+            diagramService.compile(data).then(
                 function (source) {
 
                     // todo: show source
                     console.log(source);
-                },
-                function (code) {
-                    console.log(code); // TODO show exception
-                }
-            );
-
-            evt.stopPropagation();
-            evt.preventDefault();
-        };
-
-        /*
-         ** Deploy the online diagram
-         */
-        $scope.deploy = function(evt) {
-
-            var data = $scope.onlineViewModel.data;
-
-            diagramService.deploy(data).then(
-                function (jobId) {
-
-                    beginDeploymentNotifications(jobId);
                 },
                 function (code) {
                     console.log(code); // TODO show exception
@@ -378,15 +637,17 @@ var analyticsApp = angular.module('analyticsApp',
             $scope.showSidebar = !$scope.showSidebar;
         };
 
-        $scope.loadDiagram = function(name) {
+        $scope.open = function(name) {
 
             diagramService.item(name).then(
                 function (data) {
-
-                    $scope.toggleDiagrams();
-                    $scope.toggleCanvas(false);
                     $scope.diagramViewModel = new viewmodels.diagramViewModel(data);
                     $scope.onlineViewModel = {};
+                    $scope.toggleDiagrams();
+                    $scope.toggleCanvas(false);
+
+                    subscribe($scope.diagramViewModel.getId());
+
                     updateSelectedDiagram();
                 },
                 function (code) {
@@ -400,10 +661,10 @@ var analyticsApp = angular.module('analyticsApp',
             diagramService.item().then(
                 function (data) {
 
-                    $scope.toggleDiagrams();
-                    $scope.toggleCanvas(false);
                     $scope.diagramViewModel = new viewmodels.diagramViewModel(data);
                     $scope.onlineViewModel = {};
+                    $scope.toggleDiagrams();
+                    $scope.toggleCanvas(false);
                 },
                 function (code) {
 
@@ -412,18 +673,31 @@ var analyticsApp = angular.module('analyticsApp',
             );
         };
 
+        /**
+         * Save the current diagram
+         * @param evt
+         */
         $scope.save = function(evt) {
 
+            // check whether the diagram is new
+            var isNew = false;
+            if (!$scope.diagramViewModel.getId())
+                isNew = true;
+
+            // create diagram container
             var offlineDiagram = $scope.diagramViewModel.data;
-
             var onlineDiagram = $scope.onlineViewModel.data;
-
             var data = {'offline': offlineDiagram, 'online': onlineDiagram};
 
-            diagramService.saveDiagram(data).then(
-                function (data) {
+            diagramService.save(data).then(
+                function (diagramId) {
 
-                    // TODO report success back to the user
+                    if (isNew){
+
+                        // capture the new diagram id
+                        $scope.diagramViewModel.setId(diagramId);
+                        subscribe($scope.diagramViewModel.getId());
+                    }
                 },
                 function (code) {
 
@@ -437,7 +711,7 @@ var analyticsApp = angular.module('analyticsApp',
 
         $scope.evaluate = function(evt) {
 
-            $scope.evaluating = true;
+            $scope.offlineState = 1;   // pending
 
             var offlineDiagram = $scope.diagramViewModel.data;
 
@@ -445,11 +719,9 @@ var analyticsApp = angular.module('analyticsApp',
 
             var data = {'offline': offlineDiagram, 'online': onlineDiagram};
 
-            diagramService.evaluate($scope.clientId, data).then(
+            diagramService.evaluate(data).then(
                 function (data) {
 
-                    // TODO report success back to the user
-                    console.log(data);
                 },
                 function (code) {
 
@@ -463,16 +735,35 @@ var analyticsApp = angular.module('analyticsApp',
 
         $scope.deploy = function(evt) {
 
+            $scope.onlineState = 1;   // pending
+
             var offlineDiagram = $scope.diagramViewModel.data;
-
             var onlineDiagram = $scope.onlineViewModel.data;
-
             var diagrams = {'offline': offlineDiagram, 'online': onlineDiagram};
 
             diagramService.deploy(diagrams).then(
-                function (jobId) {
+                function (data) {
 
-                    beginDeploymentNotifications(jobId);
+
+                },
+                function (code) {
+
+                    console.log(code); // TODO show exception
+                }
+            );
+
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
+
+        $scope.kill = function(evt) {
+
+            // retrieve the current diagram's data
+            var data = diagram().data;
+
+            diagramService.kill(data).then(
+                function (data) {
+
                 },
                 function (code) {
 
@@ -541,7 +832,7 @@ var analyticsApp = angular.module('analyticsApp',
                     libraryBrowserHide();
 
                 $scope.onlineCanvas = true;
-                $scope.compiling = true;
+                $scope.transforming = true;
 
                 var offlineDiagram = $scope.diagramViewModel.data;
 
@@ -549,11 +840,11 @@ var analyticsApp = angular.module('analyticsApp',
 
                 var diagrams = {'offline': offlineDiagram, 'online': onlineDiagram};
 
-                diagramService.compile(diagrams).then(
+                diagramService.transform(diagrams).then(
                     function (data) {
 
                         $scope.onlineViewModel = new viewmodels.diagramViewModel(data);
-                        $scope.compiling = false;
+                        $scope.transforming = false;
                     },
                     function (code) {
 
@@ -626,32 +917,6 @@ var analyticsApp = angular.module('analyticsApp',
             delete $scope.diagramConfiguration;
         };
 
-        var beginDeploymentNotifications = function(jobId){
-
-            var result = popupService.show({
-                templateUrl: '/assets/scripts/components/diagram/deploymentNotifications.html',
-                controller: 'deploymentNotificationController',
-                inputs: {
-                    jobId: jobId
-                }}).then(function(popup){
-
-                $scope.deployed = true;
-
-                popup.close.then(function (jobId) {
-
-                    diagramService.kill(jobId).then(
-                        function (data) {
-
-                            $scope.deployed = false;
-                        },
-                        function (code) {
-                            console.log(code); // TODO show exception
-                        }
-                    );
-                });
-            });
-        };
-
         /*
          * Returns the diagram that is currently in view
          * */
@@ -710,87 +975,88 @@ var analyticsApp = angular.module('analyticsApp',
             delete $scope.libraryBrowser;
         };
 
-        //
-        // Initialize web socket connection
-        //
+        /**
+         * Update the online diagram's deployment status
+         * @param message
+         */
+        function updateDeploymentStatus(message){
 
-        var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
-        var sock = new WS("ws://localhost:9000/getClientSocket");
+            var jobInfo = message.jobInfo;
 
-        $scope.send = function() {
-            console.log("send!");
-            sock.send("hello");
-        };
+            // set offline diagram's state
+            switch(jobInfo.state){
 
-        var receiveEvent = function(event) {
-            var data = JSON.parse(event.data);
+                case "CREATED":
+                    $scope.onlineState = 1;
+                    break;
+                case "RUNNING":
+                    $scope.onlineState = 2;
+                    break;
+                case "COMPLETED":
+                    $scope.onlineState = 0;
+                    break;
+                case "FAILED":
+                    $scope.onlineState = 0;
 
-            if (data['messageType']) {
-                if (data.messageType == 'ClientRegistration') {
-                    $scope.clientId = data.id;
-                }
-                else if (data.messageType == 'AddDiagram') {
-                    $scope.$apply(function() {
-                        initializeNavigationItem(data);
-                        $scope.diagrams.push(data);
-                    });
-                    updateSelectedDiagram();
-                }
-                else if (data.messageType == 'UpdateDiagram') {
-                    $scope.$apply(function() {
-                        $scope.diagrams.forEach(function(item){
-                            if (item.name == data.name) {
-                                item.description = data.description;
-                                item.owner = data.owner;
-                            }
-                        });
-                    });
-                }
-                else if (data.messageType == 'DeleteDiagram') {
-                    $scope.$apply(function() {
+                    // todo: create failure alert
+                    break;
+                case "STOPPED":
+                    $scope.onlineState = 0;
 
-                        $scope.diagrams.forEach(function(element, index, array){
-                            if(element.name === data.name){
-                                $scope.diagrams.splice(index, 1);
-                            }
-                        });
-
-                        $scope.waitingForDelete = false;
-                    });
-                    updateSelectedDiagram();
-                }
-                else {
-                    // todo : we got a message that we can't handle
-                }
+                    // todo: create stopped alert
+                    break;
             }
-            else {
-                console.log('job id: ' + data.jobId);
-                console.log('evaluation state: ' + data.state);
 
-                $scope.$applyAsync(function() {
-                        $scope.diagramViewModel.updateStatusOfBlocks(data['blockStates']);
-                        if (data.state > 0) {
-                            $scope.evaluating = false;
-                        }
-                    }
-                );
-            }
-        };
-
-        sock.onmessage = receiveEvent;
-
-    }])
-
-    .controller('deploymentNotificationController',
-    ['$scope', '$element', 'jobId', 'close',
-        function($scope, $element, jobId, close) {
-
-            $scope.jobId = jobId;
-
-            $scope.close = function(){
-
-                close(jobId);
-            };
+            $scope.$$phase || $scope.$apply();
         }
-    ]);
+
+        /**
+         * Updates the offline diagram's evaluation status
+         * @param message
+         */
+        function updateEvaluationStatus(message){
+
+            // set offline diagram's state
+            switch(message.state){
+
+                case "CREATED":
+                    $scope.offlineState = 1;
+                    break;
+                case "RUNNING":
+                    $scope.offlineState = 2;
+                    break;
+                case "COMPLETED":
+                    $scope.offlineState = 0;
+                    break;
+                case "FAILED":
+                    $scope.offlineState = 0;
+
+                    // todo: create failure alert
+                    break;
+                case "STOPPED":
+                    $scope.offlineState = 0;
+
+                    // todo: create stopped alert
+                    break;
+            }
+
+            if (message.blockId != null && message.blockState != null){
+
+                $scope.diagramViewModel.updateBlockState(message.blockId, message.blockState);
+            }
+
+            $scope.$$phase || $scope.$apply();
+        }
+
+        /**
+         * Subscribe to the specified diagram id
+         * @param id - diagram id
+         */
+        function subscribe(id){
+
+            console.log("subscribing to diagram: " + id);
+            $webSockets.send({ type: "subscribe", id: id });
+        }
+
+    }]);
 

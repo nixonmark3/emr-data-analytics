@@ -1,90 +1,187 @@
 package emr.analytics.service;
 
-import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.actor.Terminated;
+import akka.actor.*;
 import akka.japi.pf.ReceiveBuilder;
-import emr.analytics.service.jobs.ProcessJob;
-import emr.analytics.service.jobs.SparkStreamingJob;
-import emr.analytics.service.messages.JobKillRequest;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
+import emr.analytics.models.messages.*;
+import emr.analytics.models.definition.Mode;
+import emr.analytics.service.jobs.*;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class JobServiceActor extends AbstractActor {
 
-    // track ids by diagram name
-    private Map<String, String> idsByDiagram = new HashMap<>();
-    // track workers by unique job name - only 1 can be running at any given time
-    private Map<String, ActorRef> workers = new HashMap<>();
+    // map jobs by their ids
+    private Map<UUID, AnalyticsJob> jobs = new HashMap<UUID, AnalyticsJob>();
 
-    public static Props props(){ return Props.create(JobServiceActor.class); }
+    // organize actors by mode {offline, online} and diagram id
+    private Map<UUID, ActorRef> offlineJobs = new HashMap<UUID, ActorRef>();
+    private Map<UUID, ActorRef> onlineJobs = new HashMap<UUID, ActorRef>();
 
-    public JobServiceActor(){
+    public static Props props(String host, String port){ return Props.create(JobServiceActor.class, host, port); }
+
+    public JobServiceActor(String host, String port){
 
         receive(ReceiveBuilder
-            .match(ProcessJob.class, job -> {
 
-                // reference the job name
-                String jobName = job.getName();
-                String jobId = job.getId().toString();
+            // job request sent from client
+            .match(JobRequest.class, request -> {
 
-                if (workers.containsKey(jobName)) {
+                if (request.getMode() == Mode.OFFLINE && this.offlineJobs.containsKey(request.getDiagramId())){
 
-                    ActorRef prevJobActor = workers.get(jobName);
-                    prevJobActor.tell("kill", self());
+                    // notify the sender that this job is already running
+                    sender().tell(createFailedJobInfo(request,
+                            String.format("This offline job specified, %s, is already running.", request.getDiagramName())),
+                            self());
+
+                    return;
+                }
+                else if (request.getMode() == Mode.ONLINE && this.onlineJobs.containsKey(request.getDiagramId())){
+
+                    // notify the sender that this job is already running
+                    sender().tell(createFailedJobInfo(request,
+                            String.format("This online job specified, %s, is already running.", request.getDiagramName())),
+                            self());
+
+                    return;
                 }
 
-                ActorRef jobActor = context().actorOf(ProcessActor.props(sender(), job), job.getId().toString());
-                idsByDiagram.put(jobId, jobName);
-                workers.put(jobName, jobActor);
+                AnalyticsJob job;
+                try {
+                    job = JobFactory.get(request);
+                } catch (AnalyticsJobException ex) {
 
-                context().watch(jobActor);
-
-                jobActor.tell("start", self());
-            })
-            .match(SparkStreamingJob.class, job -> {
-
-                String jobName = job.getName();
-                String jobId = job.getId().toString();
-
-                if (workers.containsKey(jobName)) {
-
-                    ActorRef prevJobActor = workers.get(jobName);
-                    prevJobActor.tell("kill", self());
+                    // notify the sender that an exception occurred while creating analytics job
+                    sender().tell(createFailedJobInfo(request,
+                                    String.format("Failed to transform request into job. Additional info: %s.",
+                                            ex.getMessage())),
+                            self());
+                    return;
                 }
 
-                // create a spark actor to manage executing the job
-                ActorRef jobActor = context().actorOf(SparkActor.props(sender(), job), job.getId().toString());
-                idsByDiagram.put(jobId, jobName);
-                workers.put(jobName, jobActor);
+                ActorRef jobActor;
+                if (job instanceof ProcessJob){
 
-                context().watch(jobActor);
+                    jobActor = context().actorOf(
+                            ProcessActor.props(sender(), (ProcessJob)job),
+                            job.getId().toString());
 
-                jobActor.tell("start", self());
+                    jobs.put(job.getId(), job);
+                    offlineJobs.put(job.getKey().getId(), jobActor);
+                    context().watch(jobActor);
+
+                    jobActor.tell("start", self());
+                }
+                else if(job instanceof SparkJob){
+
+                    jobActor = context().actorOf(
+                            SparkProcessActor.props(sender(), (SparkJob)job, host, port),
+                            job.getId().toString());
+
+                    jobs.put(job.getId(), job);
+                    onlineJobs.put(job.getKey().getId(), jobActor);
+                    context().watch(jobActor);
+                }
+                else {
+
+                    // notify the sender that the specified job type is not support
+                    sender().tell(createFailedJobInfo(request, "The job specified is not supported."), self());
+                }
             })
+
             .match(JobKillRequest.class, request -> {
 
-                if (idsByDiagram.containsKey(request.getJobId().toString())) {
+                if (request.getMode() == Mode.OFFLINE && this.offlineJobs.containsKey(request.getDiagramId())) {
 
-                    String jobName = idsByDiagram.get(request.getJobId().toString());
-                    ActorRef jobActor = workers.get(jobName);
-                    jobActor.tell("kill", self());
+                    // send kill message
+                    ActorRef jobActor = this.offlineJobs.get(request.getDiagramId());
+                    jobActor.tell("stop", self());
+                } else if (request.getMode() == Mode.ONLINE && this.onlineJobs.containsKey(request.getDiagramId())) {
+
+                    // send kill message
+                    ActorRef jobActor = this.onlineJobs.get(request.getDiagramId());
+                    jobActor.tell("stop", self());
                 }
             })
+
+            .match(String.class, s -> s.equals("offlineJobs"), s -> {
+
+                // build a list of current jobs
+                List<JobInfo> jobs = new ArrayList<JobInfo>();
+                for (ActorRef worker : this.offlineJobs.values()) {
+
+                    JobInfo job = getJobInfo(worker);
+                    if (job != null)
+                        jobs.add(job);
+                }
+
+                sender().tell(jobs, self());
+            })
+
+            .match(String.class, s -> s.equals("onlineJobs"), s -> {
+
+                // build a list of current jobs
+                List<JobInfo> jobs = new ArrayList<JobInfo>();
+                for (ActorRef worker : this.onlineJobs.values()) {
+
+                    JobInfo job = getJobInfo(worker);
+                    if (job != null)
+                        jobs.add(job);
+                }
+
+                sender().tell(jobs, self());
+            })
+
+            .match(String.class, s -> s.equals("summary"), s -> {
+
+                JobsSummary summary = new JobsSummary(this.offlineJobs.size(), this.onlineJobs.size());
+                sender().tell(summary, self());
+            })
+
             .match(Terminated.class, t -> {
 
-                String jobId = t.actor().path().name();
-                String jobName = idsByDiagram.get(jobId);
+                // clean up completed jobs
 
-                System.out.println(String.format("Job for diagram '%s' has been terminated.",
-                    jobName));
+                UUID jobId = UUID.fromString(t.actor().path().name());
+                AnalyticsJob job = jobs.get(jobId);
+                if (job.getMode() == Mode.OFFLINE && this.offlineJobs.containsKey(jobId))
+                    this.offlineJobs.remove(jobId);
+                else if (job.getMode() == Mode.ONLINE && this.onlineJobs.containsKey(jobId))
+                    this.onlineJobs.remove(jobId);
 
-                workers.remove(jobName);
-                idsByDiagram.remove(jobId);
-            })
-            .build()
+                jobs.remove(jobId);
+
+            }).build()
         );
+
+    }
+
+    private JobInfo createFailedJobInfo(JobRequest request, String message){
+
+        JobInfo jobInfo = new JobInfo(UUID.randomUUID(),
+                request.getDiagramId(),
+                request.getDiagramName(),
+                request.getMode());
+        jobInfo.setState(JobStates.FAILED);
+        jobInfo.setMessage(message);
+
+        return jobInfo;
+    }
+
+    private JobInfo getJobInfo(ActorRef actor) {
+
+        try {
+            Timeout timeout = new Timeout(Duration.create(5, TimeUnit.SECONDS));
+            Future<Object> future = Patterns.ask(actor, "info", timeout);
+            return (JobInfo) Await.result(future, timeout.duration());
+        }
+        catch(Exception ex){
+            return null;
+        }
     }
 }

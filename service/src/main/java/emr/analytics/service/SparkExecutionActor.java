@@ -4,48 +4,62 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
-import emr.analytics.service.jobs.SparkStreamingJob;
-import emr.analytics.service.spark.SparkStreamingCompiler;
-import org.apache.spark.SparkConf;
-import org.apache.spark.streaming.StreamingContext;
-import org.apache.spark.streaming.Duration;
+import emr.analytics.service.jobs.SparkJob;
+import emr.analytics.service.messages.JobProgress;
+import emr.analytics.service.messages.JobStatus;
+import emr.analytics.service.messages.JobStatusTypes;
+import emr.analytics.service.spark.RuntimeMessenger;
+import emr.analytics.service.spark.SparkCompiler;
+import org.apache.spark.SparkContext;
+
+import java.util.UUID;
 
 public class SparkExecutionActor extends AbstractActor {
 
-    private ActorRef _jobStatusActor;
-    private String[] _jars = new String[] {
-        "../utilities/spark-algorithms/target/scala-2.10/spark-algorithms_2.10-1.0.jar"
-    };
+    private ActorRef jobStatusActor;
+    private SparkContext sparkContext;
 
-    public static Props props(ActorRef jobStatusActor){
-        return Props.create(SparkExecutionActor.class, jobStatusActor);
+    public static Props props(ActorRef jobStatusActor, SparkContext sparkContext){
+        return Props.create(SparkExecutionActor.class, jobStatusActor, sparkContext);
     }
 
-    public SparkExecutionActor(ActorRef jobStatusActor){
+    public SparkExecutionActor(ActorRef jobStatusActor, SparkContext sparkContext){
 
-        _jobStatusActor = jobStatusActor;
+        this.jobStatusActor = jobStatusActor;
+        this.sparkContext = sparkContext;
 
         receive(ReceiveBuilder
-            .match(SparkStreamingJob.class, job -> {
+            .match(SparkJob.class, job -> {
 
-                // todo: provide feedback to job status actor
-
-                // create a spark streaming context
-                SparkConf conf = new SparkConf()
-                    .setMaster("local[2]")
-                    .setAppName(job.getDiagramName().replace(" ", ""))
-                    .setJars(_jars);
-
-                StreamingContext ssc = new StreamingContext(conf, new Duration(1000));
-
-                // pass context back to sender
-                sender().tell(ssc, self());
+                // report that the job has been started
+                this.jobStatusActor.tell(new JobStatus(job.getId(), JobStatusTypes.STARTED), self());
 
                 // create a spark streaming compiler and run
-                SparkStreamingCompiler compiler = new SparkStreamingCompiler(job.getSource());
-                compiler.run(ssc);
+                SparkCompiler compiler = new SparkCompiler(this.sparkContext,
+                    job.getSource(),
+                    new SparkMessenger(job.getId(), this.jobStatusActor));
+                compiler.run();
+
+                // report completion
+                this.jobStatusActor.tell(new JobStatus(job.getId(), JobStatusTypes.COMPLETED), self());
             })
             .build());
+    }
+
+    public class SparkMessenger implements RuntimeMessenger {
+        private UUID jobId;
+        private ActorRef actor;
+
+        public SparkMessenger(UUID jobId, ActorRef actor){
+            this.jobId = jobId;
+            this.actor = actor;
+        }
+
+        public void send(String key, String value) {
+
+            // report progress
+            this.actor.tell(new JobProgress(this.jobId, key, value), null);
+        }
     }
 }
 

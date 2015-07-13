@@ -44,11 +44,11 @@ object SparkTestHarness {
 
     val _64b42aa0a74e42f4bd81e15abf27d732 = Requests.postOpcValue("http://172.16.167.131:8000/updatedata/7in1out", "IN7OUT1MODEL/Y_PRED.CV", _06d52e8abd2da4234d150a2e08f9f3cb_out)
 
-    ssc.start()
-    ssc.awaitTermination()
-
     /*
     ** End Spark
      */
+
+    ssc.start()
+    ssc.awaitTermination()
   }
 }

@@ -1,6 +1,8 @@
 'use strict';
 
-analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
+analyticsApp
+
+    .factory('diagramService', function ($http, $q, $timeout) {
 
     return {
 
@@ -66,11 +68,11 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
 
 
 
-        compile: function (data) {
+        transform: function (data) {
 
             var deferred = $q.defer();
 
-            $http.post('/compile', data)
+            $http.post('/transform', data)
                 .success(function (data, status, headers, config) {
                     deferred.resolve(data);
                 })
@@ -81,11 +83,11 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
             return deferred.promise;
         },
 
-        debug: function (data) {
+        compile: function (data) {
 
             var deferred = $q.defer();
 
-            $http.post('/debug', data)
+            $http.post('/diagrams/compile', data)
                 .success(function (data, status, headers, config) {
                     deferred.resolve(data);
                 })
@@ -100,7 +102,7 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
 
             var deferred = $q.defer();
 
-            $http.post('/deploy', data)
+            $http.post('/analytics/deploy', data)
                 .success(function (data, status, headers, config) {
                     deferred.resolve(data);
                 })
@@ -111,11 +113,11 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
             return deferred.promise;
         },
 
-        evaluate: function (clientId, data) {
+        evaluate: function (data) {
 
             var deferred = $q.defer();
 
-            $http.post('/evaluate/' + clientId, data)
+            $http.post('/analytics/evaluate', data)
                 .success(function (data, status, headers, config) {
                     deferred.resolve(data);
                 })
@@ -158,11 +160,11 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
             return deferred.promise;
         },
 
-        kill: function (jobId) {
+        kill: function (data) {
 
             var deferred = $q.defer();
 
-            $http.get('/kill/' + jobId)
+            $http.post('/analytics/kill', data)
                 .success(function (data, status, headers, config) {
                     deferred.resolve(data);
                 })
@@ -268,11 +270,11 @@ analyticsApp.factory('diagramService', function ($http, $q, $timeout) {
             return deferred.promise;
         },
 
-        saveDiagram: function (data) {
+        save: function (data) {
 
             var deferred = $q.defer();
 
-            $http.post('/saveDiagram', data)
+            $http.post('/diagrams/save', data)
                 .success(function (data, status, headers, config) {
                     deferred.resolve(data);
                 })

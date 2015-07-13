@@ -1,0 +1,20 @@
+{{=<% %>=}}
+
+<%#definitionImports%>
+<%definitionImport%>
+<%/definitionImports%>
+
+blocks_to_execute = []
+
+<%#blocks%>
+<%variableName%> = <%definitionName%>('<%name%>','<%id%>')
+<%variableName%>.parameters = {<%& parameters%>}
+<%variableName%>.input_connectors = {<%& inputs%>}
+blocks_to_execute.append(<%variableName%>)
+
+<%/blocks%>
+results_table = {}
+
+for block in blocks_to_execute:
+    results_table.update(block.execute(results_table))
+

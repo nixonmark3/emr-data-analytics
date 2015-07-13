@@ -501,6 +501,14 @@ viewmodels.diagramViewModel = function(data) {
     // reference the diagram data model
     this.data = data;
 
+    this.getId = function(){
+        return data.id;
+    };
+
+    this.setId = function(id){
+        data.id = id;
+    };
+
     // tracks the current set of block names
     var blockNames = {};
 
@@ -1121,15 +1129,15 @@ viewmodels.diagramViewModel = function(data) {
         return selectedWires;
     };
 
-    //
-    // Updates the enumerated blocks with their new state.
-    //
-    this.updateStatusOfBlocks = function(blockStates) {
+    /**
+     * Update the state of the specified block
+     * @param blockId
+     * @param blockState
+     */
+    this.updateBlockState = function(blockId, blockState) {
 
-        for (var i = 0; i < blockStates.length; ++i) {
-            var block = this.findBlock(blockStates[i].id);
-            block.updateProgress(blockStates[i].state);
-        }
+        var block = this.findBlock(blockId);
+        block.updateProgress(blockState);
     };
 
     this.getHeight = function() {
