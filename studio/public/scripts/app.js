@@ -489,7 +489,7 @@ var analyticsApp = angular.module('analyticsApp',
                             block: block
                         },
                         config: {
-                            name: 'test'
+                            name: block.data.name
                         },
                         position: modalPosition
                     }).then(function (modal) {
@@ -512,6 +512,9 @@ var analyticsApp = angular.module('analyticsApp',
                         controller: 'blockDataController',
                         inputs: {
                             block: block
+                        },
+                        config: {
+                            name: block.data.name
                         },
                         position: modalPosition
                     }).then(function (modal) {

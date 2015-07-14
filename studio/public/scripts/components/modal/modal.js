@@ -13,7 +13,8 @@ angular.module('emr.ui.modal', ['emr.ui.popup', 'emr.ui.shared'])
             scope: {
                 close: "=",
                 save: "=",
-                position: "="
+                position: "=",
+                config: "="
             },
             link: function ($scope, element, attrs) {
 
@@ -59,7 +60,7 @@ angular.module('emr.ui.modal', ['emr.ui.popup', 'emr.ui.shared'])
                         .then(function(template) {
 
                             // wrap the specified template with a modal directive
-                            var popupTemplate = "<modal position='position' close='close' save='save'>" + template + "</modal>";
+                            var popupTemplate = "<modal config='config' position='position' close='close' save='save'>" + template + "</modal>";
 
                             // capture / calculate modal start and end positions and dimensions
                             // set default variables
