@@ -63,10 +63,11 @@ angular.module('emr.ui.panel', [])
                 $scope.onResize = function(evt, direction){
 
                     var resizeE = direction.includes('e');
+                    var resizeW = direction.includes('w');
                     var resizeS = direction.includes('s');
 
                     // The top, left of the resizable element
-                    var posX, posY;
+                    var originX, originY;
 
                     $scope.$root.$broadcast("beginDrag", {
                         x: evt.pageX,
@@ -75,23 +76,32 @@ angular.module('emr.ui.panel', [])
 
                             dragStarted: function (x, y) {
 
-                                // capture the elements top, left relative to the window
-                                posX = element.offset().left;
-                                posY = element.offset().top;
+                                // capture the parent's offset from the window
+                                originX = element.offsetParent().offset().left;
+                                originY = element.offsetParent().offset().top;
                             },
 
                             dragging: function (x, y) {
 
                                 // resize in the east direction
                                 if (resizeE){
-                                    var width = x - posX;
+                                    var width = x - originX - $scope.config.x;
                                     $scope.config.width = ((minWidth > width) ? minWidth : width);
                                 }
 
                                 // resize in the the south direction
                                 if (resizeS){
-                                    var height = y - posY;
+                                    var height = y - originY - $scope.config.y;
                                     $scope.config.height = ((minHeight > height) ? minHeight : height);
+                                }
+
+                                if (resizeW){
+
+                                    var width = ($scope.config.x + originX) - x + $scope.config.width;
+                                    if (minWidth < width){
+                                        $scope.config.width = width;
+                                        $scope.config.x = x - originX;
+                                    }
                                 }
                             }
                         }
