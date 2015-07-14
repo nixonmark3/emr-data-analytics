@@ -10,6 +10,8 @@ import emr.analytics.service.messages.JobStatus;
 import emr.analytics.service.messages.JobStatusTypes;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
+import org.apache.spark.streaming.Durations;
+import org.apache.spark.streaming.StreamingContext;
 import scala.PartialFunction;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -28,6 +30,7 @@ public class SparkActor extends AbstractActor {
     private ActorRef executionActor;
     private SparkJob job;
     private SparkContext sparkContext;
+    private StreamingContext streamingContext;
     private PartialFunction<Object, BoxedUnit> active;
     private String parentPath;
     String[] jars = new String[] {
@@ -86,12 +89,13 @@ public class SparkActor extends AbstractActor {
                         .setAppName(this.job.getDiagramName().replace(" ", ""))
                         .setJars(jars);
                 sparkContext = new SparkContext(conf);
+                streamingContext = new StreamingContext(sparkContext, Durations.seconds(1));
 
                 // create the actor that manages the job status
                 statusActor = context().actorOf(JobStatusActor.props(self(), this.client, this.job), "JobStatusActor");
 
                 // create the actor that actually executes the job
-                executionActor = context().actorOf(SparkExecutionActor.props(statusActor, sparkContext), "JobExecutionActor");
+                executionActor = context().actorOf(SparkExecutionActor.props(statusActor, streamingContext), "JobExecutionActor");
 
                 // send job to executor
                 executionActor.tell(job, self());
@@ -111,7 +115,7 @@ public class SparkActor extends AbstractActor {
              */
             .match(String.class, s -> s.equals("info"), s -> {
 
-                Timeout timeout = new Timeout(Duration.create(5, TimeUnit.SECONDS));
+                Timeout timeout = new Timeout(Duration.create(20, TimeUnit.SECONDS));
                 Future<Object> future = Patterns.ask(statusActor, "info", timeout);
                 JobInfo jobInfo = (JobInfo) Await.result(future, timeout.duration());
 
@@ -119,11 +123,13 @@ public class SparkActor extends AbstractActor {
             })
 
             /**
-             * remove the source file and send self a poison pill
+             * stop context and system system
              */
             .match(String.class, s -> s.equals("finalize"), s -> {
 
-                sparkContext.stop();
+                System.out.println("finalizing spark process.");
+
+                streamingContext.stop(true, true);
 
                 getContext().system().shutdown();
             })

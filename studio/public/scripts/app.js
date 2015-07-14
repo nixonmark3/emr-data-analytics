@@ -303,7 +303,129 @@ var analyticsApp = angular.module('analyticsApp',
     .controller('dashboardController', ['$scope', '$window', '$timeout', '$webSockets', 'diagramService', 'modalService', 'popupService',
         function($scope, $window, $timeout, $webSockets, diagramService, modalService, popupService) {
 
-        $webSockets.send({ type: "ping" });
+        // reference the cards element
+        var cards = angular.element('#dashboard-cards');
+
+        // initialize variables, cards and selector
+        $scope.loading = false;
+
+        $scope.jobs = [];
+
+        $scope.cards = {
+            online: -1,
+            offline: -1
+        };
+
+        $scope.selector = {
+            index: 0,
+            width: (cards.width() / 4),
+            height: cards.height()
+        };
+
+        // set up websockets
+        $webSockets.listen(function(msg) { return msg.type == "jobs-summary"; }, setCards);
+        $webSockets.listen(function(msg) { return msg.type == "job-infos"; }, setJobs);
+        $webSockets.send({ type: "dashboard" });
+        $webSockets.send({ type: "jobs-summary" });
+
+        // watch for changes in container dimensions
+        $scope.$watch(function() { return cards.width(); }, function(newWidth, oldWidth) {
+            $scope.selector.width = (newWidth / 4);
+        });
+
+        /**
+         * Set the active card index
+         * @param index
+         */
+        $scope.activeCard = function(index){
+
+            if ($scope.selector.index != index) {
+                $scope.selector.index = index;
+                requestJobs();
+            }
+
+            $scope.$$phase || $scope.$apply();
+        };
+
+        /**
+         *
+         * @param job
+         */
+        $scope.kill = function(job){
+
+            job.killing = true;
+
+            // send kill request
+            diagramService.kill(job.diagramId, job.mode).then(
+                function (data) { },
+                function (code) {
+
+                    console.log(code); // TODO show exception
+                }
+            );
+
+            $scope.$$phase || $scope.$apply();
+        };
+
+        $scope.formatDate = function(unix){
+
+            var date = new Date(unix);
+            return date.toLocaleString();
+        };
+
+        /**
+         *
+         */
+        function requestJobs(){
+
+            switch($scope.selector.index){
+
+                case 0:
+                    $webSockets.send({ type: "online-jobs" });
+                    $scope.loading = true;
+                    break;
+                case 1:
+                    $webSockets.send({ type: "online-jobs" });
+                    $scope.loading = true;
+                    break;
+                case 2:
+                    $webSockets.send({ type: "offline-jobs" });
+                    $scope.loading = true;
+                    break;
+                case 3:
+                    $scope.jobs = [];
+                    break;
+            }
+        }
+
+        /**
+         *
+         * @param message
+         */
+        function setCards(message){
+
+            $scope.cards = {
+                online: message.online,
+                offline: message.offline
+            };
+
+            $scope.$$phase || $scope.$apply();
+        }
+
+        /**
+         *
+         * @param jobs
+         */
+        function setJobs(jobs){
+
+            $scope.jobs = jobs.items;
+            $scope.loading = false;
+
+            $scope.$$phase || $scope.$apply();
+        }
+
+        // make request to initialize list of jobs
+        requestJobs();
     }])
 
     .controller('studioController', ['$scope', '$window', '$timeout', '$webSockets', 'diagramService', 'modalService', 'popupService',
@@ -782,7 +904,7 @@ var analyticsApp = angular.module('analyticsApp',
             // retrieve the current diagram's data
             var data = diagram().data;
 
-            diagramService.kill(data).then(
+            diagramService.kill(data.id, data.mode).then(
                 function (data) {
 
                 },

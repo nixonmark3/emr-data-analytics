@@ -2,15 +2,19 @@ package actors;
 
 import akka.actor.*;
 import akka.japi.pf.ReceiveBuilder;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import emr.analytics.models.definition.Mode;
-import emr.analytics.models.messages.JobInfo;
-import emr.analytics.models.messages.JobRequest;
-import emr.analytics.models.messages.Ping;
+import emr.analytics.models.messages.*;
 import models.project.DeploymentStatus;
 import models.project.EvaluationStatus;
 import scala.PartialFunction;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.runtime.BoxedUnit;
+
+import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -30,13 +34,17 @@ public class AnalyticsActor extends AbstractActor {
             .match(ActorIdentity.class, identity -> {
 
                 // capture service's actorRef
-                service = ((ActorIdentity) identity).getRef();
+                this.service = ((ActorIdentity) identity).getRef();
 
-                if (service != null) {
+                if (this.service != null) {
+
+                    // send reference of self to the service
+                    this.service.tell(self(), self());
+
                     // send a successful ping message to all clients
                     SessionManager.getInstance().notifyAll(new Ping(true));
 
-                    context().watch(service);
+                    context().watch(this.service);
                     context().become(active, true);
                 }
             })
@@ -76,13 +84,35 @@ public class AnalyticsActor extends AbstractActor {
             // forward job request to the analytics service
             .match(JobRequest.class, request -> {
 
-                service.tell(request, self());
+                this.service.tell(request, self());
+            })
+
+            // forward job kill request to the analytics service
+            .match(JobKillRequest.class, request -> {
+
+                this.service.tell(request, self());
             })
 
             // ping request succeeds
             .match(Ping.class, ping -> {
                 ping.setValue(true);
                 sender().tell(ping, self());
+            })
+
+            // job summary from the analytics server
+            .match(JobsSummary.class, summary -> {
+
+                SessionManager.getInstance().notifyDashboards(summary);
+            })
+
+            // forward all base messages to the analytics service
+            .match(BaseMessage.class, message -> {
+
+                Timeout duration = new Timeout(Duration.create(20, TimeUnit.SECONDS));
+                Future<Object> future = Patterns.ask(this.service, message, duration);
+                BaseMessage result = (BaseMessage) Await.result(future, duration.duration());
+
+                sender().tell(result, self());
             })
 
             .match(Terminated.class, terminated -> {

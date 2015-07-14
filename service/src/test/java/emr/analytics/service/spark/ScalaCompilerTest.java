@@ -1,5 +1,6 @@
 package emr.analytics.service.spark;
 
+import emr.analytics.models.interfaces.RuntimeMessenger;
 import org.junit.Assert;
 import org.junit.Test;
 

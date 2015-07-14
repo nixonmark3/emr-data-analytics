@@ -4,29 +4,30 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
+import emr.analytics.models.interfaces.RuntimeMessenger;
 import emr.analytics.service.jobs.SparkJob;
 import emr.analytics.service.messages.JobProgress;
 import emr.analytics.service.messages.JobStatus;
 import emr.analytics.service.messages.JobStatusTypes;
-import emr.analytics.service.spark.RuntimeMessenger;
 import emr.analytics.service.spark.SparkCompiler;
-import org.apache.spark.SparkContext;
+import org.apache.spark.streaming.StreamingContext;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 public class SparkExecutionActor extends AbstractActor {
 
     private ActorRef jobStatusActor;
-    private SparkContext sparkContext;
+    private StreamingContext streamingContext;
 
-    public static Props props(ActorRef jobStatusActor, SparkContext sparkContext){
-        return Props.create(SparkExecutionActor.class, jobStatusActor, sparkContext);
+    public static Props props(ActorRef jobStatusActor, StreamingContext streamingContext){
+        return Props.create(SparkExecutionActor.class, jobStatusActor, streamingContext);
     }
 
-    public SparkExecutionActor(ActorRef jobStatusActor, SparkContext sparkContext){
+    public SparkExecutionActor(ActorRef jobStatusActor, StreamingContext streamingContext){
 
         this.jobStatusActor = jobStatusActor;
-        this.sparkContext = sparkContext;
+        this.streamingContext = streamingContext;
 
         receive(ReceiveBuilder
             .match(SparkJob.class, job -> {
@@ -35,7 +36,7 @@ public class SparkExecutionActor extends AbstractActor {
                 this.jobStatusActor.tell(new JobStatus(job.getId(), JobStatusTypes.STARTED), self());
 
                 // create a spark streaming compiler and run
-                SparkCompiler compiler = new SparkCompiler(this.sparkContext,
+                SparkCompiler compiler = new SparkCompiler(this.streamingContext,
                     job.getSource(),
                     new SparkMessenger(job.getId(), this.jobStatusActor));
                 compiler.run();
@@ -46,7 +47,7 @@ public class SparkExecutionActor extends AbstractActor {
             .build());
     }
 
-    public class SparkMessenger implements RuntimeMessenger {
+    public class SparkMessenger implements RuntimeMessenger, Serializable {
         private UUID jobId;
         private ActorRef actor;
 

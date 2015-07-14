@@ -160,11 +160,11 @@ analyticsApp
             return deferred.promise;
         },
 
-        kill: function (data) {
+        kill: function (id, mode) {
 
             var deferred = $q.defer();
 
-            $http.post('/analytics/kill', data)
+            $http.get('/analytics/kill/' + id + '/' + mode)
                 .success(function (data, status, headers, config) {
                     deferred.resolve(data);
                 })

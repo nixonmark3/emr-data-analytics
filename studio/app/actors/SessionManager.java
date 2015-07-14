@@ -76,6 +76,23 @@ public class SessionManager {
 
     /**
      *
+     * @param message
+     */
+    public void notifyDashboards(BaseMessage message) {
+
+        JsonNode node = Json.toJson(message);
+
+        Subscriptions subscriptions = this._dashboardSubscriptions;
+        for(UUID id : subscriptions.get()){
+
+            Session session = this.getSession(id);
+            if (session != null)
+                session.getActor().tell(node, null);
+        }
+    }
+
+    /**
+     *
      * @param diagramId
      * @param excludedId
      * @param message
@@ -130,6 +147,24 @@ public class SessionManager {
             session.setDiagramSubscription(diagramId);
             Subscriptions subscriptions = this.getDiagramSubscriptions(diagramId);
             subscriptions.add(id);
+        }
+    }
+
+    public void subscribeToDashboard(UUID id){
+
+        Session session = this.getSession(id);
+        if (session != null){
+
+            // todo: add locking
+
+            if (session.getDashboardSubscription())
+                return;
+
+            // clear the session's current subscription
+            this.clearSubscriptions(id, session);
+
+            session.setDashboardSubscription(true);
+            _dashboardSubscriptions.add(id);
         }
     }
 

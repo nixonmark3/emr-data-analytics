@@ -14,8 +14,7 @@ PropertyConfigurator.configure("log4j.properties")
 val <%variableName%> = Array(<%arguments%>)
 <%/models%>
 
-val ssc = new StreamingContext(sc, Seconds(1))
-val appName = sc.appName
+val appName = ssc.sparkContext.appName
 
 <%#streamingOperations%>
 val <%variableName%> = <%className%>.<%methodName%>(<%& arguments%>)
@@ -34,6 +33,12 @@ val <%variableName%> = <%className%>.<%methodName%>(<%& arguments%>)
 })
 
 <%/hasRddOperations%>
+
+<%#terminatingOperations%>
+
+<%variableName%>.foreach(value => { messenger.send("<%variableName%>", value) })
+
+<%/terminatingOperations%>
 
 ssc.start()
 ssc.awaitTermination()
