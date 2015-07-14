@@ -489,7 +489,9 @@ var analyticsApp = angular.module('analyticsApp',
                             block: block
                         },
                         config: {
-                            name: block.data.name
+                            name: block.data.name,
+                            showSave : false,
+                            showCancel: true
                         },
                         position: modalPosition
                     }).then(function (modal) {
@@ -514,7 +516,9 @@ var analyticsApp = angular.module('analyticsApp',
                             block: block
                         },
                         config: {
-                            name: block.data.name
+                            name: block.data.name,
+                            showSave : false,
+                            showCancel: true
                         },
                         position: modalPosition
                     }).then(function (modal) {
