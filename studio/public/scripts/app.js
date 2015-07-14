@@ -741,7 +741,7 @@ var analyticsApp = angular.module('analyticsApp',
                             block: block
                         },
                         config: {
-                            name: block.data.name,
+                            // todo put this back when refactor results name: block.data.name,
                             showSave : false,
                             showCancel: true
                         },

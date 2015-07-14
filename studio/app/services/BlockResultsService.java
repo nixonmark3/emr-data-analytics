@@ -51,10 +51,9 @@ public class BlockResultsService {
 
                     outputBuilder.append(item);
                     outputBuilder.append(",");
-                }
-                else{
+                } else {
 
-                    BasicDBList tuple = (BasicDBList)item;
+                    BasicDBList tuple = (BasicDBList) item;
                     if (tuple.size() == 2) {
 
                         outputBuilder.append(tuple.get(1));
@@ -250,8 +249,8 @@ public class BlockResultsService {
 
             list.forEach(item -> {
 
-                BasicDBList itemAsList = (BasicDBList)item;
-                tupleDataAsDictionary.put((String)itemAsList.get(0), itemAsList.get(1));
+                BasicDBList itemAsList = (BasicDBList) item;
+                tupleDataAsDictionary.put((String) itemAsList.get(0), itemAsList.get(1));
             });
         }
 
@@ -259,6 +258,62 @@ public class BlockResultsService {
     }
 
     public BasicDBList getChartData(String blockName, List<String> features) {
+
+        BasicDBList chartData = new BasicDBList();
+
+        BasicDBList resultChartData = _getChartData(blockName);
+
+        if (resultChartData != null) {
+
+            ArrayList<String> resultFeatures = (ArrayList<String>) resultChartData.get(0);
+
+            chartData.add(features);
+            chartData.add(resultChartData.get(1));
+
+            for (String feature : features) {
+
+                chartData.add(resultChartData.get(resultFeatures.indexOf(feature) + 2));
+            }
+        }
+
+        return chartData;
+    }
+
+    public BasicDBList getFeatureGridData(String blockName) {
+
+        BasicDBList chartData = new BasicDBList();
+
+        BasicDBList resultChartData = _getChartData(blockName);
+
+        if (resultChartData != null) {
+
+            for (int i = 0; i < resultChartData.size(); i++) {
+
+                if (i == 0) {
+
+                    chartData.add(resultChartData.get(i));
+                    continue;
+                }
+
+                ArrayList<Object> column = (ArrayList<Object>) resultChartData.get(i);
+
+                if (column.size() > 100) {
+
+                    List<Object> reducedColumn = column.subList(0, 100);
+
+                    chartData.add(reducedColumn);
+                }
+                else {
+
+                    chartData.add(resultChartData.get(i));
+                }
+            }
+        }
+
+        return chartData;
+    }
+
+    private BasicDBList _getChartData(String blockName) {
 
         BasicDBList chartData = new BasicDBList();
 
@@ -282,20 +337,7 @@ public class BlockResultsService {
 
                 String out = new String(os.toByteArray(), "UTF-8");
 
-                BasicDBList resultChartData = new ObjectMapper().readValue(out, BasicDBList.class);
-
-                if (resultChartData != null) {
-
-                    ArrayList<String> resultFeatures = (ArrayList<String>) resultChartData.get(0);
-
-                    chartData.add(features);
-                    chartData.add(resultChartData.get(1));
-
-                    for (String feature : features) {
-
-                        chartData.add(resultChartData.get(resultFeatures.indexOf(feature) + 2));
-                    }
-                }
+                chartData = new ObjectMapper().readValue(out, BasicDBList.class);
             }
         }
         catch (java.io.IOException exception) {

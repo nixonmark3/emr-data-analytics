@@ -362,6 +362,23 @@ analyticsApp
                 });
 
             return deferred.promise;
+        },
+
+        getFeatureGridData: function(blockName) {
+
+            var deferred = $q.defer();
+
+            $http.get('/getFeatureGridData/' + blockName)
+                .success(function (data, status, headers, config) {
+
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
         }
 
     };
