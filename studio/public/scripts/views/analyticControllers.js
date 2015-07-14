@@ -3,11 +3,12 @@
 analyticsApp
 
     .controller('blockDataController',
-    ['$scope', '$element', '$window', '$timeout', 'diagramService', 'block', 'position', 'close',
-        function($scope, $element, $window, $timeout, diagramService, block, position, close){
+    ['$scope', '$element', '$window', '$timeout', 'diagramService', 'block', 'config', 'position', 'close',
+        function($scope, $element, $window, $timeout, diagramService, block, config, position, close){
 
             $scope.position = position;
             $scope.block = block.data;
+            $scope.config = config;
 
             /*// calculate transitions for popup destination
             var transX = ($window.innerWidth / 2 - position.width / 2) - position.x;
