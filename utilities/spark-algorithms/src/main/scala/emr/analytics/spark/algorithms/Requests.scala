@@ -19,6 +19,8 @@ object Requests {
           })
         }
       )
+
+      value
     }
 
     case value:RDD[Double] => {
@@ -28,13 +30,15 @@ object Requests {
           postOpc(url, tag, item)
         })
       }
+
+      value
     }
 
     case value:Double => {
       postOpc(url, tag, value)
-    }
 
-    value
+      value
+    }
   }
 
   def postOpc(url: String, tag: String, value: Double): Boolean = {
