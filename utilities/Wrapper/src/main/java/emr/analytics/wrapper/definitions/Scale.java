@@ -23,6 +23,7 @@ public class Scale extends BlockDefinition  implements IExport {
         ModeDefinition modeDefinition = new ModeDefinition();
         modeDefinition.setInputs(createInputConnectors());
         modeDefinition.setOutputs(createOutputConnectors());
+        modeDefinition.setParameters(createParameters());
 
         return modeDefinition;
     }
@@ -45,5 +46,24 @@ public class Scale extends BlockDefinition  implements IExport {
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
         return outputConnectors;
+    }
+
+    public List<ParameterDefinition> createParameters() {
+
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+
+        parameters.add(new ParameterDefinition("Scale_Factor",
+                DataType.FLOAT.toString().toString(),
+                1,
+                new ArrayList<String>(),
+                null));
+
+        parameters.add(new ParameterDefinition("Scale_0to1",
+                DataType.STRING.toString().toString(),
+                "True",
+                new ArrayList<String>(),
+                null));
+
+        return parameters;
     }
 }
