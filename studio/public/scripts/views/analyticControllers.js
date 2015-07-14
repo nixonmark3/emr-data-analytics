@@ -365,46 +365,57 @@ analyticsApp
                     var yFeature = getFeatureStatistics($scope.chartOptions.series[seriesIndex].y);
                     var xFeature = ($scope.chartOptions.series[seriesIndex].x) ? getFeatureStatistics($scope.chartOptions.series[seriesIndex].x) : null;
 
+                    var yFeatureMin = Number(yFeature.min);
+                    var yFeatureMax = Number(yFeature.max);
+
+                    if (xFeature != null) {
+
+                        var xFeatureMin = Number(xFeature.min);
+                        var xFeatureMax = Number(xFeature.max);
+                    }
+
+                    var yFeatureCount = Number(yFeature.count);
+
                     if (count === 0) {
 
                         count = 1;
 
-                        var yMin = yFeature.min;
-                        var yMax = yFeature.max;
+                        yMin = yFeatureMin;
+                        yMax = yFeatureMax;
 
                         if (xFeature != null) {
 
-                            var xMin = xFeature.min;
-                            var xMax = xFeature.max;
+                            xMin = xFeatureMin;
+                            xMax = xFeatureMax;
                         }
                         else {
 
-                            var xMin = 0;
-                            var xMax = yFeature.count;
+                            xMin = 0;
+                            xMax = yFeatureCount;
                         }
                     }
                     else {
 
-                        if (yFeature.min < yMin) {
+                        if (yFeatureMin < yMin) {
 
-                            yMin = yFeature.min;
+                            yMin = yFeatureMin;
                         }
 
-                        if (yFeature.max > yMax) {
+                        if (yFeatureMax > yMax) {
 
-                            yMax = yFeature.max;
+                            yMax = yFeatureMax;
                         }
 
                         if (xFeature != null) {
 
-                            if (xFeature.min < xMin) {
+                            if (xFeatureMin < xMin) {
 
-                                xMin = xFeature.min;
+                                xMin = xFeatureMin;
                             }
 
-                            if (xFeature.max > xMax) {
+                            if (xFeatureMax > xMax) {
 
-                                xMax = xFeature.max;
+                                xMax = xFeatureMax;
                             }
                         }
                         else {
@@ -414,9 +425,9 @@ analyticsApp
                                 xMin = 0;
                             }
 
-                            if (yFeature.count > xMax) {
+                            if (yFeatureCount > xMax) {
 
-                                xMax = yFeature.count;
+                                xMax = yFeatureCount;
                             }
                         }
                     }
