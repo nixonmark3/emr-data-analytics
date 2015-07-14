@@ -300,14 +300,7 @@ analyticsApp
 
                 var deferred = $q.defer();
 
-                var features = [];
-                for (var feature in $scope.features) {
-
-                    if (feature > 0)
-                        features.push($scope.features[feature].column);
-                }
-
-                diagramService.getChartData($scope.block.id(), features).then(
+                diagramService.getFeatureGridData($scope.block.id()).then(
                     function (data) {
 
                         deferred.resolve(data);

@@ -14,6 +14,7 @@ GET         /getStatistics/:name              controllers.BlockResults.getStatis
 GET         /getFeatures/:name                controllers.BlockResults.getFeatures(name: String)
 GET         /getPlot/:name                    controllers.BlockResults.getPlot(name: String)
 GET         /getOutputResults/:name           controllers.BlockResults.getOutputResults(name: String)
+GET         /getFeatureGridData/:name         controllers.BlockResults.getFeatureGridData(name: String)
 
 POST        /diagrams/save                    controllers.Diagrams.save()
 POST        /analytics/evaluate               controllers.Analytics.evaluate()

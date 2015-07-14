@@ -67,7 +67,24 @@ public class BlockResults extends ControllerBase {
         return ok(Json.toJson(features));
     }
 
-    @BodyParser.Of(BodyParser.Json.class)
+    public static Result getFeatureGridData(String blockName) {
+
+        BasicDBList chartData;
+
+        try {
+
+            chartData = new BlockResultsService().getFeatureGridData(blockName);
+        }
+        catch (Exception exception) {
+
+            exception.printStackTrace();
+            return internalServerError("Failed to get chart data.");
+        }
+
+        return ok(Json.toJson(chartData));
+    }
+
+        @BodyParser.Of(BodyParser.Json.class)
     public static Result getChartData(String blockName) {
 
         BasicDBList chartData;
