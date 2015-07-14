@@ -330,6 +330,8 @@ var analyticsApp = angular.module('analyticsApp',
 
         $scope.offlineDiagramMethods = {};
 
+        $scope.diagrams = [];
+
         // initialize the studio properties panel to be on the right-side of the canvas
         var studioContainer = angular.element($('#studio-container'));
         $scope.studioPropertiesPanel = {
@@ -391,22 +393,26 @@ var analyticsApp = angular.module('analyticsApp',
             }
         );
 
-        // load diagrams
-        diagramService.listDiagrams().then(
-            function (data) {
+        function loadDiagrams() {
 
-                $scope.diagrams = data;
-                $scope.diagrams.forEach(function(item) {
+            $scope.diagrams.length = 0;
 
-                    initializeNavigationItem(item);
-                });
-            },
-            function (code) {
+            diagramService.listDiagrams().then(
+                function (data) {
 
-                // todo: show exception
-                console.log(code);
-            }
-        );
+                    $scope.diagrams = data;
+                    $scope.diagrams.forEach(function (item) {
+
+                        initializeNavigationItem(item);
+                    });
+                },
+                function (code) {
+
+                    // todo: show exception
+                    console.log(code);
+                }
+            );
+        }
 
         /* Scope Level Methods */
 
@@ -642,7 +648,14 @@ var analyticsApp = angular.module('analyticsApp',
 
         $scope.toggleDiagrams = function() {
 
+            $scope.diagrams.length = 0;
+
             $scope.showSidebar = !$scope.showSidebar;
+
+            if ($scope.showSidebar === true) {
+
+                loadDiagrams();
+            }
         };
 
         $scope.open = function(name) {
@@ -808,7 +821,11 @@ var analyticsApp = angular.module('analyticsApp',
             });
         };
 
-        $scope.deleteDiagram = function(diagramName) {
+        $scope.deleteDiagram = function(diagram) {
+
+            var diagramName = diagram.name;
+
+            $scope.diagrams.splice($scope.diagrams.indexOf(diagram), 1);
 
             diagramService.deleteDiagram(diagramName).then(
                 function (data) {
@@ -817,6 +834,10 @@ var analyticsApp = angular.module('analyticsApp',
                     diagramService.item().then(
                         function (data) {
 
+                            // todo if the diagram being deleted is active
+                            // unsubscribe
+                            // redirect to a new diagram
+                            // remove online diagram if there is one
                         },
                         function (code) {
 

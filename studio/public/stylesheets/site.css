@@ -234,14 +234,14 @@ button.diagram-evaluating { color: #2ca02c; }
     box-shadow: 0px 6px 12px rgba(0,0,0,0.200);
     max-height: 35px;
     overflow: hidden;
-    -webkit-transition: max-height 1s ease-out;
+    -webkit-transition: max-height 0.25s ease-out;
 }
 
-.diagrams-menu-body-item-animate { max-height: 500px; -webkit-transition: max-height 1s ease-in; }
+.diagrams-menu-body-item-animate { max-height: 500px; -webkit-transition: max-height 0.25s ease-in; }
 
-.fade-properties.ng-hide-remove { transition: 1.25s linear all; opacity: 1; }
+.fade-properties.ng-hide-remove { transition: 0.25s linear all; opacity: 1; }
 
-.fade-properties.ng-hide { transition: 1.25s linear all; opacity: 0; }
+.fade-properties.ng-hide { transition: 0.25s linear all; opacity: 0; }
 
 .diagrams-menu-body-item-container { height: 30px; width: 100%; }
 
