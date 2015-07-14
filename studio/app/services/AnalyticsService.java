@@ -28,7 +28,9 @@ public class AnalyticsService {
 
         if(_instance == null) {
             synchronized (AnalyticsService.class) {
-                _instance = new AnalyticsService();
+
+                if (_instance == null)
+                    _instance = new AnalyticsService();
             }
         }
         return _instance;

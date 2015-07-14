@@ -1,5 +1,6 @@
 package emr.analytics.service.spark;
 
+import emr.analytics.models.interfaces.RuntimeMessenger;
 import scala.collection.JavaConversions;
 import scala.collection.immutable.Nil;
 import scala.reflect.internal.util.BatchSourceFile;
@@ -134,7 +135,11 @@ public class ScalaCompiler implements Callable {
         try {
             result = (Boolean)method.invoke(cls.newInstance(), arguments.toArray(new Object[arguments.size()]));
         }
-        catch(InstantiationException | InvocationTargetException | IllegalAccessException ex){
+        catch(InvocationTargetException ex){
+            String message = "Execution failed.  Unable to invoke 'start' method.  Actual exception: %s";
+            throw new ScalaCompilerException(String.format(message, ex.getCause().toString()));
+        }
+        catch(InstantiationException | IllegalAccessException ex){
             String message = "Execution failed.  Unable to invoke 'start' method.  Actual exception: %s";
             throw new ScalaCompilerException(String.format(message, ex.toString()));
         }
@@ -214,7 +219,7 @@ public class ScalaCompiler implements Callable {
      * @return string - code wrapped in a class
      */
     protected String wrapCodeInClass(String name, String code){
-        return "import emr.analytics.service.spark.RuntimeMessenger \n"
+        return "import emr.analytics.models.interfaces.RuntimeMessenger \n"
                 + "class " + name + "{\n"
                 + "   def " + _methodName + "(messenger: RuntimeMessenger):Boolean = {\n"
                 +  code + "\n"

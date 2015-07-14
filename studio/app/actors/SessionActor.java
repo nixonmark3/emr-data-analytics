@@ -5,10 +5,11 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
-import emr.analytics.models.messages.Ping;
+import emr.analytics.models.messages.*;
 import play.libs.Json;
 import services.AnalyticsService;
 
+import java.util.List;
 import java.util.UUID;
 
 public class SessionActor extends AbstractActor {
@@ -33,11 +34,45 @@ public class SessionActor extends AbstractActor {
                 AnalyticsService.getInstance().send(new Ping(), self());
             })
 
-            // subscribe to updates for a specific diagram
+                    // subscribe to updates for a specific diagram
             .match(JsonNode.class, node -> (node.get("type").asText().equals("subscribe")), node -> {
 
                 UUID diagramId = UUID.fromString(node.get("id").asText());
-                SessionManager.getInstance().subscribe(id, diagramId);
+                SessionManager.getInstance().subscribe(this.id, diagramId);
+            })
+
+            .match(JsonNode.class, node -> (node.get("type").asText().equals("dashboard")), node -> {
+
+                SessionManager.getInstance().subscribeToDashboard(this.id);
+            })
+
+            // jobs summary request from client
+            .match(JsonNode.class, node -> (node.get("type").asText().equals("jobs-summary")), node -> {
+
+                AnalyticsService.getInstance().send(new BaseMessage("jobs-summary"), self());
+            })
+
+            //
+            .match(JsonNode.class, node -> (node.get("type").asText().equals("offline-jobs")), node -> {
+
+                AnalyticsService.getInstance().send(new BaseMessage("offline-jobs"), self());
+            })
+
+            //
+            .match(JsonNode.class, node -> (node.get("type").asText().equals("online-jobs")), node -> {
+
+                AnalyticsService.getInstance().send(new BaseMessage("online-jobs"), self());
+            })
+
+            .match(JobInfos.class, infos -> {
+
+                out.tell(Json.toJson(infos), self());
+            })
+
+            // jobs summary response from the analytics actor
+            .match(JobsSummary.class, summary -> {
+
+                out.tell(Json.toJson(summary), self());
             })
 
             // ping response from the analytics actor

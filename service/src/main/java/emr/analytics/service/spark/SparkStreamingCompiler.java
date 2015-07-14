@@ -2,6 +2,7 @@ package emr.analytics.service.spark;
 
 import java.io.*;
 
+import emr.analytics.models.interfaces.RuntimeMessenger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.streaming.StreamingContext;
 

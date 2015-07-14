@@ -2,19 +2,20 @@ package emr.analytics.service.spark;
 
 import java.io.File;
 
-import org.apache.spark.SparkContext;
+import emr.analytics.models.interfaces.RuntimeMessenger;
+import org.apache.spark.streaming.StreamingContext;
 
 /**
  * Class that compiles and executes spark code
  */
 public class SparkCompiler extends ScalaCompiler {
 
-    private SparkContext sc;
+    private StreamingContext ssc;
 
-    public SparkCompiler(SparkContext sc, String code, RuntimeMessenger messenger) throws ScalaCompilerException {
+    public SparkCompiler(StreamingContext ssc, String code, RuntimeMessenger messenger) throws ScalaCompilerException {
         super(code, messenger);
 
-        this.sc = sc;
+        this.ssc = ssc;
     }
 
     /**
@@ -33,9 +34,9 @@ public class SparkCompiler extends ScalaCompiler {
             this.createJar(jar, _dir);
 
         // add jar to spark context so that
-        sc.addJar(jar.getAbsolutePath());
+        ssc.sparkContext().addJar(jar.getAbsolutePath());
 
-        return this.invoke(cls, sc);
+        return this.invoke(cls, ssc);
     }
 
     /**
@@ -49,10 +50,10 @@ public class SparkCompiler extends ScalaCompiler {
 
         // todo: make argument list dynamic
 
-        return "import org.apache.spark.SparkContext \n"
-                + "import emr.analytics.service.spark.RuntimeMessenger \n"
+        return "import org.apache.spark.streaming.StreamingContext \n"
+                + "import emr.analytics.models.interfaces.RuntimeMessenger \n"
                 + "class " + name + "{\n"
-                + "   def " + this._methodName + "(messenger: RuntimeMessenger, sc: SparkContext):Boolean = {\n"
+                + "   def " + this._methodName + "(messenger: RuntimeMessenger, ssc: StreamingContext):Boolean = {\n"
                 +  code + "\n"
                 +  "true\n"
                 + "   }\n"

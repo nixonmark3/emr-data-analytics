@@ -5,6 +5,10 @@ public class JobsSummary extends BaseMessage {
     private int offline;
     private int online;
 
+    public JobsSummary(){
+        this(0, 0);
+    }
+
     public JobsSummary(int offline, int online){
         super("jobs-summary");
 

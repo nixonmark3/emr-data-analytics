@@ -15,6 +15,8 @@ import emr.analytics.service.messages.JobStatus;
 import emr.analytics.service.messages.JobStatusTypes;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
+import org.apache.spark.streaming.Durations;
+import org.apache.spark.streaming.StreamingContext;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -50,7 +52,7 @@ public class SparkExecutionActorTest {
             // build source code string
             StringBuilder source = new StringBuilder();
             source.append("val data = Array(1, 2, 3, 4)\n");
-            source.append("val distData = sc.parallelize(data)\n");
+            source.append("val distData = ssc.sparkContext.parallelize(data)\n");
             source.append("val result = distData.map(x => x * 2).sum().toInt\n");
             source.append("messenger.send(\"Value\", result.toString)\n");
 
@@ -65,6 +67,7 @@ public class SparkExecutionActorTest {
                     .setMaster("local[2]")
                     .setAppName("SparkExecutionTest");
             SparkContext sparkContext = new SparkContext(conf);
+            StreamingContext streamingContext = new StreamingContext(sparkContext, Durations.seconds(1));
 
             // create a test probe
             final JavaTestKit probe = new JavaTestKit(system);
@@ -72,7 +75,7 @@ public class SparkExecutionActorTest {
             // create spark execution actor
             final ActorRef sparkExecutionActor = system.actorOf(Props.create(SparkExecutionActor.class,
                     probe.getRef(),
-                    sparkContext));
+                    streamingContext));
 
             // send job
             sparkExecutionActor.tell(job, getRef());

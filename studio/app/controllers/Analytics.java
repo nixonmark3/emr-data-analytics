@@ -3,6 +3,7 @@ package controllers;
 import actors.SessionActor;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import emr.analytics.models.definition.Mode;
 import emr.analytics.models.diagram.Diagram;
 import emr.analytics.models.diagram.DiagramContainer;
 import emr.analytics.models.messages.JobKillRequest;
@@ -82,14 +83,9 @@ public class Analytics extends Controller {
      *
      * @return
      */
-    @BodyParser.Of(BodyParser.Json.class)
-    public static Result kill() {
+    public static Result kill(String id, String mode) {
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
-
-        JobKillRequest jobKillRequest = new JobKillRequest(diagram.getId(), diagram.getMode());
-
+        JobKillRequest jobKillRequest = new JobKillRequest(UUID.fromString(id), Mode.valueOf(mode));
         AnalyticsService.getInstance().send(jobKillRequest);
 
         return ok("Job killing process initiated.");

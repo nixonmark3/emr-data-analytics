@@ -62,7 +62,7 @@ public class ProcessExecutionActor extends AbstractActor {
                         while ((lineRead = err.readLine()) != null) {
 
                             stringBuilder.append(lineRead);
-                            stringBuilder.append(" ");
+                            stringBuilder.append("\n");
                         }
 
                         System.err.print(stringBuilder.toString());

@@ -71,7 +71,9 @@ public class SparkCompiler implements TargetCompiler {
 
     public class SparkBlocks {
 
-        private String _streamingContextName = "pollingstream";
+        // todo: temporarily hardcoded
+        private final String terminatingDefinition = "RESTPost";
+
         private Mode _mode = Mode.ONLINE;
 
         public HashSet<String> packageNames;
@@ -83,6 +85,7 @@ public class SparkCompiler implements TargetCompiler {
         public String rddVariable;
         public List<StreamingSourceBlock> streamingOperations;
         public List<StreamingSourceBlock> rddOperations;
+        public List<StreamingSourceBlock> terminatingOperations;
 
         public SparkBlocks(HashMap<String, String> models) {
 
@@ -119,11 +122,16 @@ public class SparkCompiler implements TargetCompiler {
 
             streamingOperations = new ArrayList<StreamingSourceBlock>();
             rddOperations = new ArrayList<StreamingSourceBlock>();
+            terminatingOperations = new ArrayList<StreamingSourceBlock>();
 
             for (StreamingSourceBlock block : this.blocks){
 
                 // todo: implement rdd operations feature
+
                 streamingOperations.add(block);
+
+                /*if (block.definition.equals(terminatingDefinition))
+                    terminatingOperations.add(block);*/
             }
 
             MustacheFactory mf = new DefaultMustacheFactory();
@@ -140,12 +148,15 @@ public class SparkCompiler implements TargetCompiler {
         }
 
         public class StreamingSourceBlock {
+            public String definition;
             public String variableName;
             public String className;
             public String methodName;
             public String arguments;
 
             public StreamingSourceBlock(ModeDefinition modeDefinition, Block block, List<Wire> wires) {
+
+                this.definition = block.getDefinition();
 
                 Signature signature = modeDefinition.getSignature();
 

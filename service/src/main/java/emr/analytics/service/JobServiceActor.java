@@ -23,29 +23,36 @@ public class JobServiceActor extends AbstractActor {
     private Map<UUID, ActorRef> offlineJobs = new HashMap<UUID, ActorRef>();
     private Map<UUID, ActorRef> onlineJobs = new HashMap<UUID, ActorRef>();
 
+    private ActorRef client = null;
+
     public static Props props(String host, String port){ return Props.create(JobServiceActor.class, host, port); }
 
     public JobServiceActor(String host, String port){
 
         receive(ReceiveBuilder
 
+            // on remote association the client will pass a reference to itself for reference
+            .match(ActorRef.class, actor -> {
+
+                this.client = actor;
+            })
+
             // job request sent from client
             .match(JobRequest.class, request -> {
 
-                if (request.getMode() == Mode.OFFLINE && this.offlineJobs.containsKey(request.getDiagramId())){
+                if (request.getMode() == Mode.OFFLINE && this.offlineJobs.containsKey(request.getDiagramId())) {
 
                     // notify the sender that this job is already running
                     sender().tell(createFailedJobInfo(request,
-                            String.format("This offline job specified, %s, is already running.", request.getDiagramName())),
+                                    String.format("This offline job specified, %s, is already running.", request.getDiagramName())),
                             self());
 
                     return;
-                }
-                else if (request.getMode() == Mode.ONLINE && this.onlineJobs.containsKey(request.getDiagramId())){
+                } else if (request.getMode() == Mode.ONLINE && this.onlineJobs.containsKey(request.getDiagramId())) {
 
                     // notify the sender that this job is already running
                     sender().tell(createFailedJobInfo(request,
-                            String.format("This online job specified, %s, is already running.", request.getDiagramName())),
+                                    String.format("This online job specified, %s, is already running.", request.getDiagramName())),
                             self());
 
                     return;
@@ -65,10 +72,10 @@ public class JobServiceActor extends AbstractActor {
                 }
 
                 ActorRef jobActor;
-                if (job instanceof ProcessJob){
+                if (job instanceof ProcessJob) {
 
                     jobActor = context().actorOf(
-                            ProcessActor.props(sender(), (ProcessJob)job),
+                            ProcessActor.props(sender(), (ProcessJob) job),
                             job.getId().toString());
 
                     jobs.put(job.getId(), job);
@@ -76,22 +83,27 @@ public class JobServiceActor extends AbstractActor {
                     context().watch(jobActor);
 
                     jobActor.tell("start", self());
-                }
-                else if(job instanceof SparkJob){
+
+                } else if (job instanceof SparkJob) {
 
                     jobActor = context().actorOf(
-                            SparkProcessActor.props(sender(), (SparkJob)job, host, port),
+                            SparkProcessActor.props(sender(), (SparkJob) job, host, port),
                             job.getId().toString());
 
                     jobs.put(job.getId(), job);
                     onlineJobs.put(job.getKey().getId(), jobActor);
                     context().watch(jobActor);
-                }
-                else {
+
+                } else {
 
                     // notify the sender that the specified job type is not support
                     sender().tell(createFailedJobInfo(request, "The job specified is not supported."), self());
+                    return;
                 }
+
+                // proactively send an update jobs summary
+                JobsSummary summary = new JobsSummary(this.offlineJobs.size(), this.onlineJobs.size());
+                sender().tell(summary, self());
             })
 
             .match(JobKillRequest.class, request -> {
@@ -109,10 +121,10 @@ public class JobServiceActor extends AbstractActor {
                 }
             })
 
-            .match(String.class, s -> s.equals("offline-jobs"), s -> {
+            .match(BaseMessage.class, message -> message.getType().equals("offline-jobs"), message -> {
 
                 // build a list of current jobs
-                List<JobInfo> jobs = new ArrayList<JobInfo>();
+                JobInfos jobs = new JobInfos();
                 for (ActorRef worker : this.offlineJobs.values()) {
 
                     JobInfo job = getJobInfo(worker);
@@ -123,10 +135,10 @@ public class JobServiceActor extends AbstractActor {
                 sender().tell(jobs, self());
             })
 
-            .match(String.class, s -> s.equals("online-jobs"), s -> {
+            .match(BaseMessage.class, message -> message.getType().equals("online-jobs"), message -> {
 
                 // build a list of current jobs
-                List<JobInfo> jobs = new ArrayList<JobInfo>();
+                JobInfos jobs = new JobInfos();
                 for (ActorRef worker : this.onlineJobs.values()) {
 
                     JobInfo job = getJobInfo(worker);
@@ -137,7 +149,7 @@ public class JobServiceActor extends AbstractActor {
                 sender().tell(jobs, self());
             })
 
-            .match(String.class, s -> s.equals("jobs-summary"), s -> {
+            .match(BaseMessage.class, message -> message.getType().equals("jobs-summary"), message -> {
 
                 JobsSummary summary = new JobsSummary(this.offlineJobs.size(), this.onlineJobs.size());
                 sender().tell(summary, self());
@@ -155,6 +167,11 @@ public class JobServiceActor extends AbstractActor {
                     this.onlineJobs.remove(job.getKey().getId());
 
                 jobs.remove(jobId);
+
+                if (this.client != null){
+                    JobsSummary summary = new JobsSummary(this.offlineJobs.size(), this.onlineJobs.size());
+                    this.client.tell(summary, self());
+                }
 
             }).build()
         );
@@ -176,7 +193,7 @@ public class JobServiceActor extends AbstractActor {
     private JobInfo getJobInfo(ActorRef actor) {
 
         try {
-            Timeout timeout = new Timeout(Duration.create(5, TimeUnit.SECONDS));
+            Timeout timeout = new Timeout(Duration.create(20, TimeUnit.SECONDS));
             Future<Object> future = Patterns.ask(actor, "info", timeout);
             return (JobInfo) Await.result(future, timeout.duration());
         }

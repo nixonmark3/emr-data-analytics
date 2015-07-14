@@ -1,7 +1,10 @@
 package emr.analytics.service.spark;
 
+import emr.analytics.models.interfaces.RuntimeMessenger;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
+import org.apache.spark.streaming.Durations;
+import org.apache.spark.streaming.StreamingContext;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -18,7 +21,7 @@ public class SparkCompilerTest {
 
         // initialize the scala code
         String source = "val data = Array(1, 2, 3, 4)\n"
-                + "val distData = sc.parallelize(data)\n"
+                + "val distData = ssc.sparkContext.parallelize(data)\n"
                 + "val result = distData.map(x => x * 2).sum().toInt\n"
                 + "messenger.send(\"Value\", \"The value is: \" + result.toString)\n";
 
@@ -29,8 +32,9 @@ public class SparkCompilerTest {
                 .setMaster("local[2]")
                 .setAppName("SparkCompilerTest");
         SparkContext sc = new SparkContext(conf);
+        StreamingContext ssc = new StreamingContext(sc, Durations.seconds(1));
 
-        SparkCompiler compiler = new SparkCompiler(sc, source, messenger);
+        SparkCompiler compiler = new SparkCompiler(ssc, source, messenger);
         Future<Boolean> future = pool.submit(compiler);
 
         Boolean result = future.get();

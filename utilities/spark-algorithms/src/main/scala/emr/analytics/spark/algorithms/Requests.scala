@@ -8,31 +8,33 @@ import org.apache.spark.streaming.dstream.DStream
 
 object Requests {
 
-  def postOpcValue(url: String, tag: String, value: Any): Boolean = value match {
+  def postOpcValue(url: String, tag: String, value: Any): Any = value match {
 
-    case value:DStream[Double] =>
+    case value:DStream[Double] => {
 
       value.foreachRDD(rdd =>
-        if (!rdd.isEmpty()){
-          rdd.foreach(item =>
+        if (!rdd.isEmpty()) {
+          rdd.foreach(item => {
             postOpc(url, tag, item)
-          )
+          })
         }
       )
-      true
+    }
 
-    case value:RDD[Double] =>
+    case value:RDD[Double] => {
 
-      if (!value.isEmpty()){
-        value.foreach(item =>
+      if (!value.isEmpty()) {
+        value.foreach(item => {
           postOpc(url, tag, item)
-        )
+        })
       }
-      true
+    }
 
-    case value:Double =>
-
+    case value:Double => {
       postOpc(url, tag, value)
+    }
+
+    value
   }
 
   def postOpc(url: String, tag: String, value: Double): Boolean = {
