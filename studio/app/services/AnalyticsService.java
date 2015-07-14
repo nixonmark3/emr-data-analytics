@@ -72,6 +72,6 @@ public class AnalyticsService {
      * @throws Exception
      */
     public BaseMessage sendSync(BaseMessage message) throws Exception {
-        return sendSync(message, 5);
+        return sendSync(message, 20);
     }
 }

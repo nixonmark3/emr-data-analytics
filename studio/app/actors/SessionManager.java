@@ -113,6 +113,8 @@ public class SessionManager {
             if (session != null)
                 session.getActor().tell(node, null);
         }
+
+        this.notifyDashboards(message);
     }
 
     /**

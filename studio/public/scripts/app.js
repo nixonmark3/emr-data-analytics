@@ -98,13 +98,30 @@ var analyticsApp = angular.module('analyticsApp',
 
             $rootScope.queuedMessages = [];
 
+            websocket.reset = function(){
+
+                var temp = [];
+                listeners.forEach(function(listener){
+
+                    if (listener.persist)
+                        temp.push(listener);
+                });
+
+                listeners = temp;
+            };
+
             /**
              *
              * @param predicate
              * @param handler
+             * @param persist
              */
-            websocket.listen = function (predicate, handler) {
-                listeners.push({ p: predicate, h: handler });
+            websocket.listen = function (predicate, handler, persist) {
+
+                if (persist == null)
+                    persist = false;
+
+                listeners.push({ p: predicate, h: handler, persist: persist });
             };
 
             /**
@@ -209,14 +226,14 @@ var analyticsApp = angular.module('analyticsApp',
         //
 
         // represents the current view { -1 = splash, 0 = studio, 1 = dashboard }
-        $scope.activeView = -1;
+        $rootScope.activeView = -1;
         // initialize the variable that indicates whether the service is available
         $rootScope.serviceAvailable = true;
         // initialize list of alerts
         $rootScope.alerts = [];
 
         // listen for analytic service pings
-        $webSockets.listen(function(msg) { return msg.type == "ping"; }, setPing);
+        $webSockets.listen(function(msg) { return msg.type == "ping"; }, setPing, true);
 
         // ping the analytics service
         $webSockets.send({ type: "ping" });
@@ -278,7 +295,7 @@ var analyticsApp = angular.module('analyticsApp',
          */
         $scope.setActiveView = function(index) {
 
-            if ($scope.activeView != index){
+            if ($rootScope.activeView != index){
 
                 switch(index){
 
@@ -290,7 +307,7 @@ var analyticsApp = angular.module('analyticsApp',
                         break;
                 }
 
-                $scope.activeView = index;
+                $rootScope.activeView = index;
             }
         };
 
@@ -323,10 +340,14 @@ var analyticsApp = angular.module('analyticsApp',
         };
 
         // set up websockets
+        $webSockets.reset();
         $webSockets.listen(function(msg) { return msg.type == "jobs-summary"; }, setCards);
         $webSockets.listen(function(msg) { return msg.type == "job-infos"; }, setJobs);
         $webSockets.send({ type: "dashboard" });
         $webSockets.send({ type: "jobs-summary" });
+
+        $webSockets.listen(function(msg) { return msg.type == "evaluationStatus"; }, updateOfflineJob);
+        $webSockets.listen(function(msg) { return msg.type == "deploymentStatus"; }, function(msg) { updateOnlineJob(msg.jobInfo); });
 
         // watch for changes in container dimensions
         $scope.$watch(function() { return cards.width(); }, function(newWidth, oldWidth) {
@@ -424,6 +445,78 @@ var analyticsApp = angular.module('analyticsApp',
             $scope.$$phase || $scope.$apply();
         }
 
+        function updateOfflineJob(message){
+
+            if ($scope.selector.index == 2){ // offline jobs
+
+                var job;
+                var jobIndex = 0;
+                $scope.jobs.forEach(function(element, index){
+
+                    if (element.diagramId == message.diagramId){
+
+                        job = element;
+                        jobIndex = index;
+                    }
+                });
+
+                if (job){
+                    // the updated online job is in the list
+                    switch(message.state){
+                        case "COMPLETED":
+                        case "FAILED":
+                        case "STOPPED":
+
+                            $scope.jobs.splice(jobIndex, 1);
+                            break;
+                    }
+                }
+                else{
+                    // the item is not in the list - append if running
+                    if (message.state == "RUNNING")
+                        $scope.jobs.push(message);
+                }
+            }
+
+            $scope.$$phase || $scope.$apply();
+        }
+
+        function updateOnlineJob(message){
+
+            if ($scope.selector.index == 0 || $scope.selector.index == 1){ // online jobs
+
+                var job;
+                var jobIndex = 0;
+                $scope.jobs.forEach(function(element, index){
+
+                    if (element.diagramId == message.diagramId){
+
+                        job = element;
+                        jobIndex = index;
+                    }
+                });
+
+                if (job){
+                    // the updated online job is in the list
+                    switch(message.state){
+                        case "COMPLETED":
+                        case "FAILED":
+                        case "STOPPED":
+
+                            $scope.jobs.splice(jobIndex, 1);
+                            break;
+                    }
+                }
+                else{
+                    // the item is not in the list - append if running
+                    if (message.state == "RUNNING")
+                        $scope.jobs.push(message);
+                }
+            }
+
+            $scope.$$phase || $scope.$apply();
+        }
+
         // make request to initialize list of jobs
         requestJobs();
     }])
@@ -466,8 +559,12 @@ var analyticsApp = angular.module('analyticsApp',
         };
 
         // setup websocket listeners
+        $webSockets.reset();
         $webSockets.listen(function(msg) { return msg.type == "evaluationStatus"; }, updateEvaluationStatus);
-        $webSockets.listen(function(msg) { return msg.type == "deploymentStatus"; }, updateDeploymentStatus);
+        $webSockets.listen(
+            function(msg) { return msg.type == "deploymentStatus"; },
+            function(msg) { updateDeploymentStatus(msg.jobInfo); }
+        );
 
         //
         // load data from the service
@@ -789,9 +886,28 @@ var analyticsApp = angular.module('analyticsApp',
                     $scope.toggleDiagrams();
                     $scope.toggleCanvas(false);
 
+                    // reset execution state
+                    $scope.offlineState = 0;
+                    $scope.onlineState = 0;
+
                     subscribe($scope.diagramViewModel.getId());
 
                     updateSelectedDiagram();
+
+                    $scope.info($scope.diagramViewModel.getId(),
+                        function(data){
+
+                            data.items.forEach(function(item){
+
+                                if (item.mode == "OFFLINE"){
+                                    updateEvaluationStatus(item);
+                                }
+                                else if(item.mode == "ONLINE"){
+                                    updateDeploymentStatus(item);
+                                }
+                            });
+                        }
+                    );
                 },
                 function (code) {
 
@@ -897,6 +1013,19 @@ var analyticsApp = angular.module('analyticsApp',
 
             evt.stopPropagation();
             evt.preventDefault();
+        };
+
+        $scope.info = function(diagramId, onSuccess){
+
+            // send info request
+            diagramService.info(diagramId).then(onSuccess,
+                function (code) {
+
+                    console.log(code); // TODO show exception
+                }
+            );
+
+            $scope.$$phase || $scope.$apply();
         };
 
         $scope.kill = function(evt) {
@@ -1132,10 +1261,8 @@ var analyticsApp = angular.module('analyticsApp',
          */
         function updateDeploymentStatus(message){
 
-            var jobInfo = message.jobInfo;
-
-            // set offline diagram's state
-            switch(jobInfo.state){
+            // set online diagram's state
+            switch(message.state){
 
                 case "CREATED":
                     $scope.onlineState = 1;

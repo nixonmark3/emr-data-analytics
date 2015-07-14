@@ -6,8 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import emr.analytics.models.definition.Mode;
 import emr.analytics.models.diagram.Diagram;
 import emr.analytics.models.diagram.DiagramContainer;
+import emr.analytics.models.messages.JobInfoRequest;
+import emr.analytics.models.messages.JobInfos;
 import emr.analytics.models.messages.JobKillRequest;
 import emr.analytics.models.messages.JobRequest;
+import play.libs.Json;
 import play.mvc.*;
 import services.AnalyticsService;
 import services.DiagramsService;
@@ -89,5 +92,27 @@ public class Analytics extends Controller {
         AnalyticsService.getInstance().send(jobKillRequest);
 
         return ok("Job killing process initiated.");
+    }
+
+    /**
+     *
+     * @param id
+     * @return
+     */
+    public static Result info(String id) {
+
+        JobInfos jobInfos = null;
+
+        try {
+            JobInfoRequest jobInfoRequest = new JobInfoRequest(UUID.fromString(id));
+            jobInfos = (JobInfos)AnalyticsService.getInstance().sendSync(jobInfoRequest);
+        }
+        catch(Exception ex){
+
+            ex.printStackTrace();
+            return internalServerError("Failed to get job info.");
+        }
+
+        return ok(Json.toJson(jobInfos));
     }
 }

@@ -160,6 +160,21 @@ analyticsApp
             return deferred.promise;
         },
 
+        info: function (id) {
+
+            var deferred = $q.defer();
+
+            $http.get('/analytics/info/' + id)
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
+
         kill: function (id, mode) {
 
             var deferred = $q.defer();

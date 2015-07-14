@@ -121,6 +121,31 @@ public class JobServiceActor extends AbstractActor {
                 }
             })
 
+            .match(JobInfoRequest.class, request -> {
+
+                JobInfos jobs = new JobInfos();
+
+                if (this.offlineJobs.containsKey(request.getDiagramId())) {
+
+                    // send kill message
+                    ActorRef jobActor = this.offlineJobs.get(request.getDiagramId());
+                    JobInfo job = getJobInfo(jobActor);
+                    if (job != null)
+                        jobs.add(job);
+                }
+
+                if (this.onlineJobs.containsKey(request.getDiagramId())) {
+
+                    // send kill message
+                    ActorRef jobActor = this.onlineJobs.get(request.getDiagramId());
+                    JobInfo job = getJobInfo(jobActor);
+                    if (job != null)
+                        jobs.add(job);
+                }
+
+                sender().tell(jobs, self());
+            })
+
             .match(BaseMessage.class, message -> message.getType().equals("offline-jobs"), message -> {
 
                 // build a list of current jobs
