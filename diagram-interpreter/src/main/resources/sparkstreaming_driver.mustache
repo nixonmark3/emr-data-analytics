@@ -36,8 +36,6 @@ val <%variableName%> = <%className%>.<%methodName%>(<%& arguments%>)
 
 <%#terminatingOperations%>
 
-<%variableName%>.foreach(value => { messenger.send("<%variableName%>", value) })
-
 <%/terminatingOperations%>
 
 ssc.start()
