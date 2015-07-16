@@ -89,16 +89,16 @@ class PCA_NIPALS(FunctionBlock):
             FunctionBlock.save_results(self, df=None, statistics=False, plot=False, results=results)
 
             scores = pd.DataFrame(scores)
-            scores.columns = [str(x) for x in scores.columns.values.tolist()]
+            scores.columns = [str('scores_{0}'.format(x)) for x in scores.columns.values.tolist()]
 
             loadings = pd.DataFrame(loadings)
-            loadings.columns = [str(x) for x in loadings.columns.values.tolist()]
+            loadings.columns = [str('loadings_{0}'.format(x)) for x in loadings.columns.values.tolist()]
 
             spe = pd.DataFrame(spe)
-            spe.columns = [str(x) for x in spe.columns.values.tolist()]
+            spe.columns = [str('spe_{0}'.format(x)) for x in spe.columns.values.tolist()]
 
             t2 = pd.DataFrame(t2)
-            t2.columns = [str(x) for x in t2.columns.values.tolist()]
+            t2.columns = [str('t2_{0}'.format(x)) for x in t2.columns.values.tolist()]
 
             FunctionBlock.report_status_complete(self)
 
