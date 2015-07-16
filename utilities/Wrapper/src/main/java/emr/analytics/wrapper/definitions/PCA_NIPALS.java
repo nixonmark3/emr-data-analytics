@@ -39,10 +39,10 @@ public class PCA_NIPALS extends BlockDefinition implements IExport {
 
     public List<ConnectorDefinition> createOutputConnectors() {
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-        outputConnectors.add(new ConnectorDefinition("scores", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("loadings", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("spe", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("t2", DataType.FRAME.toString()));
+        outputConnectors.add(new ConnectorDefinition("Scores", DataType.FRAME.toString()));
+        outputConnectors.add(new ConnectorDefinition("Loadings", DataType.FRAME.toString()));
+        outputConnectors.add(new ConnectorDefinition("Q", DataType.FRAME.toString()));
+        outputConnectors.add(new ConnectorDefinition("T2", DataType.FRAME.toString()));
         return outputConnectors;
     }
 

@@ -89,26 +89,26 @@ class PCA_NIPALS(FunctionBlock):
             FunctionBlock.save_results(self, df=None, statistics=False, plot=False, results=results)
 
             scores = pd.DataFrame(scores)
-            scores.columns = [str('scores_{0}'.format(x+1)) for x in scores.columns.values.tolist()]
+            scores.columns = [str('Score_{0}'.format(x+1)) for x in scores.columns.values.tolist()]
             scores.index = df.index
 
             loadings = pd.DataFrame(loadings)
-            loadings.columns = [str('loadings_{0}'.format(x+1)) for x in loadings.columns.values.tolist()]
+            loadings.columns = [str('Loading_{0}'.format(x+1)) for x in loadings.columns.values.tolist()]
 
-            spe = pd.DataFrame(spe)
-            spe.columns = [str('spe_{0}'.format(x+1)) for x in spe.columns.values.tolist()]
-            spe.index = df.index
+            q = pd.DataFrame(spe)
+            q.columns = [str('Q_{0}'.format(x+1)) for x in q.columns.values.tolist()]
+            q.index = df.index
 
             t2 = pd.DataFrame(t2)
-            t2.columns = [str('t2_{0}'.format(x+1)) for x in t2.columns.values.tolist()]
+            t2.columns = [str('T2_{0}'.format(x+1)) for x in t2.columns.values.tolist()]
             t2.index = df.index
 
             FunctionBlock.report_status_complete(self)
 
-            return {FunctionBlock.getFullPath(self, 'scores'): scores,
-                    FunctionBlock.getFullPath(self, 'loadings'): loadings,
-                    FunctionBlock.getFullPath(self, 'spe'): spe,
-                    FunctionBlock.getFullPath(self, 't2'): t2}
+            return {FunctionBlock.getFullPath(self, 'Scores'): scores,
+                    FunctionBlock.getFullPath(self, 'Loadings'): loadings,
+                    FunctionBlock.getFullPath(self, 'Q'): q,
+                    FunctionBlock.getFullPath(self, 'T2'): t2}
 
         except Exception as err:
             FunctionBlock.save_results(self)
