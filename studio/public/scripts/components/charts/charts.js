@@ -95,12 +95,12 @@ angular.module('emr.ui.charts', [])
                         var color = colorService.getColor(options.colorSet, seriesIndex);
 
                         // reference the x and y features
-                        var yFeature = data[data[0].indexOf(series.y)  + featureOffset];
+                        var yFeature = data[data[0].indexOf(series.y.name)  + featureOffset];
                         var xFeature = null;
                         if (chartType == 'time')
                             xFeature = data[featureIndex];
                         else if(series.x != null)
-                            xFeature = data[data[0].indexOf(series.x) + featureOffset];
+                            xFeature = data[data[0].indexOf(series.x.name) + featureOffset];
 
                         var index = 0, n = yFeature.length, y, x;
 
@@ -110,8 +110,8 @@ angular.module('emr.ui.charts', [])
                             context.fillStyle = color;
                             while (index++ < n) {
 
-                                y = yScale(yFeature[index]);
-                                x = (xFeature == null) ? xScale(index + 1) : xScale(xFeature[index]);
+                                y = yScale((options.scaled) ? (parseFloat(yFeature[index]) - series.y.min) / (series.y.max - series.y.min) : parseFloat(yFeature[index]));
+                                x = (xFeature == null) ? xScale(index + 1) : xScale((options.scaled) ? (parseFloat(yFeature[index]) - series.y.min) / (series.y.max - series.y.min) : parseFloat(xFeature[index]));
 
                                 context.fillRect(x, y, markerSize, markerSize);
                                 /*context.beginPath();
@@ -122,7 +122,7 @@ angular.module('emr.ui.charts', [])
                         else{
                             // draw line
 
-                            y = yScale(yFeature[index]);
+                            y = yScale((options.scaled) ? (parseFloat(yFeature[index]) - series.y.min) / (series.y.max - series.y.min) : parseFloat(yFeature[index]));
                             x = (xFeature == null) ? xScale(1) : xScale(xFeature[index]);
 
                             context.strokeStyle = color;
@@ -132,7 +132,7 @@ angular.module('emr.ui.charts', [])
                             context.moveTo(x, y);
                             while (++index < n) {
 
-                                y = yScale(yFeature[index]);
+                                y = yScale((options.scaled) ? (parseFloat(yFeature[index]) - series.y.min) / (series.y.max - series.y.min) : parseFloat(yFeature[index]));
                                 x = (xFeature == null) ? xScale(index + 1) : xScale(xFeature[index]);
                                 context.lineTo(x, y);
                             }
@@ -206,21 +206,27 @@ angular.module('emr.ui.charts', [])
                         chartType = options.type;
                     }
 
-                    // capture the chart boundaries
-                    var yMin = options.y.min || 0,
-                        yMax = options.y.max || 1;
+                    var yMin = 0,
+                        yMax = 1,
+                        xMin = 0,
+                        xMax = 1;
 
-                    var xMin, xMax;
+                    if (!options.scaled){
+                        yMin = options.y.minActual || options.y.min || 0;
+                        yMax = options.y.maxActual || options.y.max || 1;
+                    }
+
+                    // capture the chart boundaries
                     if (chartType == 'time'){
 
                         var timeSeries = data[featureIndex];
                         xMin = timeSeries[0];
                         xMax = timeSeries[timeSeries.length - 1];
                     }
-                    else{
+                    else if (!options.scaled || chartType == 'line'){
 
-                        xMin = options.x.min || 0;
-                        xMax = options.x.max || 1;
+                        xMin = options.x.minActual || options.x.min || 0;
+                        xMax = options.x.maxActual || options.x.max || 1;
                     }
 
                     // create the chart scales
@@ -245,14 +251,12 @@ angular.module('emr.ui.charts', [])
                  */
                 $scope.internalMethods = $scope.methods || {};
 
-                /**
-                 *
-                 * @param data: the data to be used for charting
-                 */
                 $scope.internalMethods.render = function(chartOptions, chartData){
 
                     options = chartOptions;
-                    data = chartData;
+
+                    if (chartData != null)
+                        data = chartData;
 
                     setOptions();
                     draw();

@@ -165,9 +165,14 @@ public class ScalaCompiler implements Callable {
                 classChars.add(c);
             }
 
-            // compile
-            SourceFile sf = new BatchSourceFile("(inline)", JavaConversions.iterableAsScalaIterable(classChars).toSeq());
-            _run.compileSources(Nil.$colon$colon(sf));
+            try {
+                // compile
+                SourceFile sf = new BatchSourceFile("(inline)", JavaConversions.iterableAsScalaIterable(classChars).toSeq());
+                _run.compileSources(Nil.$colon$colon(sf));
+            }
+            catch(Exception ex){
+                System.out.println(ex.toString());
+            }
         }
 
         return findClass(_className).get();
@@ -207,6 +212,9 @@ public class ScalaCompiler implements Callable {
                 return Optional.of(cls);
             }
             catch(ClassNotFoundException ex){
+
+                System.out.println(ex.toString());
+
                 return Optional.empty();
             }
         }

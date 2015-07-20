@@ -71,9 +71,7 @@ public class SparkCompiler implements TargetCompiler {
 
     public class SparkBlocks {
 
-        // todo: temporarily hardcoded
         private final String terminatingDefinition = "RESTPost";
-
         private Mode _mode = Mode.ONLINE;
 
         public HashSet<String> packageNames;
@@ -85,7 +83,7 @@ public class SparkCompiler implements TargetCompiler {
         public String rddVariable;
         public List<StreamingSourceBlock> streamingOperations;
         public List<StreamingSourceBlock> rddOperations;
-        public List<StreamingSourceBlock> terminatingOperations;
+        public List<TerminatingOperation> terminatingOperations;
 
         public SparkBlocks(HashMap<String, String> models) {
 
@@ -122,7 +120,7 @@ public class SparkCompiler implements TargetCompiler {
 
             streamingOperations = new ArrayList<StreamingSourceBlock>();
             rddOperations = new ArrayList<StreamingSourceBlock>();
-            terminatingOperations = new ArrayList<StreamingSourceBlock>();
+            terminatingOperations = new ArrayList<TerminatingOperation>();
 
             for (StreamingSourceBlock block : this.blocks){
 
@@ -130,8 +128,14 @@ public class SparkCompiler implements TargetCompiler {
 
                 streamingOperations.add(block);
 
-                /*if (block.definition.equals(terminatingDefinition))
-                    terminatingOperations.add(block);*/
+                /*if (block.definition.equals(terminatingDefinition)){
+
+                    String[] arguments = block.arguments.split(",");
+                    terminatingOperations.add(new TerminatingOperation(arguments[2], arguments[0], arguments[1]));
+                }
+                else{
+                    streamingOperations.add(block);
+                }*/
             }
 
             MustacheFactory mf = new DefaultMustacheFactory();
@@ -258,6 +262,19 @@ public class SparkCompiler implements TargetCompiler {
             public StreamingModel(String variableName, String arguments){
                 this.variableName = createVariableName(variableName);
                 this.arguments = arguments;
+            }
+        }
+
+        public class TerminatingOperation {
+
+            public String input;
+            public String url;
+            public String tag;
+
+            public TerminatingOperation(String input, String url, String tag){
+                this.input = input;
+                this.url = url;
+                this.tag = tag;
             }
         }
     }

@@ -3,6 +3,7 @@
 var analyticsApp = angular.module('analyticsApp',
     ['diagramApp',
         'browserApp',
+        'emr.ui.controls',
         'emr.ui.charts',
         'emr.ui.files',
         'emr.ui.grids',

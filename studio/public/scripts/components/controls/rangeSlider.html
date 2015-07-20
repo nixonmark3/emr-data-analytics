@@ -1,0 +1,8 @@
+<div class="range-slider">
+    <input type="range" ng-model="minValue" ng-change="updateMin()" min="{{minLimit}}" max="{{maxLimit}}" step="{{step}}" ng-disabled="disabled">
+    <input type="range" ng-model="maxValue" ng-change="updateMax()" min="{{minLimit}}" max="{{maxLimit}}" step="{{step}}" ng-disabled="disabled">
+    <div class="range-slider-labels">
+        <div class="range-slider-label pull-left">{{minLimit | number:1}}</div>
+        <div class="range-slider-label pull-right">{{maxLimit | number:1}}</div>
+    </div>
+</div>

@@ -36,6 +36,8 @@ val <%variableName%> = <%className%>.<%methodName%>(<%& arguments%>)
 
 <%#terminatingOperations%>
 
+<%input%>.foreachRDD(rdd => if (!rdd.isEmpty()) rdd.foreach(value => Requests.postOpc(<%& url%>, <%& tag%>, value)))
+
 <%/terminatingOperations%>
 
 ssc.start()

@@ -133,11 +133,12 @@ analyticsApp
             $scope.config = config;
             $scope.position = position;
             $scope.loading = true;
+            $scope.fetching = false;
             $scope.rendering = false;
             $scope.activeIndex = 0;
             $scope.chartMethods = {};
             $scope.hideChartMenus = false;
-
+            $scope.rangeSliderDisabled = false;
 
             // load the set of features after the modal animation has completed
             $timeout(function() {
@@ -159,14 +160,57 @@ analyticsApp
             // initialize the chart object
             $scope.chartOptions = {
                 type: "line",
+                scaled: false,
+                override: false, 
                 colorSet: "default",
-                x: { min: null, max: null },
-                y: { min: null, max: null },
+                x: { min: null, max: null, minActual: null, maxActual: null },
+                y: { min: null, max: null, minActual: null, maxActual: null },
                 series: []
             };
 
             // initialize new series object
-            $scope.newSeries = { x: null, y: null, flipToFront: false, flipToBack: false };
+            $scope.newSeries = {
+                x: {
+                    name: null, min: null, max: null
+                },
+                y: {
+                    name: null, min: null, max: null
+                },
+                flipToFront: false,
+                flipToBack: false
+            };
+
+            $scope.$watch(
+                function() {
+                    return $scope.chartOptions.y.minActual;
+                },
+                function() {
+                    if($scope.loading || $scope.fetching) {
+
+                        console.log("fetching...");
+                        return;
+                    }
+
+                    if ($scope.chartOptions.y.minActual != null)
+                        $scope.render();
+                }
+            );
+
+            $scope.$watch(
+                function() {
+                    return $scope.chartOptions.y.maxActual;
+                },
+                function() {
+                    if($scope.loading || $scope.fetching) {
+
+                        console.log("fetching...");
+                        return;
+                    }
+
+                    if ($scope.chartOptions.y.maxActual != null)
+                        $scope.render();
+                }
+            );
 
             /* general methods */
 
@@ -223,7 +267,10 @@ analyticsApp
 
                                 var seriesToAdd = angular.copy($scope.newSeries);
 
-                                seriesToAdd.y = $scope.features[featureIndex].column;
+                                var feature = $scope.features[featureIndex];
+                                seriesToAdd.y.name = feature.column;
+                                seriesToAdd.y.min = feature.min;
+                                seriesToAdd.y.max = feature.max;
 
                                 $scope.chartOptions.series.push(seriesToAdd);
                             }
@@ -232,7 +279,7 @@ analyticsApp
 
                     updateChartBounds();
 
-                    $scope.render();
+                    $scope.fetchData();
                 }
             };
 
@@ -242,7 +289,7 @@ analyticsApp
 
                 for (var series in $scope.chartOptions.series) {
 
-                    configuredSeries.push($scope.chartOptions.series[series].y);
+                    configuredSeries.push($scope.chartOptions.series[series].y.name);
                 }
 
                 return configuredSeries;
@@ -269,9 +316,9 @@ analyticsApp
 
             $scope.addSeries = function() {
 
-                if ($scope.newSeries.y == null) return;
+                if ($scope.newSeries.y.name == null) return;
 
-                if ($scope.hasXCoordinate() && $scope.newSeries.x == null) return;
+                if ($scope.hasXCoordinate() && $scope.newSeries.x.name == null) return;
 
                 var seriesToAdd = angular.copy($scope.newSeries);
 
@@ -281,7 +328,23 @@ analyticsApp
 
                 resetSeries();
 
-                $scope.render();
+                $scope.fetchData();
+            };
+
+            /**
+             *  Configure
+             */
+            $scope.selectFeature = function(type){
+
+                var dimension;
+                if (type == 'y')
+                    dimension = $scope.newSeries.y;
+                else if (type == 'x')
+                    dimension = $scope.newSeries.x;
+
+                var feature = getFeatureStatistics(dimension.name);
+                dimension.min = feature.min;
+                dimension.max = feature.max;
             };
 
             // retrieve a color by configured color set and index
@@ -314,10 +377,20 @@ analyticsApp
                 return deferred.promise;
             };
 
-            // render the chart
-            $scope.render = function() {
+            $scope.toggleScale = function(){
 
-                $scope.rendering = true;
+                if($scope.chartOptions.scaled)
+                    $scope.rangeSliderDisabled = true;
+                else
+                    $scope.rangeSliderDisabled = false;
+
+                $scope.render();
+            };
+
+            // fetch data and render the chart
+            $scope.fetchData = function() {
+
+                $scope.fetching = true;
 
                 // assemble a distinct list of features
                 // todo: to maintain a dictionary of features as series and added and removed
@@ -325,17 +398,18 @@ analyticsApp
                 for(var i = 0; i < $scope.chartOptions.series.length; i++){
 
                     var series = $scope.chartOptions.series[i];
-                    if (series.x != null && features.indexOf(series.x) == -1)
-                        features.push(series.x);
-                    if (features.indexOf(series.y) == -1)
-                        features.push(series.y);
+                    if (series.x.name != null && features.indexOf(series.x.name) == -1)
+                        features.push(series.x.name);
+                    if (features.indexOf(series.y.name) == -1)
+                        features.push(series.y.name);
                 }
 
                 diagramService.getChartData($scope.block.id(), features).then(
                     function (data) {
 
-                        $scope.chartMethods.render($scope.chartOptions, data);
-                        $scope.rendering = false;
+                        $scope.fetching = false;
+
+                        $scope.render(data);
                     },
                     function (code) {
 
@@ -344,10 +418,25 @@ analyticsApp
                 );
             };
 
+            $scope.render = function(data){
+
+                $scope.rendering = true;
+                $scope.chartMethods.render($scope.chartOptions, data);
+                $scope.rendering = false;
+            };
+
             function resetSeries() {
 
-                $scope.newSeries.y = null;
-                $scope.newSeries.x = null;
+                $scope.newSeries.y = {
+                    name: null,
+                    min: null,
+                    max: null
+                };
+                $scope.newSeries.x = {
+                    name: null,
+                    min: null,
+                    max: null
+                };
                 $scope.newSeries.flipToFront = false;
                 $scope.newSeries.flipToBack = false;
             }
@@ -362,8 +451,8 @@ analyticsApp
 
                 for (var seriesIndex in $scope.chartOptions.series) {
 
-                    var yFeature = getFeatureStatistics($scope.chartOptions.series[seriesIndex].y);
-                    var xFeature = ($scope.chartOptions.series[seriesIndex].x) ? getFeatureStatistics($scope.chartOptions.series[seriesIndex].x) : null;
+                    var yFeature = getFeatureStatistics($scope.chartOptions.series[seriesIndex].y.name);
+                    var xFeature = ($scope.chartOptions.series[seriesIndex].x.name) ? getFeatureStatistics($scope.chartOptions.series[seriesIndex].x.name) : null;
 
                     var yFeatureMin = Number(yFeature.min);
                     var yFeatureMax = Number(yFeature.max);
@@ -443,21 +532,22 @@ analyticsApp
 
                 var statistics = null;
 
-                $scope.features.forEach(function (feature) {
+                for (var i = 0; i < $scope.features.length; i++){
 
+                    var feature = $scope.features[i];
                     if (feature.column === selectedFeature) {
-
                         statistics =  feature.statistics;
+                        break;
                     }
-                });
+                }
 
                 return statistics;
             }
 
             $scope.updateChartType = function(){
 
-                $scope.chartOptions.x = { min: null, max: null };
-                $scope.chartOptions.y = { min: null, max: null };
+                $scope.chartOptions.x = { min: null, max: null, minActual: null, maxActual: null };
+                $scope.chartOptions.y = { min: null, max: null, minActual: null, maxActual: null };
                 $scope.chartOptions.series = [];
 
                 resetSeries();
