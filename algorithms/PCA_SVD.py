@@ -1,10 +1,9 @@
-import numpy as np
-import collections as coll
 import sys
+import pandas as pd
+import collections
 
+from sklearn import decomposition
 from FunctionBlock import FunctionBlock
-
-# Limitations: does not handle missing data
 
 
 class PCA_SVD(FunctionBlock):
@@ -21,24 +20,22 @@ class PCA_SVD(FunctionBlock):
 
             raw = df.values
 
-            # Pre-processing: mean center and scale the data columns to unit variance
-            X = raw - raw.mean(axis=0)
-            X = X / X.std(axis=0)
+            N = self.parameters['N Components']
 
-            # Verify the centering and scaling
-            X.mean(axis=0)   # array([ -3.92198351e-17,  -1.74980803e-16, ...
-            X.std(axis=0)    # [ 1.  1.  1.  1.  1.  1.  1.  1.  1.]
+            pca = decomposition.PCA(n_components=N)
+            pca.fit(raw)
+            scores = pca.transform(raw)
 
-            A = self.parameters['N Components']
+            results = collections.OrderedDict()
+            results['N components'] = N
+            results['Explained Variance'] = pca.explained_variance_.tolist()
+            FunctionBlock.save_results(self, df=None, statistics=False, plot=False, results=results)
 
-            # We could of course use SVD ...
-            u, d, v = np.linalg.svd(X)
+            scores = pd.DataFrame(scores)
+            scores.columns = [str('Score_{0}'.format(x+1)) for x in scores.columns.values.tolist()]
 
-            # Transpose the "v" array from SVD, which contains the loadings, but retain only the first A columns
-            loadings = v.T[:, range(0, A)]
-
-            # Compute the scores from the loadings:
-            scores = np.dot(X, loadings)
+            loadings = pd.DataFrame(pca.components_)
+            loadings.columns = [str('Loading_{0}'.format(x+1)) for x in loadings.columns.values.tolist()]
 
             FunctionBlock.report_status_complete(self)
 
