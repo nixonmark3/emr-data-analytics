@@ -34,10 +34,9 @@ public class PCA_Test extends BlockDefinition  implements IExport {
     public List<ConnectorDefinition> createInputConnectors() {
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
-        inputConnectors.add(new ConnectorDefinition("data", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("TestData", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("OrigData", DataType.FRAME.toString()));
         inputConnectors.add(new ConnectorDefinition("Loadings", DataType.FRAME.toString()));
-        inputConnectors.add(new ConnectorDefinition("OrigMean", DataType.FRAME.toString()));
-        inputConnectors.add(new ConnectorDefinition("OrigSTD", DataType.FRAME.toString()));
         return inputConnectors;
     }
 
