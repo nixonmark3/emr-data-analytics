@@ -6,17 +6,9 @@ import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.{DStream, ReceiverInputDStream}
 import org.apache.spark.streaming.kafka.KafkaUtils
 
+import scala.util.parsing.json.JSON
+
 object Utilities {
-
-  /*def columns(stream: DStream[Array[(String, Double)]], features: String):DStream[Array[Double]] = {
-
-    val featuresSet = features.split(",")
-    stream.map(data => data.filter(x => featuresSet.contains(x._1)).map(x => x._2))
-  }
-
-  def dotProduct(x: Array[Double], y:Array[Double]):Double = {
-    x.zip(y).map(entry => entry._1*entry._2).sum
-  }*/
 
   def columns(data:Any, features: String):Any = data match {
 
@@ -77,5 +69,14 @@ object Utilities {
 
     val topicsMap = topics.split(",").map(t => (t,1)).toMap
     KafkaUtils.createStream(ssc, zkQuorum, groupId, topicsMap)
+  }
+
+  def extractQueryColumns(query: String):Array[String] = {
+
+    val raw:Option[Any] = JSON.parseFull(query)
+    val json:Map[String,Any] = raw.get.asInstanceOf[Map[String, Any]]
+    val columns:List[Map[String,String]] = json.get("columns").get.asInstanceOf[List[Map[String,String]]]
+
+    columns.map(col => col.get("tag").get).toArray
   }
 }
