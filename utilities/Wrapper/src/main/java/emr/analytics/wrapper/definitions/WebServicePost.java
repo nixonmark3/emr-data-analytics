@@ -52,6 +52,10 @@ public class WebServicePost extends BlockDefinition implements IExport {
 
     public List<ParameterDefinition> createParameters() {
 
+        List<String> opts = new ArrayList<String>();
+        opts.add("OPC");
+        opts.add("PI");
+
         // todo: add parameters for url, payload pattern
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
         parameters.add(new ParameterDefinition("Url",
@@ -64,6 +68,11 @@ public class WebServicePost extends BlockDefinition implements IExport {
                 "",
                 new ArrayList<String>(),
                 null));
+        parameters.add(new ParameterDefinition("PostType",
+                DataType.LIST.toString(),
+                opts.get(0),
+                opts,
+                null));
 
         return parameters;
     }
@@ -72,8 +81,9 @@ public class WebServicePost extends BlockDefinition implements IExport {
 
         return new Signature("emr.analytics.spark.algorithms.Requests",
                 "Requests",
-                "postOpcValue",
+                "postValue",
                 new String[]{
+                        "parameter:PostType",
                         "parameter:Url",
                         "parameter:Tag",
                         "input:in"

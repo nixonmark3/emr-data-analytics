@@ -11,60 +11,41 @@ public class LoadPi extends BlockDefinition implements IExport {
 
     @Override
     public Definition createDefinition() {
+
         return new Definition("LoadPi", "Load PI", Category.DATA_SOURCES.toString());
     }
 
     @Override
-    public ModeDefinition createOfflineMode(){
+    public ModeDefinition createOfflineMode() {
 
         ModeDefinition modeDefinition = new ModeDefinition();
+        modeDefinition.setSignature(createSignature());
         modeDefinition.setOutputs(createOutputConnectors());
         modeDefinition.setParameters(createParameters());
-
         return modeDefinition;
     }
 
     @Override
     public ModeDefinition createOnlineMode() {
 
-        ModeDefinition modeDefinition = new ModeDefinition();
+        return null;
+    }
 
-        List<ConnectorDefinition> outputs = new ArrayList<ConnectorDefinition>();
-        outputs.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
-        modeDefinition.setOutputs(outputs);
+    public Signature createSignature() {
 
-        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-
-        parameters.add(new ParameterDefinition("Url",
-                DataType.STRING.toString(),
-                "",
-                new ArrayList<String>(),
-                null));
-
-        parameters.add(new ParameterDefinition("Sleep",
-                DataType.STRING.toString(),
-                "500",
-                new ArrayList<String>(),
-                null));
-
-        modeDefinition.setParameters(parameters);
-
-        Signature signature = new Signature("emr.analytics.spark.algorithms.Sources",
-                "Sources",
-                "PollingStream",
+        return new Signature("emr.analytics.spark.algorithms.Utilities",
+                "Utilities",
+                "loadPi",
                 new String[] {
-                        "ssc",
-                        "parameter:Url",
-                        "parameter:Sleep"
+                        "parameter:IP",
+                        "parameter:Port",
+                        "parameter:Query"
                 });
-
-        modeDefinition.setSignature(signature);
-
-        return modeDefinition;
     }
 
 
     public List<ConnectorDefinition> createOutputConnectors() {
+
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
         return outputConnectors;
@@ -73,25 +54,21 @@ public class LoadPi extends BlockDefinition implements IExport {
     public List<ParameterDefinition> createParameters() {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-
         parameters.add(new ParameterDefinition("IP",
                 DataType.STRING.toString(),
                 "",
                 new ArrayList<String>(),
                 null));
-
         parameters.add(new ParameterDefinition("Port",
                 DataType.INT.toString(),
                 "",
                 new ArrayList<String>(),
                 null));
-
         parameters.add(new ParameterDefinition("Query",
                 DataType.QUERY.toString(),
                 "None",
                 new ArrayList<String>(),
                 null));
-
         return parameters;
     }
 }
