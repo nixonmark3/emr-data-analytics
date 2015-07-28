@@ -18,39 +18,23 @@ class PCA_Test(FunctionBlock):
         try:
             FunctionBlock.report_status_executing(self)
 
-            FunctionBlock.check_connector_has_one_wire(self, 'data')
-            df = results_table[self.input_connectors['data'][0]]
+            FunctionBlock.check_connector_has_one_wire(self, 'TestData')
+            test_df = results_table[self.input_connectors['TestData'][0]]
+
+            FunctionBlock.check_connector_has_one_wire(self, 'OrigData')
+            original_df = results_table[self.input_connectors['OrigData'][0]]
 
             FunctionBlock.check_connector_has_one_wire(self, 'Loadings')
             loadings = results_table[self.input_connectors['Loadings'][0]]
 
-            FunctionBlock.check_connector_has_one_wire(self, 'OrigMean')
-            mean = results_table[self.input_connectors['OrigMean'][0]]
+            df = (test_df - original_df.mean(axis=0)) / original_df.std(axis=0)
 
-            FunctionBlock.check_connector_has_one_wire(self, 'OrigSTD')
-            std = results_table[self.input_connectors['OrigSTD'][0]]
-
-            rawdf = (df - mean)/std
-            raw = rawdf.values
-
-            N, K = raw.shape
-
-            L_n, num_PC = loadings.shape
-
-            # Pre-processing: mean center and scale the data columns to unit variance
-            # X = raw - raw.mean(axis=0)
-            #X = X / X.std(axis=0)
-
-            # scores = np.zeros((N, num_PC))
+            raw = df.values
 
             scores = np.dot(raw, loadings)
 
-            results = collections.OrderedDict()
-
-            FunctionBlock.save_results(self, df=None, statistics=False, plot=False, results=results)
-
             scores = pd.DataFrame(scores)
-            scores.columns = [str('Score_{0}'.format(x+1)) for x in scores.columns.values.tolist()]
+            scores.columns = [str('Test_Score_{0}'.format(x+1)) for x in scores.columns.values.tolist()]
             scores.index = df.index
 
             FunctionBlock.report_status_complete(self)

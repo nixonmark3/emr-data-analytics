@@ -109,13 +109,23 @@ public class SparkProcessActor extends AbstractActor {
     private void runProcess(String id, String system, String host, String port) throws SparkProcessException {
 
         try {
+
+            String operatingSystemName = System.getProperty("os.name").toLowerCase();
+
             StringBuilder pathBuilder = new StringBuilder();
             URL[] urls = ((URLClassLoader)Thread.currentThread().getContextClassLoader()).getURLs();
-            for (URL url : urls){
+            for (URL url : urls) {
+
                 pathBuilder.append(url.toURI().toString().replace("file:", ""));
 
-                // todo: separator will not work on windows make configurable
-                pathBuilder.append(":");
+                if (operatingSystemName.startsWith("windows")) {
+
+                    pathBuilder.append(";");
+                }
+                else {
+
+                    pathBuilder.append(":");
+                }
             }
 
             List<String> arguments = new ArrayList<String>();
@@ -134,6 +144,7 @@ public class SparkProcessActor extends AbstractActor {
             new Thread(() -> {
 
                 try {
+
                     BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
                     BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 
@@ -145,7 +156,7 @@ public class SparkProcessActor extends AbstractActor {
 
                     int complete = process.waitFor();
 
-                    if (complete != 0){
+                    if (complete != 0) {
 
                         StringBuilder stringBuilder = new StringBuilder();
                         while ((lineRead = err.readLine()) != null) {
@@ -157,7 +168,8 @@ public class SparkProcessActor extends AbstractActor {
                         System.err.print(stringBuilder.toString());
                     }
                 }
-                catch(Exception ex){
+                catch(Exception ex) {
+
                     System.err.println(ex.toString());
                 }
 

@@ -85,3 +85,25 @@ class Connection():
     def query_from_json(self, json_str):
         time_ranges, tags, aliases, sample_rate_secs, max_samples = self._json_to_query(json_str)
         return self.query2(tags, time_ranges, sample_rate_secs)
+
+    def write_values(self, item_values):
+        url = "%s/writevalues" % self.endpoint
+        payload = {'items':item_values.items}
+        r = requests.post(url, data=json.dumps(payload))
+        return json.loads(r.text)
+
+
+class ItemValues():
+    def __init__(self):
+        self.items = []
+
+    # date is assumed to have a timezone or if timezone naive to be in UTC
+    def add_item(self, tag, dt, type, val):
+        if dt == 0:
+            self.items.append({'tag':tag, 'ts':0, 'type':type, 'value':str(val)})
+        else:
+            ts = int(dt.timestamp() * 1000.0)
+            self.items.append({'tag':tag, 'ts':ts, 'type':type, 'value':str(val)})
+
+    def __len__(self):
+        return len(self.items)

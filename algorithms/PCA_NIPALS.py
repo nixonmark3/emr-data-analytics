@@ -4,6 +4,7 @@ import pandas as pd
 from scipy.stats import f
 from scipy.stats import norm
 import sys
+import ast
 
 from FunctionBlock import FunctionBlock
 
@@ -23,19 +24,17 @@ class PCA_NIPALS(FunctionBlock):
 
             N, K = raw.shape
 
-            # Pre-processing: mean center and scale the data columns to unit variance
+            # mean center and scale the data columns to unit variance
             X = raw - raw.mean(axis=0)
             X = X / X.std(axis=0)
 
             original_data = X
 
-            # Verify the centering and scaling
-            X.mean(axis=0)   # array([ -3.92198351e-17,  -1.74980803e-16, ...
-            X.std(axis=0)    # [ 1.  1.  1.  1.  1.  1.  1.  1.  1.]
-
             A = self.parameters['N Components']
 
             confidence_level = self.parameters['Confidence Level']
+
+            calc_contributions = ast.literal_eval(self.parameters['Calculate Contributions'])
 
             scores = np.zeros((N, A))
             loadings = np.zeros((K, A))
@@ -84,49 +83,51 @@ class PCA_NIPALS(FunctionBlock):
             inv_covariance = np.linalg.inv(np.dot(scores.T, scores) / N)
 
             # Calculate variance captured
-            eig_value, eig_vector = np.linalg.eig(np.cov(original_data.T))
-            eig_value_idx = eig_value.argsort()[::-1]
-            eig_value = eig_value[eig_value_idx]
-            eig_vector = eig_vector[:, eig_value_idx]
+            eig_values, eig_vectors = np.linalg.eig(np.cov(original_data.T))
+            eig_values_idx = eig_values.argsort()[::-1]
+            eig_values = eig_values[eig_values_idx]
+            eig_vectors = eig_vectors[:, eig_values_idx]
 
             # Calculate the variable contributions to score
 
             t2_lim = A * (N - 1) / (N - A) * f.ppf(confidence_level, A, N - A)
 
             t2 = np.zeros((N, 1))
-            varContribT2 = np.zeros((N, K))
-            varContrib = np.zeros((N, K))
+            variable_contribution_t2 = np.zeros((N, K))
+            variable_contribution_score = np.zeros((N, K))
 
             for i in range(N):
                 t2[i] = np.dot(np.dot(scores[i, :], inv_covariance), scores[i, :].T)
 
-                for j in range(K):
-                    # Calculate the variable contributions to T2
-                    temp_x_score = original_data[i, j] * loadings[j, 0:A]
-                    varContribT2[i, j] = np.dot(scores[i, 0:A] / eig_value[0:A], temp_x_score.T) / t2_lim
+                if calc_contributions:
+                    for j in range(K):
+                        # Calculate the variable contributions to T2
+                        temp_x_score = original_data[i, j] * loadings[j, 0:A]
+                        variable_contribution_t2[i, j] = np.dot(scores[i, 0:A] / eig_values[0:A], temp_x_score.T) / t2_lim
 
-                    # Continue calculation of variable contributions to score
-                    for a in range(A):
-                        varContrib[i, j] = np.sum((original_data[i, j] * loadings[j, a] * eig_value[a]) / scores[i, a])
+                        # Continue calculation of variable contributions to score
+                        for a in range(A):
+                            variable_contribution_score[i, j] = np.sum((original_data[i, j] * loadings[j, a] * eig_values[a]) / scores[i, a])
 
-            # Calculate the variable contributions to Q
-            eig_vector_inv = np.linalg.inv(eig_vector)
-
-            scoreTemp = np.matrix(scores)
-            sliceTemp = np.matrix(eig_vector_inv[:, 0:A].T)
-            reconstructed = np.array(scoreTemp * sliceTemp)
-
-            varContribQ = original_data - reconstructed
+            if calc_contributions:
+                # Calculate the variable contributions to Q
+                eig_vector_inv = np.linalg.inv(eig_vectors)
+                score_temp = np.matrix(scores)
+                slice_temp = np.matrix(eig_vector_inv[:, 0:A].T)
+                reconstructed = np.array(score_temp * slice_temp)
+                variable_contribution_q = original_data - reconstructed
+            else:
+                variable_contribution_q = np.zeros((N, K))
 
             # Calculate Q limits
             q_lim = 0
-            m = len(eig_value)
+            m = len(eig_values)
             if A >= m:
                 q_lim = 0
             elif A == m-1:
-                theta1 = eig_value[A]
-                theta2 = eig_value[A]**2
-                theta3 = eig_value[A]**3
+                theta1 = eig_values[A]
+                theta2 = eig_values[A]**2
+                theta3 = eig_values[A]**3
                 if theta1 == 0:
                     q_lim = 0
                 else:
@@ -139,9 +140,9 @@ class PCA_NIPALS(FunctionBlock):
                         h2 = theta2*h0*(h0-1)/(theta1**2)
                         q_lim = theta1*(1+h1+h2)**(1/h0)
             else:
-                theta1 = sum(eig_value[A:m])
-                theta2 = sum(eig_value[A:m]**2)
-                theta3 = sum(eig_value[A:m]**3)
+                theta1 = sum(eig_values[A:m])
+                theta2 = sum(eig_values[A:m]**2)
+                theta3 = sum(eig_values[A:m]**3)
                 if theta1 == 0:
                     q_lim = 0
                 else:
@@ -154,9 +155,13 @@ class PCA_NIPALS(FunctionBlock):
                         h2 = theta2*h0*(h0-1)/(theta1**2)
                         q_lim = theta1*(1+h1+h2)**(1/h0)
 
+            sum_of_eig_values = sum(eig_values)
+            variance_captured = [(e / sum_of_eig_values) * 100 for e in eig_values]
+
             results = collections.OrderedDict()
             results['N components'] = A
             results['Confidence Level'] = confidence_level
+            results['Variance Captured'] = variance_captured
 
             FunctionBlock.save_results(self, df=None, statistics=False, plot=False, results=results)
 
@@ -167,47 +172,47 @@ class PCA_NIPALS(FunctionBlock):
             loadings = pd.DataFrame(loadings)
             loadings.columns = [str('Loading_{0}'.format(x+1)) for x in loadings.columns.values.tolist()]
 
-            q = pd.DataFrame(spe)
-            q.columns = [str('Q_{0}'.format(x+1)) for x in q.columns.values.tolist()]
+            q = pd.DataFrame({'Q': spe})
             q.index = df.index
 
-            t2 = pd.DataFrame(t2)
-            t2.columns = [str('T2_{0}'.format(x+1)) for x in t2.columns.values.tolist()]
+            t2 = pd.DataFrame({'T2': t2[:, 0]})
             t2.index = df.index
 
-            varContribScore = pd.DataFrame(varContrib)
-            varContribScore.index = df.index
-            varContribScore.columns = df.columns
+            variable_contribution_score = pd.DataFrame(variable_contribution_score)
+            variable_contribution_score.index = df.index
+            variable_contribution_score.columns = df.columns
 
-            varContribQ = pd.DataFrame(varContribQ)
-            varContribQ.index = df.index
-            varContribQ.columns = df.columns
+            variable_contribution_q = pd.DataFrame(variable_contribution_q)
+            variable_contribution_q.index = df.index
+            variable_contribution_q.columns = df.columns
 
-            varContribT2 = pd.DataFrame(varContribT2)
-            varContribT2.index = df.index
-            varContribT2.columns = df.columns
+            variable_contribution_t2 = pd.DataFrame(variable_contribution_t2)
+            variable_contribution_t2.index = df.index
+            variable_contribution_t2.columns = df.columns
 
-            eig_value = pd.DataFrame(eig_value)
-            eig_value.columns = [str('EVAL_{0}'.format(x+1)) for x in eig_value.columns.values.tolist()]
+            eig_values = pd.DataFrame(eig_values)
+            eig_values.columns = [str('EVAL_{0}'.format(x+1)) for x in eig_values.columns.values.tolist()]
 
-            eig_vector = pd.DataFrame(eig_vector)
-            eig_vector.columns = [str('EVEC_{0}'.format(x+1)) for x in eig_vector.columns.values.tolist()]
+            eig_vectors = pd.DataFrame(eig_vectors)
+            eig_vectors.columns = [str('EVEC_{0}'.format(x+1)) for x in eig_vectors.columns.values.tolist()]
+
+            t2_limit = pd.DataFrame({'T2_Limit': [t2_lim for x in range(len(df.index.values))]})
+
+            q_limit = pd.DataFrame({'Q_Limit': [q_lim for x in range(len(df.index.values))]})
 
             FunctionBlock.report_status_complete(self)
 
             return {FunctionBlock.getFullPath(self, 'Loadings'): loadings,
                     FunctionBlock.getFullPath(self, 'Scores'): scores,
-                    FunctionBlock.getFullPath(self, 'ScoresCont'): varContribScore,
+                    FunctionBlock.getFullPath(self, 'ScoresCont'): variable_contribution_score,
                     FunctionBlock.getFullPath(self, 'T2'): t2,
-                    FunctionBlock.getFullPath(self, 'T2Lim'): t2_lim,
-                    FunctionBlock.getFullPath(self, 'T2Cont'): varContribT2,
+                    FunctionBlock.getFullPath(self, 'T2Lim'): t2_limit,
+                    FunctionBlock.getFullPath(self, 'T2Cont'): variable_contribution_t2,
                     FunctionBlock.getFullPath(self, 'Q'): q,
-                    FunctionBlock.getFullPath(self, 'QLim'): q_lim,
-                    FunctionBlock.getFullPath(self, 'QCont'): varContribQ,
-                    FunctionBlock.getFullPath(self, 'EigenValues'): eig_value,
-                    FunctionBlock.getFullPath(self, 'EigenVectors'): eig_vector,
-                    FunctionBlock.getFullPath(self, 'Mean'): df.mean(axis=1),
-                    FunctionBlock.getFullPath(self, 'Std'): df.std(axis=1)}
+                    FunctionBlock.getFullPath(self, 'QLim'): q_limit,
+                    FunctionBlock.getFullPath(self, 'QCont'): variable_contribution_q,
+                    FunctionBlock.getFullPath(self, 'EigenValues'): eig_values,
+                    FunctionBlock.getFullPath(self, 'EigenVectors'): eig_vectors}
 
         except Exception as err:
             FunctionBlock.save_results(self)

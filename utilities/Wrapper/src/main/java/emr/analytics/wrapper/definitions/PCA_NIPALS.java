@@ -52,8 +52,6 @@ public class PCA_NIPALS extends BlockDefinition implements IExport {
         outputConnectors.add(new ConnectorDefinition("QCont", DataType.FRAME.toString()));
         outputConnectors.add(new ConnectorDefinition("EigenValues", DataType.FRAME.toString()));
         outputConnectors.add(new ConnectorDefinition("EigenVectors", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("Mean", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("Std", DataType.FRAME.toString()));
         return outputConnectors;
     }
 
@@ -71,6 +69,16 @@ public class PCA_NIPALS extends BlockDefinition implements IExport {
                 DataType.FLOAT.toString(),
                 0.95,
                 new ArrayList<String>(),
+                null));
+
+        List<String> opts = new ArrayList<String>();
+        opts.add("True");
+        opts.add("False");
+
+        parameters.add(new ParameterDefinition("Calculate Contributions",
+                DataType.LIST.toString(),
+                "False",
+                opts,
                 null));
 
         return parameters;

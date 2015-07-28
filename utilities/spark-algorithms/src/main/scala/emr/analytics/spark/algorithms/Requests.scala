@@ -8,7 +8,7 @@ import org.apache.spark.streaming.dstream.DStream
 
 object Requests {
 
-  def postOpcValue(url: String, tag: String, value: Any): Any = value match {
+  def postValue(postType: String, url: String, tag: String, value: Any): Any = value match {
 
     case value:DStream[Double] => {
 

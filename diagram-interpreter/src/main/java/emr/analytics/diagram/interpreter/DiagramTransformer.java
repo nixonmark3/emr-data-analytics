@@ -3,6 +3,7 @@ package emr.analytics.diagram.interpreter;
 import emr.analytics.models.definition.Definition;
 import emr.analytics.models.definition.DefinitionType;
 import emr.analytics.models.definition.Mode;
+import emr.analytics.models.definition.ModeDefinition;
 import emr.analytics.models.diagram.*;
 
 import java.util.*;
@@ -137,7 +138,7 @@ public class DiagramTransformer {
                     definition);
 
             // set collected parameter values
-            for(Parameter parameter : block.getParameters()){
+            for(Parameter parameter : block.getParameters()) {
 
                 if (parameter.isCollected()) {
 
@@ -149,7 +150,10 @@ public class DiagramTransformer {
                 }
             }
 
-            this.applyParameterOverrides(onlineBlock);
+            if (definition.getOnlineDefinition() != null) {
+
+                this.applyParameterOverrides(onlineBlock);
+            }
 
             return onlineBlock;
         }
