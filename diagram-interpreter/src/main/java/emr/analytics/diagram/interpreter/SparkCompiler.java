@@ -190,13 +190,14 @@ public class SparkCompiler implements TargetCompiler {
 
                                 // todo: should parameter type be stored in the block ?
 
-                                if (optionalParameter.isPresent()){
+                                if (optionalParameter.isPresent()) {
 
                                     Parameter parameter = optionalParameter.get();
                                     String parameterType = parameter.getType();
 
                                     String value;
                                     if (parameterType.equals(DataType.MULTI_SELECT_LIST.toString())) {
+
                                         value = String.format("\"%s\"", parameter
                                                 .getValue()
                                                 .toString()
@@ -209,7 +210,16 @@ public class SparkCompiler implements TargetCompiler {
                                         // value = "\"PICK_P101/PV.CV,PICK_T101/PV.CV,PICK_F101/PV.CV\"";
 
                                     }
+                                    else  if (parameterType.equals(DataType.QUERY.toString())) {
+
+                                        value = String.format("\"%s\"", parameter
+                                                .getValue()
+                                                .toString()
+                                                .replace("\"", "\\\"")
+                                                .replace("\n", " "));
+                                    }
                                     else {
+
                                         value = String.format("\"%s\"", parameter.getValue().toString());
                                     }
 

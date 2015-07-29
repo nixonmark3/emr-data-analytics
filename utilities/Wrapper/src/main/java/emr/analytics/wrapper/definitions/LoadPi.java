@@ -33,16 +33,17 @@ public class LoadPi extends BlockDefinition implements IExport {
 
     public Signature createSignature() {
 
-        return new Signature("emr.analytics.spark.algorithms.Utilities",
-                "Utilities",
-                "loadPi",
+        return new Signature("emr.analytics.spark.algorithms.Sources",
+                "Sources",
+                "PiPollingStream",
                 new String[] {
+                        "ssc",
                         "parameter:IP",
                         "parameter:Port",
+                        "\"1000\"",
                         "parameter:Query"
                 });
     }
-
 
     public List<ConnectorDefinition> createOutputConnectors() {
 

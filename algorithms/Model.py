@@ -16,7 +16,7 @@ class Model(FunctionBlock):
 
             FunctionBlock.report_status_complete(self)
 
-            return {FunctionBlock.getFullPath(self, 'model'): df}
+            return {FunctionBlock.getFullPath(self, 'out'): df}
 
         except Exception as err:
             FunctionBlock.save_results(self)

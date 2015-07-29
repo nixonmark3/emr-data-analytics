@@ -21,6 +21,7 @@ object Sources {
   def PiPollingStream(ssc: StreamingContext, host: String, port: String, sleep: String, query: String): DStream[Array[(String, Double)]] = {
 
     val columns = Utilities.extractQueryColumns(query)
+
     ssc.receiverStream[Array[(String, Double)]](new PiPollingSource(host, port, sleep.toInt, columns))
   }
 }
@@ -97,12 +98,13 @@ class PiPollingSource(val host: String, port: String, val sleep: Int, val column
         val data = new ListBuffer[(String, Double)]
         columns.foreach(col => {
 
-          val endpoint = f"$host%s:$port%s/$start%d/$end%d?tag=$col%s"
+          val endpoint = f"http://$host%s:$port%s/rawhistory/$start%d/$end%d?tag=$col%s"
           val raw = scala.io.Source.fromURL(endpoint).mkString
           val json:Map[String,Any] = JSON.parseFull(raw).get.asInstanceOf[Map[String, Any]]
           val colData:List[List[Double]] = json.get("data").get.asInstanceOf[List[List[Double]]]
 
           data += ((col, colData.tail.head(1)))
+
         })
 
         store(data.toArray)
