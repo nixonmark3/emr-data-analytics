@@ -92,6 +92,34 @@ class Connection():
         r = requests.post(url, data=json.dumps(payload))
         return json.loads(r.text)
 
+    def config(self, page_name, opc_items):
+        url = "%s/page" % self.endpoint
+        payload = {'name': page_name, 'items':opc_items.items}
+        r = requests.post(url, data=json.dumps(payload));
+        return json.loads(r.text)
+
+    def read(self, page_name):
+        url = "%s/page/%s" % (self.endpoint, page_name)
+        r = requests.get(url)
+        return json.loads(r.text)
+
+    def read_current_values(self, page_name):
+        url = "%s/page/%s/values" % (self.endpoint, page_name)
+        r = requests.get(url)
+        return json.loads(r.text)
+
+    def list(self):
+        url = "%s/page" % self.endpoint
+        r = requests.get(url)
+        return json.loads(r.text)
+
+
+class Items():
+    def __init__(self, items=[]):
+        self.items = items
+
+    def add_item(self, tag, type):
+        self.items.append({'tag':tag, 'type':type})
 
 class ItemValues():
     def __init__(self):
