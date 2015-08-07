@@ -24,13 +24,13 @@ class SaveDB(FunctionBlock):
 
             create_new_name = self.parameters['New Brick Name']
 
-            if brick == '' and create_new_name == '':
+            if len(brick) == 0 and len(create_new_name) == 0:
                 FunctionBlock.report_status_failure(self)
                 return {FunctionBlock.getFullPath(self, 'out'): None}
 
             data_set = str(self.parameters['Data Set Name'])
 
-            if len(create_new_name) == '':
+            if len(create_new_name) == 0:
                 brick_name = brick
             else:
                 brick_name = create_new_name
