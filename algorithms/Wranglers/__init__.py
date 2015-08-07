@@ -5,8 +5,8 @@ import numpy as np
 import csv
 import dateutil
 
-from Projects import Project
-from Projects import Dataset
+from Bricks import BricksDB
+from Bricks import Dataset
 from pymongo import MongoClient
 from datetime import datetime
 
@@ -14,7 +14,7 @@ from datetime import datetime
 def import_csv(filename, project_name, data_set_name):
     df = pd.read_csv(filename, parse_dates=True, index_col=0)
     connection = MongoClient()
-    project = Project.Create(connection, name=project_name)
+    project = BricksDB.Create(connection, name=project_name)
     ds = Dataset.Create(project, data_set_name)
     ds.Store_Data(df)
     connection.close()
@@ -24,7 +24,7 @@ def import_csv(filename, project_name, data_set_name):
 def import_ff3(project_name, parameters):
 
     connection = MongoClient()
-    project = Project.Create(connection, name=project_name)
+    project = BricksDB.Create(connection, name=project_name)
 
     path = parameters["Path"]
 

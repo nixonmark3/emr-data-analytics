@@ -1,8 +1,8 @@
 import sys
 import collections
 
-from Projects import Project
-from Projects import Dataset
+from Bricks import BricksDB
+from Bricks import Dataset
 from pymongo import MongoClient
 from FunctionBlock import FunctionBlock
 
@@ -20,14 +20,27 @@ class SaveDB(FunctionBlock):
 
             df = results_table[self.input_connectors['in'][0]]
 
-            project = self.parameters['Project']
+            brick = self.parameters['Brick']
+
+            create_new_name = self.parameters['New Brick Name']
+
+            if brick == '' and create_new_name == '':
+                FunctionBlock.report_status_failure(self)
+                return {FunctionBlock.getFullPath(self, 'out'): None}
 
             data_set = str(self.parameters['Data Set Name'])
 
-            connection = MongoClient()
-            project = Project.Create(connection, name=project)
+            if len(create_new_name) == '':
+                brick_name = brick
+            else:
+                brick_name = create_new_name
 
-            ds = Dataset.Create(project, data_set)
+            connection = MongoClient()
+            project = BricksDB.Create(connection, name=brick_name)
+
+            columns = df.columns.values.tolist()
+
+            ds = Dataset.Create(project, data_set, tags=columns, labels=columns)
             size = ds.Store_Data(df)
 
             connection.close()

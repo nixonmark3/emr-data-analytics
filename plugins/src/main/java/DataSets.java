@@ -32,7 +32,7 @@ public class DataSets implements DynamicSource {
         try {
             mongoClient = new MongoClient();
 
-            DBCollection dataSetsCollection = mongoClient.getDB("das-" + projectName).getCollection("dataset");
+            DBCollection dataSetsCollection = mongoClient.getDB("bricks-" + projectName).getCollection("dataset");
 
             if (dataSetsCollection != null) {
 

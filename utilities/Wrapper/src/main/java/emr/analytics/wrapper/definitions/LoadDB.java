@@ -44,7 +44,7 @@ public class LoadDB extends BlockDefinition implements IExport {
                 new ArrayList<String>(),
                 new ParameterSource("Jar",
                         "plugins-1.0-SNAPSHOT.jar",
-                        "Projects",
+                        "Bricks",
                         new ArrayList<Argument>())));
 
         List<Argument> arguments = new ArrayList<Argument>();
