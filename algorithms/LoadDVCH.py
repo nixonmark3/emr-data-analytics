@@ -1,5 +1,5 @@
 import sys
-import PI
+import DVCH
 
 from FunctionBlock import FunctionBlock
 
@@ -13,13 +13,13 @@ class LoadDVCH(FunctionBlock):
         try:
             FunctionBlock.report_status_executing(self)
 
-            pi_ip = self.parameters['IP']
-            pi_port = int(self.parameters['Port'])
+            dvch_ip = self.parameters['IP']
+            dvch_port = int(self.parameters['Port'])
             query = str(self.parameters['Query'])
             query = query.replace("'", "\"")
 
-            pi = PI.Connection(pi_ip, pi_port)
-            df = pi.query_from_json(query)
+            dvch = DVCH.Connection(dvch_ip, dvch_port)
+            df = dvch.query_from_json(query)
 
             FunctionBlock.save_results(self, df=df, statistics=True, plot=False)
             FunctionBlock.report_status_complete(self)
