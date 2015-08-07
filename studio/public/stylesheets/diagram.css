@@ -67,24 +67,228 @@
 .block-complete .progress-text { fill: #ffffff; }
 .block-error .progress-text { fill: #ffffff; }
 
+
+/*
+ * Diagram Navigation
+ */
+
+.diagram-navigation {
+    position: fixed;
+    z-index: 1000;
+    top: 60px;
+    left: 80px;
+    width: auto;
+    height: calc(100% - 300px);
+    height: -webkit-calc(100% - 300px);
+    height: -moz-calc(100% - 300px);
+    border-radius: 5px;
+    border: 1px solid #989898;
+    background-color: white;
+    box-shadow: 0px 6px 12px rgba(0,0,0,0.175);
+    border-top: 4px solid #1f77b4;
+}
+
+.diagram-navigation.ng-enter { -webkit-animation: fadeIn 0.4s; }
+
+.diagram-navigation.ng-leave { -webkit-animation: fadeOut 0.4s; }
+
+.diagram-navigation:before {
+    content: "";
+    position: absolute;
+    top: -20px;
+    left: 7.5px;
+    border-right: 17px solid transparent;
+    border-left: 17px solid transparent;
+    border-bottom: 17px solid #1f77b4;
+}
+
+.diagram-navigation:after {
+    content: "";
+    position: absolute;
+    top: -19px;
+    left: 7.5px;
+    border-right: 17px solid transparent;
+    border-left: 17px solid transparent;
+    border-bottom: 17px solid #1f77b4;
+}
+
+.diagram-navigation-item {
+    width: 100%;
+    height: 25px;
+    -webkit-user-select: none;
+}
+
+.diagram-navigation-item:hover {
+    cursor: pointer;
+    font-weight: bold;
+    color: #1f77b4;
+}
+
+.nav-page {
+    width: 175px;
+    height: -webkit-calc(100% - 29px);
+    float: left;
+    border-left: 1px solid #d3d3d3;
+    padding: 10px;
+    padding-right: 5px;
+}
+
+.nav-page-override {
+    border-left: 0px solid #d3d3d3;
+}
+
+.nav-page-width-override {
+    width: 225px;
+    padding: 0px;
+    padding-right: 0px;
+}
+
+.nav-file-type {
+    margin-right: 5px;
+}
+
+.nav-footer {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    height: 30px;
+    border-top: 1px solid #d3d3d3;
+}
+
+.nav-footer:hover {
+    cursor: default;
+}
+
+.nav-add {
+    height: 29px;
+    width: 30px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 29px;
+    border-right: 1px solid #d3d3d3;
+    float: left;
+}
+
+.nav-add:hover {
+    cursor: pointer;
+    color: #1f77b4;
+}
+
+.nav-path {
+    height: 29px;
+    width: auto;
+    padding-left: 10px;
+    vertical-align: middle;
+    line-height: 29px;
+    float: left;
+}
+
+.nav-path-file-type {
+    height: 29px;
+    width: auto;
+    float: left;
+}
+
+.nav-properties-wrapper {
+    width: 100%;
+    height: 100%;
+}
+
+.nav-properties {
+    width: 100%;
+    height: -webkit-calc(100% - 30px);
+    padding: 5px;
+}
+
+.nav-properties:hover {
+    cursor: default;
+}
+
+.nav-properties-title {
+    height: 50px;
+    line-height: 50px;
+    width: 100%;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 1.8em;
+    font-weight: bold;
+    margin-bottom: 40px;
+}
+
+.nav-properties-field-wrapper {
+    width: 194px;
+    height: 20px;
+    margin-bottom: 3px;
+}
+
+.nav-properties-field {
+    height: 20px;
+    line-height: 20px;
+    width: 72px;
+    text-align: right;
+    vertical-align: middle;
+    font-size: 0.85em;
+    font-weight: bold;
+    color: grey;
+    margin-right: 5px;
+    float: left;
+}
+
+.nav-properties-value {
+    height: 20px;
+    line-height: 20px;
+    width: 117px;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 0.85em;
+    float: left;
+}
+
+.nav-file-color {
+    font-weight: bold;
+}
+
+.nav-properties-footer {
+    height: 30px;
+    width: 100%;
+    border-top: 1px solid #d3d3d3;
+}
+
+.nav-properties-icon {
+    float: left;
+    height: 29px;
+    width: 30px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 29px;
+    border-right: 1px solid #d3d3d3;
+}
+
+.nav-properties-icon:hover {
+    cursor: pointer;
+    color: #1f77b4;
+}
+
 /*
  * Diagram Configuration
  */
 
 .diagram-properties {
-    position: absolute;
+    position: fixed;
     z-index: 1000;
-    top: 70px;
+    top: 60px;
     right: 10px;
     width: 250px;
-    height: calc(100% - 94px);
-    height: -webkit-calc(100% - 94px);
-    height: -moz-calc(100% - 94px);
-    border-radius: 10px;
+    height: calc(100% - 200px);
+    height: -webkit-calc(100% - 200px);
+    height: -moz-calc(100% - 200px);
+    border-radius: 5px;
     border: 1px solid #989898;
     background-color: white;
     padding: 10px;
     box-shadow: 0px 6px 12px rgba(0,0,0,0.175);
+    border-top: 4px solid #1f77b4;
 }
 
 .diagram-properties.ng-enter { -webkit-animation: fadeIn 0.4s; }
@@ -94,21 +298,21 @@
 .diagram-properties:before {
     content: "";
     position: absolute;
-    top: -17px;
-    right: 84px;
+    top: -20px;
+    right: 130px;
     border-right: 17px solid transparent;
     border-left: 17px solid transparent;
-    border-bottom: 17px solid #989898;
+    border-bottom: 17px solid #1f77b4;
 }
 
 .diagram-properties:after {
     content: "";
     position: absolute;
-    top: -16px;
-    right: 84px;
+    top: -19px;
+    right: 130px;
     border-right: 17px solid transparent;
     border-left: 17px solid transparent;
-    border-bottom: 17px solid #fff;
+    border-bottom: 17px solid #1f77b4;
 }
 
 .diagram-property { margin-top: 10px; }

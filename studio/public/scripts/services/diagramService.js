@@ -274,11 +274,13 @@ analyticsApp
             var deferred = $q.defer();
 
             $http.get('/getDiagrams')
+            //$http({ method: 'GET', url: '/assets/data/diagrams/diagrams.json' })
                 .success(function (data, status, headers, config) {
 
                     deferred.resolve(data);
                 })
-                .error(function (data, status, headers, config){
+                .error(function (data, status, headers, config) {
+
                     deferred.reject(status);
                 });
 

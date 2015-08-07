@@ -632,7 +632,13 @@ var analyticsApp = angular.module('analyticsApp',
                     console.log(code);
                 }
             );
-        }
+        };
+
+        $scope.loadAvailableDiagrams = function() {
+
+            console.log('called');
+            return loadDiagrams();
+        };
 
         /* Scope Level Methods */
 
@@ -1164,7 +1170,44 @@ var analyticsApp = angular.module('analyticsApp',
             evt.preventDefault();
         };
 
-        /* private analytic methods */
+        $scope.toggleDiagramNavigation = function(evt){
+
+            if ($scope.navigatingDiagrams) {
+
+                endDiagramNavigation();
+            }
+            else {
+
+                beginDiagramNavigation();
+            }
+
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
+
+        var beginDiagramNavigation = function(){
+
+            var result = popupService.show({
+                templateUrl: '/assets/scripts/components/diagram/diagramNavigation.html',
+                controller: 'diagramNavigationController',
+                inputs: {
+                    diagService: diagramService,
+                    closeDialog: endDiagramNavigation
+                }
+            }).then(function(popup) {
+
+                $scope.navigatingDiagrams = true;
+                $scope.diagramNavigation = popup;
+            });
+        };
+
+        var endDiagramNavigation = function(){
+
+            $scope.diagramNavigation.controller.close();
+
+            $scope.navigatingDiagrams = false;
+            delete $scope.diagramNavigation;
+        };
 
         var beginDiagramConfiguration = function(){
 
@@ -1180,6 +1223,14 @@ var analyticsApp = angular.module('analyticsApp',
             });
         };
 
+        var endDiagramConfiguration = function(){
+
+            $scope.diagramConfiguration.controller.close();
+
+            $scope.configuringDiagram = false;
+            delete $scope.diagramConfiguration;
+        };
+
         // fire the event to begin dragging an element
         var beginDragEvent = function(x, y, config){
 
@@ -1188,14 +1239,6 @@ var analyticsApp = angular.module('analyticsApp',
                 y: y,
                 config: config
             });
-        };
-
-        var endDiagramConfiguration = function(){
-
-            $scope.diagramConfiguration.controller.close();
-
-            $scope.configuringDiagram = false;
-            delete $scope.diagramConfiguration;
         };
 
         /*

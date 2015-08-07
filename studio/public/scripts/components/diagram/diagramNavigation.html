@@ -1,0 +1,91 @@
+<div class="diagram-navigation">
+
+    <div class="nav-page"
+         ng-repeat="page in pages track by $index"
+         ng-init="pIndex = $index"
+         ng-mouseenter="setCurrentPage(pIndex);"
+         ng-switch="page.type"
+         ng-class="{'nav-page-override': isFirstPage($index), 'nav-page-width-override': isDiagramPage(page.type) }">
+
+        <div ng-switch-when="Container"
+             class="diagram-navigation-item"
+             ng-repeat="item in page.items track by $index"
+             ng-click="switchPage(item);"
+             ng-dblclick="loadDiagram(item);"
+             ng-class="{'nav-file-color': isHighLighted(item.name)}">
+
+            <div class="pull-left nav-file-type" ng-switch="item.type">
+                <i ng-switch-when="Container" class="fa fa-folder-o"></i>
+                <i ng-switch-when="Diagram" class="fa fa-file-o"></i>
+            </div>
+            <span>
+                {{item.name}}
+            </span>
+            <div class="pull-right" ng-switch="item.type">
+                <i ng-switch-when="Container" class="fa fa-caret-right"></i>
+            </div>
+
+        </div>
+
+        <div class="nav-properties-wrapper" ng-switch-when="Diagram">
+
+            <div class="nav-properties">
+                <div class="nav-properties-title">
+                    {{page.name}}
+                </div>
+                <div class="nav-properties-field-wrapper">
+                    <div class="nav-properties-field">Owner</div>
+                    <div class="nav-properties-value">{{page.owner}}</div>
+                </div>
+                <div class="nav-properties-field-wrapper">
+                    <div class="nav-properties-field">Description</div>
+                    <div class="nav-properties-value">{{page.description}}</div>
+                </div>
+                <div class="nav-properties-field-wrapper">
+                    <div class="nav-properties-field">Created</div>
+                </div>
+                <div class="nav-properties-field-wrapper">
+                    <div class="nav-properties-field">Modified</div>
+                </div>
+                <div class="nav-properties-field-wrapper">
+                    <div class="nav-properties-field">Last opened</div>
+                </div>
+                <div class="nav-properties-field-wrapper">
+                    <div class="nav-properties-field">Online</div>
+                </div>
+
+            </div>
+
+            <div class="nav-properties-footer">
+                <div class="nav-properties-icon" ng-click="deleteDiagram();">
+                    <i class="fa fa-trash"></i>
+                </div>
+                <div class="nav-properties-icon" ng-click="copyDiagram();">
+                    <i class="fa fa-clone"></i>
+                </div>
+                <div class="nav-properties-icon" ng-click="exportDiagram();">
+                    <i class="fa fa-upload"></i>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="nav-footer">
+        <div class="nav-add" ng-click="createNewDiagram();">
+            <i class="fa fa-plus"></i>
+        </div>
+        <div class="nav-path">
+            <span ng-repeat="page in pages track by $index">
+                <i class="fa fa-caret-right" ng-hide="hideCaret($index);"></i>
+                <i class="fa fa-folder-o" ng-hide="hideFileType($index, page.type, 'Container');"></i>
+                <i class="fa fa-file-o" ng-hide="hideFileType($index, page.type, 'Diagram');"></i>
+                {{page.name}}
+            </span>
+        </div>
+    </div>
+
+</div>
+
+
