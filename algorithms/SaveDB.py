@@ -36,11 +36,11 @@ class SaveDB(FunctionBlock):
                 brick_name = create_new_name
 
             connection = MongoClient()
-            project = BricksDB.Create(connection, name=brick_name)
+            bricks_db = BricksDB.Create(connection, name=brick_name)
 
             columns = df.columns.values.tolist()
 
-            ds = Dataset.Create(project, data_set, tags=columns, labels=columns)
+            ds = Dataset.Create(bricks_db, data_set, tags=columns)
             size = ds.Store_Data(df)
 
             connection.close()

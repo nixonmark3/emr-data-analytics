@@ -15,6 +15,16 @@ public class BasicDiagram implements Serializable {
     private String owner;
     private Mode mode;
     private TargetEnvironments targetEnvironment;
+    private String category;
+    private int version;
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
 
     /**
      * Returns the name of this Diagram.
@@ -86,6 +96,14 @@ public class BasicDiagram implements Serializable {
      */
     public void setTargetEnvironment(TargetEnvironments targetEnvironment) {
         this.targetEnvironment = targetEnvironment;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     /**

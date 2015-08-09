@@ -170,7 +170,9 @@ diagramApp
 
                         console.log(data);
 
-                        $scope.pages = data;
+                        $scope.pages = prepareData(data);
+
+                        console.log($scope.pages);
                     },
                     function (code) {
 
@@ -179,6 +181,61 @@ diagramApp
                     }
                 );
             };
+
+            function prepareData(data) {
+
+                var rootItems = [];
+
+                for (var i = 0; i < data.length; i++) {
+
+                    var item = data[i];
+                    item.type = "Diagram";
+
+                    if (item.category === "") {
+
+                        rootItems.push(item);
+                    }
+                    else {
+
+                        var categories = item.category.split("/");
+
+                        var current = null;
+
+                        rootItems.forEach(function(x) {
+
+                            if (x.type === "Container") {
+
+                                if (x.name === categories[0]) {
+
+                                    current = x;
+                                }
+                            }
+                        });
+
+                        if (current === null) {
+
+                            current = { "type" : "Container", "items" : [], "name" : categories[0] }
+
+                            rootItems.push(current);
+                        }
+
+                        for (var c = 1; c < categories.length; c++) {
+
+
+                        }
+
+                        current.items.push(item);
+                    }
+                }
+
+                var diagrams = [];
+
+                var root = {"type" : "Container", "items" : rootItems};
+
+                diagrams.push(root);
+
+                return diagrams;
+            }
 
             loadDiagrams();
         }

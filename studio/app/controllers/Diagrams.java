@@ -179,7 +179,7 @@ public class Diagrams extends ControllerBase {
         return ok(Json.toJson(Diagram.Create()));
     }
 
-    private static final String DIAGRAM_PROJECTION = "{_id: 0, name: 1, description: 1, owner: 1}";
+    private static final String DIAGRAM_PROJECTION = "{_id: 0, name: 1, description: 1, owner: 1, category: 1, mode: 1, targetEnvironment: 1, version: 1}";
     private static final String DIAGRAMS_COLLECTION = "diagrams";
     private static final String QUERY_BY_UNIQUE_ID = "{name: '%s'}";
     private static final String SORT_BY_NAME = "{name: 1}";

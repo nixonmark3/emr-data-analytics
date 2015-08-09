@@ -829,7 +829,7 @@ var analyticsApp = angular.module('analyticsApp',
             if (!file) return;
 
             // todo: make this configurable
-            var definitionName = "LoadCSV";
+            var definitionName = "LoadFile";
 
             // todo: base the offset on the block dimensions
             var x = evt.pageX - 100, y = evt.pageY - 20;
