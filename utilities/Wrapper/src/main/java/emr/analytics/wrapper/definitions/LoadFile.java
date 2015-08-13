@@ -7,13 +7,13 @@ import emr.analytics.wrapper.IExport;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LoadCSV extends BlockDefinition implements IExport {
+public class LoadFile extends BlockDefinition implements IExport {
 
     @Override
     public Definition createDefinition() {
 
-        Definition definition = new Definition("LoadCSV", "Load CSV", Category.DATA_SOURCES.toString());
-        definition.setDescription("Loads a data set from a csv file");
+        Definition definition = new Definition("LoadFile", "Load File", Category.DATA_SOURCES.toString());
+        definition.setDescription("Loads a data set from a file");
         return definition;
     }
 
@@ -58,6 +58,17 @@ public class LoadCSV extends BlockDefinition implements IExport {
                 DataType.LIST.toString(),
                 "False",
                 opts,
+                null));
+
+        List<String> fileType = new ArrayList<String>();
+        fileType.add("CSV");
+        fileType.add("FF3");
+        fileType.add("CDA");
+
+        parameters.add(new ParameterDefinition("File Type",
+                DataType.LIST.toString(),
+                "CSV",
+                fileType,
                 null));
 
         return parameters;

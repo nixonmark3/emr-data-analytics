@@ -1,8 +1,8 @@
 import sys
 import ast
 
-from Projects import Project
-from Projects import Dataset
+from Bricks import BricksDB
+from Bricks import Dataset
 from pymongo import MongoClient
 from FunctionBlock import FunctionBlock
 
@@ -27,7 +27,7 @@ class LoadDB(FunctionBlock):
                 return {FunctionBlock.getFullPath(self, 'out'): None}
 
             connection = MongoClient()
-            project = Project.Create(connection, name=project)
+            project = BricksDB.Create(connection, name=project)
 
             ds = Dataset.Create(project, data_set)
             df = ds.Load_Data()

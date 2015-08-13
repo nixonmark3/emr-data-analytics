@@ -190,6 +190,10 @@ class Dataset:
     def __repr__(self):
         return 'Dataset(project, %s, %s)' % (self.name, self.id)
 
+    def Brick_Data_Meta(self):
+        db = self.bricks_db.db
+        return db.brick.find({"dataset_id":str(self.id)}, {'start':1,'end':1, '_id':0})
+
     def Store_Data(self, df, remove_all_existing_data=True):
         db = self.bricks_db.db
         if remove_all_existing_data:

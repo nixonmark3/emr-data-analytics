@@ -74,6 +74,8 @@ body { font-family: Roboto, arial, sans-serif; background-color: #c5c5c5; overfl
     border: 1px solid #989898;
     background-color: white;
     box-shadow: 0px 6px 12px rgba(0,0,0,0.175);
+    border-top: 4px solid #1f77b4;
+    border-radius: 5px;
 }
 
 #library-browser.ng-leave { -webkit-animation: fadeOut 0.6s; }
@@ -82,21 +84,21 @@ body { font-family: Roboto, arial, sans-serif; background-color: #c5c5c5; overfl
 #library-browser:before {
     content: "";
     position: absolute;
-    top: -17px;
+    top: -20px;
     left: 5px;
     border-right: 17px solid transparent;
     border-left: 17px solid transparent;
-    border-bottom: 17px solid #989898;
+    border-bottom: 17px solid #1f77b4;
 }
 
 #library-browser:after {
     content: "";
     position: absolute;
-    top: -16px;
+    top: -19px;
     left: 5px;
     border-right: 17px solid transparent;
     border-left: 17px solid transparent;
-    border-bottom: 17px solid #fff;
+    border-bottom: 17px solid #1f77b4;
 }
 
 #browser-container { position: relative; width: 100%; height: 100%; overflow-x: hidden; }
@@ -117,17 +119,6 @@ button.diagram-evaluating { color: #2ca02c; }
 #studio-wrapper.show-sidebar {
     -webkit-transform: translateX(200px);
     transform: translateX(200px);
-}
-
-#diagrams-menu {
-    position: absolute;
-    left: -200px;
-    top: 0px;
-    background-color: #d9d9d9;
-    width:200px;
-    height: 100%;
-    overflow-y:auto;
-    overflow-x:hidden;
 }
 
 .wrapper {
@@ -217,125 +208,6 @@ button.diagram-evaluating { color: #2ca02c; }
 #deployment-notification.ng-enter { -webkit-animation: slideInUp 0.6s; }
 
 #notification-exit { color: #31a354; position: absolute; right: 5px; top: 3px; cursor: pointer; }
-
-.diagrams-menu-header { height: 50px; width: 100%; }
-
-.diagrams-menu-body {
-    background: lightgray;
-    height: calc(100% - 125px);
-    width: 100%;
-    overflow-y: auto;
-}
-
-.diagrams-menu-body-item {
-    background: white;
-    margin: 10px;
-    padding: 5px;
-    box-shadow: 0px 6px 12px rgba(0,0,0,0.200);
-    max-height: 35px;
-    overflow: hidden;
-    -webkit-transition: max-height 0.25s ease-out;
-}
-
-.diagrams-menu-body-item-animate { max-height: 500px; -webkit-transition: max-height 0.25s ease-in; }
-
-.fade-properties.ng-hide-remove { transition: 0.25s linear all; opacity: 1; }
-
-.fade-properties.ng-hide { transition: 0.25s linear all; opacity: 0; }
-
-.diagrams-menu-body-item-container { height: 30px; width: 100%; }
-
-.diagrams-menu-body-item-name {
-    float: left;
-    height: 25px;
-    width: 140px;
-    text-align: center;
-    vertical-align: middle;
-    line-height: 25px;
-}
-
-.diagrams-menu-body-item-name:hover { cursor: pointer; color: #3182bd }
-
-.diagrams-menu-body-item-expand {
-    float: right;
-    height: 25px;
-    width: calc(100% - 140px);
-    text-align: center;
-    vertical-align: middle;
-    line-height: 25px;
-}
-
-.diagrams-menu-body-item-expand:hover { cursor: pointer; color: #3182bd }
-
-.diagrams-menu-body-item-expand-container {
-    opacity: 1;
-    height: auto;
-    width: 100%;
-}
-
-.diagrams-menu-body-item-expand-row { opacity: 1; height: 30px; width: 100%; }
-
-.diagrams-menu-body-item-owner {
-    opacity: 1;
-    float: left;
-    height: 30px;
-    width: 140px;
-    color: grey;
-    vertical-align: middle;
-}
-
-.diagrams-menu-body-item-owner:before { content: ""; display: inline-block; vertical-align: middle; height: 100%; }
-
-.diagrams-menu-body-item-owner:hover { cursor: default; }
-
-.diagrams-menu-body-item-no-owner-text { font-style: italic; }
-
-.diagrams-menu-body-item-delete {
-    opacity: 1;
-    float: right;
-    height: 30px;
-    width: calc(100% - 140px);
-    text-align: center;
-    line-height: 30px;
-}
-
-.diagrams-menu-body-item-delete:hover { cursor: pointer; color: #3182bd }
-
-.diagrams-menu-body-item-expand-row-auto { opacity: 1; height: auto; width: 100%; }
-
-.diagrams-menu-body-item-description {
-    opacity: 1;
-    height: auto;
-    width: 100%;
-    color: grey;
-    padding: 5px;
-}
-
-.diagrams-menu-body-item-description:hover { cursor: default; }
-
-.diagrams-menu-footer { height: 50px; width: 100%; }
-
-.diagrams-menu-footer-name {
-    width: 100%;
-    height: 50px;
-    vertical-align: middle;
-    text-align: center;
-    line-height: 50px;
-}
-
-.diagrams-menu-footer-company {
-    width: 100%;
-    height: 25px;
-    vertical-align: middle;
-    text-align: center;
-    line-height: 25px;
-}
-
-.selected-diagram-text { font-weight: bold; }
-
-.span-text {
-    font-size: 0.9em;
-}
 
 /* modal directive */
 .emr-modal { background-color: #f9f9f9; position: absolute; border: 1px solid #e5e5e5; -webkit-transform: scale(0.01); border-radius: 15px; z-index: 1150; box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.175); }

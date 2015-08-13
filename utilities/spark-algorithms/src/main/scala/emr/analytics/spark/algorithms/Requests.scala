@@ -10,12 +10,22 @@ object Requests {
 
   def postValue(postType: String, url: String, tag: String, value: Any): Any = value match {
 
-    case value:DStream[Double] => {
+    case value:DStream[Any] => {
 
       value.foreachRDD(rdd =>
         if (!rdd.isEmpty()) {
           rdd.foreach(item => {
-            postOpc(url, tag, item)
+
+            if (postType == "PI") {
+
+              val x = item.asInstanceOf[Array[Double]]
+              val y = x.head
+              postPi(url, tag, y)
+            }
+            else {
+
+              postOpc(url, tag, item.asInstanceOf[Double])
+            }
           })
         }
       )
@@ -45,6 +55,20 @@ object Requests {
     val post = new HttpPost(url)
 
     val payload = "%s,%s".format(tag, value.toString)
+
+    post.setEntity(new StringEntity(payload))
+
+    val client = HttpClientBuilder.create().build()
+    client.execute(post)
+
+    true
+  }
+
+  def postPi(url: String, tag: String, value: Double): Boolean = {
+
+    val post = new HttpPost(url)
+
+    val payload = "{'items': [{'tag':'%s', 'ts':0, 'type':'F', 'value':'%s'}]}".format(tag, value.toString)
 
     post.setEntity(new StringEntity(payload))
 

@@ -1,11 +1,12 @@
 import sys
 import pandas as pd
 import ast
+import Wranglers
 
 from FunctionBlock import FunctionBlock
 
 
-class LoadCSV(FunctionBlock):
+class LoadFile(FunctionBlock):
 
     def __init__(self, name, unique_name):
         FunctionBlock.__init__(self, name, unique_name)
@@ -16,14 +17,21 @@ class LoadCSV(FunctionBlock):
 
             filename = self.parameters['Filename']
 
+            file_type = self.parameters['File Type']
+
             plot = ast.literal_eval(self.parameters['Plot'])
 
             time_series = ast.literal_eval(self.parameters['Time Series'])
 
-            if time_series:
-                df = pd.read_csv(filename, parse_dates=True, index_col=0)
+            if file_type == 'CSV':
+                df =  Wranglers.import_csv(filename, time_series)
+            elif file_type == 'FF3':
+                df = Wranglers.import_ff3(filename)
+            elif file_type == 'CDA':
+                df = Wranglers.import_cda(filename)
             else:
-                df = pd.read_csv(filename, index_col=0)
+                FunctionBlock.report_status_failure(self)
+                return {FunctionBlock.getFullPath(self, 'out'): None}
 
             FunctionBlock.save_results(self, df=df, statistics=True, plot=plot)
             FunctionBlock.report_status_complete(self)

@@ -24,6 +24,7 @@ public class Diagram implements Serializable {
     private int height = 1000;
     private int width = 1000;
     private int version = 0;
+    private String category = "";
 
     private List<Wire> wires = new ArrayList<Wire>();
     private List<Block> blocks = new ArrayList<Block>();
@@ -373,5 +374,13 @@ public class Diagram implements Serializable {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

@@ -1,8 +1,10 @@
 import sys
+import DVCH
 
 from FunctionBlock import FunctionBlock
 
-class Model(FunctionBlock):
+
+class LoadDVCH(FunctionBlock):
 
     def __init__(self, name, unique_name):
         FunctionBlock.__init__(self, name, unique_name)
@@ -11,9 +13,15 @@ class Model(FunctionBlock):
         try:
             FunctionBlock.report_status_executing(self)
 
-            FunctionBlock.check_connector_has_one_wire(self, 'in')
-            df = results_table[self.input_connectors['in'][0]]
+            dvch_ip = self.parameters['IP']
+            dvch_port = int(self.parameters['Port'])
+            query = str(self.parameters['Query'])
+            query = query.replace("'", "\"")
 
+            dvch = DVCH.Connection(dvch_ip, dvch_port)
+            df = dvch.query_from_json(query)
+
+            FunctionBlock.save_results(self, df=df, statistics=True, plot=False)
             FunctionBlock.report_status_complete(self)
 
             return {FunctionBlock.getFullPath(self, 'out'): df}

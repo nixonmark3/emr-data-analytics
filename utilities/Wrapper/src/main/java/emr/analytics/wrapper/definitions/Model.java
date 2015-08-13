@@ -23,6 +23,7 @@ public class Model extends BlockDefinition implements IExport {
     public ModeDefinition createOfflineMode(){
 
         ModeDefinition modeDefinition = new ModeDefinition();
+        modeDefinition.setSignature(createSignature());
         modeDefinition.setInputs(createInputConnectors());
         modeDefinition.setOutputs(createOutputConnectors());
         return modeDefinition;
@@ -38,31 +39,24 @@ public class Model extends BlockDefinition implements IExport {
     public List<ConnectorDefinition> createOutputConnectors() {
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-        outputConnectors.add(new ConnectorDefinition("model", DataType.LIST.toString(), true, true));
+        outputConnectors.add(new ConnectorDefinition("out", DataType.LIST.toString(), true, false));
         return outputConnectors;
     }
 
     @Override
     public ModeDefinition createOnlineMode(){
 
-        ModeDefinition modeDefinition = new ModeDefinition();
-        List<ConnectorDefinition> inputs = new ArrayList<ConnectorDefinition>();
-        inputs.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-        modeDefinition.setInputs(inputs);
+        return null;
+    }
 
-        List<ConnectorDefinition> outputs = new ArrayList<ConnectorDefinition>();
-        outputs.add(new ConnectorDefinition("out", DataType.FLOAT.toString()));
-        modeDefinition.setOutputs(outputs);
+    public Signature createSignature() {
 
-        modeDefinition.setSignature(new Signature("emr.analytics.spark.algorithms.Utilities",
+        return new Signature("emr.analytics.spark.algorithms.Utilities",
                 "Utilities",
-                "predict",
+                "fillNa",
                 new String[]{
-                        "input:in",
-                        "block:model"
-                }));
-
-        return modeDefinition;
+                        "input:in"
+                });
     }
 }
 */

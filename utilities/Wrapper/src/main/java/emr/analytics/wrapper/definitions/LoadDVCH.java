@@ -7,39 +7,43 @@ import emr.analytics.wrapper.IExport;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SaveDB extends BlockDefinition implements IExport {
+public class LoadDVCH extends BlockDefinition implements IExport {
 
     @Override
     public Definition createDefinition() {
 
-        Definition definition = new Definition("SaveDB", "Save DB", Category.DATA_SOURCES.toString());
-        definition.setDescription("Saves a given data frame");
-        return definition;
+        return new Definition("LoadDVCH", "Load DVCH", Category.DATA_SOURCES.toString());
     }
 
     @Override
-    public ModeDefinition createOfflineMode(){
+    public ModeDefinition createOfflineMode() {
 
         ModeDefinition modeDefinition = new ModeDefinition();
-        modeDefinition.setInputs(createInputConnectors());
+        //modeDefinition.setSignature(createSignature());
         modeDefinition.setOutputs(createOutputConnectors());
         modeDefinition.setParameters(createParameters());
-
         return modeDefinition;
     }
 
     @Override
-    public ModeDefinition createOnlineMode(){
+    public ModeDefinition createOnlineMode() {
 
         return null;
     }
 
-    public List<ConnectorDefinition> createInputConnectors() {
+    /*public Signature createSignature() {
 
-        List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
-        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
-        return inputConnectors;
-    }
+        return new Signature("emr.analytics.spark.algorithms.Sources",
+                "Sources",
+                "PiPollingStream",
+                new String[] {
+                        "ssc",
+                        "parameter:IP",
+                        "parameter:Port",
+                        "\"1000\"",
+                        "parameter:Query"
+                });
+    }*/
 
     public List<ConnectorDefinition> createOutputConnectors() {
 
@@ -51,28 +55,21 @@ public class SaveDB extends BlockDefinition implements IExport {
     public List<ParameterDefinition> createParameters() {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-
-        parameters.add(new ParameterDefinition("Brick",
-                DataType.LIST.toString(),
-                "",
-                new ArrayList<String>(),
-                new ParameterSource("Jar",
-                        "plugins-1.0-SNAPSHOT.jar",
-                        "Bricks",
-                        new ArrayList<Argument>())));
-
-        parameters.add(new ParameterDefinition("New Brick Name",
+        parameters.add(new ParameterDefinition("IP",
                 DataType.STRING.toString(),
                 "",
                 new ArrayList<String>(),
                 null));
-
-        parameters.add(new ParameterDefinition("Data Set Name",
-                DataType.STRING.toString(),
+        parameters.add(new ParameterDefinition("Port",
+                DataType.INT.toString(),
+                "",
+                new ArrayList<String>(),
+                null));
+        parameters.add(new ParameterDefinition("Query",
+                DataType.QUERY.toString(),
                 "None",
                 new ArrayList<String>(),
                 null));
-
         return parameters;
     }
 }
