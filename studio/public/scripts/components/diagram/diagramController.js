@@ -14,13 +14,6 @@ diagramApp
             var currentPage = 0;
             var maxVisiblePages = 5;
 
-            var navWidth = 180;
-
-            $scope.getNavWidth = function() {
-
-                return $scope.pages.length * navWidth;
-            };
-
             $scope.isPageVisible = function(index) {
 
                 if ($scope.pages.length > maxVisiblePages) {
