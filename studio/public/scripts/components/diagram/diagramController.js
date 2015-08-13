@@ -2,21 +2,48 @@
 
 diagramApp
     .controller('diagramNavigationController',
-    ['$scope', '$element', 'diagService', 'closeDialog', 'close',
-        function($scope, $element, diagService, closeDialog, close) {
+    ['$scope', '$element', 'diagService', 'closeDialog', 'openDiagram', 'createNewDiagram', 'deleteExistingDiagram', 'close',
+        function($scope, $element, diagService, closeDialog, openDiagram, createNewDiagram, deleteExistingDiagram, close) {
 
             $scope.pages = [];
-            $scope.pageIndexs = [0];
             $scope.pageIndex = 0;
-            $scope.showDiagramInformation = false;
             $scope.path = "/";
+            $scope.toggleAddNewCategory = false;
+            $scope.categories = [""];
 
-            var lastPage = 0;
             var currentPage = 0;
+            var maxVisiblePages = 5;
 
-            $scope.deleteDiagram = function() {
+            var navWidth = 180;
 
-                console.log("delete diagram!")
+            $scope.getNavWidth = function() {
+
+                return $scope.pages.length * navWidth;
+            };
+
+            $scope.isPageVisible = function(index) {
+
+                if ($scope.pages.length > maxVisiblePages) {
+
+                    if (index < ($scope.pages.length - maxVisiblePages)) {
+
+                        return false;
+                    }
+                }
+
+                return true;
+            };
+
+            $scope.onAddNewCategory = function() {
+
+                $scope.toggleAddNewCategory = !$scope.toggleAddNewCategory;
+            };
+
+            $scope.deleteDiagram = function(item) {
+
+                deleteExistingDiagram(item.name);
+
+                loadDiagrams();
             };
 
             $scope.copyDiagram = function() {
@@ -49,7 +76,7 @@ diagramApp
 
             $scope.isDiagramPage = function(type) {
 
-                if (type === "Diagram") {
+                if (type != "Container") {
 
                     return true;
                 }
@@ -82,11 +109,14 @@ diagramApp
                 return false;
             };
 
-            $scope.hideCaret = function(index) {
+            $scope.hideCaret = function(index, currentType) {
 
-                if (index > 1) {
+                if (currentType != "Create") {
 
-                    return false;
+                    if (index > 0) {
+
+                        return false;
+                    }
                 }
 
                 return true;
@@ -94,7 +124,6 @@ diagramApp
 
             $scope.setCurrentPage = function(index) {
 
-                lastPage = currentPage;
                 currentPage = index;
             }
 
@@ -115,50 +144,82 @@ diagramApp
 
             $scope.switchPage = function(item) {
 
-                $scope.showDiagramInformation = false;
+                if ($scope.pages.length > 1) {
 
-                if ($scope.pageIndexs.length > 1) {
+                    if (currentPage < $scope.pageIndex) {
 
-                    if (lastPage === currentPage) {
+                        for (var i = $scope.pageIndex; i > currentPage; i--) {
 
-                        var i = $scope.pageIndexs.pop();
-                        $scope.pages.splice(i);
-                        $scope.pageIndex = $scope.pageIndex - 1;
-                    }
-                    else {
-
-                        if (currentPage < lastPage) {
-
-                            for (var i = $scope.pageIndex; i > currentPage; i--) {
-
-                                $scope.pages.splice(i);
-                                $scope.pageIndex = $scope.pageIndex - 1;
-                            }
+                            $scope.pages.splice(i);
+                            $scope.pageIndex = $scope.pageIndex - 1;
                         }
-
-                        lastPage = currentPage;
                     }
                 }
 
-                var index = $scope.pageIndex + 1;
                 $scope.pages.push(item);
-                $scope.pageIndexs.push(index);
-                $scope.pageIndex = index;
+                $scope.pageIndex = $scope.pageIndex + 1;
             };
 
             $scope.loadDiagram = function(item) {
 
                 if (item.type === "Diagram") {
 
-                    console.log('Open diagram!');
+                    openDiagram(item.name);
+
                     closeDialog();
                 }
             };
 
             $scope.createNewDiagram = function() {
 
-                console.log('Create new diagram!');
+                var lastPage = $scope.pages[$scope.pages.length-1];
+
+                if (lastPage.type != "Create") {
+
+                    if (lastPage.type === "Diagram") {
+
+                        $scope.pages.pop();
+                        $scope.pageIndex = $scope.pageIndex - 1;
+                    }
+
+                    $scope.currentPath = getCurrentPath();
+
+                    var item = {
+                        "type": "Create",
+                        "diagramName": "Diagram",
+                        "description": "",
+                        "targetEnvironment": "PYTHON",
+                        "owner": "",
+                        "category": $scope.currentPath
+                    };
+
+                    $scope.pages.push(item);
+                    $scope.pageIndex = $scope.pageIndex + 1;
+                }
+            };
+
+            $scope.onCancel = function() {
+
+                $scope.pages.pop();
+                $scope.pageIndex = $scope.pageIndex - 1;
+                $scope.toggleAddNewCategory = false;
+
+            };
+
+            $scope.onCreate = function(item) {
+
+                createNewDiagram(item);
+
                 closeDialog();
+            };
+
+            $scope.onNavPathItemClick = function(index) {
+
+                for (var i = $scope.pageIndex; i > index; i--) {
+
+                    $scope.pages.splice(i);
+                    $scope.pageIndex = $scope.pageIndex - 1;
+                }
             };
 
             this.close = $scope.close;
@@ -168,11 +229,7 @@ diagramApp
                 diagService.listDiagrams().then(
                     function (data) {
 
-                        console.log(data);
-
                         $scope.pages = prepareData(data);
-
-                        console.log($scope.pages);
                     },
                     function (code) {
 
@@ -181,6 +238,21 @@ diagramApp
                     }
                 );
             };
+
+            function getCurrentPath() {
+
+                var pathItems = [];
+
+                $scope.pages.forEach(function(page){
+
+                    if (page.name) {
+
+                        pathItems.push(page.name);
+                    }
+                });
+
+                return pathItems.join("/");
+            }
 
             function prepareData(data) {
 
@@ -196,6 +268,11 @@ diagramApp
                         rootItems.push(item);
                     }
                     else {
+
+                        if ($scope.categories.indexOf(item.category) == -1) {
+
+                            $scope.categories.push(item.category);
+                        }
 
                         var categories = item.category.split("/");
 
@@ -221,20 +298,67 @@ diagramApp
 
                         for (var c = 1; c < categories.length; c++) {
 
+                            var next_current = null;
 
+                            current.items.forEach(function(x) {
+
+                                if (x.type === "Container") {
+
+                                    if (x.name === categories[c]) {
+
+                                        next_current = x;
+                                    }
+                                }
+                            });
+
+                            if (next_current === null) {
+
+                                next_current = { "type" : "Container", "items" : [], "name" : categories[c] }
+                                current.items.push(next_current);
+                                current.items.sort(sortByName);
+                                current.items.sort(sortByType);
+                            }
+
+                            current = next_current;
                         }
 
                         current.items.push(item);
+                        current.items.sort(sortByName);
+                        current.items.sort(sortByType);
                     }
                 }
 
                 var diagrams = [];
+
+                rootItems.sort(sortByName);
+                rootItems.sort(sortByType);
 
                 var root = {"type" : "Container", "items" : rootItems};
 
                 diagrams.push(root);
 
                 return diagrams;
+            }
+
+            function sortByName(a, b) {
+
+                var x = a.name.toLowerCase()
+                var y = b.name.toLowerCase();
+                return x < y ? -1 : x > y ? 1 : 0;
+            }
+
+            function sortByType(a, b) {
+
+                var x = a.type.toLowerCase()
+                var y = b.type.toLowerCase();
+                return x < y ? -1 : x > y ? 1 : 0;
+            }
+
+            function sortBy(a, b) {
+
+                var x = a.toLowerCase()
+                var y = b.toLowerCase();
+                return x < y ? -1 : x > y ? 1 : 0;
             }
 
             loadDiagrams();

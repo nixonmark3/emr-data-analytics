@@ -613,33 +613,6 @@ var analyticsApp = angular.module('analyticsApp',
             }
         );
 
-        function loadDiagrams() {
-
-            $scope.diagrams.length = 0;
-
-            diagramService.listDiagrams().then(
-                function (data) {
-
-                    $scope.diagrams = data;
-                    $scope.diagrams.forEach(function (item) {
-
-                        initializeNavigationItem(item);
-                    });
-                },
-                function (code) {
-
-                    // todo: show exception
-                    console.log(code);
-                }
-            );
-        };
-
-        $scope.loadAvailableDiagrams = function() {
-
-            console.log('called');
-            return loadDiagrams();
-        };
-
         /* Scope Level Methods */
 
         $scope.compile = function(evt) {
@@ -886,30 +859,26 @@ var analyticsApp = angular.module('analyticsApp',
 
         $scope.open = function(name) {
 
-            diagramService.item(name).then(
-                function (data) {
+            diagramService.item(name).then(function (data) {
+
                     $scope.diagramViewModel = new viewmodels.diagramViewModel(data);
                     $scope.onlineViewModel = {};
-                    $scope.toggleDiagrams();
                     $scope.toggleCanvas(false);
-
-                    // reset execution state
                     $scope.offlineState = 0;
                     $scope.onlineState = 0;
 
                     subscribe($scope.diagramViewModel.getId());
 
-                    updateSelectedDiagram();
+                    $scope.info($scope.diagramViewModel.getId(), function(data){
 
-                    $scope.info($scope.diagramViewModel.getId(),
-                        function(data){
+                            data.items.forEach(function(item) {
 
-                            data.items.forEach(function(item){
+                                if (item.mode == "OFFLINE") {
 
-                                if (item.mode == "OFFLINE"){
                                     updateEvaluationStatus(item);
                                 }
-                                else if(item.mode == "ONLINE"){
+                                else if(item.mode == "ONLINE") {
+
                                     updateDeploymentStatus(item);
                                 }
                             });
@@ -923,14 +892,19 @@ var analyticsApp = angular.module('analyticsApp',
             );
         };
 
-        $scope.createDiagram = function() {
-            diagramService.item().then(
-                function (data) {
+        $scope.createDiagram = function(item) {
+
+            diagramService.item().then(function (data) {
 
                     $scope.diagramViewModel = new viewmodels.diagramViewModel(data);
                     $scope.onlineViewModel = {};
-                    $scope.toggleDiagrams();
                     $scope.toggleCanvas(false);
+
+                    $scope.diagramViewModel.data.name = item.diagramName;
+                    $scope.diagramViewModel.data.description = item.description;
+                    $scope.diagramViewModel.data.owner = item.owner;
+                    $scope.diagramViewModel.data.category = item.category;
+
                 },
                 function (code) {
 
@@ -955,10 +929,9 @@ var analyticsApp = angular.module('analyticsApp',
             var onlineDiagram = $scope.onlineViewModel.data;
             var data = {'offline': offlineDiagram, 'online': onlineDiagram};
 
-            diagramService.save(data).then(
-                function (diagramId) {
+            diagramService.save(data).then(function (diagramId) {
 
-                    if (isNew){
+                    if (isNew) {
 
                         // capture the new diagram id
                         $scope.diagramViewModel.setId(diagramId);
@@ -1079,11 +1052,7 @@ var analyticsApp = angular.module('analyticsApp',
             });
         };
 
-        $scope.deleteDiagram = function(diagram) {
-
-            var diagramName = diagram.name;
-
-            $scope.diagrams.splice($scope.diagrams.indexOf(diagram), 1);
+        $scope.deleteDiagram = function(diagramName) {
 
             diagramService.deleteDiagram(diagramName).then(
                 function (data) {
@@ -1192,7 +1161,10 @@ var analyticsApp = angular.module('analyticsApp',
                 controller: 'diagramNavigationController',
                 inputs: {
                     diagService: diagramService,
-                    closeDialog: endDiagramNavigation
+                    closeDialog: endDiagramNavigation,
+                    openDiagram: $scope.open,
+                    createNewDiagram: $scope.createDiagram,
+                    deleteExistingDiagram: $scope.deleteDiagram
                 }
             }).then(function(popup) {
 
@@ -1249,26 +1221,6 @@ var analyticsApp = angular.module('analyticsApp',
                 return $scope.onlineViewModel;
             else
                 return $scope.diagramViewModel;
-        };
-
-        var updateSelectedDiagram = function() {
-            if ($scope.diagrams) {
-                $scope.$applyAsync(function() {
-                    $scope.diagrams.forEach(function (item) {
-                        if (item.selected == true) {
-                            item.selected = false;
-                        }
-                        if (item.name == $scope.diagramViewModel.data.name) {
-                            item.selected = true;
-                        }
-                    });
-                });
-            }
-        };
-
-        var initializeNavigationItem = function(item) {
-            item['showProperties'] = false;
-            item['selected'] = false;
         };
 
         // show library browser popup
