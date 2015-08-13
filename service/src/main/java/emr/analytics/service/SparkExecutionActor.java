@@ -33,7 +33,7 @@ public class SparkExecutionActor extends AbstractActor {
             .match(SparkJob.class, job -> {
 
                 // report that the job has been started
-                this.jobStatusActor.tell(new JobStatus(job.getId(), JobStatusTypes.STARTED), self());
+                this.jobStatusActor.tell(new JobStatus(JobStatusTypes.STARTED), self());
 
                 // create a spark streaming compiler and run
                 SparkCompiler compiler = new SparkCompiler(this.streamingContext,
@@ -42,7 +42,7 @@ public class SparkExecutionActor extends AbstractActor {
                 compiler.run();
 
                 // report completion
-                this.jobStatusActor.tell(new JobStatus(job.getId(), JobStatusTypes.COMPLETED), self());
+                this.jobStatusActor.tell(new JobStatus(JobStatusTypes.COMPLETED), self());
             })
             .build());
     }
@@ -59,7 +59,7 @@ public class SparkExecutionActor extends AbstractActor {
         public void send(String key, String value) {
 
             // report progress
-            this.actor.tell(new JobProgress(this.jobId, key, value), null);
+            this.actor.tell(new JobProgress(key, value), null);
         }
     }
 }

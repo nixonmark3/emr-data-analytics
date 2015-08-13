@@ -11,7 +11,6 @@ import emr.analytics.models.messages.JobInfo;
 import emr.analytics.service.jobs.ProcessJob;
 import emr.analytics.service.messages.JobStatus;
 import emr.analytics.service.messages.JobStatusTypes;
-import org.apache.spark.streaming.StreamingContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -60,7 +59,7 @@ public class ProcessActor extends AbstractActor {
             .match(String.class, s -> s.equals("stop"), s -> {
 
                 // notify the job status actor that the job is being stopped
-                statusActor.tell(new JobStatus(job.getId(), JobStatusTypes.STOPPED), self());
+                statusActor.tell(new JobStatus(JobStatusTypes.STOPPED), self());
             })
 
             /**

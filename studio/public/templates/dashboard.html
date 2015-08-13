@@ -4,20 +4,14 @@
 
     <div id="dashboard-cards" class="container-fluid">
 
-        <div id="card-selector-wrapper" ng-style="{'left': (selector.index * selector.width + 15) + 'px', 'height': selector.height + 'px', 'width': selector.width + 'px' }">
-
-            <div class="card-selector"></div>
-
-        </div>
-
         <div class="row">
 
             <div class="col-xs-3">
 
-                    <div class="dashboard-card" ng-click="activeCard(0)">
-                        <div class="card-value">{{cards.online}}</div>
-                        <div class="card-label">Online</div>
-                    </div>
+                <div class="dashboard-card" ng-click="activeCard(0)">
+                    <div class="card-value">{{cards.streaming}}</div>
+                    <div class="card-label">Data Streams</div>
+                </div>
 
             </div>
 
@@ -25,7 +19,7 @@
 
                 <div class="dashboard-card" ng-click="activeCard(1)">
                     <div class="card-value">{{cards.online}}</div>
-                    <div class="card-label">Data Streams</div>
+                    <div class="card-label">Online</div>
                 </div>
 
             </div>
@@ -50,49 +44,142 @@
 
         </div>
 
+        <div id="card-selector" ng-style="{'left': (selector.index * selector.xOffset + selector.xOffset / 2) + 'px', 'top': selector.height + 'px' }"></div>
+
     </div>
 
-    <div id="dashboard-jobs">
+    <div id="dashboard-details" ng-switch on="selector.index">
 
-        <div ng-if="jobs.length > 0" id="dashboard-job-header" class="container">
+        <div class="dashboard-items" ng-switch-when="0">
 
-            <div class="row">
+            <div class="dashboard-item-header container">
 
-                <div class="col-xs-2">Name</div>
+                <div class="row">
 
-                <div class="col-xs-2">Start</div>
+                    <div class="col-xs-2">Topic</div>
 
-                <div class="col-xs-2">Last Prediction</div>
+                    <div class="col-xs-2">Start</div>
 
-                <div class="col-xs-5">Trend</div>
+                    <div class="col-xs-2">Type</div>
 
-                <div class="col-xs-1"></div>
+                    <div class="col-xs-2">Frequency</div>
+
+                    <div class="col-xs-4">
+                        <i class="fa fa-plus pull-right" ng-click="addSource($event)"></i>
+                    </div>
+
+                </div>
 
             </div>
 
-        </div>
+            <div class="dashboard-item container" ng-repeat="job in jobs">
 
-        <div class="dashboard-job container" ng-repeat="job in jobs">
+                <div class="row">
 
-            <div class="row">
+                    <div class="col-xs-2">{{::job.topic}}</div>
 
-                <div class="col-xs-2">{{::job.diagramName}}</div>
+                    <div class="col-xs-2">{{::formatDate(job.started)}}</div>
 
-                <div class="col-xs-2">{{::formatDate(job.started)}}</div>
+                    <div class="col-xs-2">{{::job.pollingSourceType}}</div>
 
-                <div class="col-xs-2"></div>
+                    <div class="col-xs-2">{{::job.frequency}} per second</div>
 
-                <div class="col-xs-5"></div>
+                    <div class="col-xs-4">
+                        <i ng-if="!job.killing" class="fa fa-times dashboard-item-kill pull-right" ng-click="killTopic(job, $event)"></i>
+                        <i ng-if="job.killing" class="fa fa-spinner fa-spin pull-right"></i>
+                    </div>
 
-                <div class="col-xs-1">
-                    <i ng-if="!job.killing" class="fa fa-times dashboard-job-kill pull-right" ng-click="kill(job, $event)"></i>
-                    <i ng-if="job.killing" class="fa fa-spinner fa-spin pull-right"></i>
                 </div>
 
             </div>
 
         </div>
 
+        <div class="dashboard-items" ng-switch-when="1">
+
+            <div class="dashboard-item-header container">
+
+                <div class="row">
+
+                    <div class="col-xs-2">Name</div>
+
+                    <div class="col-xs-2">Start</div>
+
+                    <div class="col-xs-2">Last Prediction</div>
+
+                    <div class="col-xs-5">Trend</div>
+
+                    <div class="col-xs-1"></div>
+
+                </div>
+
+            </div>
+
+            <div class="dashboard-item container" ng-repeat="job in jobs">
+
+                <div class="row">
+
+                    <div class="col-xs-2">{{::job.diagramName}}</div>
+
+                    <div class="col-xs-2">{{::formatDate(job.started)}}</div>
+
+                    <div class="col-xs-2">&#160;</div>
+
+                    <div class="col-xs-5">&#160;</div>
+
+                    <div class="col-xs-1">
+                        <i ng-if="!job.killing" class="fa fa-times dashboard-item-kill pull-right" ng-click="killTopic(job, $event)"></i>
+                        <i ng-if="job.killing" class="fa fa-spinner fa-spin pull-right"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="dashboard-items" ng-switch-when="2">
+
+            <div class="dashboard-item-header container">
+
+                <div class="row">
+
+                    <div class="col-xs-2">Name</div>
+
+                    <div class="col-xs-2">Start</div>
+
+                    <div class="col-xs-2">Last Prediction</div>
+
+                    <div class="col-xs-5">Trend</div>
+
+                    <div class="col-xs-1"></div>
+
+                </div>
+
+            </div>
+
+            <div class="dashboard-item container" ng-repeat="job in jobs">
+
+                <div class="row">
+
+                    <div class="col-xs-2">{{::job.diagramName}}</div>
+
+                    <div class="col-xs-2">{{::formatDate(job.started)}}</div>
+
+                    <div class="col-xs-2">&#160;</div>
+
+                    <div class="col-xs-5">&#160;</div>
+
+                    <div class="col-xs-1">
+                        <i ng-if="!job.killing" class="fa fa-times dashboard-item-kill pull-right" ng-click="killTopic(job, $event)"></i>
+                        <i ng-if="job.killing" class="fa fa-spinner fa-spin pull-right"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
     </div>
 
 </div>

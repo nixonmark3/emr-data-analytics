@@ -93,6 +93,18 @@ public class AnalyticsActor extends AbstractActor {
                 this.service.tell(request, self());
             })
 
+            // forward streaming source request to the analytics service
+            .match(StreamingSourceRequest.class, request -> {
+
+                this.service.tell(request, self());
+            })
+
+            // forward request to kill a streaming source to the analytics service
+            .match(StreamingSourceKillRequest.class, request -> {
+
+                this.service.tell(request, self());
+            })
+
             // ping request succeeds
             .match(Ping.class, ping -> {
                 ping.setValue(true);

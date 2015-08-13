@@ -9,8 +9,8 @@ public class JobProgress extends JobStatus {
     private String progressKey;
     private String progressValue;
 
-    public JobProgress(UUID jobId, String progressKey, String progressValue){
-        super(jobId, JobStatusTypes.PROGRESS);
+    public JobProgress(String progressKey, String progressValue){
+        super(JobStatusTypes.PROGRESS);
 
         this.progressKey = progressKey;
         this.progressValue = progressValue;

@@ -10,17 +10,6 @@ analyticsApp
             $scope.block = block.data;
             $scope.config = config;
 
-            /*// calculate transitions for popup destination
-            var transX = ($window.innerWidth / 2 - position.width / 2) - position.x;
-            var transY = ($window.innerHeight / 2 - position.height / 2) - position.y;
-            var transform = "translate(" + transX + "px," + transY + "px) scale(1)";
-
-            $timeout(
-                function(){
-                    $element.css({ "-webkit-transform": transform });
-                },
-                30);*/
-
             $scope.close = function(){
 
                 close(null, 500);
@@ -126,6 +115,62 @@ analyticsApp
         }
     ])
 
+    .controller('debugController', ['$scope', '$element', '$timeout', 'diagramService', 'data', 'config', 'position', 'close',
+        function($scope, $element, $timeout, diagramService, data, config, position, close){
+
+            $scope.config = config;
+            $scope.position = position;
+
+            diagramService.compile(data).then(
+                function (source) {
+                    $scope.editor = { data: source };
+                },
+                function (code) {
+                    console.log(code); // TODO show exception
+                }
+            );
+
+            $scope.close = function(transitionDelay){
+
+                close(null, transitionDelay);
+            };
+        }
+    ])
+
+    .controller('editorController', ['$scope', '$element', '$timeout', 'config', 'position', 'close',
+        function($scope, $element, $timeout, config, position, close){
+
+            $scope.config = config;
+            $scope.position = position;
+
+            // todo: temporarily hardcode default json
+            $scope.editor = {
+                data: JSON.stringify({
+                topic: "OPC",
+                streamingSource: {
+                    pollingSourceType: "Simulated",
+                    url: "http://localhost",
+                    frequency: 1,
+                    keys: [
+                        "Tag1.CV",
+                        "Tag2.CV",
+                        "Tag3.CV"
+                    ]}
+                }, null, '\t')
+            };
+
+            $scope.close = function(transitionDelay){
+
+                close(null, transitionDelay);
+            };
+
+            $scope.save = function(transitionDelay){
+
+                close($scope.editor.data, transitionDelay);
+            };
+        }
+    ])
+
     .controller('exploreController', ['$scope', '$element', '$timeout', '$q', '$animate', 'diagramService', 'colorService', 'block', 'config', 'position', 'close',
         function($scope, $element, $timeout, $q, $animate, diagramService, colorService, block, config, position, close){
 
@@ -155,7 +200,7 @@ analyticsApp
                         $scope.loading = false;
                     }
                 );
-            }, 600);
+            }, 400);
 
             // initialize the chart object
             $scope.chartOptions = {

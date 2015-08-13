@@ -10,9 +10,9 @@ public class ModeDefinition {
     private List<ConnectorDefinition> inputs = new ArrayList<ConnectorDefinition>();
     private List<ConnectorDefinition> outputs  = new ArrayList<ConnectorDefinition>();
 
-    public Signature getSignature(){ return signature; }
+    public Signature getSignature(){ return this.signature; }
 
-    public void setSignature(Signature value){ signature = value; }
+    public void setSignature(Signature signature){ this.signature = signature; }
 
     public List<ParameterDefinition> getParameters() {
         return parameters;
@@ -22,9 +22,7 @@ public class ModeDefinition {
         this.parameters = parameters;
     }
 
-    public List<ConnectorDefinition> getInputs() {
-        return inputs;
-    }
+    public List<ConnectorDefinition> getInputs() { return inputs; }
 
     public void setInputs(List<ConnectorDefinition> inputs) { this.inputs = inputs; }
 

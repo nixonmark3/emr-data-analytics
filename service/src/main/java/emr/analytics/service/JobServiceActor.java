@@ -4,6 +4,7 @@ import akka.actor.*;
 import akka.japi.pf.ReceiveBuilder;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
+import emr.analytics.models.definition.TargetEnvironments;
 import emr.analytics.models.messages.*;
 import emr.analytics.models.definition.Mode;
 import emr.analytics.service.jobs.*;
@@ -14,15 +15,23 @@ import scala.concurrent.duration.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Serves as the primary entry point for executing analytic jobs.  Accepts requests and manages the lifecycle of various
+ * job types.
+ */
 public class JobServiceActor extends AbstractActor {
 
-    // map jobs by their ids
-    private Map<UUID, AnalyticsJob> jobs = new HashMap<UUID, AnalyticsJob>();
+    // map analytic jobs to their ids
+    private Map<UUID, AnalyticsJob> analyticJobs = new HashMap<UUID, AnalyticsJob>();
 
-    // organize actors by mode {offline, online} and diagram id
+    // cache actors by mode {offline, online} and diagram id
     private Map<UUID, ActorRef> offlineJobs = new HashMap<UUID, ActorRef>();
     private Map<UUID, ActorRef> onlineJobs = new HashMap<UUID, ActorRef>();
 
+    // cache streaming source actors by their topic
+    private Map<String, ActorRef> streamingSources = new HashMap<String, ActorRef>();
+
+    // keep a reference to the remote akka actor client
     private ActorRef client = null;
 
     public static Props props(String host, String port){ return Props.create(JobServiceActor.class, host, port); }
@@ -77,22 +86,21 @@ public class JobServiceActor extends AbstractActor {
                     jobActor = context().actorOf(
                             ProcessActor.props(sender(), (ProcessJob) job),
                             job.getId().toString());
-
-                    jobs.put(job.getId(), job);
-                    offlineJobs.put(job.getKey().getId(), jobActor);
-                    context().watch(jobActor);
-
                     jobActor.tell("start", self());
 
                 } else if (job instanceof SparkJob) {
 
-                    jobActor = context().actorOf(
-                            SparkProcessActor.props(sender(), (SparkJob) job, host, port),
+                    // create a new spark process actor - send job
+                    SparkJob sparkJob = (SparkJob)job;
+                    jobActor = context().actorOf(SparkProcessActor.props(sender(),
+                                    job.getId(),
+                                    sparkJob.getDiagramName(),
+                                    sparkJob.getTargetEnvironment(),
+                                    sparkJob.getMode(),
+                                    host,
+                                    port),
                             job.getId().toString());
-
-                    jobs.put(job.getId(), job);
-                    onlineJobs.put(job.getKey().getId(), jobActor);
-                    context().watch(jobActor);
+                    jobActor.tell(sparkJob, self());
 
                 } else {
 
@@ -101,8 +109,18 @@ public class JobServiceActor extends AbstractActor {
                     return;
                 }
 
+                // store job information for reference later
+                if (job.getMode() == Mode.OFFLINE)
+                    offlineJobs.put(job.getKey().getId(), jobActor);
+                else if (job.getMode() == Mode.ONLINE)
+                    onlineJobs.put(job.getKey().getId(), jobActor);
+                analyticJobs.put(job.getId(), job);
+                context().watch(jobActor);
+
                 // proactively send an update jobs summary
-                JobsSummary summary = new JobsSummary(this.offlineJobs.size(), this.onlineJobs.size());
+                JobsSummary summary = new JobsSummary(this.offlineJobs.size(),
+                        this.onlineJobs.size(),
+                        this.streamingSources.size());
                 sender().tell(summary, self());
             })
 
@@ -113,10 +131,45 @@ public class JobServiceActor extends AbstractActor {
                     // send kill message
                     ActorRef jobActor = this.offlineJobs.get(request.getDiagramId());
                     jobActor.tell("stop", self());
-                } else if (request.getMode() == Mode.ONLINE && this.onlineJobs.containsKey(request.getDiagramId())) {
+                }
+                else if (request.getMode() == Mode.ONLINE && this.onlineJobs.containsKey(request.getDiagramId())) {
 
                     // send kill message
                     ActorRef jobActor = this.onlineJobs.get(request.getDiagramId());
+                    jobActor.tell("stop", self());
+                }
+            })
+
+            .match(StreamingSourceRequest.class, request -> {
+
+                if (this.streamingSources.containsKey(request.getTopic())) {
+
+                    // todo: notify the sender that this topic is already running
+                    return;
+                }
+
+                // todo: check whether kafka is running
+
+                // initialize, cache, and start kafka actor
+                ActorRef kafkaActor = context().actorOf(KafkaActor.props(request), request.getTopic());
+                streamingSources.put(request.getTopic(), kafkaActor);
+                context().watch(kafkaActor);
+
+                kafkaActor.tell("start", self());
+
+                // proactively send an update jobs summary
+                JobsSummary summary = new JobsSummary(this.offlineJobs.size(),
+                        this.onlineJobs.size(),
+                        this.streamingSources.size());
+                sender().tell(summary, self());
+            })
+
+            .match(StreamingSourceKillRequest.class, request -> {
+
+                if (this.streamingSources.containsKey(request.getTopic())) {
+
+                    // send kill message
+                    ActorRef jobActor = this.streamingSources.get(request.getTopic());
                     jobActor.tell("stop", self());
                 }
             })
@@ -127,18 +180,16 @@ public class JobServiceActor extends AbstractActor {
 
                 if (this.offlineJobs.containsKey(request.getDiagramId())) {
 
-                    // send kill message
                     ActorRef jobActor = this.offlineJobs.get(request.getDiagramId());
-                    JobInfo job = getJobInfo(jobActor);
+                    JobInfo job = (JobInfo)getInfo(jobActor);
                     if (job != null)
                         jobs.add(job);
                 }
 
                 if (this.onlineJobs.containsKey(request.getDiagramId())) {
 
-                    // send kill message
                     ActorRef jobActor = this.onlineJobs.get(request.getDiagramId());
-                    JobInfo job = getJobInfo(jobActor);
+                    JobInfo job = (JobInfo)getInfo(jobActor);
                     if (job != null)
                         jobs.add(job);
                 }
@@ -152,7 +203,7 @@ public class JobServiceActor extends AbstractActor {
                 JobInfos jobs = new JobInfos();
                 for (ActorRef worker : this.offlineJobs.values()) {
 
-                    JobInfo job = getJobInfo(worker);
+                    JobInfo job = (JobInfo)getInfo(worker);
                     if (job != null)
                         jobs.add(job);
                 }
@@ -166,7 +217,21 @@ public class JobServiceActor extends AbstractActor {
                 JobInfos jobs = new JobInfos();
                 for (ActorRef worker : this.onlineJobs.values()) {
 
-                    JobInfo job = getJobInfo(worker);
+                    JobInfo job = (JobInfo)getInfo(worker);
+                    if (job != null)
+                        jobs.add(job);
+                }
+
+                sender().tell(jobs, self());
+            })
+
+            .match(BaseMessage.class, message -> message.getType().equals("streaming-jobs"), message -> {
+
+                // build a list of current jobs
+                StreamingInfos jobs = new StreamingInfos();
+                for (ActorRef worker : this.streamingSources.values()) {
+
+                    StreamingInfo job = (StreamingInfo)getInfo(worker);
                     if (job != null)
                         jobs.add(job);
                 }
@@ -176,26 +241,39 @@ public class JobServiceActor extends AbstractActor {
 
             .match(BaseMessage.class, message -> message.getType().equals("jobs-summary"), message -> {
 
-                JobsSummary summary = new JobsSummary(this.offlineJobs.size(), this.onlineJobs.size());
+                JobsSummary summary = new JobsSummary(this.offlineJobs.size(),
+                        this.onlineJobs.size(),
+                        this.streamingSources.size());
                 sender().tell(summary, self());
             })
 
-            .match(Terminated.class, t -> {
+                        .match(Terminated.class, t -> {
 
-                // clean up completed jobs
-                UUID jobId = UUID.fromString(t.actor().path().name());
+                            // clean up terminated actors
 
-                AnalyticsJob job = jobs.get(jobId);
-                if (job.getMode() == Mode.OFFLINE && this.offlineJobs.containsKey(job.getKey().getId()))
-                    this.offlineJobs.remove(job.getKey().getId());
-                else if (job.getMode() == Mode.ONLINE && this.onlineJobs.containsKey(job.getKey().getId()))
-                    this.onlineJobs.remove(job.getKey().getId());
+                            String actorName = t.actor().path().name();
+                            if (isUUID(actorName)) {
+                                // if the job name is a uuid - clean up completed jobs
 
-                jobs.remove(jobId);
+                                UUID jobId = UUID.fromString(actorName);
+                                AnalyticsJob job = analyticJobs.get(jobId);
+                                if (job.getMode() == Mode.OFFLINE && this.offlineJobs.containsKey(job.getKey().getId()))
+                                    this.offlineJobs.remove(job.getKey().getId());
+                                else if (job.getMode() == Mode.ONLINE && this.onlineJobs.containsKey(job.getKey().getId()))
+                                    this.onlineJobs.remove(job.getKey().getId());
 
-                if (this.client != null){
-                    JobsSummary summary = new JobsSummary(this.offlineJobs.size(), this.onlineJobs.size());
-                    this.client.tell(summary, self());
+                                analyticJobs.remove(jobId);
+                            } else if (this.streamingSources.containsKey(actorName)) {
+
+                                // clean up the streaming source data actor
+                                this.streamingSources.remove(actorName);
+                            }
+
+                            if (this.client != null) {
+                                JobsSummary summary = new JobsSummary(this.offlineJobs.size(),
+                                        this.onlineJobs.size(),
+                                        this.streamingSources.size());
+                                this.client.tell(summary, self());
                 }
 
             }).build()
@@ -215,15 +293,24 @@ public class JobServiceActor extends AbstractActor {
         return jobInfo;
     }
 
-    private JobInfo getJobInfo(ActorRef actor) {
+    private Object getInfo(ActorRef actor) {
 
         try {
             Timeout timeout = new Timeout(Duration.create(20, TimeUnit.SECONDS));
             Future<Object> future = Patterns.ask(actor, "info", timeout);
-            return (JobInfo) Await.result(future, timeout.duration());
+            return Await.result(future, timeout.duration());
         }
         catch(Exception ex){
             return null;
         }
+    }
+
+    /**
+     * apply a regex to determine whether a string is a uuid
+     * @param data
+     * @return
+     */
+    private boolean isUUID(String data){
+        return (data.matches("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[34][0-9a-fA-F]{3}-[89ab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}"));
     }
 }

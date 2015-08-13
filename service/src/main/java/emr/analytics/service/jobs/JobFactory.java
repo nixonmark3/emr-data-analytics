@@ -14,9 +14,6 @@ public class JobFactory {
                 break;
 
             case PYSPARK:
-                job = new PySparkJob(request);
-                break;
-
             case SPARK:
                 job = new SparkJob(request);
                 break;

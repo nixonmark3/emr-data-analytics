@@ -14,8 +14,8 @@ public class WebServicePost extends BlockDefinition implements IExport {
 
         Definition definition;
 
-        definition = new Definition("RESTPost", "REST POST", Category.TRANSFORMERS.toString());
-        definition.setDescription("Post data to a REST API.");
+        definition = new Definition("Post", "POST", Category.TRANSFORMERS.toString());
+        definition.setDescription("Post data to a REST Web API.");
 
         return definition;
     }
@@ -24,7 +24,6 @@ public class WebServicePost extends BlockDefinition implements IExport {
     public ModeDefinition createOfflineMode(){
 
         ModeDefinition modeDefinition = new ModeDefinition();
-        modeDefinition.setSignature(createSignature());
         modeDefinition.setInputs(createInputConnectors());
         modeDefinition.setOutputs(createOutputConnectors());
         modeDefinition.setParameters(createParameters());
@@ -76,18 +75,4 @@ public class WebServicePost extends BlockDefinition implements IExport {
 
         return parameters;
     }
-
-    public Signature createSignature() {
-
-        return new Signature("emr.analytics.spark.algorithms.Requests",
-                "Requests",
-                "postValue",
-                new String[]{
-                        "parameter:PostType",
-                        "parameter:Url",
-                        "parameter:Tag",
-                        "input:in"
-                });
-    }
-
 }

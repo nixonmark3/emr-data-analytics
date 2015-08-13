@@ -4,6 +4,8 @@ import akka.actor.*;
 import akka.japi.pf.ReceiveBuilder;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
+import emr.analytics.models.definition.Mode;
+import emr.analytics.models.definition.TargetEnvironments;
 import emr.analytics.models.messages.JobInfo;
 import emr.analytics.service.jobs.SparkJob;
 import emr.analytics.service.messages.JobProgress;
@@ -19,8 +21,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,36 +29,64 @@ import java.util.concurrent.TimeUnit;
  */
 public class SparkProcessActor extends AbstractActor {
 
-    private ActorRef client;
-    private ActorRef spark;
-    private SparkJob job;
-    private PartialFunction<Object, BoxedUnit> active;
+    private ActorRef client = null;
+    private ActorRef spark = null;
 
-    public static Props props(ActorRef client, SparkJob job, String host, String port){
-        return Props.create(SparkProcessActor.class, client, job, host, port);
+    private String diagramName;
+    private TargetEnvironments targetEnvironment;
+    private Mode mode;
+
+    private Queue<SparkJob> jobs;
+
+    public static Props props(ActorRef client, UUID id, String diagramName, TargetEnvironments targetEnvironment, Mode mode, String host, String port){
+
+        return Props.create(SparkProcessActor.class,
+                client,
+                id,
+                diagramName,
+                targetEnvironment,
+                mode,
+                host,
+                port);
     }
 
-    public SparkProcessActor(ActorRef client, SparkJob job, String host, String port) throws SparkProcessException {
+    public SparkProcessActor(ActorRef client, UUID id, String diagramName, TargetEnvironments targetEnvironment, Mode mode, String host, String port) throws SparkProcessException {
 
         this.client = client;
-        this.job = job;
+        this.diagramName = diagramName;
+        this.targetEnvironment = targetEnvironment;
+        this.mode = mode;
+
+        this.jobs = new LinkedList<SparkJob>();
 
         receive(ReceiveBuilder
 
                 /**
-                 * After the spark actor identifies this actor, it will make context by sending a reference
+                 * After the spark actor starts up, it will make contact by sending a reference to itself
                  */
                 .match(ActorRef.class, actor -> {
 
-                    System.out.println("deploying spark job");
-
+                    // reference spark actor
                     spark = actor;
-
                     context().watch(spark);
 
                     // send reference to client and job
                     spark.tell(this.client, self());
-                    spark.tell(this.job, self());
+
+                    // if a job exists - send it
+                    if (jobs.size() > 0)
+                        spark.tell(this.jobs.remove(), self());
+                })
+
+                /**
+                 * Receive new spark jobs - depending on state - either send or queue
+                 */
+                .match(SparkJob.class, job -> {
+
+                    if (spark != null)
+                        spark.tell(job, self());
+                    else
+                        this.jobs.add(job);
                 })
 
                 /**
@@ -89,18 +118,12 @@ public class SparkProcessActor extends AbstractActor {
                     self().tell(PoisonPill.getInstance(), self());
                 })
 
-                .match(ReceiveTimeout.class, timeout -> {
-                    // ignore
-                })
-
                 .matchAny(this::unhandled)
 
                 .build());
 
-        System.out.println(self().path().name());
-
         // create the spark process
-        this.runProcess(this.job.getId().toString(),
+        this.runProcess(id.toString(),
                 context().system().name(),
                 host,
                 port);
@@ -137,6 +160,9 @@ public class SparkProcessActor extends AbstractActor {
             arguments.add(system);
             arguments.add(host);
             arguments.add(port);
+            arguments.add(this.diagramName);
+            arguments.add(this.targetEnvironment.toString());
+            arguments.add(this.mode.toString());
 
             ProcessBuilder builder = new ProcessBuilder(arguments);
             Process process = builder.start();

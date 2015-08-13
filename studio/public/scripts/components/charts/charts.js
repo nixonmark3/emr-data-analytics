@@ -171,8 +171,8 @@ angular.module('emr.ui.charts', [])
 
                         if (chartType == 'time'){
                             var date = new Date(ticks[t]*1000);
-                            var dateText = date.toLocaleDateString('en-US', {year: "numeric", month: "2-digit", day: "2-digit"});
-                            var timeText = date.toLocaleTimeString('en-US', {hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit"});
+                            var dateText = date.toLocaleDateString('en-US', {timeZone: "UTC", year: "numeric", month: "2-digit", day: "2-digit"});
+                            var timeText = date.toLocaleTimeString('en-US', {timeZone: "UTC", hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit"});
                             chartService.drawText(context, dateText, {  x: pos.x, y: pos.y + tickSize + 2 }, "12px Arial", "#666", "center", "top");
                             chartService.drawText(context, timeText, {  x: pos.x, y: pos.y + tickSize + 14 }, "12px Arial", "#666", "center", "top");
                         }

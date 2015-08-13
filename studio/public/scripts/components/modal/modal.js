@@ -3,7 +3,7 @@
 angular.module('emr.ui.modal', ['emr.ui.popup', 'emr.ui.shared'])
     .directive('modal', ['$timeout', function($timeout){
 
-        var transitionDelay = 500;
+        var transitionDelay = 400;
 
         return {
             restrict: 'E',

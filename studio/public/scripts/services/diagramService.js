@@ -300,6 +300,34 @@ analyticsApp
             return deferred.promise;
         },
 
+        streamingStart: function(data){
+
+            var deferred = $q.defer();
+            $http.post('/streaming/start', data)
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
+
+        streamingStop: function (topic) {
+
+            var deferred = $q.defer();
+            $http.get('/streaming/stop/' + topic)
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
+
         deleteDiagram: function (name) {
 
             var deferred = $q.defer();

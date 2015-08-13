@@ -75,29 +75,20 @@ public class LoadCSV extends BlockDefinition implements IExport {
 
         // create parameters
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-
-        parameters.add(new ParameterDefinition("Url",
+        parameters.add(new ParameterDefinition("Topic",
                 DataType.STRING.toString(),
                 "",
                 new ArrayList<String>(),
                 null));
-        parameters.add(new ParameterDefinition("Sleep",
-                DataType.STRING.toString(),
-                "500",
-                new ArrayList<String>(),
-                null));
-
         modeDefinition.setParameters(parameters);
 
-        Signature signature = new Signature("emr.analytics.spark.algorithms.Sources",
-                "Sources",
-                "PollingStream",
+        modeDefinition.setSignature(new Signature("StreamingSources",
+                "kafkaStream",
                 new String[]{
                         "ssc",
-                        "parameter:Url",
-                        "parameter:Sleep"
-                });
-        modeDefinition.setSignature(signature);
+                        "parameter:Topic",
+                        "broker"
+                }));
 
         return modeDefinition;
     }

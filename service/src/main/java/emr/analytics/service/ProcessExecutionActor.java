@@ -36,7 +36,7 @@ public class ProcessExecutionActor extends AbstractActor {
                 ProcessBuilder builder = job.getProcess();
 
                 // report that the job has been started
-                this.jobStatusActor.tell(new JobStatus(job.getId(), JobStatusTypes.STARTED), self());
+                this.jobStatusActor.tell(new JobStatus(JobStatusTypes.STARTED), self());
 
                 // execute process
                 Process process = null;
@@ -50,7 +50,7 @@ public class ProcessExecutionActor extends AbstractActor {
                     while ((lineRead = in.readLine()) != null) {
 
                         // report progress
-                        this.jobStatusActor.tell(new JobProgress(job.getId(), "STATE", lineRead), self());
+                        this.jobStatusActor.tell(new JobProgress("STATE", lineRead), self());
                     }
 
                     int complete = process.waitFor();
@@ -68,17 +68,17 @@ public class ProcessExecutionActor extends AbstractActor {
                         System.err.print(stringBuilder.toString());
 
                         // report failure
-                        this.jobStatusActor.tell(new JobFailed(job.getId(), stringBuilder.toString()), self());
+                        this.jobStatusActor.tell(new JobFailed(stringBuilder.toString()), self());
                     } else {
 
                         // report completion
-                        this.jobStatusActor.tell(new JobStatus(job.getId(), JobStatusTypes.COMPLETED), self());
+                        this.jobStatusActor.tell(new JobStatus(JobStatusTypes.COMPLETED), self());
                     }
                 } catch (IOException | InterruptedException ex) {
 
                     System.err.print(ex.toString());
 
-                    this.jobStatusActor.tell(new JobFailed(job.getId(), ex.toString()), self());
+                    this.jobStatusActor.tell(new JobFailed(ex.toString()), self());
                     if (process != null){
                         process.destroyForcibly();
                     }

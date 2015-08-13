@@ -90,21 +90,21 @@ public class JobStatusActorTest {
             Assert.assertEquals("Job Info was expected to be in the created state.", JobStates.CREATED, info.getState());
 
             // start the job and verify resulting job info
-            status = new JobStatus(job.getId(), JobStatusTypes.STARTED);
+            status = new JobStatus(JobStatusTypes.STARTED);
             jobStatus.tell(status, getRef());
             info = probe.expectMsgClass(JobInfo.class);
             Assert.assertEquals("Job Info was expected to be in the running state.", JobStates.RUNNING, info.getState());
             Assert.assertNotNull("Created date should exist.", info.getStarted());
 
             // send progress and verify
-            status = new JobProgress(job.getId(), "VAL", "1");
+            status = new JobProgress("VAL", "1");
             jobStatus.tell(status, getRef());
             info = probe.expectMsgClass(JobInfo.class);
             Assert.assertEquals("Job Info was expected to be in the running state.", JobStates.RUNNING, info.getState());
             Assert.assertEquals("The last progress variable should be 1.", "1", info.lastVariableValue("VAL"));
             Assert.assertArrayEquals("The list should be equal to [1].", new String[]{"1"}, info.listVariableValues("VAL").toArray());
 
-            status = new JobProgress(job.getId(), "VAL", "2");
+            status = new JobProgress("VAL", "2");
             jobStatus.tell(status, getRef());
             info = probe.expectMsgClass(JobInfo.class);
             Assert.assertEquals("Job Info was expected to be in the running state.", JobStates.RUNNING, info.getState());
@@ -112,7 +112,7 @@ public class JobStatusActorTest {
             Assert.assertArrayEquals("The list should be equal to [1, 2].", new String[]{"1", "2"}, info.listVariableValues("VAL").toArray());
 
             // send complete
-            status = new JobStatus(job.getId(), JobStatusTypes.COMPLETED);
+            status = new JobStatus(JobStatusTypes.COMPLETED);
             jobStatus.tell(status, getRef());
             info = probe.expectMsgClass(JobInfo.class);
             Assert.assertEquals("Job Info was expected to be in the completed state.", JobStates.COMPLETED, info.getState());
@@ -123,7 +123,7 @@ public class JobStatusActorTest {
 
             // send failure
             String message = "Job Failed!";
-            status = new JobFailed(job.getId(), message);
+            status = new JobFailed(message);
             jobStatus.tell(status, getRef());
             info = probe.expectMsgClass(JobInfo.class);
             Assert.assertEquals("Job Info was expected to be in the failed state.", JobStates.FAILED, info.getState());

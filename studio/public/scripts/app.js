@@ -330,29 +330,31 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.jobs = [];
 
         $scope.cards = {
+            streaming: -1,
             online: -1,
             offline: -1
         };
 
         $scope.selector = {
             index: 0,
-            width: (cards.width() / 4),
-            height: cards.height()
+            xOffset: (cards.width() / 4),
+            yOffset: cards.height()
         };
 
         // set up websockets
         $webSockets.reset();
         $webSockets.listen(function(msg) { return msg.type == "jobs-summary"; }, setCards);
-        $webSockets.listen(function(msg) { return msg.type == "job-infos"; }, setJobs);
+        $webSockets.listen(function(msg) { return (msg.type == "job-infos" || msg.type == "streaming-infos"); }, setJobs);
         $webSockets.send({ type: "dashboard" });
         $webSockets.send({ type: "jobs-summary" });
 
         $webSockets.listen(function(msg) { return msg.type == "evaluationStatus"; }, updateOfflineJob);
         $webSockets.listen(function(msg) { return msg.type == "deploymentStatus"; }, function(msg) { updateOnlineJob(msg.jobInfo); });
 
+
         // watch for changes in container dimensions
         $scope.$watch(function() { return cards.width(); }, function(newWidth, oldWidth) {
-            $scope.selector.width = (newWidth / 4);
+            $scope.selector.xOffset = (newWidth / 4);
         });
 
         /**
@@ -369,6 +371,42 @@ var analyticsApp = angular.module('analyticsApp',
             $scope.$$phase || $scope.$apply();
         };
 
+        $scope.addSource = function(evt){
+
+            var position = {
+                width: 800,
+                centerX: evt.clientX,
+                centerY: evt.clientY
+            };
+
+            modalService.show({
+                templateUrl: '/assets/scripts/views/editor.html',
+                controller: 'editorController',
+                inputs: {},
+                config: {
+                    name: "Create Data Source",
+                    showSave : true,
+                    showCancel: true
+                },
+                position: position
+            }).then(function (modal) {
+
+                modal.close.then(function (source) {
+
+                    if (source) {
+
+                        diagramService.streamingStart(source).then(
+                            function (data) { },
+                            function (code) {
+                                // todo: show exception
+                                console.log(code);
+                            }
+                        );
+                    }
+                });
+            });
+        };
+
         /**
          *
          * @param job
@@ -379,6 +417,22 @@ var analyticsApp = angular.module('analyticsApp',
 
             // send kill request
             diagramService.kill(job.diagramId, job.mode).then(
+                function (data) { },
+                function (code) {
+
+                    console.log(code); // TODO show exception
+                }
+            );
+
+            $scope.$$phase || $scope.$apply();
+        };
+
+        $scope.killTopic = function(job){
+
+            job.killing = true;
+
+            // send kill request
+            diagramService.streamingStop(job.topic).then(
                 function (data) { },
                 function (code) {
 
@@ -403,7 +457,7 @@ var analyticsApp = angular.module('analyticsApp',
             switch($scope.selector.index){
 
                 case 0:
-                    $webSockets.send({ type: "online-jobs" });
+                    $webSockets.send({ type: "streaming-jobs" });
                     $scope.loading = true;
                     break;
                 case 1:
@@ -427,6 +481,7 @@ var analyticsApp = angular.module('analyticsApp',
         function setCards(message){
 
             $scope.cards = {
+                streaming: message.streaming,
                 online: message.online,
                 offline: message.offline
             };
@@ -641,16 +696,23 @@ var analyticsApp = angular.module('analyticsApp',
             // retrieve the current diagram's data
             var data = diagram().data;
 
-            diagramService.compile(data).then(
-                function (source) {
+            var position = {
+                width: 800,
+                centerX: evt.clientX,
+                centerY: evt.clientY
+            };
 
-                    // todo: show source
-                    console.log(source);
+            modalService.show({
+                templateUrl: '/assets/scripts/views/editor.html',
+                controller: 'debugController',
+                inputs: { data: data },
+                config: {
+                    name: "Compiled Source Code",
+                    showSave : true,
+                    showCancel: true
                 },
-                function (code) {
-                    console.log(code); // TODO show exception
-                }
-            );
+                position: position
+            });
 
             evt.stopPropagation();
             evt.preventDefault();
@@ -702,8 +764,6 @@ var analyticsApp = angular.module('analyticsApp',
                 centerY: (position.y + block.height() / 2)
             };
 
-            $scope.blurBackground = true;
-
             switch(block.definitionType()){
 
                 case "CHART":
@@ -722,9 +782,12 @@ var analyticsApp = angular.module('analyticsApp',
                         position: modalPosition
                     }).then(function (modal) {
 
+                        // todo: blurring the background at the same time as modal zoom is causing a performance problem
+                        // $scope.blurBackground = true;
+
                         modal.close.then(function (result) {
 
-                            $scope.blurBackground = false;
+                            // $scope.blurBackground = false;
 
                             if (result) {
 

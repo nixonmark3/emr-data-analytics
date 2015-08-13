@@ -2,6 +2,7 @@ target
 tmp
 .history
 dist
+output
 /.idea
 /*.iml
 /out

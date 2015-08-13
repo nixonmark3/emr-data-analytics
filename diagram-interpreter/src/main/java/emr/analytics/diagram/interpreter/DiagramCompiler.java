@@ -26,12 +26,13 @@ public class DiagramCompiler {
         TargetCompiler compiler;
         switch (diagram.getTargetEnvironment()) {
 
-            case PYTHON:
-                compiler = new PythonCompiler(definitions, diagram);
+            case SPARK:
+            case PYSPARK:
+                compiler = new PySparkCompiler(definitions, diagram, models);
                 break;
 
-            case SPARK:
-                compiler = new SparkCompiler(definitions, diagram, models);
+            case PYTHON:
+                compiler = new PythonCompiler(definitions, diagram);
                 break;
 
             default:

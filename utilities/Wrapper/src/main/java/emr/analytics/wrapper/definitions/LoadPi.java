@@ -19,30 +19,40 @@ public class LoadPi extends BlockDefinition implements IExport {
     public ModeDefinition createOfflineMode() {
 
         ModeDefinition modeDefinition = new ModeDefinition();
-        modeDefinition.setSignature(createSignature());
         modeDefinition.setOutputs(createOutputConnectors());
         modeDefinition.setParameters(createParameters());
         return modeDefinition;
     }
 
     @Override
-    public ModeDefinition createOnlineMode() {
+    public ModeDefinition createOnlineMode(){
 
-        return null;
+        ModeDefinition modeDefinition = new ModeDefinition();
+
+        // create outputs
+        List<ConnectorDefinition> outputs = new ArrayList<ConnectorDefinition>();
+        outputs.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        modeDefinition.setOutputs(outputs);
+
+        // create parameters
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+        parameters.add(new ParameterDefinition("Topic",
+                DataType.STRING.toString(),
+                "",
+                new ArrayList<String>(),
+                null));
+        modeDefinition.setParameters(parameters);
+
+        modeDefinition.setSignature(new Signature("StreamingSources",
+                "kafkaStream",
+                new String[]{
+                        "ssc",
+                        "parameter:Topic",
+                        "broker"
+                }));
+
+        return modeDefinition;
     }
-
-    public Signature createSignature() {
-
-        return new Signature("emr.analytics.spark.algorithms.Utilities",
-                "Utilities",
-                "loadPi",
-                new String[] {
-                        "parameter:IP",
-                        "parameter:Port",
-                        "parameter:Query"
-                });
-    }
-
 
     public List<ConnectorDefinition> createOutputConnectors() {
 

@@ -27,6 +27,8 @@ POST        /getChartData/:name               controllers.BlockResults.getChartD
 GET         /analytics/kill/:id/:mode         controllers.Analytics.kill(id: String, mode: String)
 GET         /analytics/info/:id               controllers.Analytics.info(id: String)
 POST        /upload                           controllers.Data.upload()
+POST        /streaming/start                  controllers.Streaming.start()
+GET         /streaming/stop/:topic            controllers.Streaming.stop(topic: String)
 
 GET         /simulator/read                   controllers.Simulator.read()
 POST        /simulator/write                  controllers.Simulator.write()

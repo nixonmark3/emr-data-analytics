@@ -38,10 +38,6 @@ public class Diagram implements Serializable {
         this.description = description;
         this.owner = owner;
         this.mode = mode;
-
-        if (this.mode == Mode.ONLINE){
-            this.targetEnvironment = TargetEnvironments.SPARK;
-        }
     }
 
     public Diagram(String name, String description, String owner) { this(name, description, owner, Mode.OFFLINE); }

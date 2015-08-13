@@ -1,9 +1,6 @@
 package emr.analytics.diagram.interpreter;
 
-import emr.analytics.models.definition.Definition;
-import emr.analytics.models.definition.DefinitionType;
-import emr.analytics.models.definition.Mode;
-import emr.analytics.models.definition.ModeDefinition;
+import emr.analytics.models.definition.*;
 import emr.analytics.models.diagram.*;
 
 import java.util.*;
@@ -40,7 +37,7 @@ public class DiagramTransformer {
 
         public Transformer(Diagram offline){
             this.offline = offline;
-            terminatingDefinition = definitions.get("RESTPost");
+            terminatingDefinition = definitions.get("Post");
         }
 
         public Diagram transform(){
@@ -51,6 +48,9 @@ public class DiagramTransformer {
                     offline.getDescription(),
                     offline.getOwner(),
                     Mode.ONLINE);
+
+            // default to the pyspark environment
+            online.setTargetEnvironment(TargetEnvironments.PYSPARK);
 
             // capture the offline diagam's id, width, and height
             online.setId(offline.getId());

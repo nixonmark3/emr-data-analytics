@@ -1,0 +1,26 @@
+{{=<% %>=}}
+
+<%#packages%>
+import <%.%>
+<%/packages%>
+
+broker = "localhost:9092"
+
+def post(rdd):
+    results = rdd.collect()
+    for result in results:
+        for item in result:
+            interpreter.onNotify("predict", str(item))
+
+<%#models%>
+<%variableName%> = [<%arguments%>]
+<%/models%>
+
+<%#blocks%>
+<%variableName%> = <%objectName%><%& operations%>
+<%/blocks%>
+
+<%terminatingVariable%>.foreachRDD(lambda rdd: post(rdd))
+
+ssc.start()
+ssc.awaitTermination()

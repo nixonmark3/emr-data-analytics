@@ -37,13 +37,15 @@ public class Columns extends BlockDefinition implements IExport {
 
     public Signature createSignature() {
 
-        return new Signature("emr.analytics.spark.algorithms.Utilities",
-                        "Utilities",
-                        "columns",
+        return new Signature("input:in", new Operation[] {
+                new Operation(Operation.OperationType.MAP,
+                        "Filters",
+                        "dictionaryToArray",
                         new String[]{
-                                "input:in",
+                                "lambda:x",
                                 "parameter:Columns"
-                        });
+                        })}
+        );
     }
 
     public List<ConnectorDefinition> createInputConnectors() {

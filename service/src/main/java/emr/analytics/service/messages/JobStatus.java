@@ -7,15 +7,11 @@ import java.util.UUID;
 
 public class JobStatus implements Serializable {
 
-    private UUID jobId;
     private JobStatusTypes statusType;
 
-    public JobStatus(UUID jobId, JobStatusTypes statusType){
-        this.jobId = jobId;
+    public JobStatus(JobStatusTypes statusType){
         this.statusType = statusType;
     }
-
-    public UUID getJobId(){ return this.jobId; }
 
     public JobStatusTypes getStatusType() { return this.statusType; }
 }

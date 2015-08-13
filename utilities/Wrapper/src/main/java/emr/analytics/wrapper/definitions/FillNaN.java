@@ -29,12 +29,14 @@ public class FillNaN extends BlockDefinition implements IExport {
 
     public Signature createSignature() {
 
-        return new Signature("emr.analytics.spark.algorithms.Utilities",
-                "Utilities",
-                "fillNa",
-                new String[]{
-                        "input:in"
-                });
+        return new Signature("input:in", new Operation[] {
+                new Operation(Operation.OperationType.MAP,
+                        "Identity",
+                        "identity",
+                        new String[]{
+                                "lambda:x"
+                        })
+        });
     }
 
     @Override

@@ -8,8 +8,8 @@ public class JobFailed extends JobStatus {
 
     private String message;
 
-    public JobFailed(UUID jobId, String message){
-        super(jobId, JobStatusTypes.FAILED);
+    public JobFailed(String message){
+        super(JobStatusTypes.FAILED);
 
         this.message = message;
     }

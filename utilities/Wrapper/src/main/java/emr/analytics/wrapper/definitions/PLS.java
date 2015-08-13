@@ -60,17 +60,31 @@ public class PLS extends BlockDefinition implements IExport {
         outputs.add(new ConnectorDefinition("out", DataType.FLOAT.toString()));
         modeDefinition.setOutputs(outputs);
 
-        modeDefinition.setSignature(new Signature("emr.analytics.spark.algorithms.Utilities",
-                "Utilities",
-                "predict",
-                new String[]{
-                        "input:x",
-                        "block:model",
-                        "block:x_mean",
-                        "block:x_std",
-                        "block:y_mean",
-                        "block:y_std"
-                }));
+        modeDefinition.setSignature(new Signature("input:x", new Operation[] {
+                new Operation(Operation.OperationType.MAP,
+                        "Transformations",
+                        "normalize",
+                        new String[]{
+                                "lambda:x",
+                                "block:x_mean",
+                                "block:x_std"
+                        }),
+                new Operation(Operation.OperationType.MAP,
+                        "Transformations",
+                        "dotProduct",
+                        new String[]{
+                                "lambda:x",
+                                "block:model"
+                        }),
+                new Operation(Operation.OperationType.MAP,
+                        "Transformations",
+                        "deNormalize",
+                        new String[]{
+                                "lambda:x",
+                                "block:y_mean",
+                                "block:y_std"
+                        })
+        }));
 
         return modeDefinition;
     }

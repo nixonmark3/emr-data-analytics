@@ -34,7 +34,7 @@ public class SessionActor extends AbstractActor {
                 AnalyticsService.getInstance().send(new Ping(), self());
             })
 
-                    // subscribe to updates for a specific diagram
+            // subscribe to updates for a specific diagram
             .match(JsonNode.class, node -> (node.get("type").asText().equals("subscribe")), node -> {
 
                 UUID diagramId = UUID.fromString(node.get("id").asText());
@@ -64,7 +64,18 @@ public class SessionActor extends AbstractActor {
                 AnalyticsService.getInstance().send(new BaseMessage("online-jobs"), self());
             })
 
+            //
+            .match(JsonNode.class, node -> (node.get("type").asText().equals("streaming-jobs")), node -> {
+
+                AnalyticsService.getInstance().send(new BaseMessage("streaming-jobs"), self());
+            })
+
             .match(JobInfos.class, infos -> {
+
+                out.tell(Json.toJson(infos), self());
+            })
+
+            .match(StreamingInfos.class, infos -> {
 
                 out.tell(Json.toJson(infos), self());
             })
