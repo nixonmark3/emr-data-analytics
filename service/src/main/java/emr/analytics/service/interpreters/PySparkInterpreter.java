@@ -26,7 +26,7 @@ public class PySparkInterpreter extends PythonInterpreter implements ExecuteResu
 
         // create spark configuration and context
         sparkConf = new SparkConf()
-                .setMaster("local[4]")
+                .setMaster("local[2]")
                 .setAppName(name);
         sparkContext = new JavaSparkContext(sparkConf);
     }

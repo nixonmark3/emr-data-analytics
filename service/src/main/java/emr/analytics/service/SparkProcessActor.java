@@ -90,7 +90,7 @@ public class SparkProcessActor extends AbstractActor {
                 })
 
                 /**
-                 * prematurely initiate the stopping of this job
+                 * initiate the stopping of this job
                  */
                 .match(String.class, s -> s.equals("stop"), s -> {
 
@@ -99,7 +99,7 @@ public class SparkProcessActor extends AbstractActor {
                 })
 
                 /**
-                 * forward the info request to the status actor
+                 * forward the info request to the spark actor
                  */
                 .match(String.class, s -> s.equals("info"), s -> {
 
@@ -111,8 +111,6 @@ public class SparkProcessActor extends AbstractActor {
                 })
 
                 .match(Terminated.class, terminated -> {
-
-                    System.out.println("Terminating spark process actor.");
 
                     // the spark actor has been terminated - terminate self
                     self().tell(PoisonPill.getInstance(), self());

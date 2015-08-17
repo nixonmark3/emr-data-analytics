@@ -122,8 +122,8 @@ public class SparkActor extends AbstractActor implements InterpreterNotification
              * stop context and system system
              */
             .match(String.class, s -> s.equals("finalize"), s -> {
-                interpreter.stop();
 
+                interpreter.stop();
                 getContext().system().shutdown();
             })
             .build();

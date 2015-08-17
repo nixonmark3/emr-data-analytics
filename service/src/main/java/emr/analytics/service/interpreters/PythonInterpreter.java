@@ -6,6 +6,7 @@ import org.apache.commons.io.IOUtils;
 import py4j.GatewayServer;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.util.Map;
 
 /**
@@ -53,7 +54,8 @@ public class PythonInterpreter extends Interpreter implements ExecuteResultHandl
         // retrieve the pyspark source from resources and create python file
         createScriptFile();
 
-        gatewayServer = new GatewayServer(this);
+        int port = getOpenPort();
+        gatewayServer = new GatewayServer(this, port);
         gatewayServer.start();
 
         // configure python command line
@@ -61,6 +63,8 @@ public class PythonInterpreter extends Interpreter implements ExecuteResultHandl
 
         // setup executor and stream handler
         executor = new DefaultExecutor();
+        executor.setWorkingDirectory(this.getWorkingDirectory());
+
         outputStream = new ByteArrayOutputStream();
         PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, outputStream);
         executor.setStreamHandler(streamHandler);
@@ -93,19 +97,13 @@ public class PythonInterpreter extends Interpreter implements ExecuteResultHandl
     @Override
     public InterpreterResult interpret(String statements) {
 
-        System.out.println("Interpreter Begin.");
-
         // confirm the python script has been started
         if (!flags.hasFlag(InterpreterFlags.InterpreterFlag.STARTED)) {
-
-            System.out.println("Interpreter did not Start.");
 
             return new InterpreterResult(InterpreterResult.State.FAILURE,
                     String.format("The python process is not running. Additional info: %s.",
                             outputStream.toString()));
         }
-
-        System.out.println("Interpreter Started.");
 
         // reset the output stream
         outputStream.reset();
@@ -139,8 +137,6 @@ public class PythonInterpreter extends Interpreter implements ExecuteResultHandl
                             outputStream.toString()));
         }
 
-        System.out.println("Interpreter Initialized.");
-
         // create the request and set the
         interpreterRequest = new InterpreterRequest(statements);
         flags.setFlag(InterpreterFlags.InterpreterFlag.RUNNING);
@@ -152,8 +148,6 @@ public class PythonInterpreter extends Interpreter implements ExecuteResultHandl
             statementReceivedNotifier.notify();
         }
 
-        System.out.println("Interpreter Running.");
-
         // wait for the statement to be completed
         synchronized (statementCompletedNotifier) {
             while (flags.hasFlag(InterpreterFlags.InterpreterFlag.RUNNING)) {
@@ -162,11 +156,11 @@ public class PythonInterpreter extends Interpreter implements ExecuteResultHandl
                 }
                 catch (InterruptedException e) {
                     // do nothing
+
+
                 }
             }
         }
-
-        System.out.println("Interpreter Ended.");
 
         if (flags.hasFlag(InterpreterFlags.InterpreterFlag.FAILED)) {
             return new InterpreterResult(InterpreterResult.State.FAILURE, interpreterOutput);
@@ -181,8 +175,6 @@ public class PythonInterpreter extends Interpreter implements ExecuteResultHandl
     private void createScriptFile(){
 
         File out = new File(this.getScriptPath());
-
-        System.out.println(out.getPath());
 
         if (out.exists() && out.isDirectory()) {
             throw new InterpreterException("Unable to create python script " + out.getAbsolutePath());
@@ -229,8 +221,16 @@ public class PythonInterpreter extends Interpreter implements ExecuteResultHandl
      */
     protected String getScriptPath(){
         return String.format("%s/%s.py",
-                this.getProperties().getProperty("python.tempDir"),
+                this.getWorkingDirectory().getAbsolutePath(),
                 this.getClass().getName());
+    }
+
+    /**
+     *
+     * @return
+     */
+    protected File getWorkingDirectory(){
+        return new File(this.getProperties().getProperty("python.workingDir"));
     }
 
     /**
@@ -292,5 +292,16 @@ public class PythonInterpreter extends Interpreter implements ExecuteResultHandl
     @Override
     public void onProcessFailed(ExecuteException e) {
         flags.clearFlag(InterpreterFlags.InterpreterFlag.STARTED);
+    }
+
+    private int getOpenPort() {
+        int port;
+        try (ServerSocket socket = new ServerSocket(0)) {
+            port = socket.getLocalPort();
+            socket.close();
+        } catch (IOException e) {
+            throw new InterpreterException(e);
+        }
+        return port;
     }
 }

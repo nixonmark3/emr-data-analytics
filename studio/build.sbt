@@ -14,7 +14,7 @@ libraryDependencies ++= Seq(
   cache,
   javaWs,
   "emr.analytics.models" % "analytics-models" % "1.0-SNAPSHOT",
-  "emr.analytics.diagram-interpreter" % "diagram-interpreter" % "1.0-SNAPSHOT",
+  "emr.analytics.compiler" % "analytics-compiler" % "1.0-SNAPSHOT",
   "com.typesafe.akka" %% "akka-remote" % "2.3.9",
   "org.mongodb" % "mongo-java-driver" % "2.13.0",
   "org.jongo" % "jongo" % "1.1",

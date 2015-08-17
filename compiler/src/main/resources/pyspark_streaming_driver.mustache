@@ -3,14 +3,22 @@
 <%#packages%>
 import <%.%>
 <%/packages%>
+import time
 
+diagramName = ssc.sparkContext.appName
+
+# kafka producer used to report results
+from kafka import KeyedProducer, KafkaClient
 broker = "localhost:9092"
+resultTopic = "ONLINE"
+kafka = KafkaClient(broker)
+producer = KeyedProducer(kafka)
 
 def post(rdd):
     results = rdd.collect()
     for result in results:
         for item in result:
-            interpreter.onNotify("predict", str(item))
+            producer.send_messages(resultTopic, diagramName.encode("UTF-8"), str(item).encode("UTF-8"))
 
 <%#models%>
 <%variableName%> = [<%arguments%>]
@@ -24,3 +32,4 @@ def post(rdd):
 
 ssc.start()
 ssc.awaitTermination()
+

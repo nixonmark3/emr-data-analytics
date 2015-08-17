@@ -4,7 +4,6 @@ import akka.actor.*;
 import akka.japi.pf.ReceiveBuilder;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import emr.analytics.models.definition.TargetEnvironments;
 import emr.analytics.models.messages.*;
 import emr.analytics.models.definition.Mode;
 import emr.analytics.service.jobs.*;
@@ -151,7 +150,7 @@ public class JobServiceActor extends AbstractActor {
                 // todo: check whether kafka is running
 
                 // initialize, cache, and start kafka actor
-                ActorRef kafkaActor = context().actorOf(KafkaActor.props(request), request.getTopic());
+                ActorRef kafkaActor = context().actorOf(KafkaProducer.props(request), request.getTopic());
                 streamingSources.put(request.getTopic(), kafkaActor);
                 context().watch(kafkaActor);
 
@@ -247,38 +246,41 @@ public class JobServiceActor extends AbstractActor {
                 sender().tell(summary, self());
             })
 
-                        .match(Terminated.class, t -> {
+            .match(Terminated.class, t -> {
 
-                            // clean up terminated actors
+                // clean up terminated actors
 
-                            String actorName = t.actor().path().name();
-                            if (isUUID(actorName)) {
-                                // if the job name is a uuid - clean up completed jobs
+                String actorName = t.actor().path().name();
 
-                                UUID jobId = UUID.fromString(actorName);
-                                AnalyticsJob job = analyticJobs.get(jobId);
-                                if (job.getMode() == Mode.OFFLINE && this.offlineJobs.containsKey(job.getKey().getId()))
-                                    this.offlineJobs.remove(job.getKey().getId());
-                                else if (job.getMode() == Mode.ONLINE && this.onlineJobs.containsKey(job.getKey().getId()))
-                                    this.onlineJobs.remove(job.getKey().getId());
+                if (isUUID(actorName)) {
+                    // if the job name is a uuid - clean up completed jobs
 
-                                analyticJobs.remove(jobId);
-                            } else if (this.streamingSources.containsKey(actorName)) {
+                    UUID jobId = UUID.fromString(actorName);
+                    AnalyticsJob job = analyticJobs.get(jobId);
+                    if (job.getMode() == Mode.OFFLINE && this.offlineJobs.containsKey(job.getKey().getId()))
+                        this.offlineJobs.remove(job.getKey().getId());
+                    else if (job.getMode() == Mode.ONLINE && this.onlineJobs.containsKey(job.getKey().getId()))
+                        this.onlineJobs.remove(job.getKey().getId());
 
-                                // clean up the streaming source data actor
-                                this.streamingSources.remove(actorName);
-                            }
+                    analyticJobs.remove(jobId);
+                } else if (this.streamingSources.containsKey(actorName)) {
 
-                            if (this.client != null) {
-                                JobsSummary summary = new JobsSummary(this.offlineJobs.size(),
-                                        this.onlineJobs.size(),
-                                        this.streamingSources.size());
-                                this.client.tell(summary, self());
+                    // clean up the streaming source data actor
+                    this.streamingSources.remove(actorName);
+                }
+
+                if (this.client != null) {
+                    JobsSummary summary = new JobsSummary(this.offlineJobs.size(),
+                            this.onlineJobs.size(),
+                            this.streamingSources.size());
+                    this.client.tell(summary, self());
                 }
 
             }).build()
         );
 
+        ActorRef kafkaConsumer = context().actorOf(KafkaConsumer.props());
+        kafkaConsumer.tell("start", self());
     }
 
     private JobInfo createFailedJobInfo(JobRequest request, String message){

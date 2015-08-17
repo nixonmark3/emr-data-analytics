@@ -53,13 +53,15 @@ public class PySparkStreamingInterpreterTest {
         source.append("\trddQueue += [sc.parallelize([j for j in xrange(1, 1001)], 10)]\n");
         source.append("inputStream = ssc.queueStream(rddQueue)\n");
         source.append("mappedStream = inputStream.map(lambda x: (x % 10, 1))\n");
-        source.append("reducedStream = mappedStream.reduceByKey(lambda a, b: a + b)\n");
-        source.append("reducedStream.pprint()\n");
+        source.append("inputStream.pprint()\n");
         source.append("ssc.start()\n");
-        source.append("time.sleep(10)\n");
+        source.append("time.sleep(5)\n");
         source.append("ssc.stop(stopSparkContext=True, stopGraceFully=True)\n");
 
         InterpreterResult result = interpreter.interpret(source.toString());
+
+        System.out.println(result.toString());
+
         Assert.assertEquals(InterpreterResult.State.SUCCESS, result.getState());
     }
 }

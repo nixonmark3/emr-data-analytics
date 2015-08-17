@@ -152,9 +152,13 @@ analyticsApp
                     url: "http://localhost",
                     frequency: 1,
                     keys: [
-                        "Tag1.CV",
-                        "Tag2.CV",
-                        "Tag3.CV"
+                        "IN7OUT1MODEL/TAG1.CV",
+                        "IN7OUT1MODEL/TAG2.CV",
+                        "IN7OUT1MODEL/TAG3.CV",
+                        "IN7OUT1MODEL/TAG4.CV",
+                        "IN7OUT1MODEL/TAG5.CV",
+                        "IN7OUT1MODEL/TAG6.CV",
+                        "IN7OUT1MODEL/TAG7.CV"
                     ]}
                 }, null, '\t')
             };

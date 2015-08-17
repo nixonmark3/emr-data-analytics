@@ -10,28 +10,28 @@ import emr.analytics.service.kafka.JsonSerializer;
 import emr.analytics.service.sources.SourceFactory;
 import emr.analytics.service.sources.SourceValues;
 import emr.analytics.service.sources.StreamingSource;
-import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
+
 import org.apache.log4j.Logger;
 
 import java.util.Properties;
 
-public class KafkaActor extends AbstractActor {
+public class KafkaProducer extends AbstractActor {
 
     // initialize logger
-    private static final Logger logger = Logger.getLogger(KafkaActor.class);
+    private static final Logger logger = Logger.getLogger(KafkaProducer.class);
 
     // flag that indicates whether the producer is running
     private boolean running;
-    private KafkaProducer<String, SourceValues<Double>> producer;
+    private org.apache.kafka.clients.producer.KafkaProducer producer;
     private final StreamingSourceRequest request;
     private final StreamingInfo info;
 
-    public static Props props(StreamingSourceRequest request) { return Props.create(KafkaActor.class, request); }
+    public static Props props(StreamingSourceRequest request) { return Props.create(KafkaProducer.class, request); }
 
-    public KafkaActor(StreamingSourceRequest request){
+    public KafkaProducer(StreamingSourceRequest request){
 
         // initialize the running flag
         this.running = false;
@@ -52,7 +52,7 @@ public class KafkaActor extends AbstractActor {
             props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getProperty("zookeeper.quorum"));
             props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
             props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class.getName());
-            this.producer = new KafkaProducer<>(props);
+            this.producer = new org.apache.kafka.clients.producer.KafkaProducer(props);
         }
         catch(Exception ex){
             logger.error(String.format("Exception occurred while instantiating kafka producer. Details: %s.", ex.toString()));

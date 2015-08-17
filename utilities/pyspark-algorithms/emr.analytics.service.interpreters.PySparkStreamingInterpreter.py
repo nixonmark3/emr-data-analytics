@@ -40,9 +40,11 @@ java_import(gateway.jvm, "org.apache.spark.streaming.api.java.*")
 java_import(gateway.jvm, "org.apache.spark.streaming.api.python.*")
 java_import(gateway.jvm, "org.apache.spark.streaming.kafka.*")
 
-# jssc = interpreter.getStreamingContext()
-# ssc = StreamingContext(sc, None, jssc)
-ssc = StreamingContext(sc, 1)# notify the client that the python script has been initialized
+jssc = interpreter.getStreamingContext()
+ssc = StreamingContext(sc, None, jssc)
+StreamingContext._ensure_initialized()
+# ssc = StreamingContext(sc, 1)
+# notify the client that the python script has been initialized
 interpreter.onPythonScriptInitialized()
 
 class Logger(object):
