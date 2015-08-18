@@ -8,7 +8,8 @@ public enum DataType {
     TIMESTAMP("timestamp"),
     LIST("list"),
     MULTI_SELECT_LIST("multiSelectList"),
-    QUERY("query");
+    QUERY("query"),
+    EDITABLE_QUERY("editableQuery");
 
     private final String stringValue;
 

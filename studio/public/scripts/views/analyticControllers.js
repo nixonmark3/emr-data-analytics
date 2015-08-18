@@ -137,6 +137,25 @@ analyticsApp
         }
     ])
 
+    .controller('blockConfigEditorController', ['$scope', '$element', '$timeout', 'diagramService', 'data', 'config', 'position', 'close',
+        function($scope, $element, $timeout, diagramService, data, config, position, close){
+
+            $scope.config = config;
+            $scope.position = position;
+            $scope.editor = { data: data };
+
+            $scope.close = function(transitionDelay){
+
+                close(null, transitionDelay);
+            };
+
+            $scope.save = function(transitionDelay){
+
+                close($scope.editor.data, transitionDelay);
+            };
+        }
+    ])
+
     .controller('editorController', ['$scope', '$element', '$timeout', 'config', 'position', 'close',
         function($scope, $element, $timeout, config, position, close){
 

@@ -71,7 +71,7 @@ public class SparkCompiler implements TargetCompiler {
 
     public class SparkBlocks {
 
-        private final String terminatingDefinition = "RESTPost";
+        private final String terminatingDefinition = "Write";
         private Mode _mode = Mode.ONLINE;
 
         public HashSet<String> packageNames;
