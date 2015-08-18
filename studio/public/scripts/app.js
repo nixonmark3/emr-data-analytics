@@ -344,13 +344,15 @@ var analyticsApp = angular.module('analyticsApp',
         // set up websockets
         $webSockets.reset();
         $webSockets.listen(function(msg) { return msg.type == "jobs-summary"; }, setCards);
-        $webSockets.listen(function(msg) { return (msg.type == "job-infos" || msg.type == "streaming-infos"); }, setJobs);
+        $webSockets.listen(function(msg) { return (msg.type == "job-infos" ); }, setJobs);
+        $webSockets.listen(function(msg) { return (msg.type == "streaming-infos"); }, setStreamingJobs);
         $webSockets.send({ type: "dashboard" });
         $webSockets.send({ type: "jobs-summary" });
 
         $webSockets.listen(function(msg) { return msg.type == "evaluationStatus"; }, updateOfflineJob);
         $webSockets.listen(function(msg) { return msg.type == "deploymentStatus"; }, function(msg) { updateOnlineJob(msg.jobInfo); });
         $webSockets.listen(function(msg) { return msg.type == "streaming-info"; }, updateStreamingJob);
+        $webSockets.listen(function(msg) { return msg.type == "job-variable"; }, updateJobVariable);
 
             // watch for changes in container dimensions
         $scope.$watch(function() { return cards.width(); }, function(newWidth, oldWidth) {
@@ -495,6 +497,19 @@ var analyticsApp = angular.module('analyticsApp',
          */
         function setJobs(jobs){
 
+            var temp = [];
+            jobs.items.forEach(function(element){
+                temp.push(new viewmodels.jobViewModel(element));
+            });
+
+            $scope.jobs = temp;
+            $scope.loading = false;
+
+            $scope.$$phase || $scope.$apply();
+        }
+
+        function setStreamingJobs(jobs){
+
             $scope.jobs = jobs.items;
             $scope.loading = false;
 
@@ -505,32 +520,32 @@ var analyticsApp = angular.module('analyticsApp',
 
             if ($scope.selector.index == 2){ // offline jobs
 
-                var job;
-                var jobIndex = 0;
+                var temp;
+                var tempIndex = 0;
                 $scope.jobs.forEach(function(element, index){
 
                     if (element.diagramId == message.diagramId){
 
-                        job = element;
-                        jobIndex = index;
+                        temp = element;
+                        tempIndex = index;
                     }
                 });
 
-                if (job){
+                if (temp){
                     // the updated online job is in the list
                     switch(message.state){
                         case "COMPLETED":
                         case "FAILED":
                         case "STOPPED":
 
-                            $scope.jobs.splice(jobIndex, 1);
+                            $scope.jobs.splice(tempIndex, 1);
                             break;
                     }
                 }
                 else{
                     // the item is not in the list - append if running
                     if (message.state == "RUNNING")
-                        $scope.jobs.push(message);
+                        $scope.jobs.push(new viewmodels.jobViewModel(message));
                 }
             }
 
@@ -541,32 +556,32 @@ var analyticsApp = angular.module('analyticsApp',
 
             if ($scope.selector.index == 1){ // online jobs
 
-                var job;
-                var jobIndex = 0;
+                var temp;
+                var tempIndex = 0;
                 $scope.jobs.forEach(function(element, index){
 
                     if (element.diagramId == message.diagramId){
 
-                        job = element;
-                        jobIndex = index;
+                        temp = element;
+                        tempIndex = index;
                     }
                 });
 
-                if (job){
+                if (temp){
                     // the updated online job is in the list
                     switch(message.state){
                         case "COMPLETED":
                         case "FAILED":
                         case "STOPPED":
 
-                            $scope.jobs.splice(jobIndex, 1);
+                            $scope.jobs.splice(tempIndex, 1);
                             break;
                     }
                 }
                 else{
                     // the item is not in the list - append if running
                     if (message.state == "RUNNING")
-                        $scope.jobs.push(message);
+                        $scope.jobs.push(new viewmodels.jobViewModel(message));
                 }
             }
 
@@ -603,6 +618,31 @@ var analyticsApp = angular.module('analyticsApp',
                     // the item is not in the list - append if running
                     if (message.state == "RUNNING")
                         $scope.jobs.push(message);
+                }
+            }
+
+            $scope.$$phase || $scope.$apply();
+        }
+
+        function updateJobVariable(variable){
+
+            if ($scope.selector.index == 1) { // online jobs
+
+                var temp;
+                $scope.jobs.forEach(function(element){
+
+                    if (element.diagramId == variable.key)
+                        temp = element;
+                });
+
+                if (temp){
+                    var trend = [];
+                    variable.values.forEach(function(element){
+                        trend.push(parseFloat(element));
+                    });
+
+                    temp.lastValue = variable.last;
+                    temp.trend = trend;
                 }
             }
 

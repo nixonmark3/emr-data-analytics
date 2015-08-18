@@ -398,3 +398,6 @@ button.diagram-evaluating { color: #2ca02c; }
 
 .editor { position: relative; width: 100%; height: 100%; padding: 15px; }
 .editor textarea { width: 100%; height: 100%; resize: none; }
+
+.trend-line { fill: none; stroke: steelblue; stroke-width: 1.5px; }
+

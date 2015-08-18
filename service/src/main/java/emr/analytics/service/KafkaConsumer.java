@@ -5,6 +5,8 @@ import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
+import emr.analytics.models.messages.JobVariable;
+import emr.analytics.service.messages.ConsumeJob;
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
@@ -13,10 +15,7 @@ import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
 import org.apache.log4j.Logger;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 public class KafkaConsumer extends AbstractActor {
 
@@ -24,8 +23,11 @@ public class KafkaConsumer extends AbstractActor {
     private static final Logger logger = Logger.getLogger(KafkaConsumer.class);
 
     private ConsumerConnector consumer;
+    private ActorRef client;
     private final String topic = "ONLINE";
     private boolean running;
+
+    private Map<UUID, JobVariable> consumerJobs;
 
     public static Props props() { return Props.create(KafkaConsumer.class); }
 
@@ -33,6 +35,9 @@ public class KafkaConsumer extends AbstractActor {
 
         // initialize the running flag
         this.running = false;
+
+        // initialize map of consumer jobs
+        consumerJobs = new HashMap<>();
 
         // load kafka properties
         Properties properties = JobServiceHelper.loadProperties("kafka");
@@ -47,26 +52,46 @@ public class KafkaConsumer extends AbstractActor {
 
         receive(ReceiveBuilder
 
-            /**
-             * start the streaming source job
-             */
-            .match(String.class, s -> s.equals("start"), s -> {
-                run();
-            })
+                        /**
+                         * When a reference to the client actor is received start the streaming source job
+                         */
+                        .match(ActorRef.class, actor -> {
 
-            /**
-             * set the stop flag and send a poison pill
-             */
-            .match(String.class, s -> s.equals("stop"), s -> {
+                            this.client = actor;
+                            run();
+                        })
 
-                // set running flag to false and close the consumer
-                this.running = false;
-                this.consumer.shutdown();
-                // kill this actor
-                self().tell(PoisonPill.getInstance(), self());
-            })
+                                /**
+                                 * Manage the map of consumer jobs
+                                 */
+                        .match(ConsumeJob.class, job -> {
 
-            .build()
+                            switch (job.getState()) {
+                                case START:
+                                    if (!consumerJobs.containsKey(job.getDiagramId()))
+                                        consumerJobs.put(job.getDiagramId(),
+                                                new JobVariable(job.getDiagramId().toString()));
+                                    break;
+                                case END:
+                                    if (consumerJobs.containsKey(job.getDiagramId()))
+                                        consumerJobs.remove(job.getDiagramId());
+                                    break;
+                            }
+                        })
+
+                                /**
+                                 * set the stop flag and send a poison pill
+                                 */
+                        .match(String.class, s -> s.equals("stop"), s -> {
+
+                            // set running flag to false and close the consumer
+                            this.running = false;
+                            this.consumer.shutdown();
+                            // kill this actor
+                            self().tell(PoisonPill.getInstance(), self());
+                        })
+
+                        .build()
         );
     }
 
@@ -93,9 +118,21 @@ public class KafkaConsumer extends AbstractActor {
                         ConsumerIterator<byte[], byte[]> iterator = stream.iterator();
                         while (iterator.hasNext()){
                             MessageAndMetadata<byte[], byte[]> iteration = iterator.next();
+
+                            UUID diagramId = UUID.fromString(new String(iteration.key()));
+                            String value = new String(iteration.message());
+
+                            if (this.client != null && this.consumerJobs.containsKey(diagramId)){
+
+                                JobVariable variable = this.consumerJobs.get(diagramId);
+                                variable.add(value);
+
+                                this.client.tell(variable, self());
+                            }
+
                             System.out.printf("Key: %s, Value: %s.\n",
-                                    new String(iteration.key()),
-                                    new String(iteration.message()));
+                                    diagramId.toString(),
+                                    value);
                         }
                     }
                 }

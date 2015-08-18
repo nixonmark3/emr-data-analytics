@@ -87,6 +87,12 @@ public class AnalyticsActor extends AbstractActor {
                 SessionManager.getInstance().notifyDashboards(info);
             })
 
+            // send job variable to all dashboards
+            .match(JobVariable.class, variable -> {
+
+                SessionManager.getInstance().notifyDashboards(variable);
+            })
+
             // forward job request to the analytics service
             .match(JobRequest.class, request -> {
 

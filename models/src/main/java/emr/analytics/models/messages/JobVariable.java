@@ -5,13 +5,15 @@ import emr.analytics.models.structures.CircularQueue;
 import java.io.Serializable;
 import java.util.List;
 
-public class JobVariable implements Serializable {
+public class JobVariable extends BaseMessage implements Serializable {
 
     private String key;
     private final int capacity = 20;
     private CircularQueue<String> queue;
 
     public JobVariable(String key){
+        super("job-variable");
+
         this.key = key;
         this.queue = new CircularQueue<String>(String.class, this.capacity);
     }

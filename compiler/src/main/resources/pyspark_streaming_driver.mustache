@@ -5,7 +5,7 @@ import <%.%>
 <%/packages%>
 import time
 
-diagramName = ssc.sparkContext.appName
+diagramId = "<%diagramId%>"
 
 # kafka producer used to report results
 from kafka import KeyedProducer, KafkaClient
@@ -18,7 +18,7 @@ def post(rdd):
     results = rdd.collect()
     for result in results:
         for item in result:
-            producer.send_messages(resultTopic, diagramName.encode("UTF-8"), str(item).encode("UTF-8"))
+            producer.send_messages(resultTopic, diagramId.encode("UTF-8"), str(item).encode("UTF-8"))
 
 <%#models%>
 <%variableName%> = [<%arguments%>]

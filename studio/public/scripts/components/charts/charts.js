@@ -270,7 +270,7 @@ angular.module('emr.ui.charts', [])
         }
     }])
 
-    .directive('statisticsHistogram', ['chartService', 'colorService', function(chartService, colorService) {
+    .directive('statisticsHistogram', [function() {
 
         return {
             restrict: 'E',
@@ -322,7 +322,7 @@ angular.module('emr.ui.charts', [])
         }
     }])
 
-    .directive('statisticsBarChart', ['chartService', 'colorService', function(chartService, colorService) {
+    .directive('statisticsBarChart', [function() {
 
         return {
             restrict: 'E',
@@ -364,6 +364,71 @@ angular.module('emr.ui.charts', [])
                             .attr("width", x.rangeBand())
                             .attr("y", function(d) { return y(d.y); })
                             .attr("height", function(d) { return height - y(d.y); });
+                }
+
+                draw();
+            }
+        }
+    }])
+
+    .directive('trendLine', [function(){
+
+        return {
+            restrict: 'E',
+            replace: false,
+            scope: {
+                data: "=trendData",
+                size: "="
+            },
+            link: function($scope, element, attrs){
+
+                // initialize variables
+                var width, height;
+                var margin = { top: 0, right: 0, bottom: 0, left: 0 };
+
+                // initialize the chart canvas
+                var svg = d3.select(element[0]).append("svg");
+                var canvas = svg.append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                $scope.$watch('data', function(newValue, oldValue) {
+                    draw();
+                }, true);
+
+                function draw(){
+
+                    if ($scope.data === undefined || $scope.data.length == 0)
+                        return;
+
+                    console.log($scope.data.length);
+                    console.log($scope.data);
+
+                    // capture the parent's width and height
+                    width = element.width();
+                    height = element.height();
+                    svg.attr("width", width).attr("height", height);
+
+                    var x = d3.scale.linear()
+                        .range([0, width])
+                        .domain([0, parseInt($scope.size)]);
+
+                    var y = d3.scale.linear()
+                        .range([height, 0])
+                        .domain(d3.extent($scope.data, function(d) { return parseFloat(d); } ));
+
+                    var line = d3.svg.line()
+                        .x(function(d, i) { return x(i); })
+                        .y(function(d) {
+                            console.log(d + " " + y(parseFloat(d)));
+                            return y(parseFloat(d));
+                        });
+
+                    canvas.selectAll(".trend-line").remove();
+                    canvas.append("path")
+                        .datum($scope.data)
+                            .attr("class", "trend-line")
+                            .style("stroke","blue")
+                            .attr("d", line);
                 }
 
                 draw();

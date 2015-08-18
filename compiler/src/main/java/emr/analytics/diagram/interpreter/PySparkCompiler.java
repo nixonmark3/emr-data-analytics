@@ -36,7 +36,7 @@ public class PySparkCompiler implements TargetCompiler {
     public String compile(){
 
         // compile a list of blocks to execute
-        PySparkBlocks blocks = new PySparkBlocks(diagram.getMode(), models);
+        PySparkBlocks blocks = new PySparkBlocks(diagram.getId(), diagram.getMode(), models);
 
         // Initialize queue of blocks to compile
         Queue<Block> queue = new LinkedList<Block>();
@@ -79,13 +79,15 @@ public class PySparkCompiler implements TargetCompiler {
         private final String terminatingDefinition = "Post";
         private Mode mode;
 
+        public String diagramId;
         public HashSet<String> packages;
         public List<BlockOperation> blocks;
         public List<ModelVariable> models = new ArrayList<ModelVariable>();
         public String terminatingVariable;
 
-        public PySparkBlocks(Mode mode, HashMap<String, String> models) {
+        public PySparkBlocks(UUID diagramId, Mode mode, HashMap<String, String> models) {
 
+            this.diagramId = diagramId.toString();
             this.mode = mode;
 
             models.forEach((key, value) -> {

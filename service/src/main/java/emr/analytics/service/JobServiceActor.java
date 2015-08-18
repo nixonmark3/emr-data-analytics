@@ -7,6 +7,7 @@ import akka.util.Timeout;
 import emr.analytics.models.messages.*;
 import emr.analytics.models.definition.Mode;
 import emr.analytics.service.jobs.*;
+import emr.analytics.service.messages.ConsumeJob;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -33,6 +34,9 @@ public class JobServiceActor extends AbstractActor {
     // keep a reference to the remote akka actor client
     private ActorRef client = null;
 
+    // reference to the kafka consumer
+    private ActorRef kafkaConsumer;
+
     public static Props props(String host, String port){ return Props.create(JobServiceActor.class, host, port); }
 
     public JobServiceActor(String host, String port){
@@ -42,7 +46,11 @@ public class JobServiceActor extends AbstractActor {
             // on remote association the client will pass a reference to itself for reference
             .match(ActorRef.class, actor -> {
 
+                // capture the client reference
                 this.client = actor;
+
+                // pass the client to the kafka consumer
+                kafkaConsumer.tell(this.client, self());
             })
 
             // job request sent from client
@@ -90,7 +98,7 @@ public class JobServiceActor extends AbstractActor {
                 } else if (job instanceof SparkJob) {
 
                     // create a new spark process actor - send job
-                    SparkJob sparkJob = (SparkJob)job;
+                    SparkJob sparkJob = (SparkJob) job;
                     jobActor = context().actorOf(SparkProcessActor.props(sender(),
                                     job.getId(),
                                     sparkJob.getDiagramName(),
@@ -101,6 +109,8 @@ public class JobServiceActor extends AbstractActor {
                             job.getId().toString());
                     jobActor.tell(sparkJob, self());
 
+                    // tell the kafka consumer that a spark job is starting
+                    kafkaConsumer.tell(new ConsumeJob(job.getKey().getId(), ConsumeJob.ConsumeState.START), self());
                 } else {
 
                     // notify the sender that the specified job type is not support
@@ -130,8 +140,7 @@ public class JobServiceActor extends AbstractActor {
                     // send kill message
                     ActorRef jobActor = this.offlineJobs.get(request.getDiagramId());
                     jobActor.tell("stop", self());
-                }
-                else if (request.getMode() == Mode.ONLINE && this.onlineJobs.containsKey(request.getDiagramId())) {
+                } else if (request.getMode() == Mode.ONLINE && this.onlineJobs.containsKey(request.getDiagramId())) {
 
                     // send kill message
                     ActorRef jobActor = this.onlineJobs.get(request.getDiagramId());
@@ -257,10 +266,15 @@ public class JobServiceActor extends AbstractActor {
 
                     UUID jobId = UUID.fromString(actorName);
                     AnalyticsJob job = analyticJobs.get(jobId);
-                    if (job.getMode() == Mode.OFFLINE && this.offlineJobs.containsKey(job.getKey().getId()))
+                    if (job.getMode() == Mode.OFFLINE && this.offlineJobs.containsKey(job.getKey().getId())) {
                         this.offlineJobs.remove(job.getKey().getId());
-                    else if (job.getMode() == Mode.ONLINE && this.onlineJobs.containsKey(job.getKey().getId()))
+                    }
+                    else if (job.getMode() == Mode.ONLINE && this.onlineJobs.containsKey(job.getKey().getId())) {
                         this.onlineJobs.remove(job.getKey().getId());
+
+                        // tell the kafka consumer that a spark job has been terminated
+                        kafkaConsumer.tell(new ConsumeJob(job.getKey().getId(), ConsumeJob.ConsumeState.END), self());
+                    }
 
                     analyticJobs.remove(jobId);
                 } else if (this.streamingSources.containsKey(actorName)) {
@@ -279,8 +293,7 @@ public class JobServiceActor extends AbstractActor {
             }).build()
         );
 
-        ActorRef kafkaConsumer = context().actorOf(KafkaConsumer.props());
-        kafkaConsumer.tell("start", self());
+        kafkaConsumer = context().actorOf(KafkaConsumer.props());
     }
 
     private JobInfo createFailedJobInfo(JobRequest request, String message){
