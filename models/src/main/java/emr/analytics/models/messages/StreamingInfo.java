@@ -5,7 +5,7 @@ import emr.analytics.models.sources.PollingSource;
 import java.io.Serializable;
 import java.util.Date;
 
-public class StreamingInfo implements Serializable {
+public class StreamingInfo extends BaseMessage implements Serializable {
 
     private String topic;
     private PollingSource.PollingSourceType pollingSourceType;
@@ -14,11 +14,20 @@ public class StreamingInfo implements Serializable {
     private JobStates state;
 
     public StreamingInfo(String topic, PollingSource.PollingSourceType pollingSourceType, int frequency){
+        super("streaming-info");
+
         this.topic = topic;
         this.pollingSourceType = pollingSourceType;
         this.frequency = frequency;
         this.started = new Date();
         this.state = JobStates.RUNNING;
+    }
+
+    public StreamingInfo(StreamingInfo streamingInfo){
+        this(streamingInfo.getTopic(), streamingInfo.getPollingSourceType(), streamingInfo.getFrequency());
+
+        this.state = streamingInfo.getState();
+        this.started = streamingInfo.getStarted();
     }
 
     public String getTopic(){ return this.topic; }

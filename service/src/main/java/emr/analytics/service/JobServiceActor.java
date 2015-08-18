@@ -150,7 +150,7 @@ public class JobServiceActor extends AbstractActor {
                 // todo: check whether kafka is running
 
                 // initialize, cache, and start kafka actor
-                ActorRef kafkaActor = context().actorOf(KafkaProducer.props(request), request.getTopic());
+                ActorRef kafkaActor = context().actorOf(KafkaProducer.props(request, this.client), request.getTopic());
                 streamingSources.put(request.getTopic(), kafkaActor);
                 context().watch(kafkaActor);
 

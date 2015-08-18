@@ -1,6 +1,7 @@
 package emr.analytics.service;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
@@ -53,9 +54,9 @@ public class KafkaConsumer extends AbstractActor {
                 run();
             })
 
-                    /**
-                     * set the stop flag and send a poison pill
-                     */
+            /**
+             * set the stop flag and send a poison pill
+             */
             .match(String.class, s -> s.equals("stop"), s -> {
 
                 // set running flag to false and close the consumer
