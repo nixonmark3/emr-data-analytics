@@ -350,9 +350,9 @@ var analyticsApp = angular.module('analyticsApp',
 
         $webSockets.listen(function(msg) { return msg.type == "evaluationStatus"; }, updateOfflineJob);
         $webSockets.listen(function(msg) { return msg.type == "deploymentStatus"; }, function(msg) { updateOnlineJob(msg.jobInfo); });
+        $webSockets.listen(function(msg) { return msg.type == "streaming-info"; }, updateStreamingJob);
 
-
-        // watch for changes in container dimensions
+            // watch for changes in container dimensions
         $scope.$watch(function() { return cards.width(); }, function(newWidth, oldWidth) {
             $scope.selector.xOffset = (newWidth / 4);
         });
@@ -539,7 +539,43 @@ var analyticsApp = angular.module('analyticsApp',
 
         function updateOnlineJob(message){
 
-            if ($scope.selector.index == 0 || $scope.selector.index == 1){ // online jobs
+            if ($scope.selector.index == 1){ // online jobs
+
+                var job;
+                var jobIndex = 0;
+                $scope.jobs.forEach(function(element, index){
+
+                    if (element.diagramId == message.diagramId){
+
+                        job = element;
+                        jobIndex = index;
+                    }
+                });
+
+                if (job){
+                    // the updated online job is in the list
+                    switch(message.state){
+                        case "COMPLETED":
+                        case "FAILED":
+                        case "STOPPED":
+
+                            $scope.jobs.splice(jobIndex, 1);
+                            break;
+                    }
+                }
+                else{
+                    // the item is not in the list - append if running
+                    if (message.state == "RUNNING")
+                        $scope.jobs.push(message);
+                }
+            }
+
+            $scope.$$phase || $scope.$apply();
+        }
+
+        function updateStreamingJob(message){
+
+            if ($scope.selector.index == 0){ // streaming jobs
 
                 var job;
                 var jobIndex = 0;

@@ -1,9 +1,11 @@
 package emr.analytics.service;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
+import emr.analytics.models.messages.JobStates;
 import emr.analytics.models.messages.StreamingInfo;
 import emr.analytics.models.messages.StreamingSourceRequest;
 import emr.analytics.service.kafka.JsonSerializer;
@@ -26,18 +28,22 @@ public class KafkaProducer extends AbstractActor {
     // flag that indicates whether the producer is running
     private boolean running;
     private org.apache.kafka.clients.producer.KafkaProducer producer;
+    private final ActorRef client;
     private final StreamingSourceRequest request;
     private final StreamingInfo info;
 
-    public static Props props(StreamingSourceRequest request) { return Props.create(KafkaProducer.class, request); }
+    public static Props props(StreamingSourceRequest request, ActorRef client) { return Props.create(KafkaProducer.class, request, client); }
 
-    public KafkaProducer(StreamingSourceRequest request){
+    public KafkaProducer(StreamingSourceRequest request, ActorRef client){
 
         // initialize the running flag
         this.running = false;
 
         // capture the streaming source request
         this.request = request;
+
+        // reference the client actor to send updates
+        this.client = client;
 
         // load kafka properties
         Properties properties = JobServiceHelper.loadProperties("kafka");
@@ -72,18 +78,24 @@ public class KafkaProducer extends AbstractActor {
              * start the streaming source job
              */
             .match(String.class, s -> s.equals("start"), s -> {
+
+                this.client.tell(new StreamingInfo(info), self());
                 run();
-
-
             })
 
             /**
              * set the stop flag and send a poison pill
              */
             .match(String.class, s -> s.equals("stop"), s -> {
+
                 // set running flag to false and close producer
                 this.running = false;
+
+                info.setState(JobStates.STOPPED);
+                this.client.tell(new StreamingInfo(info), self());
+
                 this.producer.close();
+
                 // kill this actor
                 self().tell(PoisonPill.getInstance(), self());
             })

@@ -81,6 +81,12 @@ public class AnalyticsActor extends AbstractActor {
                 }
             })
 
+            // received streaming information from the server
+            .match(StreamingInfo.class, info -> {
+
+                SessionManager.getInstance().notifyDashboards(info);
+            })
+
             // forward job request to the analytics service
             .match(JobRequest.class, request -> {
 
