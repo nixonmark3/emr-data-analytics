@@ -8,7 +8,7 @@
         <div class="input-group" ng-switch on="parameter.type()">
 
             <span class="input-group-addon">
-                <i ng-attr-class="fa {{parameter.loading && 'fa-spinner fa-spin' || parameter.type()=='list' && 'fa-list-ul' || parameter.type()=='multiSelectList' && 'fa-list-alt' || parameter.type()=='query' && 'fa-pencil-square-o' || parameter.type()=='int' && 'fa-list-ol' || 'fa-file-text-o'}}"></i>
+                <i ng-attr-class="fa {{parameter.loading && 'fa-spinner fa-spin' || parameter.type()=='list' && 'fa-list-ul' || parameter.type()=='multiSelectList' && 'fa-list-alt' || parameter.type()=='query' && 'fa-pencil-square-o' || parameter.type()=='int' && 'fa-list-ol' || parameter.type()=='editableQuery' && 'fa-edit' || 'fa-file-text-o'}}"></i>
             </span>
 
             <select ng-switch-when="list"
@@ -37,6 +37,8 @@
             <input ng-switch-when="int" class="form-control" type="number" ng-model="parameter.value" ng-change="setValue(parameter);" />
 
             <textarea ng-switch-when="query" class="form-control" type="text" ng-model="parameter.value" ng-change="setValue(parameter);" />
+
+            <button type="button" class="btn btn-success editable-query-btn" ng-switch-when="editableQuery" class="form-control" ng-click="editQuery($event, parameter)">Edit</button>
 
             <input ng-switch-default class="form-control" type="text" ng-model="parameter.value" ng-change="setValue(parameter);" />
 

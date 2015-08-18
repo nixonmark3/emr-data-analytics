@@ -76,7 +76,7 @@ public class PySparkCompiler implements TargetCompiler {
 
     public class PySparkBlocks {
 
-        private final String terminatingDefinition = "Post";
+        private final String terminatingDefinition = "Write";
         private Mode mode;
 
         public String diagramId;

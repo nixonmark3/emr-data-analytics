@@ -148,7 +148,7 @@ angular.module('browserApp', ['ngAnimate', 'emr.ui.interact'])
             }
         }
     }])
-    .directive('blockConfig', [function () {
+    .directive('blockConfig', ['modalService', function (modalService) {
 
         return {
             restrict: 'E',
@@ -339,6 +339,40 @@ angular.module('browserApp', ['ngAnimate', 'emr.ui.interact'])
                     if ($scope.onChange)
                         $scope.onChange();
                 };
+
+                $scope.editQuery = function(evt, parameter) {
+
+                    var data = parameter.value;
+
+                    var position = {
+                        width: 800,
+                        centerX: evt.clientX,
+                        centerY: evt.clientY
+                    };
+
+                    modalService.show({
+                        templateUrl: '/assets/scripts/views/editor.html',
+                        controller: 'blockConfigEditorController',
+                        inputs: { data: data },
+                        config: {
+                            name: "Edit Query",
+                            showSave : true,
+                            showCancel: true
+                        },
+                        position: position
+                    }).then(function (modal) {
+
+                        modal.close.then(function (query) {
+
+                            if (query) {
+
+                                parameter.value = query;
+                                $scope.setValue(parameter);
+                            }
+                        });
+                    });
+                };
+
             }
         }
     }]);

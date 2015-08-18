@@ -37,7 +37,7 @@ public class DiagramTransformer {
 
         public Transformer(Diagram offline){
             this.offline = offline;
-            terminatingDefinition = definitions.get("Post");
+            terminatingDefinition = definitions.get("Write");
         }
 
         public Diagram transform(){
