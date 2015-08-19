@@ -384,7 +384,7 @@ angular.module('emr.ui.charts', [])
 
                 // initialize variables
                 var width, height;
-                var margin = { top: 0, right: 0, bottom: 0, left: 0 };
+                var margin = { top: 10, right: 0, bottom: 10, left: 0 };
 
                 // initialize the chart canvas
                 var svg = d3.select(element[0]).append("svg");
@@ -400,9 +400,6 @@ angular.module('emr.ui.charts', [])
                     if ($scope.data === undefined || $scope.data.length == 0)
                         return;
 
-                    console.log($scope.data.length);
-                    console.log($scope.data);
-
                     // capture the parent's width and height
                     width = element.width();
                     height = element.height();
@@ -413,21 +410,17 @@ angular.module('emr.ui.charts', [])
                         .domain([0, parseInt($scope.size)]);
 
                     var y = d3.scale.linear()
-                        .range([height, 0])
+                        .range([height - margin.top - margin.bottom, 0])
                         .domain(d3.extent($scope.data, function(d) { return parseFloat(d); } ));
 
                     var line = d3.svg.line()
                         .x(function(d, i) { return x(i); })
-                        .y(function(d) {
-                            console.log(d + " " + y(parseFloat(d)));
-                            return y(parseFloat(d));
-                        });
+                        .y(function(d) { return y(parseFloat(d)); });
 
                     canvas.selectAll(".trend-line").remove();
                     canvas.append("path")
                         .datum($scope.data)
                             .attr("class", "trend-line")
-                            .style("stroke","blue")
                             .attr("d", line);
                 }
 

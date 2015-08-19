@@ -9,7 +9,7 @@
             <div class="col-xs-3">
 
                 <div class="dashboard-card" ng-click="activeCard(0)">
-                    <div class="card-value">{{cards.streaming}}</div>
+                    <div class="card-value">{{cards.streaming == -1 ? "-" : cards.streaming}}</div>
                     <div class="card-label">Data Streams</div>
                 </div>
 
@@ -18,7 +18,7 @@
             <div class="col-xs-3">
 
                 <div class="dashboard-card" ng-click="activeCard(1)">
-                    <div class="card-value">{{cards.online}}</div>
+                    <div class="card-value">{{cards.online == -1 ? "-" : cards.online}}</div>
                     <div class="card-label">Online</div>
                 </div>
 
@@ -27,7 +27,7 @@
             <div class="col-xs-3">
 
                 <div class="dashboard-card" ng-click="activeCard(2)">
-                    <div class="card-value">{{cards.offline}}</div>
+                    <div class="card-value">{{cards.offline == -1 ? "-" : cards.offline}}</div>
                     <div class="card-label">Offline</div>
                 </div>
 
@@ -56,13 +56,13 @@
 
                 <div class="row">
 
-                    <div class="col-xs-2">Topic</div>
+                    <div class="col-xs-2 dashboard-header-col">Topic</div>
 
-                    <div class="col-xs-2">Start</div>
+                    <div class="col-xs-2 dashboard-header-col">Start</div>
 
-                    <div class="col-xs-2">Type</div>
+                    <div class="col-xs-2 dashboard-header-col">Type</div>
 
-                    <div class="col-xs-2">Frequency</div>
+                    <div class="col-xs-2 dashboard-header-col">Frequency</div>
 
                     <div class="col-xs-4">
                         <i class="fa fa-plus pull-right" ng-click="addSource($event)"></i>
@@ -76,15 +76,15 @@
 
                 <div class="row">
 
-                    <div class="col-xs-2">{{::job.topic}}</div>
+                    <div class="col-xs-2 dashboard-item-col">{{::job.topic}}</div>
 
-                    <div class="col-xs-2">{{::formatDate(job.started)}}</div>
+                    <div class="col-xs-2 dashboard-item-col">{{::formatDate(job.started)}}</div>
 
-                    <div class="col-xs-2">{{::job.pollingSourceType}}</div>
+                    <div class="col-xs-2 dashboard-item-col">{{::job.pollingSourceType}}</div>
 
-                    <div class="col-xs-2">{{::job.frequency}} per second</div>
+                    <div class="col-xs-2 dashboard-item-col">{{::job.frequency}} per second</div>
 
-                    <div class="col-xs-4">
+                    <div class="col-xs-4 dashboard-item-col">
                         <i ng-if="!job.killing" class="fa fa-times dashboard-item-kill pull-right" ng-click="killTopic(job, $event)"></i>
                         <i ng-if="job.killing" class="fa fa-spinner fa-spin pull-right"></i>
                     </div>
@@ -101,13 +101,13 @@
 
                 <div class="row">
 
-                    <div class="col-xs-2">Name</div>
+                    <div class="col-xs-2 dashboard-header-col">Name</div>
 
-                    <div class="col-xs-2">Start</div>
+                    <div class="col-xs-2 dashboard-header-col">Start</div>
 
-                    <div class="col-xs-5">Trend</div>
+                    <div class="col-xs-5 dashboard-header-col">Trend</div>
 
-                    <div class="col-xs-2">Last Prediction</div>
+                    <div class="col-xs-2 dashboard-header-col">Last Prediction</div>
 
                     <div class="col-xs-1"></div>
 
@@ -119,17 +119,17 @@
 
                 <div class="row">
 
-                    <div class="col-xs-2">{{::job.diagramName}}</div>
+                    <div class="col-xs-2 dashboard-item-col">{{::job.diagramName}}</div>
 
-                    <div class="col-xs-2">{{::formatDate(job.started)}}</div>
+                    <div class="col-xs-2 dashboard-item-col">{{::formatDate(job.started)}}</div>
 
-                    <div class="col-xs-5">
-                        <trend-line trend-data="job.trend" size="20"></trend-line>
+                    <div class="col-xs-5 dashboard-item-trend">
+                        <trend-line class="dashboard-trend" trend-data="job.trend" size="20"></trend-line>
                     </div>
 
-                    <div class="col-xs-2">{{job.lastValue}}</div>
+                    <div class="col-xs-2 dashboard-item-col">{{job.lastValue == -1 ? "-" : job.lastValue}}</div>
 
-                    <div class="col-xs-1">
+                    <div class="col-xs-1 dashboard-item-col">
                         <i ng-if="!job.killing" class="fa fa-times dashboard-item-kill pull-right" ng-click="kill(job, $event)"></i>
                         <i ng-if="job.killing" class="fa fa-spinner fa-spin pull-right"></i>
                     </div>
@@ -146,9 +146,9 @@
 
                 <div class="row">
 
-                    <div class="col-xs-2">Name</div>
+                    <div class="col-xs-2 dashboard-header-col">Name</div>
 
-                    <div class="col-xs-9">Start</div>
+                    <div class="col-xs-9 dashboard-header-col">Start</div>
 
                     <div class="col-xs-1"></div>
 
@@ -160,9 +160,9 @@
 
                 <div class="row">
 
-                    <div class="col-xs-2">{{::job.diagramName}}</div>
+                    <div class="col-xs-2 dashboard-item-col">{{::job.diagramName}}</div>
 
-                    <div class="col-xs-9">{{::formatDate(job.started)}}</div>
+                    <div class="col-xs-9 dashboard-item-col">{{::formatDate(job.started)}}</div>
 
                     <div class="col-xs-1">
                         <i ng-if="!job.killing" class="fa fa-times dashboard-item-kill pull-right" ng-click="kill(job, $event)"></i>
