@@ -6,7 +6,9 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
 import emr.analytics.models.messages.JobVariable;
+import emr.analytics.service.consumers.DataConsumer;
 import emr.analytics.service.messages.ConsumeJob;
+import emr.analytics.service.consumers.ConsumerData;
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
@@ -61,9 +63,9 @@ public class KafkaConsumer extends AbstractActor {
                             run();
                         })
 
-                                /**
-                                 * Manage the map of consumer jobs
-                                 */
+                        /**
+                         * Manage the map of consumer jobs
+                         */
                         .match(ConsumeJob.class, job -> {
 
                             switch (job.getState()) {
@@ -79,9 +81,9 @@ public class KafkaConsumer extends AbstractActor {
                             }
                         })
 
-                                /**
-                                 * set the stop flag and send a poison pill
-                                 */
+                        /**
+                         * set the stop flag and send a poison pill
+                         */
                         .match(String.class, s -> s.equals("stop"), s -> {
 
                             // set running flag to false and close the consumer
@@ -111,18 +113,22 @@ public class KafkaConsumer extends AbstractActor {
         // spawn a thread to consume records
         new Thread(() -> {
 
-            while(running){
+            while(running) {
 
-                try{
+                try {
+
                     for (final KafkaStream<byte[], byte[]> stream : streamList) {
+
                         ConsumerIterator<byte[], byte[]> iterator = stream.iterator();
-                        while (iterator.hasNext()){
+
+                        while (iterator.hasNext()) {
+
                             MessageAndMetadata<byte[], byte[]> iteration = iterator.next();
 
                             UUID diagramId = UUID.fromString(new String(iteration.key()));
                             String value = new String(iteration.message());
 
-                            if (this.client != null && this.consumerJobs.containsKey(diagramId)){
+                            if (this.client != null && this.consumerJobs.containsKey(diagramId)) {
 
                                 JobVariable variable = this.consumerJobs.get(diagramId);
                                 variable.add(value);
@@ -130,13 +136,16 @@ public class KafkaConsumer extends AbstractActor {
                                 this.client.tell(variable, self());
                             }
 
-                            System.out.printf("Key: %s, Value: %s.\n",
-                                    diagramId.toString(),
-                                    value);
+                            ConsumerData consumerData = new ConsumerData();
+                            consumerData.ip = "localhost";
+                            consumerData.value = value;
+
+                            DataConsumer.send("Simulated", consumerData);
                         }
                     }
                 }
-                catch(Exception ex){
+                catch(Exception ex) {
+
                     logger.error(String.format("Exception occurred while writing to Kafka. Details: %s.", ex.toString()));
                 }
             }
