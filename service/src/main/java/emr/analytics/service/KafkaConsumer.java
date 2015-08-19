@@ -129,10 +129,6 @@ public class KafkaConsumer extends AbstractActor {
 
                                 this.client.tell(variable, self());
                             }
-
-                            System.out.printf("Key: %s, Value: %s.\n",
-                                    diagramId.toString(),
-                                    value);
                         }
                     }
                 }
