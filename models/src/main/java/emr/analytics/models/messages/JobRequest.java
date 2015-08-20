@@ -13,8 +13,9 @@ public class JobRequest extends BaseMessage implements Serializable {
     private TargetEnvironments targetEnvironment;
     private String diagramName;
     private String source;
+    private String metaData;
 
-    public JobRequest(UUID diagramId, Mode mode, TargetEnvironments targetEnvironment, String diagramName, String source){
+    public JobRequest(UUID diagramId, Mode mode, TargetEnvironments targetEnvironment, String diagramName, String source, String metaData){
         super("jobRequest");
 
         this.diagramId = diagramId;
@@ -22,6 +23,7 @@ public class JobRequest extends BaseMessage implements Serializable {
         this.targetEnvironment = targetEnvironment;
         this.diagramName = diagramName;
         this.source = source;
+        this.metaData = metaData;
     }
 
     public UUID getDiagramId(){ return this.diagramId; }
@@ -33,4 +35,6 @@ public class JobRequest extends BaseMessage implements Serializable {
     public String getDiagramName(){ return this.diagramName; }
 
     public String getSource(){ return this.source; }
+
+    public String getMetaData() { return this.metaData; }
 }

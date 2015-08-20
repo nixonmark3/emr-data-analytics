@@ -2,10 +2,7 @@ package services;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.WriteResult;
-import emr.analytics.diagram.interpreter.CompilerException;
-import emr.analytics.diagram.interpreter.DiagramCompiler;
-import emr.analytics.diagram.interpreter.DiagramOperations;
-import emr.analytics.diagram.interpreter.DiagramTransformer;
+import emr.analytics.diagram.interpreter.*;
 import emr.analytics.models.definition.Definition;
 import emr.analytics.models.diagram.*;
 import emr.analytics.models.messages.JobRequest;
@@ -42,7 +39,7 @@ public class DiagramsService {
      * @return source code string
      * @throws CompilerException
      */
-    public String compile(Diagram diagram) throws CompilerException {
+    public CompiledDiagram compile(Diagram diagram) throws CompilerException {
 
         HashMap<String, String> outputs = this.getPersistedOutputs(diagram);
         DiagramCompiler compiler = new DiagramCompiler(definitions);
@@ -68,13 +65,14 @@ public class DiagramsService {
      */
     public JobRequest getJobRequest(Diagram diagram) throws CompilerException {
 
-        String source = this.compile(diagram);
+        CompiledDiagram compiledDiagram = this.compile(diagram);
 
         JobRequest request = new JobRequest(diagram.getId(),
             diagram.getMode(),
             diagram.getTargetEnvironment(),
             diagram.getName(),
-            source);
+            compiledDiagram.getSource(),
+            compiledDiagram.getMetaData());
 
         return request;
     }

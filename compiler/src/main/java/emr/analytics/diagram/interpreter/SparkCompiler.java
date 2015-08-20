@@ -28,7 +28,7 @@ public class SparkCompiler implements TargetCompiler {
         this.models = models;
     }
 
-    public String compile(){
+    public CompiledDiagram compile(){
 
         // compile a list of blocks to execute
         SparkBlocks blocks = new SparkBlocks(models);
@@ -66,7 +66,7 @@ public class SparkCompiler implements TargetCompiler {
             }
         }
 
-        return source;
+        return new CompiledDiagram(source);
     }
 
     public class SparkBlocks {
@@ -143,6 +143,7 @@ public class SparkCompiler implements TargetCompiler {
 
             StringWriter writer = new StringWriter();
             mustache.execute(writer, this);
+
             return writer.toString();
         }
 

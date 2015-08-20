@@ -21,7 +21,7 @@ public class DiagramCompiler {
      * @return
      * @throws CompilerException
      */
-    public String compile(Diagram diagram, HashMap<String, String> models) throws CompilerException {
+    public CompiledDiagram compile(Diagram diagram, HashMap<String, String> models) throws CompilerException {
 
         TargetCompiler compiler;
         switch (diagram.getTargetEnvironment()) {
@@ -48,7 +48,7 @@ public class DiagramCompiler {
      * @return
      * @throws CompilerException
      */
-    public String compile(Diagram diagram) throws CompilerException {
+    public CompiledDiagram compile(Diagram diagram) throws CompilerException {
         return this.compile(diagram, new HashMap<String, String>());
     }
 }

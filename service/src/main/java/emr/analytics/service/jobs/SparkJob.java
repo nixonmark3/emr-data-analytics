@@ -6,14 +6,18 @@ import emr.analytics.models.messages.JobRequest;
 public class SparkJob extends AnalyticsJob {
 
     private TargetEnvironments targetEnvironment;
+    private String metaData;
 
     public SparkJob(JobRequest request){
         super(request);
 
-        targetEnvironment = request.getTargetEnvironment();
+        this.targetEnvironment = request.getTargetEnvironment();
+        this.metaData = request.getMetaData();
     }
 
     public TargetEnvironments getTargetEnvironment(){
         return this.targetEnvironment;
     }
+
+    public String getMetaData() { return this.metaData; }
 }

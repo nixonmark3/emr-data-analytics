@@ -26,7 +26,7 @@ public class PythonCompiler implements TargetCompiler {
         this.diagram = diagram;
     }
 
-    public String compile(){
+    public CompiledDiagram compile(){
 
         // compile a list of blocks to execute
         PythonBlocks blocks = new PythonBlocks();
@@ -80,7 +80,7 @@ public class PythonCompiler implements TargetCompiler {
             }
         }
 
-        return source;
+        return new CompiledDiagram(source);
     }
 
     private class PythonBlocks {

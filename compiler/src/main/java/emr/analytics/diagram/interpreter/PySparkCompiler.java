@@ -33,7 +33,7 @@ public class PySparkCompiler implements TargetCompiler {
             this.template = "pyspark_driver.mustache";
     }
 
-    public String compile(){
+    public CompiledDiagram compile(){
 
         // compile a list of blocks to execute
         PySparkBlocks blocks = new PySparkBlocks(diagram.getId(), diagram.getMode(), models);
@@ -71,7 +71,7 @@ public class PySparkCompiler implements TargetCompiler {
             }
         }
 
-        return source;
+        return new CompiledDiagram(source, blocks.terminatingConfiguration);
     }
 
     public class PySparkBlocks {
@@ -84,6 +84,7 @@ public class PySparkCompiler implements TargetCompiler {
         public List<BlockOperation> blocks;
         public List<ModelVariable> models = new ArrayList<ModelVariable>();
         public String terminatingVariable;
+        public String terminatingConfiguration;
 
         public PySparkBlocks(UUID diagramId, Mode mode, HashMap<String, String> models) {
 
@@ -103,6 +104,11 @@ public class PySparkCompiler implements TargetCompiler {
             ModeDefinition modeDefinition = definition.getModel(this.mode);
 
             if (definition.getName().equals(terminatingDefinition)){
+
+                // capture the terminating block's configuration
+                Optional<Parameter> parameter = block.getParameter("Query");
+                if (parameter.isPresent())
+                    this.terminatingConfiguration = parameter.get().getValue().toString();
 
                 this.terminatingVariable = buildArguments(new String[] { "input:in" },
                         block,

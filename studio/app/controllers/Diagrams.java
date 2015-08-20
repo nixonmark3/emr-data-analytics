@@ -25,7 +25,7 @@ public class Diagrams extends ControllerBase {
 
         String source;
         try{
-            source = DiagramsService.getInstance().compile(diagram);
+            source = DiagramsService.getInstance().compile(diagram).getSource();
         }
         catch(CompilerException ex){
             return internalServerError(String.format("Compile Exception: %s", ex.toString()));

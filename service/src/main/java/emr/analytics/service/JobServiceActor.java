@@ -109,6 +109,8 @@ public class JobServiceActor extends AbstractActor {
                             job.getId().toString());
                     jobActor.tell(sparkJob, self());
 
+                    System.out.println(String.format("Metadata: %s.", sparkJob.getMetaData()));
+
                     // tell the kafka consumer that a spark job is starting
                     kafkaConsumer.tell(new ConsumeJob(job.getKey().getId(), ConsumeJob.ConsumeState.START), self());
                 } else {
