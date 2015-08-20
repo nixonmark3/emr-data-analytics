@@ -7,6 +7,7 @@ public class ConsumerException extends RuntimeException {
     }
 
     public ConsumerException(String m) {
+
         super(m);
     }
 }

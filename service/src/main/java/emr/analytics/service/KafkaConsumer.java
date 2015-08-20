@@ -6,9 +6,9 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
 import emr.analytics.models.messages.JobVariable;
-import emr.analytics.service.consumers.DataConsumer;
+import emr.analytics.service.consumers.ConsumerDispatcher;
+import emr.analytics.service.kafka.ConsumerJob;
 import emr.analytics.service.messages.ConsumeJob;
-import emr.analytics.service.consumers.ConsumerData;
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
@@ -16,8 +16,8 @@ import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
 import org.apache.log4j.Logger;
-
 import java.util.*;
+import java.util.concurrent.Executors;
 
 public class KafkaConsumer extends AbstractActor {
 
@@ -29,7 +29,7 @@ public class KafkaConsumer extends AbstractActor {
     private final String topic = "ONLINE";
     private boolean running;
 
-    private Map<UUID, JobVariable> consumerJobs;
+    private Map<UUID, ConsumerJob> consumerJobs;
 
     public static Props props() { return Props.create(KafkaConsumer.class); }
 
@@ -69,14 +69,22 @@ public class KafkaConsumer extends AbstractActor {
                         .match(ConsumeJob.class, job -> {
 
                             switch (job.getState()) {
+
                                 case START:
-                                    if (!consumerJobs.containsKey(job.getDiagramId()))
-                                        consumerJobs.put(job.getDiagramId(),
-                                                new JobVariable(job.getDiagramId().toString()));
+                                    if (!consumerJobs.containsKey(job.getDiagramId())) {
+
+                                        ConsumerJob consumerJob = new ConsumerJob(
+                                                new JobVariable(job.getDiagramId().toString()),
+                                                job.getMetaData());
+
+                                        consumerJobs.put(job.getDiagramId(), consumerJob);
+                                    }
                                     break;
                                 case END:
-                                    if (consumerJobs.containsKey(job.getDiagramId()))
+                                    if (consumerJobs.containsKey(job.getDiagramId())) {
+
                                         consumerJobs.remove(job.getDiagramId());
+                                    }
                                     break;
                             }
                         })
@@ -100,7 +108,8 @@ public class KafkaConsumer extends AbstractActor {
     /**
      * Asynchronously produce kafka records
      */
-    private void run(){
+    private void run() {
+
         this.running = true;
 
         // Define single thread for topic
@@ -110,10 +119,9 @@ public class KafkaConsumer extends AbstractActor {
 
         List<KafkaStream<byte[], byte[]>> streamList = consumerStreamsMap.get(this.topic);
 
-        // spawn a thread to consume records
-        new Thread(() -> {
+        Executors.newSingleThreadExecutor().submit(() -> {
 
-            while(running) {
+            while (running) {
 
                 try {
 
@@ -130,17 +138,17 @@ public class KafkaConsumer extends AbstractActor {
 
                             if (this.client != null && this.consumerJobs.containsKey(diagramId)) {
 
-                                JobVariable variable = this.consumerJobs.get(diagramId);
+                                ConsumerJob consumerJob = this.consumerJobs.get(diagramId);
+                                JobVariable variable = consumerJob.getJobVariable();
                                 variable.add(value);
 
                                 this.client.tell(variable, self());
+
+                                Executors.newSingleThreadExecutor().submit(() -> {
+
+                                    ConsumerDispatcher.send(value, consumerJob.getJobMetaData());
+                                });
                             }
-
-                            ConsumerData consumerData = new ConsumerData();
-                            consumerData.ip = "localhost";
-                            consumerData.value = value;
-
-                            DataConsumer.send("Simulated", consumerData);
                         }
                     }
                 }
@@ -149,10 +157,11 @@ public class KafkaConsumer extends AbstractActor {
                     logger.error(String.format("Exception occurred while writing to Kafka. Details: %s.", ex.toString()));
                 }
             }
-        }).start();
+        });
     }
 
-    private ConsumerConfig getConfig(){
+    private ConsumerConfig getConfig() {
+
         Properties props = new Properties();
         props.put("zookeeper.connect", "localhost:2181");
         props.put("group.id", "service");

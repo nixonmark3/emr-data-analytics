@@ -95,10 +95,12 @@ public class JobServiceActor extends AbstractActor {
                             job.getId().toString());
                     jobActor.tell("start", self());
 
-                } else if (job instanceof SparkJob) {
+                }
+                else if (job instanceof SparkJob) {
 
                     // create a new spark process actor - send job
                     SparkJob sparkJob = (SparkJob) job;
+
                     jobActor = context().actorOf(SparkProcessActor.props(sender(),
                                     job.getId(),
                                     sparkJob.getDiagramName(),
@@ -107,13 +109,13 @@ public class JobServiceActor extends AbstractActor {
                                     host,
                                     port),
                             job.getId().toString());
+
                     jobActor.tell(sparkJob, self());
 
-                    System.out.println(String.format("Metadata: %s.", sparkJob.getMetaData()));
-
                     // tell the kafka consumer that a spark job is starting
-                    kafkaConsumer.tell(new ConsumeJob(job.getKey().getId(), ConsumeJob.ConsumeState.START), self());
-                } else {
+                    kafkaConsumer.tell(new ConsumeJob(job.getKey().getId(), sparkJob.getMetaData(), ConsumeJob.ConsumeState.START), self());
+                }
+                else {
 
                     // notify the sender that the specified job type is not support
                     sender().tell(createFailedJobInfo(request, "The job specified is not supported."), self());
@@ -275,7 +277,7 @@ public class JobServiceActor extends AbstractActor {
                         this.onlineJobs.remove(job.getKey().getId());
 
                         // tell the kafka consumer that a spark job has been terminated
-                        kafkaConsumer.tell(new ConsumeJob(job.getKey().getId(), ConsumeJob.ConsumeState.END), self());
+                        kafkaConsumer.tell(new ConsumeJob(job.getKey().getId(), "", ConsumeJob.ConsumeState.END), self());
                     }
 
                     analyticJobs.remove(jobId);
