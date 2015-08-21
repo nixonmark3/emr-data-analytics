@@ -6,27 +6,32 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class OpcDataConsumer extends DataConsumer {
 
     protected void send(String value, Consumer consumer) {
 
-//        try {
-//
-//            String uri = "http://192.168.17.129:8000/updatedata/InferredCalc1";
-//
-//            String tag = "PICK_INFER_MEAS/INFER1.CV";
-//            String val = consumerData.value.toString();
-//
-//            HttpPost post = new HttpPost(uri);
-//            post.setEntity(new StringEntity(String.format("%s,%s", tag, val)));
-//
-//            CloseableHttpClient client = HttpClientBuilder.create().build();
-//            client.execute(post);
-//            client.close();
-//        }
-//        catch (Exception exception) {
-//
-//            System.out.println(exception.getStackTrace().toString());
-//        }
+        try {
+
+            String[] parts = consumer.getTag().split("/");
+
+            String uri = String.format("http://%s:8000/updatedata/%s", consumer.getIp(), parts[0]);
+
+            String[] tagParts = Arrays.copyOfRange(parts, 1, parts.length);
+            String tag = String.join("/", tagParts);
+
+            HttpPost post = new HttpPost(uri);
+            post.setEntity(new StringEntity(String.format("%s,%s", tag, value)));
+
+            CloseableHttpClient client = HttpClientBuilder.create().build();
+            client.execute(post);
+            client.close();
+        }
+        catch (Exception exception) {
+
+            exception.printStackTrace();
+        }
     }
 }
