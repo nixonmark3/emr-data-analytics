@@ -51,10 +51,30 @@ public class Write extends BlockDefinition implements IExport {
 
     public List<ParameterDefinition> createParameters() {
 
+        String defaultValue = "{\n"
+                + "  \"consumers\" : [\n"
+                + "    {\n"
+                + "      \"consumerType\": \"Simulated\",\n"
+                + "      \"ip\": \"localhost\",\n"
+                + "      \"tag\": \"TAG1\"\n"
+                + "    },\n"
+                + "    {\n"
+                + "      \"consumerType\": \"OPC\",\n"
+                + "      \"ip\": \"000.000.00.000\",\n"
+                + "      \"tag\": \"TAG1\"\n"
+                + "    },\n"
+                + "    {\n"
+                + "      \"consumerType\": \"PI\",\n"
+                + "      \"ip\": \"000.000.00.000\",\n"
+                + "      \"tag\": \"TAG1\"\n"
+                + "    }\n"
+                + "  ]\n"
+                + "}\n";
+
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
         parameters.add(new ParameterDefinition("Query",
                 DataType.EDITABLE_QUERY.toString(),
-                "",
+                defaultValue,
                 new ArrayList<String>(),
                 null));
 

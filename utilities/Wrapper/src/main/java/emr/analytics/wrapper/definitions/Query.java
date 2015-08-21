@@ -77,9 +77,30 @@ public class Query extends BlockDefinition implements IExport {
                         "Bricks",
                         new ArrayList<Argument>())));
 
+        String defaultValue = "{\n"
+                + "  \"query_name\": \"Query1\",\n"
+                + "  \"docType\": \"json\",\n"
+                + "  \"version\": \"1.0\",\n"
+                + "  \"timeSelector\": [\n"
+                + "    {\n"
+                + "      \"startTime\": \"2015-01-01T00:00:00.000Z\",\n"
+                + "      \"endTime\": \"2015-01-01T00:00:00.000Z\"\n"
+                + "    },\n"
+                + "    {\n"
+                + "      \"startTime\": \"2015-01-01T00:00:00.000Z\",\n"
+                + "      \"endTime\": \"2015-01-01T00:00:00.000Z\"\n"
+                + "    }\n"
+                + "  ],\n"
+                + "  \"sampleRateSecs\": 60,\n"
+                + "  \"columns\": [\n"
+                + "    { \"tag\": \"TAG1\",\"alias\": \"ALIAS1\",\"dataType\": \"Float\", \"renderType\": \"VALUE\", \"format\": \"0.###\"},\n"
+                + "    { \"tag\": \"TAG2\",\"alias\": \"ALIAS2\",\"dataType\": \"Float\", \"renderType\": \"VALUE\", \"format\": \"0.###\"}\n"
+                + "  ]\n"
+                + "}";
+
         parameters.add(new ParameterDefinition("Query",
-                DataType.QUERY.toString(),
-                "None",
+                DataType.EDITABLE_QUERY.toString(),
+                defaultValue,
                 new ArrayList<String>(),
                 null));
 
