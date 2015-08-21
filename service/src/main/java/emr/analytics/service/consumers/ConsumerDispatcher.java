@@ -1,7 +1,9 @@
 package emr.analytics.service.consumers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import emr.analytics.service.consumers.serializers.Consumers;
+
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,11 +18,11 @@ public class ConsumerDispatcher {
 
             Consumers consumers = new ObjectMapper().readValue(consumersJsonString, Consumers.class);
 
-            ExecutorService executor = Executors.newFixedThreadPool(nThreads);
+            ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
 
             consumers.getConsumers().stream().forEach((consumer) -> {
 
-                executor.submit(() -> {
+                executorService.submit(() -> {
 
                     Optional<DataConsumer> dataConsumer = ConsumerFactory.get(consumer.getConsumerType());
 
@@ -30,6 +32,8 @@ public class ConsumerDispatcher {
                     }
                 });
             });
+
+            executorService.shutdown();
         }
         catch (Exception exception) {
 

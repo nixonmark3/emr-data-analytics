@@ -1,23 +1,13 @@
 package emr.analytics.service.sources;
 
 import emr.analytics.models.messages.StreamingSourceRequest;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Optional;
 
-public class OpcPollingSource implements StreamingSource {
+public class OpcPollingSource extends DataSource implements StreamingSource {
 
     private String url;
     private List<String> keys;
@@ -35,31 +25,17 @@ public class OpcPollingSource implements StreamingSource {
 
             String uri = String.format("http://%s:8000/jsondata/%s", url, keys.get(0));
 
-            try {
+            Optional<JSONObject> jsonResponse = getDataFromWebService(uri);
 
-                HttpGet get = new HttpGet(uri);
+            if (jsonResponse.isPresent()) {
 
-                CloseableHttpClient client = HttpClientBuilder.create().build();
-                CloseableHttpResponse response = client.execute(get);
-                HttpEntity httpEntity = response.getEntity();
-                Optional<JSONObject> jsonResponse = convertInputStreamToJson(httpEntity.getContent());
-                response.close();
-                client.close();
+                JSONObject json = jsonResponse.get();
 
-                if (jsonResponse.isPresent()) {
+                json.keys().forEachRemaining(key -> {
 
-                    JSONObject json = jsonResponse.get();
-
-                    json.keys().forEachRemaining(key -> {
-
-                        JSONObject keyValue = (JSONObject) json.get(key);
-                        values.add(key, Double.parseDouble((String) keyValue.get("Val")));
-                    });
-                }
-            }
-            catch (Exception exception) {
-
-                exception.printStackTrace();
+                    JSONObject keyValue = (JSONObject) json.get(key);
+                    values.add(key, Double.parseDouble((String) keyValue.get("Val")));
+                });
             }
         }
         else {
@@ -71,28 +47,5 @@ public class OpcPollingSource implements StreamingSource {
         return values;
     }
 
-    public Optional<JSONObject> convertInputStreamToJson(InputStream stream) {
 
-        JSONObject json = null;
-
-        try {
-
-            BufferedReader streamReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-            StringBuilder responseStrBuilder = new StringBuilder();
-
-            String inputString;
-            while ((inputString = streamReader.readLine()) != null) {
-
-                responseStrBuilder.append(inputString);
-            }
-
-            json = new JSONObject(responseStrBuilder.toString());
-        }
-        catch (Exception exception) {
-
-            exception.printStackTrace();
-        }
-
-        return Optional.of(json);
-    }
 }
