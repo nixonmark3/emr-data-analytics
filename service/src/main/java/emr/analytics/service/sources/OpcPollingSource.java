@@ -12,16 +12,17 @@ public class OpcPollingSource extends DataSource implements StreamingSource {
     private String url;
     private List<String> keys;
 
-    public OpcPollingSource(StreamingSourceRequest request){
+    public OpcPollingSource(StreamingSourceRequest request) {
+
         this.url = request.getStreamingSource().getUrl();
         this.keys = request.getStreamingSource().getKeys();
     }
 
-    public SourceValues<Double> read(){
+    public SourceValues<Double> read() {
 
         SourceValues<Double> values = new SourceValues<Double>();
 
-        if (keys.size() == 1) {
+        if (keys.size() > 0) {
 
             String uri = String.format("http://%s:8000/jsondata/%s", url, keys.get(0));
 
@@ -33,8 +34,25 @@ public class OpcPollingSource extends DataSource implements StreamingSource {
 
                 json.keys().forEachRemaining(key -> {
 
-                    JSONObject keyValue = (JSONObject) json.get(key);
-                    values.add(key, Double.parseDouble((String) keyValue.get("Val")));
+                    boolean include = false;
+
+                    if (keys.size() == 1) {
+
+                        include = true;
+                    }
+                    else {
+
+                        if (keys.contains(key)) {
+
+                            include = true;
+                        }
+                    }
+
+                    if (include) {
+
+                        JSONObject keyValue = (JSONObject) json.get(key);
+                        values.add(key, Double.parseDouble((String) keyValue.get("Val")));
+                    }
                 });
             }
         }
@@ -46,6 +64,4 @@ public class OpcPollingSource extends DataSource implements StreamingSource {
 
         return values;
     }
-
-
 }

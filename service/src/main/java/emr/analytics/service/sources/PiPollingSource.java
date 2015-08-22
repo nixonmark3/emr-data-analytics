@@ -20,6 +20,8 @@ public class PiPollingSource extends DataSource implements StreamingSource {
     private final String url;
     private final List<String> keys;
 
+    private static int nThreads = 10;
+
     public PiPollingSource(StreamingSourceRequest request) {
 
         this.url = request.getStreamingSource().getUrl();
@@ -41,7 +43,7 @@ public class PiPollingSource extends DataSource implements StreamingSource {
                 uriList.add(String.format("http://%s:8003/rawhistory/%s/%s?tag=%s", url, tNow, tNow, key));
             });
 
-            ExecutorService executorService = Executors.newFixedThreadPool(10);
+            ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
 
             List<Callable<Optional<JSONObject>>> tasks = new ArrayList<>();
 
@@ -51,7 +53,8 @@ public class PiPollingSource extends DataSource implements StreamingSource {
 
             });
 
-            executorService.invokeAll(tasks)
+            executorService
+                    .invokeAll(tasks)
                     .stream()
                     .map(future -> {
 

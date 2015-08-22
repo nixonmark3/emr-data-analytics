@@ -5,17 +5,21 @@ import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
+
 import emr.analytics.models.messages.JobVariable;
 import emr.analytics.service.consumers.ConsumerDispatcher;
 import emr.analytics.service.kafka.ConsumerJob;
 import emr.analytics.service.messages.ConsumeJob;
+
 import kafka.consumer.Consumer;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;
 import kafka.message.MessageAndMetadata;
+
 import org.apache.log4j.Logger;
+
 import java.util.*;
 import java.util.concurrent.Executors;
 
@@ -144,15 +148,12 @@ public class KafkaConsumer extends AbstractActor {
 
                                 this.client.tell(variable, self());
 
-                                Executors.newSingleThreadExecutor().submit(() -> {
-
-                                    ConsumerDispatcher.send(value, consumerJob.getJobMetaData());
-                                });
+                                Executors.newSingleThreadExecutor().submit(() -> ConsumerDispatcher.send(value, consumerJob.getJobMetaData()));
                             }
                         }
                     }
                 }
-                catch(Exception ex) {
+                catch (Exception ex) {
 
                     logger.error(String.format("Exception occurred while writing to Kafka. Details: %s.", ex.toString()));
                 }

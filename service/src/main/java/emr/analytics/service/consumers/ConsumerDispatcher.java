@@ -20,7 +20,7 @@ public class ConsumerDispatcher {
 
             ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
 
-            consumers.getConsumers().stream().forEach((consumer) -> {
+            consumers.getConsumers().stream().forEach(consumer -> {
 
                 executorService.submit(() -> {
 

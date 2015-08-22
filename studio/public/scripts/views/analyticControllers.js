@@ -165,7 +165,7 @@ analyticsApp
             // todo: temporarily hardcode default json
             $scope.editor = {
                 data: JSON.stringify({
-                topic: "OPC",
+                topic: "SIM",
                 streamingSource: {
                     pollingSourceType: "Simulated",
                     url: "http://localhost",
