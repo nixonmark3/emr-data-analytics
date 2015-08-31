@@ -63,10 +63,7 @@ var analyticsApp = angular.module('analyticsApp',
              */
             webSocketUrl: function(){
 
-                // todo: retrieve the url prefix from the server
-                var url = "ws://localhost:9000/analytics/socket/";
                 var id;
-
                 // attempt to retrieve the websocket url from session storage
                 if (window.sessionStorage) {
                     var stored = window.sessionStorage.getItem("sessionId");
@@ -80,7 +77,7 @@ var analyticsApp = angular.module('analyticsApp',
                     }
                 }
 
-                return url + id;
+                return jsRoutes.controllers.Analytics.socket(id).webSocketURL();
             }
         }
     }])
@@ -207,6 +204,8 @@ var analyticsApp = angular.module('analyticsApp',
              */
             function connect() {
                 var url = analyticsService.webSocketUrl();
+                console.log("web socket url: " + url);
+
                 var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
                 var sock = new WS(url);
                 setHandlers(sock);

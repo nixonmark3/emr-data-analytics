@@ -41,7 +41,7 @@ public class Consumer implements Serializable {
     }
 
     public enum ConsumerType {
-
+        File,
         Simulated,
         OPC,
         PI

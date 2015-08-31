@@ -126,7 +126,8 @@ public class KafkaProducer extends AbstractActor {
 
                 try{
                     SourceValues<Double> values = source.read();
-                    producer.send(new ProducerRecord<>(topic, values));
+                    if (values != null)
+                        producer.send(new ProducerRecord<>(topic, values));
 
                     Thread.sleep(interval);
                 }

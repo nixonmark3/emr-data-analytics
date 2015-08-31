@@ -17,7 +17,7 @@ public class PollingSource implements Serializable {
         this.keys = keys;
     }
 
-    public enum PollingSourceType { OPC, PI, Simulated }
+    public enum PollingSourceType { File, OPC, PI, Simulated }
 
     public PollingSourceType getPollingSourceType(){ return this.pollingSourceType; }
 

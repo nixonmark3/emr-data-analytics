@@ -12,6 +12,10 @@ public class ConsumerFactory {
 
         switch(consumerType) {
 
+            case File:
+                dataConsumer = new FileDataConsumer();
+                break;
+
             case OPC:
                 dataConsumer = new OpcDataConsumer();
                 break;

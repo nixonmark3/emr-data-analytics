@@ -9,6 +9,10 @@ public class SourceFactory {
         StreamingSource source;
         switch(request.getStreamingSource().getPollingSourceType()){
 
+            case File:
+                source = new FileSource(request);
+                break;
+
             case OPC:
                 source = new OpcPollingSource(request);
                 break;

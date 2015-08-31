@@ -1,6 +1,5 @@
 package services;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.WriteResult;
 import emr.analytics.diagram.interpreter.*;
 import emr.analytics.models.definition.Definition;
@@ -9,7 +8,6 @@ import emr.analytics.models.messages.JobRequest;
 import models.project.GroupRequest;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
-import play.libs.Json;
 import plugins.MongoDBPlugin;
 
 import java.util.*;
