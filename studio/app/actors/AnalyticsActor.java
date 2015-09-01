@@ -8,6 +8,7 @@ import emr.analytics.models.definition.Mode;
 import emr.analytics.models.messages.*;
 import models.project.DeploymentStatus;
 import models.project.EvaluationStatus;
+import play.Configuration;
 import scala.PartialFunction;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -20,13 +21,19 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class AnalyticsActor extends AbstractActor {
 
-    private String remotePath = "akka.tcp://job-service-system@127.0.0.1:2552/user/job-service";
+    private static final String ANALYTICS_CONFIG = "analytics";
+    private static final String ANALYTICS_HOST_NAME = "service.host";
+
+    private String remotePath;
     private ActorRef service = null;
     private PartialFunction<Object, BoxedUnit> active;
 
     public static Props props(){ return Props.create(AnalyticsActor.class); }
 
     public AnalyticsActor() {
+
+        String host = this.getAnalyticsConfig(ANALYTICS_HOST_NAME);
+        remotePath = String.format("akka.tcp://job-service-system@%s:2552/user/job-service", host);
 
         receive(ReceiveBuilder
 
@@ -53,7 +60,7 @@ public class AnalyticsActor extends AbstractActor {
                 sendIdentifyRequest();
             })
 
-            // ping request fails
+                    // ping request fails
             .match(Ping.class, ping -> {
                 ping.setValue(false);
                 sender().tell(ping, self());
@@ -164,5 +171,9 @@ public class AnalyticsActor extends AbstractActor {
         getContext().system().scheduler()
                 .scheduleOnce(Duration.create(1, SECONDS), self(),
                         ReceiveTimeout.getInstance(), getContext().dispatcher(), self());
+    }
+
+    private String getAnalyticsConfig(String name) {
+        return Configuration.root().getConfig(ANALYTICS_CONFIG).getString(name);
     }
 }
