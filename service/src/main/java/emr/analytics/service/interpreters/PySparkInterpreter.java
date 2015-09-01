@@ -18,10 +18,9 @@ public class PySparkInterpreter extends PythonInterpreter implements ExecuteResu
     public PySparkInterpreter(String name, InterpreterNotificationHandler notificationHandler){
         super(notificationHandler);
 
-        // load spark and pySpark properties
         loadProperties("spark");
-        loadProperties("pySpark");
-        // load py4j properties
+        loadProperties("pyspark");
+
         loadLogProperties();
 
         // create spark configuration and context
