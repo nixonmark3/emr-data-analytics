@@ -64,7 +64,7 @@ public class JobServiceActorTest {
                     mode,
                     TargetEnvironments.PYTHON,
                     diagramName,
-                    source.toString());
+                    source.toString(), "");
 
             // create process actor
             final ActorRef jobServiceActor = system.actorOf(Props.create(JobServiceActor.class, "host", "port"));
