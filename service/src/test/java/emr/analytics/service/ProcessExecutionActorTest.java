@@ -58,7 +58,7 @@ public class ProcessExecutionActorTest {
             JobRequest request = new JobRequest(UUID.randomUUID(),
                 Mode.OFFLINE,
                 TargetEnvironments.PYTHON,
-                "test diagram", source.toString());
+                "test diagram", source.toString(), "");
             PythonJob job = new PythonJob(request);
 
             // create a test probe
