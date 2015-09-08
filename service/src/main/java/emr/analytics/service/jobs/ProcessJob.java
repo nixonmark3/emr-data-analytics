@@ -107,7 +107,7 @@ public abstract class ProcessJob extends AnalyticsJob {
             Files.delete(Paths.get(fileName));
         }
         catch(IOException ex) {
-            System.err.println("IO Exception occurred.");
+            System.err.println(String.format("IO Exception occurred: %s.", ex.toString()));
         }
     }
 
@@ -120,7 +120,7 @@ public abstract class ProcessJob extends AnalyticsJob {
             out.close();
         }
         catch(IOException ex) {
-            System.err.println("IO Exception occurred.");
+            System.err.println(String.format("IO Exception occurred: %s.", ex.toString()));
         }
     }
 }

@@ -1,6 +1,6 @@
 # Dockerizing Zookeeper and Kafka
 
-FROM emr/java8:latest
+FROM emr/base:latest
 
 MAINTAINER PSS Applied Research 
 

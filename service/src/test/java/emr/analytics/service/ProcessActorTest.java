@@ -64,7 +64,7 @@ public class ProcessActorTest {
                     mode,
                     TargetEnvironments.PYTHON,
                     diagramName,
-                    source.toString());
+                    source.toString(), "");
             PythonJob job = new PythonJob(request);
 
             // create a test probe

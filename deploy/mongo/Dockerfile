@@ -1,20 +1,18 @@
-# Dockerizing MongoDB: Dockerfile for building MongoDB images
-# Based on ubuntu:latest, installs MongoDB following the instructions from:
-# http://docs.mongodb.org/manual/tutorial/install-mongodb-on-ubuntu/
+## Mongo container 
+#  https://docs.mongodb.org/manual/tutorial/install-mongodb-on-ubuntu/
 
-# parent of this dockerized image
-# Format: FROM repository[:version]
-FROM ubuntu:latest
+FROM ubuntu:latest 
 
-# Format: MAINTAINER Name <email@addr.ess>
 MAINTAINER PSS Applied Research
 
-# Import MongoDB public GPG key AND create a MongoDB list file 
+# import the public ket used by the package management system 
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+
+# creat ea list file for MongoDB 
 RUN echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.0.list
 
 # update apt-get sources AND install MongoDB
-RUN apt-get update && apt-get install -y mongodb-org
+RUN apt-get -y update && apt-get install -y mongodb-org
 
 # create the mongodb data directory 
 RUN mkdir -p /data/db

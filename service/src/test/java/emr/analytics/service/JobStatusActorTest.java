@@ -32,7 +32,7 @@ public class JobStatusActorTest {
                     mode,
                     TargetEnvironments.PYTHON,
                     diagramName,
-                    source));
+                    source, ""));
         }
 
         public MockJob(JobRequest request){
