@@ -62,6 +62,7 @@ public class SparkExecutionActorTest {
                     "test diagram",
                     source.toString(),
                     "");
+
             SparkJob job = new SparkJob(request);
 
             // create a spark context
