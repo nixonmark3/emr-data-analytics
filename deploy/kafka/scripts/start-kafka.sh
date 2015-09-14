@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 # Set the external host and port
 if [ ! -z "$ADVERTISED_HOST" ]; then
     echo "advertised host: $ADVERTISED_HOST"

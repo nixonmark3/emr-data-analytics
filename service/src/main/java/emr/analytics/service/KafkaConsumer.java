@@ -45,12 +45,12 @@ public class KafkaConsumer extends AbstractActor {
         // initialize map of consumer jobs
         consumerJobs = new HashMap<>();
 
-        // load kafka properties
-        Properties properties = JobServiceHelper.loadProperties("kafka");
+        // retrieve the analytics host name stored as an environmental variable
+        String host = JobServiceHelper.getEnvVariable("ANALYTICS_HOST", "127.0.0.1");
 
         try {
             // instantiate a kafka producer
-            this.consumer = Consumer.createJavaConsumerConnector(this.getConfig());
+            this.consumer = Consumer.createJavaConsumerConnector(this.getConfig(String.format("%s:2181", host)));
         }
         catch(Exception ex){
             logger.error(String.format("Exception occurred while instantiating kafka consumer. Details: %s.", ex.toString()));
@@ -161,10 +161,10 @@ public class KafkaConsumer extends AbstractActor {
         });
     }
 
-    private ConsumerConfig getConfig() {
+    private ConsumerConfig getConfig(String path) {
 
         Properties props = new Properties();
-        props.put("zookeeper.connect", "localhost:2181");
+        props.put("zookeeper.connect", path);
         props.put("group.id", "service");
         props.put("zookeeper.session.timeout.ms", "500");
         props.put("zookeeper.sync.time.ms", "250");

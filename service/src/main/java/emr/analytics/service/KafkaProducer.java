@@ -45,8 +45,8 @@ public class KafkaProducer extends AbstractActor {
         // reference the client actor to send updates
         this.client = client;
 
-        // load kafka properties
-        Properties properties = JobServiceHelper.loadProperties("kafka");
+        // retrieve the analytics host name stored as an environmental variable
+        String host = JobServiceHelper.getEnvVariable("ANALYTICS_HOST", "127.0.0.1");
 
         info = new StreamingInfo(request.getTopic(),
                 request.getStreamingSource().getPollingSourceType(),
@@ -55,7 +55,7 @@ public class KafkaProducer extends AbstractActor {
         try {
             // instantiate a kafka producer
             Properties props = new Properties();
-            props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getProperty("zookeeper.quorum"));
+            props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, String.format("%s:9092", host));
             props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
             props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class.getName());
             this.producer = new org.apache.kafka.clients.producer.KafkaProducer(props);

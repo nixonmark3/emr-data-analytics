@@ -1,6 +1,10 @@
 import sys
 import pymongo
 import gridfs
+
+import matplotlib
+matplotlib.use("Agg")
+
 import matplotlib.pyplot as plt
 import os
 import collections

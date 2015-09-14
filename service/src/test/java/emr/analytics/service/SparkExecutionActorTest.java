@@ -59,7 +59,10 @@ public class SparkExecutionActorTest {
             JobRequest request = new JobRequest(UUID.randomUUID(),
                     Mode.ONLINE,
                     TargetEnvironments.SPARK,
-                    "test diagram", source.toString(), "");
+                    "test diagram",
+                    source.toString(),
+                    "");
+
             SparkJob job = new SparkJob(request);
 
             // create a spark context
