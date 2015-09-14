@@ -7,11 +7,11 @@ import emr.analytics.wrapper.IExport;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PCA_NIPALS extends BlockDefinition implements IExport {
+public class PCA_NIPALS_TEST extends BlockDefinition implements IExport {
 
     @Override
     public Definition createDefinition() {
-        Definition definition = new Definition("PCA_NIPALS", "PCA_NIPALS", Category.TRANSFORMERS.toString());
+        Definition definition = new Definition("PCA_NIPALS_TEST", "PCA_NIPALS_TEST", Category.TRANSFORMERS.toString());
         definition.setW(300);
         return definition;
     }
@@ -36,6 +36,11 @@ public class PCA_NIPALS extends BlockDefinition implements IExport {
     public List<ConnectorDefinition> createInputConnectors() {
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
         inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("Loadings", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("EigenValues", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("EigenVectors", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("Mean", DataType.FLOAT.toString()));
+        inputConnectors.add(new ConnectorDefinition("Std", DataType.FLOAT.toString()));
         return inputConnectors;
     }
 
@@ -60,12 +65,6 @@ public class PCA_NIPALS extends BlockDefinition implements IExport {
     public List<ParameterDefinition> createParameters() {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-
-        parameters.add(new ParameterDefinition("N Components",
-                DataType.INT.toString(),
-                2,
-                new ArrayList<String>(),
-                null));
 
         parameters.add(new ParameterDefinition("Confidence Level",
                 DataType.FLOAT.toString(),

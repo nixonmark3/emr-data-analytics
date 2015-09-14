@@ -7,7 +7,7 @@ import sys
 
 from FunctionBlock import FunctionBlock
 
-class PCA_NIPALS(FunctionBlock):
+class PCA_NIPALS_TEST(FunctionBlock):
 
     def __init__(self, name, unique_name):
         FunctionBlock.__init__(self, name, unique_name)
@@ -18,19 +18,22 @@ class PCA_NIPALS(FunctionBlock):
 
             FunctionBlock.check_connector_has_one_wire(self, 'in')
             df = results_table[self.input_connectors['in'][0]]
+            loadings = results_table[self.input_connectors['Loadings'][0]]
+            eig_value = results_table[self.input_connectors['EigenValues'][0]]
+            eig_vector = results_table[self.input_connectors['EigenVectors'][0]]
+            mean_df = results_table[self.input_connectors['Mean'][0]]
+            std_df = results_table[self.input_connectors['Std'][0]]
+
+            confidence_level = self.parameters['Confidence Level']
 
             raw = df.values
+            P_a = loadings.values
 
             N, K = raw.shape
 
             # Pre-processing: mean center and scale the data columns to unit variance
-            X = raw - raw.mean(axis=0)
-            XDev = X.std(axis=0)
-            for i in range(XDev.shape[0]):
-                if(XDev[i] == 0):
-                    XDev[i] = 1
-
-            X=X/XDev
+            X = raw - mean_df(axis=0)
+            X = X / std_df(axis=0)
 
             original_data = X
 
@@ -38,65 +41,23 @@ class PCA_NIPALS(FunctionBlock):
             X.mean(axis=0)   # array([ -3.92198351e-17,  -1.74980803e-16, ...
             X.std(axis=0)    # [ 1.  1.  1.  1.  1.  1.  1.  1.  1.]
 
-            A = self.parameters['N Components']
+            # get number of principal components
+            A = loadings.shape[1]
 
-            confidence_level = self.parameters['Confidence Level']
-
-            scores = np.zeros((N, A))
-            loadings = np.zeros((K, A))
-
-            debugoutfile = open('/Users/noelbell/bds_datafiles/debug.csv', 'w+')
-            tolerance = 1E-6
-            for a in range(A):
-
-                t_a_guess = np.zeros((N,1))#np.random.rand(N, 1)*2
-                t_a = t_a_guess + 1.0
-                itern = 0
-
-                # Repeat until the score, t_a, converges, or until a maximum number of iterations has been reached
-                while np.linalg.norm(t_a_guess - t_a) > tolerance and itern < 10000:
-
-                    # 0: starting point for convergence checking on next loop
-                    t_a_guess = t_a
-
-                    # 1: Regress the scores, t_a, onto every column in X; compute the
-                    #    regression coefficient and store it in the loadings, p_a
-                    #    i.e. p_a = (X' * t_a)/(t_a' * t_a)
-                    p_a = np.dot(X.T, t_a) / np.dot(t_a.T, t_a)
-
-                    # 2: Normalize loadings p_a to unit length
-                    p_a = p_a / np.linalg.norm(p_a)
-
-                    # 3: Now regress each row in X onto the loading vector; store the
-                    #    regression coefficients in t_a.
-                    #    i.e. t_a = X * p_a / (p_a.T * p_a)
-                    t_a = np.dot(X, p_a) / np.dot(p_a.T, p_a)
-
-                    itern += 1
-
-                #  We've converged, or reached the limit on the number of iteration
-
-                debugoutfile.write(str(itern)+','+' '+str(np.linalg.norm(t_a_guess - t_a))+'\n')
-
-
-                # Deflate the part of the data in X that we've explained with t_a and p_a
-                X = X - np.dot(t_a, p_a.T)
-
-                # Store result before computing the next component
-                scores[:, a] = t_a.ravel()
-                loadings[:, a] = p_a.ravel()
+            scores = np.dot(X, P_a) / np.dot(P_a.T, P_a)
 
             # Squared Prediction Error to the X-space is the residual distance from the model to each data point.
-            spe = np.sum(X ** 2, axis=1)
+            X_error = X - np.dot(scores, P_a.T)
+            spe = np.sum(X_error ** 2, axis=1)
 
             # Hotelling's T2, the directed distance from the model center to each data point.
             inv_covariance = np.linalg.inv(np.dot(scores.T, scores) / N)
 
             # Calculate variance captured
-            eig_value, eig_vector = np.linalg.eig(np.cov(original_data.T))
-            eig_value_idx = eig_value.argsort()[::-1]
-            eig_value = eig_value[eig_value_idx]
-            eig_vector = eig_vector[:, eig_value_idx]
+            # eig_value, eig_vector = np.linalg.eig(np.cov(original_data.T))
+            # eig_value_idx = eig_value.argsort()[::-1]
+            # eig_value = eig_value[eig_value_idx]
+            # eig_vector = eig_vector[:, eig_value_idx]
 
             # Calculate the variable contributions to score
 
@@ -115,7 +76,7 @@ class PCA_NIPALS(FunctionBlock):
                     varContribT2[i, j] = np.dot(scores[i, 0:A] / eig_value[0:A], temp_x_score.T) / t2_lim
 
                     # Continue calculation of variable contributions to score
-                    for a in range(5):    #range(A):
+                    for a in range(A):
                         varContrib[i, j] = np.sum((original_data[i, j] * loadings[j, a] * eig_value[a]) / scores[i, a])
 
             # Calculate the variable contributions to Q
@@ -125,7 +86,7 @@ class PCA_NIPALS(FunctionBlock):
             sliceTemp = np.matrix(eig_vector_inv[:, 0:A].T)
             reconstructed = np.array(scoreTemp * sliceTemp)
 
-            varContribQ = original_data #- reconstructed
+            varContribQ = original_data - reconstructed
 
             # Calculate Q limits
             q_lim = 0
@@ -166,8 +127,6 @@ class PCA_NIPALS(FunctionBlock):
             results = collections.OrderedDict()
             results['N components'] = A
             results['Confidence Level'] = confidence_level
-            results['Q Limit'] = q_lim
-            results['T2 Limit'] = t2_lim
 
             FunctionBlock.save_results(self, df=None, statistics=False, plot=False, results=results)
 
@@ -217,8 +176,8 @@ class PCA_NIPALS(FunctionBlock):
                     FunctionBlock.getFullPath(self, 'QCont'): varContribQ,
                     FunctionBlock.getFullPath(self, 'EigenValues'): eig_value,
                     FunctionBlock.getFullPath(self, 'EigenVectors'): eig_vector,
-                    FunctionBlock.getFullPath(self, 'Mean'): df.mean(axis=0),
-                    FunctionBlock.getFullPath(self, 'Std'): df.std(axis=0)}
+                    FunctionBlock.getFullPath(self, 'Mean'): df.mean(axis=1),
+                    FunctionBlock.getFullPath(self, 'Std'): df.std(axis=1)}
 
         except Exception as err:
             FunctionBlock.save_results(self)

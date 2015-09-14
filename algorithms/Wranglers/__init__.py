@@ -9,6 +9,11 @@ def import_csv(filename, time_series):
         df = pd.read_csv(filename, parse_dates=True, index_col=0)
     else:
         df = pd.read_csv(filename, index_col=0)
+
+    df=df.convert_objects(convert_dates=False, convert_timedeltas=False,convert_numeric=True)
+
+    df=df.fillna(method='ffill')
+
     return df
 
 
