@@ -16,9 +16,9 @@ docker build --no-cache --tag emr/base .
 
 cd ../spark
 
-curl -o spark-1.4.1-bin-hadoop2.6.tgz http://apache.mirrors.hoobly.com/spark/spark-1.4.1/spark-1.4.1-bin-hadoop2.6.tgz
+# curl -o spark-1.4.1-bin-hadoop2.6.tgz http://apache.mirrors.hoobly.com/spark/spark-1.4.1/spark-1.4.1-bin-hadoop2.6.tgz
 
-curl -o spark-streaming-kafka-assembly_2.10-1.4.1.jar http://central.maven.org/maven2/org/apache/spark/spark-streaming-kafka-assembly_2.10/1.4.1/spark-streaming-kafka-assembly_2.10-1.4.1.jar
+# curl -o spark-streaming-kafka-assembly_2.10-1.4.1.jar http://central.maven.org/maven2/org/apache/spark/spark-streaming-kafka-assembly_2.10/1.4.1/spark-streaming-kafka-assembly_2.10-1.4.1.jar
 
 docker build --no-cache --tag emr/spark .
 
