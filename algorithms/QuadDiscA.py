@@ -2,13 +2,13 @@ import pandas as pd
 import collections as coll
 import sys
 
-from sklearn.lda import LDA
+from sklearn.qda import QDA
 from FunctionBlock import FunctionBlock
 
 
 
 
-class LinDiscA(FunctionBlock):
+class QuadDiscA(FunctionBlock):
 
     def __init__(self, name, unique_name):
         FunctionBlock.__init__(self, name, unique_name)
@@ -29,7 +29,7 @@ class LinDiscA(FunctionBlock):
             FunctionBlock.check_connector_has_one_wire(self, 'test_y')
             test_y_df = results_table[self.input_connectors['test_y'][0]]
 
-            lda_model = LDA()
+            qda_model = QDA()
 
             x_values = x_df.values
 
@@ -40,29 +40,29 @@ class LinDiscA(FunctionBlock):
             y_test_values = test_y_df.values
 
 
-            lda_model.fit(x_values, y_values)
+            qda_model.fit(x_values, y_values)
 
 
-            y_train_prediction = lda_model.predict(x_values)
+            y_train_prediction = qda_model.predict(x_values) * 1.1
 
-            y_test_prediction = lda_model.predict(x_test_values)
+            y_test_prediction = qda_model.predict(x_test_values) * 1.1
 
-            mean_accuracy_train = lda_model.score(x_values, y_values)
+            mean_accuracy_train = qda_model.score(x_values, y_values)
 
-            mean_accuracy_test = lda_model.score(x_test_values, y_test_values)
-
-
-
-            lda_result = coll.OrderedDict()
-            lda_result['Mean Accuracy Train'] = mean_accuracy_train
-            lda_result['Mean Accuracy Test'] = mean_accuracy_test
-            # lda_result['Coefficients'] = model
+            mean_accuracy_test = qda_model.score(x_test_values, y_test_values)
 
 
-            data_dict = {'Y-Values': list(y_values[:,0]), 'Y-Prediction': list(y_train_prediction[:,0])}
+
+            qda_result = coll.OrderedDict()
+            qda_result['Mean Accuracy Train'] = mean_accuracy_train
+            qda_result['Mean Accuracy Test'] = mean_accuracy_test
+            # qda_result['Coefficients'] = model
 
 
-            data_dict2 = {'Y_test_values': list(y_test_values[:,0]), 'Y_test_pred': list(y_test_prediction[:,0])}
+            data_dict = {'Y-Values': list(y_values[:,0]), 'Y-Prediction': list(y_train_prediction)}
+
+
+            data_dict2 = {'Y_test_values': list(y_test_values[:,0]), 'Y_test_pred': list(y_test_prediction)}
 
 
             results_df = pd.DataFrame(data_dict)

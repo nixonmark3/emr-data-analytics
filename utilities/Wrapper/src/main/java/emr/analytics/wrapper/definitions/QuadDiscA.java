@@ -12,7 +12,7 @@ public class QuadDiscA extends BlockDefinition implements IExport {
     @Override
     public Definition createDefinition() {
 
-        Definition definition = new Definition(DefinitionType.MODEL, "LinDiscA", "Linear Discriminant Analysis", Category.TRANSFORMERS.toString());
+        Definition definition = new Definition(DefinitionType.MODEL, "QuadDiscA", "Quadratic Discriminant Analysis", Category.TRANSFORMERS.toString());
         definition.setW(200);
         return definition;
     }
