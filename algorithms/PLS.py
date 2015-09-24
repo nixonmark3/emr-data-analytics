@@ -1,6 +1,7 @@
 import pandas as pd
 import collections as coll
 import sys
+import traceback
 
 from sklearn.cross_decomposition import PLSRegression
 from FunctionBlock import FunctionBlock
@@ -84,7 +85,7 @@ class PLS(FunctionBlock):
             return {FunctionBlock.getFullPath(self, 'model'): model,
                     FunctionBlock.getFullPath(self, 'y_comp'): results_df}
 
-        except Exception as err:
+        except:
             FunctionBlock.save_results(self)
             FunctionBlock.report_status_failure(self)
-            print(err.args, file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)

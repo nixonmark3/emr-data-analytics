@@ -19,7 +19,8 @@ import os
 #os.environ['MDP_DISABLE_SKLEARN']='yes'
 from FunctionBlock import FunctionBlock
 #import mdp
-
+import sys
+import traceback
 
 class AutoPickTrain(FunctionBlock):
     def __init__(self,name,unique_name):
@@ -59,9 +60,9 @@ class AutoPickTrain(FunctionBlock):
             # Return data
             return {FunctionBlock.getFullPath(self,'out'): PickedDataDF}
         
-        except Exception as err:
+        except:
             FunctionBlock.save_results(self)
             FunctionBlock.report_status_failure(self)
-            print(err.args, file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
         
 
