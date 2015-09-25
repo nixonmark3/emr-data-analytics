@@ -45,18 +45,20 @@ public class BlockResultsService {
         if (results != null) {
 
             BasicDBList output = (BasicDBList) results.get(name);
+
             output.forEach(item -> {
 
                 if (item instanceof Double) {
 
                     outputBuilder.append(item);
                     outputBuilder.append(",");
-                } else {
+                }
+                else {
 
                     BasicDBList tuple = (BasicDBList) item;
-                    if (tuple.size() == 2) {
+                    if (tuple.size() > 0) {
 
-                        outputBuilder.append(tuple.get(1));
+                        outputBuilder.append(tuple);
                         outputBuilder.append(",");
                     }
                 }

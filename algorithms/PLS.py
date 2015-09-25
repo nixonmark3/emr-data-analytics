@@ -70,10 +70,12 @@ class PLS(FunctionBlock):
 
             results_df = pd.DataFrame(data_dict)
 
+            model_values = [x[1] for x in model]
+
             FunctionBlock.add_statistics_result(self, results_df)
             FunctionBlock.add_plot_result(self, results_df)
             FunctionBlock.add_general_results(self, pls_result)
-            FunctionBlock.add_persisted_connector_result(self, 'model', model)
+            FunctionBlock.add_persisted_connector_result(self, 'model', model_values)
             FunctionBlock.add_persisted_connector_result(self, 'x_mean', x_mean)
             FunctionBlock.add_persisted_connector_result(self, 'x_std', x_std)
             FunctionBlock.add_persisted_connector_result(self, 'y_mean', y_mean)
