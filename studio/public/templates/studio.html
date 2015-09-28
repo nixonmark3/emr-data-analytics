@@ -6,7 +6,6 @@
             <div class="row">
                 <div class="col-xs-4">
                     <button type="button" class="btn btn-default navbar-btn pull-left" ng-click="toggleDiagramNavigation($event)">
-                    <!--<button type="button" class="btn btn-default navbar-btn pull-left" ng-click="toggleDiagrams()">-->
                         <i class="fa fa-folder-open"></i>
                     </button>
                     <span class="navbar-title">{{diagramViewModel.data.name}}</span>
@@ -31,52 +30,7 @@
                 </div>
                 <div class="col-xs-4">
 
-                    <div ng-if="!onlineCanvas" class="navbar-state pull-right" ng-switch on="offlineState">
-
-                        <i ng-switch-when="0" class="fa fa-circle-o-notch state-icon idle"></i>
-                        <i ng-switch-when="1" class="fa fa-cloud-download state-icon idle"></i>
-                        <i ng-switch-when="2" class="fa fa-bolt state-icon running"></i>
-
-                    </div>
-
-                    <div ng-if="onlineCanvas" class="navbar-state pull-right" ng-switch on="onlineState">
-
-                        <i ng-switch-when="0" class="fa fa-circle-o-notch state-icon idle"></i>
-                        <i ng-switch-when="1" class="fa fa-cloud-download state-icon idle"></i>
-                        <i ng-switch-when="2" class="fa fa-bolt state-icon running"></i>
-
-                    </div>
-
-                    <div ng-if="!onlineCanvas" class="btn-group pull-right">
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="toggleDiagramConfiguration($event)">
-                            <i class="fa fa-wrench"></i>
-                        </button>
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="compile($event)">
-                            <i class="fa fa-code"></i>
-                        </button>
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="save($event)">
-                            <i class="fa fa-save"></i>
-                        </button>
-                        <button type="button"
-                                class="btn btn-default navbar-btn ng-class:{ 'diagram-evaluating' : (offlineState != 0) }"
-                                ng-disabled="(offlineState != 0)"
-                                ng-click="evaluate($event)">
-
-                            <i class="fa ng-class:{ 'fa-cog fa-spin': (offlineState != 0), 'fa-play': (offlineState == 0) }"></i>
-                        </button>
-                    </div>
-
-                    <div ng-if="onlineCanvas" class="btn-group pull-right">
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="compile($event)">
-                            <i class="fa fa-code"></i>
-                        </button>
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="save($event)">
-                            <i class="fa fa-save"></i>
-                        </button>
-                        <button type="button" class="btn btn-default navbar-btn" ng-click="deploy($event)">
-                            <i class="fa fa-rocket"></i>
-                        </button>
-                    </div>
+                    <!-- todo: search -->
 
                 </div>
             </div>
@@ -87,48 +41,34 @@
 
         <div id="dropTarget">Drop Data</div>
 
-        <panel id="studio-properties"
-               config="studioPropertiesPanel"
-               title="studioProperties.viewModel.name"
-               min-width="180"
-               on-save="studioPropertiesSave"
-               on-cancel="studioPropertiesCancel">
-
-            <div ng-switch on="studioProperties.type">
-
-                <block-config ng-switch-when="BLOCK"
-                              block="studioProperties.viewModel"
-                              load-sources="loadSources"
-                              on-change="studioPropertiesChange">
-                </block-config>
-
-            </div>
-        </panel>
-
         <div id="studio-canvases" ng-class="{'flipped': onlineCanvas}">
 
             <div id="offline-canvas" class="studio-canvas">
 
-                <div id="library-controls" class="studio-controls">
+                <!--<div id="library-controls" class="studio-controls">
                     <button type="button" class="btn btn-default" ng-click="libraryToggle($event)">
                         <i class="fa fa-cubes"></i>
                     </button>
-                </div>
+                </div>-->
 
-                <div class="diagram-container">
+                <diagram-controls id="offline-diagram-controls"
+                                  center-radius="26"
+                                  orbit-radius="20"
+                                  offset-radius="60"
+                                  load="onLoadData">
+                </diagram-controls>
 
-                    <diagram id="offline-diagram"
-                             view-model="diagramViewModel"
-                             on-deselection="onDiagramDeselection"
-                             on-display="onBlockDisplay"
-                             on-selection="onBlockSelection"
-                             nodes="nodes"
-                             library="library"
-                             load-sources="loadSources"
-                             blur-background="blurBackground"
-                             methods="offlineDiagramMethods"></diagram>
+                <diagram id="offline-diagram"
+                         view-model="diagramViewModel"
+                         on-deselection="onDiagramDeselection"
+                         on-display="onBlockDisplay"
+                         on-selection="onBlockSelection"
+                         nodes="nodes"
+                         library="library"
+                         load-sources="loadSources"
+                         blur-background="blurBackground"
+                         methods="offlineDiagramMethods"></diagram>
 
-                </div>
             </div>
 
             <div id="online-canvas" class="studio-canvas">

@@ -3,7 +3,8 @@
  * Diagram
  */
 
-#offline-diagram, #online-diagram { width: 100%; height: 1000px; }
+.diagram-canvas { width: 100%; height: 100%; }
+.panning { cursor: -webkit-grabbing; }
 
 /*
  * Blocks
@@ -237,6 +238,16 @@
 
 .connector-name-bg { stroke-width: 1; stroke: #7f7f7f; fill: #f0f0f0; }
 .connector-name { }
+
+/*
+ *
+ */
+
+.diagram-button-container { cursor: pointer; }
+.diagram-button-container rect { width: 40px; height: 34px; fill: #f5f5f5; stroke-width: 1px; stroke: #ccc; }
+.diagram-button-container text { font-family: FontAwesome; font-size: 16px; fill: #333; }
+.diagram-button-container:hover rect { fill: #e6e6e6; }
+.diagram-text text { font-size: 12px; color: #333; }
 
 /*
  * Root Connector

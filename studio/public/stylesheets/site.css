@@ -6,10 +6,10 @@ body { font-family: Roboto, arial, sans-serif; background-color: #c5c5c5; overfl
 [ng\:cloak], [ng-cloak], .ng-cloak { display: none !important; }
 
 /* main layout  */
-#main-tabs { display: block; position: relative; float: left; height: 100%; width: 70px; padding: 50px 0 0 0; margin: 0; background-color: #3d3d3d; }
-#main-tabs .vertical-tab { position: relative; margin-left: 3px; color: #fff; }
-#main-tabs .vertical-tab:hover { color: #3182bd; }
-#main-tabs .vertical-tab.active { background-color: #e5e5e5; color: #737373; border-left: 4px solid #1f77b4; }
+#main-tabs { display: block; position: relative; float: left; height: 100%; width: 70px; padding: 50px 0 0 0; margin: 0; background-color: #32404e; }
+#main-tabs .vertical-tab { position: relative; color: #adb3b8; margin: 0; border-radius: 0; }
+#main-tabs .vertical-tab:hover { color: #fff; }
+#main-tabs .vertical-tab.active { background-color: #2986b8; color: #fff; }
 #main-tabs .tab-text { font-size: 0.7em; }
 .tab-badge-warning { color: #d62728; }
 .tab-badge { position: absolute; right: 0; top: 0; }
@@ -59,8 +59,6 @@ body { font-family: Roboto, arial, sans-serif; background-color: #c5c5c5; overfl
 
 /* studio properties */
 #studio-properties { box-shadow: 0px 6px 12px rgba(0,0,0,0.175); }
-
-.diagram-container { position: relative; width: 100%; height: 100%; background-color: #e5e5e5; overflow: auto; }
 
 #library-browser{
     position: absolute;
@@ -144,6 +142,18 @@ button.diagram-evaluating { color: #2ca02c; }
     overflow-x:hidden;
 }
 
+/* Diagram Controls */
+
+#offline-diagram-controls { top: 10px; right: 10px; }
+.diag-ctrls { position: absolute; z-index: 1; }
+
+.diag-ctrls-btn { position: absolute; display: inline-block; border-radius: 50%; text-align: center; vertical-align: bottom; background-color: #5fa2dd; color: #fff; cursor: pointer; transition: transform .4s ease-in-out, top .4s ease-in-out, right .4s ease-in-out; box-shadow: 0px 2px 6px rgba(0,0,0,0.3), 0px 0px 1px rgba(0,0,0,0.1), inset 0px 1px 0px rgba(255,255,255,0.25), inset 0px -1px 0px rgba(0,0,0,0.15); }
+.diag-ctrls-btn:hover { background-color: #5692c7; color: #fff; }
+.diag-ctrls-btn-c { top: 0; right: 0; z-index: 1; font-size: 22px; }
+.diag-ctrls-btn-c.evaluating, .diag-ctrls-btn-c.evaluating:hover { background-color: #9cc96b; color: #fff; cursor: auto; }
+.diag-ctrls-btn-o { z-index: 0; font-size: 18px; }
+.diag-ctrls-btn-o.rotated { transform: rotate(180deg); }
+
 /* Animated loader */
 
 #loader-overlay { position: absolute; top: 0; left: 0; background-color: #e5e5e5; width: 100%; height: 100%; z-index: 3; }
@@ -210,11 +220,12 @@ button.diagram-evaluating { color: #2ca02c; }
 #notification-exit { color: #31a354; position: absolute; right: 5px; top: 3px; cursor: pointer; }
 
 /* modal directive */
-.emr-modal { background-color: #f9f9f9; position: absolute; border: 1px solid #e5e5e5; -webkit-transform: scale(0.01); border-radius: 15px; z-index: 1150; box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.175); }
+.emr-modal { background-color: #f9f9f9; position: absolute; border: 1px solid #e5e5e5; border-radius: 15px; z-index: 1150; box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.175); }
 .emr-modal-header, .emr-modal-footer { position: relative; font-weight: bold; width: 100%; line-height: 60px; height: 60px; vertical-align: middle; }
 .emr-modal-body { position: relative; background-color: #fff; border-top: 1px solid #e5e5e5; border-bottom: 1px solid #e5e5e5; width: 100%; height: -webkit-calc(100% - 120px); height: calc(100% - 120px); margin: 0; overflow: hidden; }
 .emr-modal-footer { text-align: right; padding-right: 20px; }
 .emr-modal-footer .btn+.btn { margin-left: 20px; }
+.emr-modal-backdrop { position: absolute; width: 100%; height: 100%; background-color: #32404e; opacity: 0; }
 
 #chart-axes-controls { position: relative; width: 100%; margin: 15px 0 10px 0; }
 #chart-axes-controls .radio-inline { margin-right: 20px; }
@@ -370,39 +381,4 @@ button.diagram-evaluating { color: #2ca02c; }
 .resizable-s { cursor: s-resize; width: 100%; height: 7px; left: 0; bottom:-5px; }
 .resizable-se { cursor: se-resize; width: 16px; height: 16px; right: 0; bottom: 0; }
 .resizable-sw { cursor: sw-resize; width: 16px; height: 16px; left: 0; bottom: 0; }
-
-/**
- * Dashboard
- */
-
-#dashboard-wrapper { width: 100%; height: 100%; background-color: #e5e5e5; }
-
-#dashboard-cards { position: relative; padding: 15px; }
-#dashboard-cards .row { padding: 0 15px 0 15px; }
-.dashboard-card { position: relative; background-color: #fff; margin: 15px 0 10px 0; border-radius: 4px; border: 1px solid #d9d9d9; cursor: pointer; }
-.card-value { width: 100%; padding: 6px 0 6px 0; text-align: center; font-size: 4em; color: #666; }
-.card-label { width: 100%; background-color: #f5f5f5; padding: 6px 0 6px 0; text-align: center; font-size: 1.3em; border-radius: 0 0 4px 4px; border-top: 1px solid #d9d9d9; color: #707070; }
-
-#card-selector { position: absolute; transition: left .2s; z-index: 2; }
-#card-selector:before { content: ""; position: absolute; border-right: 17px solid transparent; border-left: 17px solid transparent; border-bottom: 17px solid #989898; }
-#card-selector:after { content: ""; position: absolute; top: 1px; border-right: 17px solid transparent; border-left: 17px solid transparent; border-bottom: 17px solid #1f77b4; }
-
-#dashboard-details { position: relative; width: 100%; height: 100%; overflow-x: hidden; overflow-y: auto; }
-.dashboard-items { position: relative; padding: 0 30px 0 30px; }
-.dashboard-item-header { width: 100%; margin: 0 0 8px 0; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 1.1em; background-color: #f5f5f5; color: #707070; }
-.dashboard-item-header .row { padding: 10px 15px 10px 15px; border-radius: 4px; border-top: 4px solid #1f77b4; }
-.dashboard-item-header i, .dashboard-item i { margin-top: 3px; }
-.dashboard-item-header i:hover { cursor: pointer; }
-.dashboard-header-col { padding: 0; }
-.dashboard-item { width: 100%; margin-bottom: 15px; padding: 0 15px 0 15px; background-color: #fff; border: 1px solid #d9d9d9; font-size: 1.1em; }
-.dashboard-item .row { margin: 0; }
-.dashboard-item-col { padding: 20px 0 20px 0; }
-.dashboard-item-trend { padding: 0; }
-.dashboard-trend { display: block; height: 60px; }
-.dashboard-item-kill { cursor: pointer; }
-
-.editor { position: relative; width: 100%; height: 100%; padding: 15px; }
-.editor textarea { width: 100%; height: 100%; resize: none; }
-
-.trend-line { fill: none; stroke: #2ca02c; stroke-width: 2px; }
 

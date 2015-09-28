@@ -3,8 +3,6 @@
 angular.module('emr.ui.modal', ['emr.ui.popup', 'emr.ui.shared'])
     .directive('modal', ['$timeout', function($timeout){
 
-        var transitionDelay = 400;
-
         return {
             restrict: 'E',
             replace: true,
@@ -18,28 +16,63 @@ angular.module('emr.ui.modal', ['emr.ui.popup', 'emr.ui.shared'])
             },
             link: function ($scope, element, attrs) {
 
-                // invoke the zoom transformation
-                var transition = "all " + transitionDelay / 1000 + "s ease";
-                var transform = "translate(" + $scope.position.endX + "px," + $scope.position.endY + "px) scale(1)";
+                var transition;
+                switch($scope.position.animation.type){
+                    case 'fadeIn':
+
+                        element.css({ "opacity": "0" });
+                        transition = "opacity " + $scope.position.animation.durationIn / 1000 + "s ease";
+                        break;
+                    default:
+
+                        // zoom
+                        element.css({ "-webkit-transform": "scale(" + $scope.position.initialScale + ")" });
+                        transition = "transform " + $scope.position.animation.durationIn / 1000 + "s ease";
+                        break;
+                }
+
+                var backdrop;
+                if ($scope.config.backdropClass)
+                    backdrop = angular.element(document.getElementsByClassName($scope.config.backdropClass));
+
                 $timeout(
                     function(){
-                        element.css({ "-webkit-transition": transition, "-webkit-transform": transform });
-                    },
-                    30);
+                        element.css({
+                            "-webkit-transition": transition,
+                            "-webkit-transform": "translate(" + $scope.position.endX + "px," + $scope.position.endY + "px) scale(1)",
+                            "opacity": "1"
+                        });
 
-                var zoomOut = function(){
-                    element.css({ "-webkit-transform": "translate(0, 0) scale(0.01)" });
-                };
+                        if (backdrop)
+                            backdrop.css({
+                                "-webkit-transition": "opacity " + $scope.position.animation.durationIn / 1000 + "s ease",
+                                "opacity": "0.6"
+                            });
+                    },
+                    10);
+
+                function zoomOut(){
+                    element.css({
+                        "-webkit-transition": "transform " + $scope.position.animation.durationOut / 1000 + "s ease",
+                        "-webkit-transform": "translate(0, 0) scale(" + $scope.position.initialScale + ")"
+                    });
+
+                    if (backdrop)
+                        backdrop.css({
+                            "-webkit-transition": "opacity " + $scope.position.animation.durationOut / 1000 + "s ease",
+                            "opacity": "0"
+                        });
+                }
 
                 $scope.onSave = function(){
 
-                    $scope.save(transitionDelay);
+                    $scope.save($scope.position.animation.durationOut);
                     zoomOut();
                 };
 
                 $scope.onClose = function(){
 
-                    $scope.close(transitionDelay);
+                    $scope.close($scope.position.animation.durationOut);
                     zoomOut();
                 };
             }
@@ -50,7 +83,7 @@ angular.module('emr.ui.modal', ['emr.ui.popup', 'emr.ui.shared'])
 
             function ModalService(){
 
-                var defaultModalSize = 0.95;
+                var defaultModalSize = 0.90;
 
                 this.show = function(options){
 
@@ -64,10 +97,16 @@ angular.module('emr.ui.modal', ['emr.ui.popup', 'emr.ui.shared'])
 
                             // capture / calculate modal start and end positions and dimensions
                             // set default variables
-                            var width = $window.innerWidth * defaultModalSize;
-                            var height = $window.innerHeight * defaultModalSize;
-                            var centerX = $window.innerWidth / 2;
-                            var centerY = $window.innerHeight / 2;
+                            var width = $window.innerWidth * defaultModalSize,
+                                height = $window.innerHeight * defaultModalSize,
+                                centerX = $window.innerWidth / 2,
+                                centerY = $window.innerHeight / 2,
+                                initialScale = 0.01,
+                                animation = {
+                                    type: 'zoom',
+                                    durationIn: 500,
+                                    durationOut: 500
+                                };
 
                             // capture overrides
                             if (options.position){
@@ -82,9 +121,23 @@ angular.module('emr.ui.modal', ['emr.ui.popup', 'emr.ui.shared'])
 
                                 if (options.position.centerY)
                                     centerY = options.position.centerY;
+
+                                if (options.position.initialHeight)
+                                    initialScale = options.position.initialHeight / height;
+                            }
+
+                            if (options.animation){
+                                if (options.animation.type)
+                                    animation.type = options.animation.type;
+                                if (options.animation.durationIn)
+                                    animation.durationIn = options.animation.durationIn;
+                                if (options.animation.durationOut)
+                                    animation.durationOut = options.animation.durationOut;
                             }
 
                             var position = {
+                                animation: animation,
+                                initialScale: initialScale,
                                 width: width,
                                 height: height,
                                 startX: centerX - (width / 2),
@@ -103,6 +156,11 @@ angular.module('emr.ui.modal', ['emr.ui.popup', 'emr.ui.shared'])
                             };
                             popupOptions.inputs.position = position;
                             popupOptions.inputs.config = options.config;
+
+                            // check whether a backdropClass was specified
+                            if (options.config.backdropClass){
+                                popupOptions.backdropClass = options.config.backdropClass;
+                            }
 
                             // show modal using the popup service
                             popupService.show(popupOptions).then(function (popup) {

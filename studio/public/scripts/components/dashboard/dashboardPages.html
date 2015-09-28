@@ -1,0 +1,19 @@
+<div class="dashboard-pages">
+
+    <div class="dashboard-page" ng-style="{ 'width': pageWidth, 'left': positions[0] }">
+        <div class="dashboard-cards"></div>
+    </div>
+
+    <div class="dashboard-page" ng-style="{ 'width': pageWidth, 'left': positions[1] }">
+        <div gridster="gridsterOpts" class="dashboard-cards">
+            <ul>
+                <li gridster-item="card" ng-repeat="card in cards" class="dashboard-card"></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="dashboard-page" ng-style="{ 'width': pageWidth, 'left': positions[2] }">
+        <div class="dashboard-cards"></div>
+    </div>
+
+</div>

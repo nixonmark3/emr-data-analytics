@@ -1,8 +1,8 @@
 'use strict';
 
 var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup', 'ngAnimate', 'blockDataViewerApp'])
-    .directive('diagram', ['$compile', '$window', '$location', '$timeout', 'popupService',
-        function ($compile, $window, $location, $timeout, popupService) {
+    .directive('diagram', ['$compile', '$window', '$timeout', 'popupService',
+        function ($compile, $window, $timeout, popupService) {
 
         return {
             restrict: 'E',
@@ -10,13 +10,13 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
             templateUrl: '/assets/scripts/components/diagram/diagram.html',
             scope: {
                 diagram: '=viewModel',
-                onDisplay: '=?',
-                onSelection: '=?',
-                onDeselection: '=?',
-                nodes: '=?',
-                library: '=?',
-                loadSources: "=?",
-                blurBackground: "=?",
+                onDisplay: '=',
+                onSelection: '=',
+                onDeselection: '=',
+                nodes: '=',
+                library: '=',
+                loadSources: "=",
+                blurBackground: "=",
                 methods: "=?"
             },
             link: function($scope, element, attrs) {
@@ -28,9 +28,18 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                 $scope.draggingWire = false;
                 $scope.mouseOverBlock = null;
                 $scope.mouseOverConnector = null;
-                $scope.absUrl = $location.absUrl();
-                $scope.containerSize = { width: element.width(), height: element.height() };
+
+                $scope.boundary = { x: 0, y: 0, width: 0, height: 0 };
+
+                $scope.panning = false;
+                $scope.canvasMatrix = [1, 0, 0, 1, 0, 0];
+
                 $scope.internalMethods = $scope.methods || {};
+
+                element[0].addEventListener("wheel", function(evt){
+                    zoom(evt.wheelDeltaY / -100, { x: evt.offsetX, y: evt.offsetY });
+                    $scope.$$phase || $scope.$apply();
+                });
 
                 // todo: only need to bind to window resize once in the entire application
                 // todo: move to app.js
@@ -38,102 +47,17 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                     $scope.$apply(function () {
 
-                        $scope.containerSize = { width: element.width(), height: element.height() };
+                        setConsolePosition();
                     });
                 });
 
-                $scope.getDiagramWidth = function() {
-
-                    if ($scope.diagram != undefined) {
-
-                        var diagram = $scope.diagram;
-
-                        if (diagram.blocks.length == 0) {
-
-                            diagram.setWidth($scope.containerSize.width);
-
-                            return diagram.getWidth();
-                        }
-                        else {
-
-                            return diagram.getWidth();
-                        }
-                    }
-
-                    return $scope.containerSize.width;
+                var init = function(){
+                    setConsolePosition();
                 };
 
-                $scope.getDiagramHeight = function() {
+                var setConsolePosition = function(){
 
-                    if ($scope.diagram != undefined) {
-
-                        var diagram = $scope.diagram;
-
-                        if (diagram.blocks.length == 0) {
-
-                            diagram.setHeight(getDefaultDiagramHeight());
-
-                            return diagram.getHeight();
-                        }
-                        else {
-
-                            return diagram.getHeight();
-                        }
-                    }
-
-                    return getDefaultDiagramHeight();
-                };
-
-                $scope.showRootConnector = function() {
-
-                    if ($scope.diagram != undefined) {
-
-                        var diagram = $scope.diagram;
-
-                        if (diagram.blocks.length == 0) {
-
-                            diagram.setWidth($scope.containerSize.width);
-                            diagram.setHeight($scope.containerSize.height);
-                            return true;
-                        }
-                    }
-
-                    return false;
-                };
-
-                var adjustDiagramSizeIfRequired = function(point) {
-
-                    var diagram = $scope.diagram;
-
-                    var increaseHeight = diagram.isPointInHeightIncreaseZone(point.y);
-
-                    var increaseWidth = diagram.isPointInWidthIncreaseZone(point.x);
-
-                    if (increaseHeight) {
-
-                        $scope.$applyAsync(function() {
-
-                            diagram.increaseHeight();
-                        });
-                    }
-
-                    if (increaseWidth) {
-
-                        $scope.$applyAsync(function() {
-
-                            diagram.increaseWidth();
-                        });
-                    }
-                };
-
-                var getDefaultDiagramHeight = function() {
-
-                    return $scope.containerSize.height - 55;
-                };
-
-                var jQuery = function (element) {
-
-                    return $(element);
+                    $scope.consolePosition = { x: (element.width() - 54), y: (element.height() - 156) };
                 };
 
                 var beginDragEvent = function (x, y, config) {
@@ -213,7 +137,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                     //
                     // Find the parent element, if any, that is a connector.
                     //
-                    var hoverElement = searchUp(jQuery(mouseOverElement), whichClass);
+                    var hoverElement = searchUp($(mouseOverElement), whichClass);
                     if (!hoverElement) {
                         return null;
                     }
@@ -229,16 +153,25 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                     var diagram = element[0];
                     var matrix = diagram.getScreenCTM();
                     var point = diagram.createSVGPoint();
-                    point.x = x - evt.view.scrollX;
-                    point.y = y - evt.view.scrollY;
+                    point.x = (x - evt.view.scrollX);
+                    point.y = (y - evt.view.scrollY);
 
-                    return point.matrixTransform(matrix.inverse());
+                    var transform = point.matrixTransform(matrix.inverse());
+
+                    // adjust position based on zoom level
+                    return {
+                            x: (transform.x - $scope.canvasMatrix[4]) / $scope.canvasMatrix[0],
+                            y: (transform.y - $scope.canvasMatrix[5]) / $scope.canvasMatrix[3]
+                    };
                 };
 
                 var inverseCoordinates = function (x, y) {
 
                     var diagram = element[0];
-                    var matrix = diagram.getScreenCTM().translate(x, y);
+                    var transX =  $scope.canvasMatrix[0] * x + $scope.canvasMatrix[4];
+                    var transY =  $scope.canvasMatrix[3] * y + $scope.canvasMatrix[5];
+
+                    var matrix = diagram.getScreenCTM().translate(transX, transY);
 
                     return {
                         x: matrix.e, y: matrix.f
@@ -312,8 +245,6 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                             diagram.updateSelectedBlocksLocation(deltaX, deltaY);
 
                             coords = curCoords;
-
-                            adjustDiagramSizeIfRequired(coords);
                         },
 
                         clicked: function () {
@@ -410,15 +341,13 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                     evt.preventDefault();
                 };
 
-                //
-                // handles diagram mouse down event: drag allows users to select multiple blocks and click sets focus to
-                // the diagram canvas
-                //
                 $scope.diagramMouseDown = function (evt) {
 
                     // ignore right clicks
                     if (evt.which === 3 || evt.button === 2)
                         return;
+
+                    $scope.panning = true;
 
                     var coords;
                     beginDragEvent(evt.pageX, evt.pageY, {
@@ -426,55 +355,52 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                         dragStarted: function (x, y) {
 
                             // capture the initial drag coordinates
-
-                            coords = $scope.internalMethods.translateCoordinates(x, y, evt);
-
-                            $scope.draggingSelection = true;
-                            $scope.dragSelectionRect = {x: coords.x, y: coords.y, width: 0, height: 0};
+                            coords = {
+                                x: x,
+                                y: y
+                            };
                         },
 
                         dragging: function (x, y) {
 
-                            // update the selection rectangle's position and dimensions based on the current drag position
+                            var curCoords = {
+                                x: x,
+                                y: y
+                            };
 
-                            var curCoords = $scope.internalMethods.translateCoordinates(x, y, evt);
+                            var deltaX = curCoords.x - coords.x;
+                            var deltaY = curCoords.y - coords.y;
 
-                            var width = curCoords.x - coords.x;
-                            if (width < 0)
-                                $scope.dragSelectionRect.x = curCoords.x;
-                            $scope.dragSelectionRect.width = Math.abs(width);
+                            $scope.canvasMatrix[4] += deltaX;
+                            $scope.canvasMatrix[5] += deltaY;
 
-                            var height = curCoords.y - coords.y;
-                            if (height < 0)
-                                $scope.dragSelectionRect.y = curCoords.y;
-                            $scope.dragSelectionRect.height = Math.abs(height);
+                            coords = curCoords;
                         },
 
                         dragEnded: function (x, y, evt) {
 
-                            $scope.$apply(function(){
-                                $scope.draggingSelection = false;
-                                $scope.diagram.applySelectionRect($scope.dragSelectionRect);
+                            $scope.$apply(function () {
+                                $scope.panning = false;
                             });
-
-                            delete $scope.dragSelectionRect;
                         },
 
                         clicked: function () {
 
                             // diagram click
 
-                            if ($scope.diagram.getSelectionCount() > 0) {
+                            $scope.$apply(function () {
+                                $scope.panning = false;
 
-                                // if configured, fire the deselection event
-                                if ($scope.onDeselection)
-                                    $scope.onDeselection();
+                                if ($scope.diagram.getSelectionCount() > 0) {
+
+                                    // if configured, fire the deselection event
+                                    if ($scope.onDeselection)
+                                        $scope.onDeselection();
 
 
-                                $scope.$apply(function () {
                                     $scope.diagram.deselectAll();
-                                });
-                            }
+                                }
+                            });
                         }
                     });
 
@@ -522,12 +448,11 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                 $scope.onBlockDisplay = function (evt, block){
 
-                    if ($scope.onDisplay) {
+                    if ($scope.onDisplay){
 
                         // capture the block's coordinates and set the popup's width and height
                         var position = inverseCoordinates(block.x(), block.y());
-                        position.width = 250;
-                        position.height = 300;
+                        position.zoom = $scope.canvasMatrix[0];
 
                         $scope.onDisplay(position, block);
                     }
@@ -535,6 +460,92 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                     evt.stopPropagation();
                     evt.preventDefault();
                 };
+
+                $scope.onFit = function(evt){
+
+                    var padding = 40;
+                    var duration = 200;
+
+                    // retrieve the diagram's boundary
+                    var diagramBoundary = $scope.diagram.getBoundary();
+                    $scope.boundary = {
+                        x: (diagramBoundary.x1 == Number.MIN_VALUE) ? 0 : diagramBoundary.x1,
+                        y: (diagramBoundary.y1 == Number.MIN_VALUE) ? 0 : diagramBoundary.y1,
+                        width: (diagramBoundary.x2 - diagramBoundary.x1),
+                        height: (diagramBoundary.y2 - diagramBoundary.y1)
+                    };
+
+                    // bail if either dimension is 0
+                    if ($scope.boundary.width <= 0 || $scope.boundary.height <= 0)
+                        return;
+
+                    // find the ultimate zoom factor
+                    var zoomX = element.width() / ($scope.boundary.width + 2 * padding);
+                    var zoomY = element.height() / ($scope.boundary.height + 2 * padding);
+                    var zoomFactor = (zoomX < 1 && zoomX < zoomY) ? zoomX : ((zoomY < 1 && zoomY < zoomX) ? zoomY : 1);
+
+                    // find delta and if necessary, zoom out
+                    var delta = zoomFactor - $scope.canvasMatrix[0];
+                    var deltaZoom = (delta < 1) ? delta : 0;
+
+                    // center the boundary
+                    var deltaX = (element.width() / 2)
+                        - zoomFactor * ($scope.boundary.width / 2 + $scope.boundary.x) - $scope.canvasMatrix[4];
+                    var deltaY = (element.height() / 2)
+                        - zoomFactor * ($scope.boundary.height / 2 + $scope.boundary.y) - $scope.canvasMatrix[5];
+
+                    animateZoomPan(deltaZoom, deltaX, deltaY, duration);
+
+                    evt.stopPropagation();
+                    evt.preventDefault();
+                };
+
+                $scope.onZoom = function(evt, delta){
+
+                    zoom(delta);
+
+                    evt.stopPropagation();
+                    evt.preventDefault();
+                };
+
+                function zoom(delta, point){
+
+                    // if a focal point was not specified, zoom in on the center of the canvas
+                    if (point === undefined)
+                        point = { x: (element.width() / 2), y: (element.height() / 2) };
+
+                    var zoomFactor = $scope.canvasMatrix[0] + delta;
+                    zoomFactor = (zoomFactor < 0.2) ? 0.2 : ((zoomFactor > 2.0) ? 2.0 : zoomFactor);
+
+                    var factor = zoomFactor / $scope.canvasMatrix[0];
+                    $scope.canvasMatrix[0] = zoomFactor;
+                    $scope.canvasMatrix[3] = zoomFactor;
+
+                    // adjust the transform to zoom in a on a specific point
+                    $scope.canvasMatrix[4] = (factor * $scope.canvasMatrix[4]) + (1 - factor) * point.x;
+                    $scope.canvasMatrix[5] = (factor * $scope.canvasMatrix[5]) + (1 - factor) * point.y;
+                }
+
+                function animateZoomPan(deltaZoom, deltaX, deltaY, duration, iteration){
+
+                    var stepSize = 20;
+                    $timeout(function(){
+
+                        if (iteration === undefined)
+                            iteration = 0;
+
+                        var iterations = Math.ceil(duration / stepSize);
+
+                        $scope.canvasMatrix[0] += deltaZoom / iterations;
+                        $scope.canvasMatrix[3] += deltaZoom / iterations;
+                        $scope.canvasMatrix[4] += deltaX / iterations;
+                        $scope.canvasMatrix[5] += deltaY / iterations;
+
+                        if (++iteration < iterations)
+                            animateZoomPan(deltaZoom, deltaX, deltaY, duration, iteration);
+
+                    }, stepSize);
+                }
 
                 $scope.diagramMode = function(){
 
@@ -544,6 +555,8 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                     return mode;
                 };
+
+                init();
             }
         }
     }]);

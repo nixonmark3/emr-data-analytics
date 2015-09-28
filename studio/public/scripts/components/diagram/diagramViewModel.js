@@ -498,8 +498,18 @@ viewmodels.wireViewModel = function (data, parent, sourceConnector, targetConnec
 
 viewmodels.diagramViewModel = function(data) {
 
-    // reference the diagram data model
+    // the diagram data model
     this.data = data;
+
+    // internal variables
+
+    var blockNames = {},        // tracks the current set of block names
+        boundary = { x1: Number.MIN_VALUE, x2: Number.MIN_VALUE, y1: Number.MIN_VALUE, y2: Number.MIN_VALUE }, // track the diagram boundary
+        selectionCount = 0;     // tracks the current number of selected blocks
+
+    /**
+     * public properties
+     */
 
     this.getId = function(){
         return data.id;
@@ -509,26 +519,92 @@ viewmodels.diagramViewModel = function(data) {
         data.id = id;
     };
 
-    // tracks the current set of block names
-    var blockNames = {};
+    //
+    // gets the diagram's mode
+    //
+    this.mode = function(){
+        return this.data.mode;
+    };
 
-    var selectionCount = 0;
+    /**
+     * methods
+     */
 
+    /**
+     * Select blocks and wires that fall within the selection rect
+     * @param selectionRect
+     */
+    this.applySelectionRect = function (selectionRect) {
+
+        selectionCount = 0;
+
+        for (var i = 0; i < this.blocks.length; ++i) {
+            var block = this.blocks[i];
+            if (block.x() >= selectionRect.x &&
+                block.y() >= selectionRect.y &&
+                block.x() + block.width() <= selectionRect.x + selectionRect.width &&
+                block.y() + block.height() <= selectionRect.y + selectionRect.height) {
+
+                selectionCount++;
+
+                // Select blocks that are within the selection rect
+                block.select();
+            }
+        }
+
+        for (var j = 0; j < this.wires.length; ++j) {
+            var wire = this.wires[j];
+            if (wire.source.parent().selected() &&
+                wire.target.parent().selected()) {
+
+                // Select the wire if both its parent blocks are selected
+                wire.select();
+            }
+        }
+    };
+
+    /**
+     * calculate the connector's position
+     * @param block
+     * @param connectorIndex
+     * @param inputConnector
+     * @returns {{x: *, y: *}}
+     */
+    this.computeConnectorPos = function (block, connectorIndex, inputConnector) {
+        return {
+            x: block.x() + block.calculateConnectorX(connectorIndex, inputConnector),
+            y: block.y() + (inputConnector ? 0 : block.height())
+        };
+    };
+
+    /**
+     * create a view model for each block
+     * @param blocksData
+     * @returns {Array}
+     */
     this.createBlockViewModels = function (blocksData) {
         var models = [];
 
         if (blocksData) {
             for (var i = 0; i < blocksData.length; ++i) {
 
-                blockNames[blocksData[i].name] = true;
+                var block = new viewmodels.blockViewModel(blocksData[i]);
+                blockNames[block.name()] = true;
 
-                models.push(new viewmodels.blockViewModel(blocksData[i]));
+                this.updateBoundary(block);
+
+                models.push(block);
             }
         }
 
         return models;
     };
 
+    /**
+     * create a view model for each child diagram
+     * @param diagramsData
+     * @returns {Array}
+     */
     this.createDiagramViewModels = function(diagramsData){
         var models = [];
 
@@ -542,73 +618,11 @@ viewmodels.diagramViewModel = function(data) {
         return models;
     };
 
-    this.computeConnectorPos = function (block, connectorIndex, inputConnector) {
-        return {
-            x: block.x() + block.calculateConnectorX(connectorIndex, inputConnector),
-            y: block.y() + (inputConnector ? 0 : block.height())
-        };
-    };
-
-    //
-    // Find a specific block within this diagram
-    //
-    this.findBlock = function (id) {
-
-        for (var i = 0; i < this.blocks.length; ++i) {
-            var block = this.blocks[i];
-            if (block.data.id == id) {
-                return block;
-            }
-        }
-
-        throw new Error("Failed to find block " + name);
-    };
-
-    //
-    // Find the specified nested diagram
-    //
-    this.findDiagram = function(name){
-        for (var i = 0; i < this.diagrams.length; ++i) {
-            var diagram = this.diagrams[i];
-            if (diagram.data.name == name) {
-                return diagram;
-            }
-        }
-
-        throw new Error("Failed to find block " + name);
-    };
-
-    //
-    // Find a specific input connector within this diagram
-    //
-    this.findInputConnector = function (name, connectorIndex) {
-
-        var block = this.findBlock(name);
-
-        if (!block.inputConnectors || block.inputConnectors.length <= connectorIndex) {
-            throw new Error("Block " + name + " has invalid input connectors.");
-        }
-
-        return block.inputConnectors[connectorIndex];
-    };
-
-    //
-    // Find a specific output connector within the chart.
-    //
-    this.findOutputConnector = function (name, connectorIndex) {
-
-        var block = this.findBlock(name);
-
-        if (!block.outputConnectors || block.outputConnectors.length <= connectorIndex) {
-            throw new Error("Block " + name + " has invalid output connectors.");
-        }
-
-        return block.outputConnectors[connectorIndex];
-    };
-
-    //
-    // Create a view model for connection from the data model.
-    //
+    /**
+     * create a view model for the specified wire
+     * @param wireData
+     * @returns {viewmodels.wireViewModel}
+     */
     this.createWireViewModel = function(wireData) {
 
         var sourceConnector = this.findOutputConnector(wireData.from_node,
@@ -623,6 +637,11 @@ viewmodels.diagramViewModel = function(data) {
             destConnector);
     };
 
+    /**
+     * create a view model for each wire in the list of wires
+     * @param wiresData
+     * @returns {Array}
+     */
     this.createWireViewModels = function (wiresData) {
 
         var models = [];
@@ -636,68 +655,43 @@ viewmodels.diagramViewModel = function(data) {
         return models;
     };
 
-    // create a view model for each block
-    this.blocks = this.createBlockViewModels(this.data.blocks);
+    /**
+     * create a new block based on the specified config block
+     * @param configBlock
+     */
+    this.createBlock = function (configBlock) {
 
-    // create a view model for each wire
-    this.wires = this.createWireViewModels(this.data.wires);
+        var blockData = getDataBlock(configBlock);
 
-    // create a view model for each nested diagram
-    this.diagrams = this.createDiagramViewModels(this.data.diagrams);
+        if (!this.data.blocks) {
+            this.data.blocks = [];
+        }
 
-    //
-    // gets the diagram's mode
-    //
-    this.mode = function(){
-        return this.data.mode;
+        // capture new block name
+        blockNames[blockData.name] = true;
+
+        //
+        // Update the data model.
+        //
+        this.data.blocks.push(blockData);
+
+        // create the block view model
+        var block = new viewmodels.blockViewModel(blockData);
+
+        // update the diagram boundary
+        this.updateBoundary(block);
+
+        //
+        // Update the view model.
+        //
+        this.blocks.push(block);
     };
 
-    //
-    // Bezier curve calculations
-    //
-
-    this.computeWireSourceTangentX = function (pt1, pt2) {
-
-        return pt1.x;
-    };
-
-    this.computeWireSourceTangentY = function (pt1, pt2) {
-
-        return pt1.y + this.computeWireTangentOffset(pt1, pt2);
-    };
-
-    this.computeWireSourceTangent = function(pt1, pt2) {
-        return {
-            x: this.computeWireSourceTangentX(pt1, pt2),
-            y: this.computeWireSourceTangentY(pt1, pt2)
-        };
-    };
-
-    this.computeWireTargetTangentX = function (pt1, pt2) {
-
-        return pt2.x;
-    };
-
-    this.computeWireTargetTangentY = function (pt1, pt2) {
-
-        return pt2.y - this.computeWireTangentOffset(pt1, pt2);
-    };
-
-    this.computeWireTargetTangent = function(pt1, pt2) {
-        return {
-            x: this.computeWireTargetTangentX(pt1, pt2),
-            y: this.computeWireTargetTangentY(pt1, pt2)
-        };
-    };
-
-    this.computeWireTangentOffset = function (pt1, pt2) {
-
-        return (pt2.y - pt1.y) / 2;
-    };
-
-    //
-    // Create a view model for a new wire
-    //
+    /**
+     * Create a view model for a new wire
+     * @param startConnector
+     * @param endConnector
+     */
     this.createWire = function (startConnector, endConnector) {
 
         var wiresData = this.data.wires;
@@ -761,240 +755,20 @@ viewmodels.diagramViewModel = function(data) {
         wiresViewModels.push(wireViewModel);
     };
 
-    //
-    // Add a block to the view model.
-    //
-    this.createBlock = function (configBlock) {
-
-        var block = getDataBlock(configBlock);
-
-        if (!this.data.blocks) {
-            this.data.blocks = [];
-        }
-
-        // capture new block name
-        blockNames[block.name] = true;
-
-        //
-        // Update the data model.
-        //
-        this.data.blocks.push(block);
-
-        //
-        // Update the view model.
-        //
-        this.blocks.push(new viewmodels.blockViewModel(block));
-    };
-
-    this.updateBlock = function(configBlock){
-
-        var block = this.findBlock(configBlock.id);
-
-        if ((configBlock.name) && (!blockNames[configBlock.name])) {
-            block.data.name = configBlock.name;
-            blockNames[configBlock.name] = true;
-        }
-
-        var configured = true;
-        var dirty = false;
-        configBlock.parameters.forEach(function(configParameter){
-
-            if (!configParameter.collected)
-                configured = false;
-
-            if (configParameter.dirty)
-                dirty = true;
-
-            var parameter = block.getParameter(configParameter.name());
-            parameter.value = configParameter.value;
-            parameter.collected = configParameter.collected;
-        });
-
-        if (dirty && configured)
-            block.data.state = 1;
-        else if (!configured)
-            block.data.state = 0;
-    };
-
-    this.getBlockDescription = function(x, y, definition){
-
-        return {
-            name: this.generateBlockName(definition.name()),
-            id: generateUniqueName(),
-            definition: definition.name(),
-            x: x,
-            y: y
-        };
-    };
-
-    var getDataBlock = function(configBlock){
-
-        return new DataBlock(configBlock);
-    };
-
-    var DataBlock = function(configBlock){
-
-        this.name = configBlock.name;
-        this.id = configBlock.id;
-        this.definition = configBlock.definition.name();
-        this.definitionType = configBlock.definition.definitionType();
-        this.state = 0;
-        this.w = configBlock.definition.w();
-        this.x = configBlock.x;
-        this.y = configBlock.y;
-        this.inputConnectors = angular.copy(configBlock.definition.inputs()); // todo copy over only what we need from definition
-        this.outputConnectors = angular.copy(configBlock.definition.outputs()); // todo copy over only what we need from definition
-
-        var parameters = [];
-        var configured = true;
-        configBlock.parameters.forEach(function(parameter){
-
-            if (!parameter.collected)
-                configured = false;
-
-            parameters.push({
-                name:parameter.name(),
-                type:parameter.type(),
-                value:parameter.value,
-                collected:parameter.collected
-            });
-        });
-
-        if (configured)
-            this.state = 1;
-
-        this.parameters = parameters;
-    };
-
-    this.generateBlockName = function(definitionName){
-
-        // generate unique block name
-        var index = 1;
-        var name;
-        do{
-            name = definitionName + index;
-            index++;
-        }
-        while(name in blockNames);
-
-        return name;
-    };
-
-    var generateUniqueName = function() {
-
-        var delim = "-";
-
-        function S4() {
-            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-        }
-
-        return (S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4());
-    };
-
-    //
-    // Select all blocks and connections in the chart.
-    //
-    this.selectAll = function () {
-
-        selectionCount = 0;
-
-        var blocks = this.blocks;
-        for (var i = 0; i < blocks.length; ++i) {
-            var block = blocks[i];
-            selectionCount++;
-            block.select();
-        }
-
-        var wires = this.wires;
-        for (var j = 0; j < connections.length; ++j) {
-            var wire = wires[i];
-            wire.select();
-        }
-    };
-
-    //
-    // Deselect all blocks and wires in the diagram, return the number of selected blocks (0)
-    //
-    this.deselectAll = function () {
-
-        var blocks = this.blocks;
-        for (var i = 0; i < blocks.length; ++i) {
-            var block = blocks[i];
-            block.deselect();
-        }
-
-        var wires = this.wires;
-        for (var j = 0; j < wires.length; ++j) {
-            var wire = wires[j];
-            wire.deselect();
-        }
-
-        selectionCount = 0;
-    };
-
-    this.selectBlock = function(block){
-
-        this.deselectAll();
-        block.select();
-
-        selectionCount = 1;
-    };
-
+    /**
+     * delete the specified block
+     * @param block
+     */
     this.deleteBlock = function(block){
 
         this.selectBlock(block);
         this.deleteSelected();
     };
 
-    //
-    // Update the location of the block and its connectors.
-    //
-    this.updateSelectedBlocksLocation = function (deltaX, deltaY) {
-
-        var selectedBlocks = this.getSelectedBlocks();
-
-        for (var i = 0; i < selectedBlocks.length; ++i) {
-            var block = selectedBlocks[i];
-            block.data.x += deltaX;
-            block.data.y += deltaY;
-        }
-    };
-
-    //
-    // Handle mouse click on a particular block.
-    //
-    this.onBlockClicked = function (block) {
-
-        this.selectBlock(block);
-
-        // Move node to the end of the list so it is rendered after all the other.
-        // This is the way Z-order is done in SVG.
-
-        var blockIndex = this.blocks.indexOf(block);
-        if (blockIndex == -1) {
-            throw new Error("Failed to find block in view model!");
-        }
-        this.blocks.splice(blockIndex, 1);
-        this.blocks.push(block);
-    };
-
-    //
-    // Handle mouse down on a wire.
-    //
-    this.onWireMouseDown = function (wire, ctrlKey) {
-
-        if (ctrlKey) {
-            wire.toggleSelected();
-        }
-        else {
-            this.deselectAll();
-            wire.select();
-        }
-    };
-
-    //
-    // Delete all blocks and wires that are selected.
-    //
+    /**
+     * Delete all blocks and wires that are selected.
+     * @returns {number}
+     */
     this.deleteSelected = function () {
 
         var newBlockViewModels = [];
@@ -1057,41 +831,164 @@ viewmodels.diagramViewModel = function(data) {
         return 0;
     };
 
-    //
-    // Select blocks and wires that fall within the selection rect
-    //
-    this.applySelectionRect = function (selectionRect) {
+    /**
+     * Deselect all blocks and wires in the diagram, return the number of selected blocks (0)
+     */
+    this.deselectAll = function () {
+
+        var blocks = this.blocks;
+        for (var i = 0; i < blocks.length; ++i) {
+            var block = blocks[i];
+            block.deselect();
+        }
+
+        var wires = this.wires;
+        for (var j = 0; j < wires.length; ++j) {
+            var wire = wires[j];
+            wire.deselect();
+        }
 
         selectionCount = 0;
+    };
+
+    /**
+     * Find a block by guid
+     * @param id
+     * @returns {*}
+     */
+    this.findBlock = function (id) {
 
         for (var i = 0; i < this.blocks.length; ++i) {
             var block = this.blocks[i];
-            if (block.x() >= selectionRect.x &&
-                block.y() >= selectionRect.y &&
-                block.x() + block.width() <= selectionRect.x + selectionRect.width &&
-                block.y() + block.height() <= selectionRect.y + selectionRect.height) {
-
-                selectionCount++;
-
-                // Select blocks that are within the selection rect
-                block.select();
+            if (block.data.id == id) {
+                return block;
             }
         }
 
-        for (var j = 0; j < this.wires.length; ++j) {
-            var wire = this.wires[j];
-            if (wire.source.parent().selected() &&
-                wire.target.parent().selected()) {
-
-                // Select the wire if both its parent blocks are selected
-                wire.select();
-            }
-        }
+        throw new Error("Failed to find block " + name);
     };
 
-    //
-    // Get the array of blocks that are currently selected.
-    //
+    /**
+     * Find a diagram by name
+     * @param name
+     * @returns {*}
+     */
+    this.findDiagram = function(name){
+        for (var i = 0; i < this.diagrams.length; ++i) {
+            var diagram = this.diagrams[i];
+            if (diagram.data.name == name) {
+                return diagram;
+            }
+        }
+
+        throw new Error("Failed to find block " + name);
+    };
+
+    /**
+     * Find input connector by block id and connector index
+     * @param id
+     * @param connectorIndex
+     * @returns {*}
+     */
+    this.findInputConnector = function (id, connectorIndex) {
+
+        var block = this.findBlock(id);
+
+        if (!block.inputConnectors || block.inputConnectors.length <= connectorIndex) {
+            throw new Error("Block " + id + " has invalid input connectors.");
+        }
+
+        return block.inputConnectors[connectorIndex];
+    };
+
+    /**
+     * Find output connector by block id and connector index
+     * @param id
+     * @param connectorIndex
+     * @returns {*}
+     */
+    this.findOutputConnector = function (id, connectorIndex) {
+
+        var block = this.findBlock(id);
+
+        if (!block.outputConnectors || block.outputConnectors.length <= connectorIndex) {
+            throw new Error("Block " + id + " has invalid output connectors.");
+        }
+
+        return block.outputConnectors[connectorIndex];
+    };
+
+    /**
+     * Get a summary of the block's details
+     * @param x
+     * @param y
+     * @param definition
+     * @returns {{name, id, definition: *, x: *, y: *}}
+     */
+    this.getBlockDescription = function(x, y, definition){
+
+        return {
+            name: this.generateBlockName(definition.name()),
+            id: generateUniqueName(),
+            definition: definition.name(),
+            x: x,
+            y: y
+        };
+    };
+
+    this.getBoundary = function(){
+
+        return boundary;
+    };
+
+    /**
+     * returns a dataBlock object representing the specified config block
+     * @param configBlock
+     * @returns {DataBlock}
+     */
+    var getDataBlock = function(configBlock){
+
+        return new DataBlock(configBlock);
+    };
+
+    var DataBlock = function(configBlock){
+
+        this.name = configBlock.name;
+        this.id = configBlock.id;
+        this.definition = configBlock.definition.name();
+        this.definitionType = configBlock.definition.definitionType();
+        this.state = 0;
+        this.w = configBlock.definition.w();
+        this.x = configBlock.x;
+        this.y = configBlock.y;
+        this.inputConnectors = angular.copy(configBlock.definition.inputs()); // todo copy over only what we need from definition
+        this.outputConnectors = angular.copy(configBlock.definition.outputs()); // todo copy over only what we need from definition
+
+        var parameters = [];
+        var configured = true;
+        configBlock.parameters.forEach(function(parameter){
+
+            if (!parameter.collected)
+                configured = false;
+
+            parameters.push({
+                name:parameter.name(),
+                type:parameter.type(),
+                value:parameter.value,
+                collected:parameter.collected
+            });
+        });
+
+        if (configured)
+            this.state = 1;
+
+        this.parameters = parameters;
+    };
+
+    /**
+     * Get the array of blocks that are currently selected.
+     * @returns {Array}
+     */
     this.getSelectedBlocks = function () {
         var selectedBlocks = [];
 
@@ -1105,14 +1002,16 @@ viewmodels.diagramViewModel = function(data) {
         return selectedBlocks;
     };
 
-    /*
-    ** retrieve the number of selected blocks
+    /**
+     * retrieve the number of selected blocks
+     * @returns {number}
      */
     this.getSelectionCount = function() { return selectionCount; };
 
-    //
-    // Get the array of wires that are currently selected.
-    //
+    /**
+     * Get the array of wires that are currently selected.
+     * @returns {Array}
+     */
     this.getSelectedWires = function () {
 
         var selectedWires = [];
@@ -1130,6 +1029,142 @@ viewmodels.diagramViewModel = function(data) {
     };
 
     /**
+     * Generate a unique block name based on the definition name
+     * @param definitionName
+     * @returns {*}
+     */
+    this.generateBlockName = function(definitionName){
+
+        // generate unique block name
+        var index = 1;
+        var name;
+        do{
+            name = definitionName + index;
+            index++;
+        }
+        while(name in blockNames);
+
+        return name;
+    };
+
+    /**
+     * Generate guid
+     * @returns {string}
+     */
+    var generateUniqueName = function() {
+
+        var delim = "-";
+
+        function S4() {
+            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+        }
+
+        return (S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4());
+    };
+
+    /**
+     * Handle mouse click on a particular block.
+     * @param block
+     */
+    this.onBlockClicked = function (block) {
+
+        this.selectBlock(block);
+
+        // Move node to the end of the list so it is rendered after all the other.
+        // This is the way Z-order is done in SVG.
+
+        var blockIndex = this.blocks.indexOf(block);
+        if (blockIndex == -1) {
+            throw new Error("Failed to find block in view model!");
+        }
+        this.blocks.splice(blockIndex, 1);
+        this.blocks.push(block);
+    };
+
+    /**
+     * Handle mouse down on a wire.
+     * @param wire
+     * @param ctrlKey
+     */
+    this.onWireMouseDown = function (wire, ctrlKey) {
+
+        if (ctrlKey) {
+            wire.toggleSelected();
+        }
+        else {
+            this.deselectAll();
+            wire.select();
+        }
+    };
+
+    /**
+     * select all blocks
+     */
+    this.selectAll = function () {
+
+        selectionCount = 0;
+
+        var blocks = this.blocks;
+        for (var i = 0; i < blocks.length; ++i) {
+            var block = blocks[i];
+            selectionCount++;
+            block.select();
+        }
+
+        var wires = this.wires;
+        for (var j = 0; j < connections.length; ++j) {
+            var wire = wires[i];
+            wire.select();
+        }
+    };
+
+    /**
+     * select block
+     * @param block
+     */
+    this.selectBlock = function(block){
+
+        this.deselectAll();
+        block.select();
+
+        selectionCount = 1;
+    };
+
+    /**
+     * Update a block view model based on the specified config block
+     * @param configBlock
+     */
+    this.updateBlock = function(configBlock){
+
+        var block = this.findBlock(configBlock.id);
+
+        if ((configBlock.name) && (!blockNames[configBlock.name])) {
+            block.data.name = configBlock.name;
+            blockNames[configBlock.name] = true;
+        }
+
+        var configured = true;
+        var dirty = false;
+        configBlock.parameters.forEach(function(configParameter){
+
+            if (!configParameter.collected)
+                configured = false;
+
+            if (configParameter.dirty)
+                dirty = true;
+
+            var parameter = block.getParameter(configParameter.name());
+            parameter.value = configParameter.value;
+            parameter.collected = configParameter.collected;
+        });
+
+        if (dirty && configured)
+            block.data.state = 1;
+        else if (!configured)
+            block.data.state = 0;
+    };
+
+    /**
      * Update the state of the specified block
      * @param blockId
      * @param blockState
@@ -1140,68 +1175,88 @@ viewmodels.diagramViewModel = function(data) {
         block.updateProgress(blockState);
     };
 
-    this.getHeight = function() {
+    /**
+     * Check whether the specified block expands the diagram's current boundary
+     * @param block
+     */
+    this.updateBoundary = function(block){
 
-        return this.data.height;
+        if (boundary.x1 == Number.MIN_VALUE || block.x() < boundary.x1)
+            boundary.x1 = block.x();
+        if (boundary.x2 == Number.MIN_VALUE || (block.x() + block.width()) > boundary.x2)
+            boundary.x2 = (block.x() + block.width());
+        if (boundary.y1 == Number.MIN_VALUE || block.y() < boundary.y1)
+            boundary.y1 = block.y();
+        if (boundary.y2 == Number.MIN_VALUE || (block.y() + block.height()) > boundary.y2)
+            boundary.y2 = (block.y() + block.height());
     };
 
-    this.setHeight = function(newHeight) {
+    /**
+     * Update the location of the block and its connectors.
+     * @param deltaX
+     * @param deltaY
+     */
+    this.updateSelectedBlocksLocation = function (deltaX, deltaY) {
 
-        this.data.height = newHeight;
-    };
+        var selectedBlocks = this.getSelectedBlocks();
 
-    this.getWidth = function() {
-
-        return this.data.width;
-    };
-
-    this.setWidth = function(newWidth) {
-
-        this.data.width = newWidth;
-    };
-
-    this.getResizeHeightDelta = function() {
-
-        return this.getHeight() * 0.10;
-    };
-
-    this.getResizeWidthDelta = function() {
-
-        return this.getWidth() * 0.10;
-    };
-
-    this.isPointInHeightIncreaseZone = function(yPosition) {
-
-        var increaseSize = false;
-
-        if (yPosition >= (this.getHeight() - this.getResizeHeightDelta())) {
-
-            increaseSize = true;
+        for (var i = 0; i < selectedBlocks.length; ++i) {
+            var block = selectedBlocks[i];
+            block.data.x += deltaX;
+            block.data.y += deltaY;
         }
-
-        return increaseSize;
     };
 
-    this.isPointInWidthIncreaseZone = function(xPosition) {
+    // create a view model for each block
+    this.blocks = this.createBlockViewModels(this.data.blocks);
 
-        var increaseSize = false;
+    // create a view model for each wire
+    this.wires = this.createWireViewModels(this.data.wires);
 
-        if (xPosition >= (this.getWidth() - this.getResizeWidthDelta())) {
+    // create a view model for each nested diagram
+    this.diagrams = this.createDiagramViewModels(this.data.diagrams);
 
-            increaseSize = true;
-        }
+    //
+    // Bezier curve calculations
+    //
 
-        return increaseSize;
+    this.computeWireSourceTangentX = function (pt1, pt2) {
+
+        return pt1.x;
     };
 
-    this.increaseHeight = function() {
+    this.computeWireSourceTangentY = function (pt1, pt2) {
 
-        this.data.height = this.data.height + this.getResizeHeightDelta();
+        return pt1.y + this.computeWireTangentOffset(pt1, pt2);
     };
 
-    this.increaseWidth = function() {
+    this.computeWireSourceTangent = function(pt1, pt2) {
+        return {
+            x: this.computeWireSourceTangentX(pt1, pt2),
+            y: this.computeWireSourceTangentY(pt1, pt2)
+        };
+    };
 
-        this.data.width = this.data.width + this.getResizeWidthDelta();
+    this.computeWireTargetTangentX = function (pt1, pt2) {
+
+        return pt2.x;
+    };
+
+    this.computeWireTargetTangentY = function (pt1, pt2) {
+
+        return pt2.y - this.computeWireTangentOffset(pt1, pt2);
+    };
+
+    this.computeWireTargetTangent = function(pt1, pt2) {
+        return {
+            x: this.computeWireTargetTangentX(pt1, pt2),
+            y: this.computeWireTargetTangentY(pt1, pt2)
+        };
+    };
+
+    this.computeWireTangentOffset = function (pt1, pt2) {
+
+        return (pt2.y - pt1.y) / 2;
     };
 };
 

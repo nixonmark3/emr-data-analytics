@@ -2,21 +2,16 @@
 
 analyticsApp
 
-    .controller('blockDataController',
-    ['$scope', '$element', '$window', '$timeout', 'diagramService', 'block', 'config', 'position', 'close',
+    .controller('blockDataController', ['$scope', '$element', '$window', '$timeout', 'diagramService', 'block', 'config', 'position', 'close',
         function($scope, $element, $window, $timeout, diagramService, block, config, position, close){
 
             $scope.position = position;
             $scope.block = block.data;
             $scope.config = config;
 
-            $scope.close = function(){
+            $scope.close = function(transitionDuration){
 
-                close(null, 500);
-
-                $element.css({
-                    "-webkit-transform": "translate(0, 0) scale(0.01)"
-                });
+                close(null, transitionDuration);
             };
 
             $scope.getBlockData = function(type, key, success){
@@ -207,6 +202,8 @@ analyticsApp
             $scope.chartMethods = {};
             $scope.hideChartMenus = false;
             $scope.rangeSliderDisabled = false;
+
+            $scope.config.subTitle = "Explore";
 
             // load the set of features after the modal animation has completed
             $timeout(function() {
@@ -639,4 +636,16 @@ analyticsApp
 
             this.close = $scope.close;
         }
-    ]);
+    ])
+
+    .controller('loadDataController', ['$scope', '$element', 'diagramService', 'config', 'position', 'close',
+        function($scope, $element, diagramService, config, position, close){
+
+            $scope.position = position;
+            $scope.config = config;
+
+            $scope.close = function(transitionDuration){
+
+                close(null, transitionDuration);
+            };
+    }]);

@@ -5,6 +5,7 @@ var analyticsApp = angular.module('analyticsApp',
         'browserApp',
         'emr.ui.controls',
         'emr.ui.charts',
+        'emr.ui.dashboard',
         'emr.ui.files',
         'emr.ui.grids',
         'emr.ui.modal',
@@ -14,7 +15,7 @@ var analyticsApp = angular.module('analyticsApp',
         'ngSanitize',
         'ngAnimate'])
 
-    .config(function ($routeProvider, $locationProvider) {
+    .config(function ($routeProvider, $locationProvider, $animateProvider) {
         $routeProvider
             .when('/studio', {
                 templateUrl: "/assets/templates/studio.html",
@@ -28,6 +29,8 @@ var analyticsApp = angular.module('analyticsApp',
         $locationProvider.html5Mode({
             enabled: true
         });
+
+        $animateProvider.classNameFilter(/^((?!(fa-spin)).)*$/);
     })
 
     .filter('unsafe', ['$sce', function ($sce) {
@@ -320,336 +323,7 @@ var analyticsApp = angular.module('analyticsApp',
     .controller('dashboardController', ['$scope', '$window', '$timeout', '$webSockets', 'diagramService', 'modalService', 'popupService',
         function($scope, $window, $timeout, $webSockets, diagramService, modalService, popupService) {
 
-        // reference the cards element
-        var cards = angular.element('#dashboard-cards');
 
-        // initialize variables, cards and selector
-        $scope.loading = false;
-
-        $scope.jobs = [];
-
-        $scope.cards = {
-            streaming: -1,
-            online: -1,
-            offline: -1
-        };
-
-        $scope.selector = {
-            index: 0,
-            xOffset: (cards.width() / 4),
-            yOffset: cards.height()
-        };
-
-        // set up websockets
-        $webSockets.reset();
-        $webSockets.listen(function(msg) { return msg.type == "jobs-summary"; }, setCards);
-        $webSockets.listen(function(msg) { return (msg.type == "job-infos" ); }, setJobs);
-        $webSockets.listen(function(msg) { return (msg.type == "streaming-infos"); }, setStreamingJobs);
-        $webSockets.send({ type: "dashboard" });
-        $webSockets.send({ type: "jobs-summary" });
-
-        $webSockets.listen(function(msg) { return msg.type == "evaluationStatus"; }, updateOfflineJob);
-        $webSockets.listen(function(msg) { return msg.type == "deploymentStatus"; }, function(msg) { updateOnlineJob(msg.jobInfo); });
-        $webSockets.listen(function(msg) { return msg.type == "streaming-info"; }, updateStreamingJob);
-        $webSockets.listen(function(msg) { return msg.type == "job-variable"; }, updateJobVariable);
-
-            // watch for changes in container dimensions
-        $scope.$watch(function() { return cards.width(); }, function(newWidth, oldWidth) {
-            $scope.selector.xOffset = (newWidth / 4);
-        });
-
-        /**
-         * Set the active card index
-         * @param index
-         */
-        $scope.activeCard = function(index){
-
-            if ($scope.selector.index != index) {
-                $scope.selector.index = index;
-                requestJobs();
-            }
-
-            $scope.$$phase || $scope.$apply();
-        };
-
-        $scope.addSource = function(evt){
-
-            var position = {
-                width: 800,
-                centerX: evt.clientX,
-                centerY: evt.clientY
-            };
-
-            modalService.show({
-                templateUrl: '/assets/scripts/views/editor.html',
-                controller: 'editorController',
-                inputs: {},
-                config: {
-                    name: "Create Data Source",
-                    showSave : true,
-                    showCancel: true
-                },
-                position: position
-            }).then(function (modal) {
-
-                modal.close.then(function (source) {
-
-                    if (source) {
-
-                        diagramService.streamingStart(source).then(
-                            function (data) { },
-                            function (code) {
-                                // todo: show exception
-                                console.log(code);
-                            }
-                        );
-                    }
-                });
-            });
-        };
-
-        /**
-         *
-         * @param job
-         */
-        $scope.kill = function(job){
-
-            job.killing = true;
-
-            // send kill request
-            diagramService.kill(job.diagramId, job.mode).then(
-                function (data) { },
-                function (code) {
-
-                    console.log(code); // TODO show exception
-                }
-            );
-
-            $scope.$$phase || $scope.$apply();
-        };
-
-        $scope.killTopic = function(job){
-
-            job.killing = true;
-
-            // send kill request
-            diagramService.streamingStop(job.topic).then(
-                function (data) { },
-                function (code) {
-
-                    console.log(code); // TODO show exception
-                }
-            );
-
-            $scope.$$phase || $scope.$apply();
-        };
-
-        $scope.formatDate = function(unix){
-
-            var date = new Date(unix);
-            return date.toLocaleString();
-        };
-
-        /**
-         *
-         */
-        function requestJobs(){
-
-            switch($scope.selector.index){
-
-                case 0:
-                    $webSockets.send({ type: "streaming-jobs" });
-                    $scope.loading = true;
-                    break;
-                case 1:
-                    $webSockets.send({ type: "online-jobs" });
-                    $scope.loading = true;
-                    break;
-                case 2:
-                    $webSockets.send({ type: "offline-jobs" });
-                    $scope.loading = true;
-                    break;
-                case 3:
-                    $scope.jobs = [];
-                    break;
-            }
-        }
-
-        /**
-         *
-         * @param message
-         */
-        function setCards(message){
-
-            $scope.cards = {
-                streaming: message.streaming,
-                online: message.online,
-                offline: message.offline
-            };
-
-            $scope.$$phase || $scope.$apply();
-        }
-
-        /**
-         *
-         * @param jobs
-         */
-        function setJobs(jobs){
-
-            var temp = [];
-            jobs.items.forEach(function(element){
-                temp.push(new viewmodels.jobViewModel(element));
-            });
-
-            $scope.jobs = temp;
-            $scope.loading = false;
-
-            $scope.$$phase || $scope.$apply();
-        }
-
-        function setStreamingJobs(jobs){
-
-            $scope.jobs = jobs.items;
-            $scope.loading = false;
-
-            $scope.$$phase || $scope.$apply();
-        }
-
-        function updateOfflineJob(message){
-
-            if ($scope.selector.index == 2){ // offline jobs
-
-                var temp;
-                var tempIndex = 0;
-                $scope.jobs.forEach(function(element, index){
-
-                    if (element.diagramId == message.diagramId){
-
-                        temp = element;
-                        tempIndex = index;
-                    }
-                });
-
-                if (temp){
-                    // the updated online job is in the list
-                    switch(message.state){
-                        case "COMPLETED":
-                        case "FAILED":
-                        case "STOPPED":
-
-                            $scope.jobs.splice(tempIndex, 1);
-                            break;
-                    }
-                }
-                else{
-                    // the item is not in the list - append if running
-                    if (message.state == "RUNNING")
-                        $scope.jobs.push(new viewmodels.jobViewModel(message));
-                }
-            }
-
-            $scope.$$phase || $scope.$apply();
-        }
-
-        function updateOnlineJob(message){
-
-            if ($scope.selector.index == 1){ // online jobs
-
-                var temp;
-                var tempIndex = 0;
-                $scope.jobs.forEach(function(element, index){
-
-                    if (element.diagramId == message.diagramId){
-
-                        temp = element;
-                        tempIndex = index;
-                    }
-                });
-
-                if (temp){
-                    // the updated online job is in the list
-                    switch(message.state){
-                        case "COMPLETED":
-                        case "FAILED":
-                        case "STOPPED":
-
-                            $scope.jobs.splice(tempIndex, 1);
-                            break;
-                    }
-                }
-                else{
-                    // the item is not in the list - append if running
-                    if (message.state == "RUNNING")
-                        $scope.jobs.push(new viewmodels.jobViewModel(message));
-                }
-            }
-
-            $scope.$$phase || $scope.$apply();
-        }
-
-        function updateStreamingJob(message){
-
-            if ($scope.selector.index == 0){ // streaming jobs
-
-                var job;
-                var jobIndex = 0;
-                $scope.jobs.forEach(function(element, index){
-
-                    if (element.diagramId == message.diagramId){
-
-                        job = element;
-                        jobIndex = index;
-                    }
-                });
-
-                if (job){
-                    // the updated online job is in the list
-                    switch(message.state){
-                        case "COMPLETED":
-                        case "FAILED":
-                        case "STOPPED":
-
-                            $scope.jobs.splice(jobIndex, 1);
-                            break;
-                    }
-                }
-                else{
-                    // the item is not in the list - append if running
-                    if (message.state == "RUNNING")
-                        $scope.jobs.push(message);
-                }
-            }
-
-            $scope.$$phase || $scope.$apply();
-        }
-
-        function updateJobVariable(variable){
-
-            if ($scope.selector.index == 1) { // online jobs
-
-                var temp;
-                $scope.jobs.forEach(function(element){
-
-                    if (element.diagramId == variable.key)
-                        temp = element;
-                });
-
-                if (temp){
-                    var trend = [];
-                    variable.values.forEach(function(element){
-                        trend.push(parseFloat(element));
-                    });
-
-                    temp.lastValue = variable.last;
-                    temp.trend = trend;
-                }
-            }
-
-            $scope.$$phase || $scope.$apply();
-        }
-
-        // make request to initialize list of jobs
-        requestJobs();
     }])
 
     .controller('studioController', ['$scope', '$window', '$timeout', '$webSockets', 'diagramService', 'modalService', 'popupService',
@@ -677,17 +351,6 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.offlineDiagramMethods = {};
 
         $scope.diagrams = [];
-
-        // initialize the studio properties panel to be on the right-side of the canvas
-        var studioContainer = angular.element($('#studio-container'));
-        $scope.studioPropertiesPanel = {
-            isDirty: false,
-            isVisible: false,
-            x: studioContainer.width() - 250 - 20,
-            y: 20,
-            width: 250,
-            height: studioContainer.height() - 20 - 20
-        };
 
         // setup websocket listeners
         $webSockets.reset();
@@ -814,8 +477,8 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.onBlockDisplay = function(position, block){
 
             var modalPosition = {
-                centerX: (position.x + block.width() / 2),
-                centerY: (position.y + block.height() / 2)
+                centerX: (position.x + position.zoom * block.width() / 2),
+                centerY: (position.y + position.zoom * block.height() / 2)
             };
 
             switch(block.definitionType()){
@@ -829,19 +492,15 @@ var analyticsApp = angular.module('analyticsApp',
                             block: block
                         },
                         config: {
-                            name: block.data.name,
+                            title: block.data.name,
+                            backdropClass: 'emr-modal-backdrop',
                             showSave : false,
                             showCancel: true
                         },
                         position: modalPosition
                     }).then(function (modal) {
 
-                        // todo: blurring the background at the same time as modal zoom is causing a performance problem
-                        // $scope.blurBackground = true;
-
                         modal.close.then(function (result) {
-
-                            // $scope.blurBackground = false;
 
                             if (result) {
 
@@ -860,6 +519,7 @@ var analyticsApp = angular.module('analyticsApp',
                         },
                         config: {
                             // todo put this back when refactor results name: block.data.name,
+                            backdropClass: 'emr-modal-backdrop',
                             showSave : false,
                             showCancel: true
                         },
@@ -867,8 +527,6 @@ var analyticsApp = angular.module('analyticsApp',
                     }).then(function (modal) {
 
                         modal.close.then(function (result) {
-
-                            $scope.blurBackground = false;
 
                             if (result) {
 
@@ -885,9 +543,6 @@ var analyticsApp = angular.module('analyticsApp',
          */
         $scope.onBlockSelection = function(blocks){
 
-            // prevent the user from losing data
-            $scope.studioPropertiesPanel.isDirty = false;
-
             if (blocks.length == 1){
 
                 // a single block has been selected
@@ -901,17 +556,6 @@ var analyticsApp = angular.module('analyticsApp',
 
                 // retrieve the block's definition viewmodel
                 var definition = new viewmodels.definitionViewModel(mode, $scope.library[block.definition()]);
-
-                // create a studio properties object
-
-                $scope.studioProperties = {
-                    type: "BLOCK",
-                    viewModel: new viewmodels.configuringBlockViewModel(definition, block.data)
-                };
-
-                // show the studio properties panel
-                $scope.studioPropertiesPanel.isVisible = true;
-
             }
         };
 
@@ -928,10 +572,7 @@ var analyticsApp = angular.module('analyticsApp',
         ** When all blocks are being deselected - stop editing and hide the studio properties panel
          */
         $scope.onDiagramDeselection = function(){
-            $scope.studioPropertiesPanel.isDirty = false;
-            $scope.studioPropertiesPanel.isVisible = false;
 
-            delete $scope.studioProperties;
         };
 
         $scope.onFileDrop = function(files, evt){
@@ -953,34 +594,36 @@ var analyticsApp = angular.module('analyticsApp',
             diagram().createBlock(configBlock);
         };
 
-        /*
-         ** Cancel the edits performed in the studio properties panel
-         */
-        $scope.studioPropertiesCancel = function(){
 
-            var viewModel = $scope.studioProperties.viewModel.reset();
-            $scope.studioProperties = {
-                type: "BLOCK",
-                viewModel: viewModel
-            };
-            $scope.studioPropertiesPanel.isDirty = false;
-        };
+        $scope.onLoadData = function(){
 
-        /*
-        ** Sets the studio properties savable flag when a properties is changed
-         */
-        $scope.studioPropertiesChange = function(){
+            // todo: calculate new block position
 
-            $scope.studioPropertiesPanel.isDirty = true;
-        };
+            modalService.show({
+                templateUrl: '/assets/scripts/views/loadData.html',
+                controller: 'loadDataController',
+                animation: {
+                    type: 'fadeIn',
+                    durationIn: 600
+                },
+                position: null,
+                inputs: {
 
-        /*
-        ** Commit the modified properties to the view model
-         */
-        $scope.studioPropertiesSave = function(){
+                },
+                config: {
+                    backdropClass: 'emr-modal-backdrop',
+                    showSave : false,
+                    showCancel: true
+                }
+            }).then(function (modal) {
 
-            diagram().updateBlock($scope.studioProperties.viewModel);
-            $scope.studioPropertiesPanel.isDirty = false;
+                modal.close.then(function (result) {
+
+                    if (result) {
+
+                    }
+                });
+            });
         };
 
         $scope.toggleDiagrams = function() {
