@@ -687,6 +687,7 @@ var analyticsApp = angular.module('analyticsApp',
                     $scope.diagramViewModel.data.description = item.description;
                     $scope.diagramViewModel.data.owner = item.owner;
                     $scope.diagramViewModel.data.category = item.category;
+                    $scope.diagramViewModel.data.targetEnvironment = item.targetEnvironment;
 
                 },
                 function (code) {
