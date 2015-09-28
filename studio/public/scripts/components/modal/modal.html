@@ -12,6 +12,8 @@
 
     <div class="emr-modal-footer">
         <button type="button" class="btn btn-default" ng-click="onClose()" ng-show="config.showCancel">{{::config.cancel || 'Cancel'}}</button>
+        <button type="button" class="btn btn-default" ng-click="onBack()" ng-show="config.showBack">{{::config.back || 'Back'}}</button>
+        <button type="button" class="btn btn-default" ng-click="onNext()" ng-show="config.showNext">{{::config.next || 'Next'}}<i class="fa fa-chevron-right" style="padding-left: 10px;"></i></button>
         <button type="button" class="btn btn-success" ng-click="onSave()" ng-show="config.showSave">{{::config.save || 'Save'}}</button>
     </div>
 

@@ -594,7 +594,9 @@ var analyticsApp = angular.module('analyticsApp',
             diagram().createBlock(configBlock);
         };
 
-
+        /**
+         *
+         */
         $scope.onLoadData = function(){
 
             // todo: calculate new block position
@@ -612,8 +614,8 @@ var analyticsApp = angular.module('analyticsApp',
                 },
                 config: {
                     backdropClass: 'emr-modal-backdrop',
-                    showSave : false,
-                    showCancel: true
+                    showCancel: true,
+                    showNext: true
                 }
             }).then(function (modal) {
 
@@ -698,7 +700,7 @@ var analyticsApp = angular.module('analyticsApp',
          * Save the current diagram
          * @param evt
          */
-        $scope.save = function(evt) {
+        $scope.onSave = function() {
 
             // check whether the diagram is new
             var isNew = false;
@@ -724,12 +726,9 @@ var analyticsApp = angular.module('analyticsApp',
                     console.log(code); // TODO show exception
                 }
             );
-
-            evt.stopPropagation();
-            evt.preventDefault();
         };
 
-        $scope.evaluate = function(evt) {
+        $scope.onEvaluate = function(success, failure) {
 
             $scope.offlineState = 1;   // pending
 
@@ -739,18 +738,7 @@ var analyticsApp = angular.module('analyticsApp',
 
             var data = {'offline': offlineDiagram, 'online': onlineDiagram};
 
-            diagramService.evaluate(data).then(
-                function (data) {
-
-                },
-                function (code) {
-
-                    console.log(code); // TODO show exception
-                }
-            );
-
-            evt.stopPropagation();
-            evt.preventDefault();
+            diagramService.evaluate(data).then(success, failure);
         };
 
         $scope.deploy = function(evt) {

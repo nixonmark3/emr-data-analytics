@@ -12,7 +12,9 @@ diagramApp
                     centerRadius: "=",
                     orbitRadius: "=",
                     offsetRadius: "=",
-                    load: "="
+                    load: "=",
+                    evaluate: "=",
+                    save: "="
                 },
                 link: function($scope, element, attrs) {
 
@@ -49,17 +51,31 @@ diagramApp
                         $scope.orbitSouthwest = southwestPos;
                     }
 
-                    $scope.onClick = function(id){
-                        collapse();
-                        $scope.isEvaluating = true;
+                    $scope.onEvaluate = function(evt){
 
-                        $timeout(function(){
+                        if ($scope.evaluate){
+
+                            collapse();
+                            $scope.isEvaluating = true;
+
+                            $scope.evaluate(function(){
+
                                 $scope.isEvaluating = false;
                                 expand();
 
-                                $scope.$$phase || $scope.$apply();
+                                // $scope.$$phase || $scope.$apply();
                             },
-                            3000);
+                            function(){
+
+                                $scope.isEvaluating = false;
+                                expand();
+
+                                // $scope.$$phase || $scope.$apply();
+                            });
+                        }
+
+                        evt.stopPropagation();
+                        evt.preventDefault();
                     };
 
                     /**
@@ -70,6 +86,17 @@ diagramApp
                         if ($scope.load){
 
                             $scope.load();
+                        }
+
+                        evt.stopPropagation();
+                        evt.preventDefault();
+                    };
+
+                    $scope.onSave = function(evt){
+
+                        if ($scope.save){
+
+                            $scope.save();
                         }
 
                         evt.stopPropagation();

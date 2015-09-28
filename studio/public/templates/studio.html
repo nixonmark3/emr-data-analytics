@@ -45,17 +45,20 @@
 
             <div id="offline-canvas" class="studio-canvas">
 
-                <!--<div id="library-controls" class="studio-controls">
+                <div id="library-controls" class="studio-controls">
                     <button type="button" class="btn btn-default" ng-click="libraryToggle($event)">
                         <i class="fa fa-cubes"></i>
                     </button>
-                </div>-->
+                </div>
 
                 <diagram-controls id="offline-diagram-controls"
-                                  center-radius="26"
-                                  orbit-radius="20"
-                                  offset-radius="60"
-                                  load="onLoadData">
+                      center-radius="26"
+                      orbit-radius="20"
+                      offset-radius="60"
+                      load="onLoadData"
+                      evaluate="onEvaluate"
+                      save="onSave">
+
                 </diagram-controls>
 
                 <diagram id="offline-diagram"

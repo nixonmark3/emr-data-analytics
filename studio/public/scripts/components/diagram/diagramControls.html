@@ -1,7 +1,7 @@
 <div class="diag-ctrls">
     <a class="diag-ctrls-btn diag-ctrls-btn-c ng-class: {'evaluating': isEvaluating};"
        ng-style="{'height': 2 * centerRadius, 'width': 2 * centerRadius, 'line-height': 2 * (centerRadius - 1) + 'px' }"
-       ng-click="onClick('c');"
+       ng-click="onEvaluate($event);"
        ng-switch on="isEvaluating">
 
         <i ng-switch-when="false" class="fa fa-play"></i>
@@ -19,7 +19,8 @@
         <i class="fa fa-cubes"></i>
     </a>
     <a class="diag-ctrls-btn diag-ctrls-btn-o ng-class: {'rotated': isRotated};"
-       ng-style="{'height': 2 * orbitRadius, 'width': 2 * orbitRadius, 'line-height': 2 * (orbitRadius - 1) + 'px', 'top': orbitSouth.y, 'right': orbitSouth.x }">
+       ng-style="{'height': 2 * orbitRadius, 'width': 2 * orbitRadius, 'line-height': 2 * (orbitRadius - 1) + 'px', 'top': orbitSouth.y, 'right': orbitSouth.x }"
+       ng-click="onSave($event);">
         <i class="fa fa-save"></i>
     </a>
 </div>
