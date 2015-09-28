@@ -1,8 +1,8 @@
 <div class="diag-ctrls">
-    <a class="diag-ctrls-btn diag-ctrls-btn-c ng-class: {'evaluating': isEvaluating};"
+    <a class="diag-ctrls-btn diag-ctrls-btn-c ng-class: {'evaluating': evaluating};"
        ng-style="{'height': 2 * centerRadius, 'width': 2 * centerRadius, 'line-height': 2 * (centerRadius - 1) + 'px' }"
-       ng-click="onEvaluate($event);"
-       ng-switch on="isEvaluating">
+       ng-click="onClick($event, 'c');"
+       ng-switch on="evaluating">
 
         <i ng-switch-when="false" class="fa fa-play"></i>
         <i ng-switch-when="true" class="fa fa-cog fa-spin"></i>
@@ -10,17 +10,20 @@
     </a>
     <a class="diag-ctrls-btn diag-ctrls-btn-o ng-class: {'rotated': isRotated};"
        ng-style="{'height': 2 * orbitRadius, 'width': 2 * orbitRadius, 'line-height': 2 * (orbitRadius - 1) + 'px', 'top': orbitWest.y, 'right': orbitWest.x }"
-       ng-click="onLoad($event);">
+       ng-click="onClick($event, 'o1');">
 
         <i class="fa fa-upload"></i>
     </a>
     <a class="diag-ctrls-btn diag-ctrls-btn-o ng-class: {'rotated': isRotated};"
-       ng-style="{'height': 2 * orbitRadius, 'width': 2 * orbitRadius, 'line-height': 2 * (orbitRadius - 1) + 'px', 'top': orbitSouthwest.y, 'right': orbitSouthwest.x }">
-        <i class="fa fa-cubes"></i>
+       ng-style="{'height': 2 * orbitRadius, 'width': 2 * orbitRadius, 'line-height': 2 * (orbitRadius - 1) + 'px', 'top': orbitSouthwest.y, 'right': orbitSouthwest.x }"
+       ng-click="onClick($event, 'o2');">
+
+        <i class="fa fa-cube"></i>
     </a>
     <a class="diag-ctrls-btn diag-ctrls-btn-o ng-class: {'rotated': isRotated};"
        ng-style="{'height': 2 * orbitRadius, 'width': 2 * orbitRadius, 'line-height': 2 * (orbitRadius - 1) + 'px', 'top': orbitSouth.y, 'right': orbitSouth.x }"
-       ng-click="onSave($event);">
+       ng-click="onClick($event, 'o3');">
+
         <i class="fa fa-save"></i>
     </a>
 </div>

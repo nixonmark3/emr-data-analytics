@@ -12,14 +12,13 @@ diagramApp
                     centerRadius: "=",
                     orbitRadius: "=",
                     offsetRadius: "=",
-                    load: "=",
-                    evaluate: "=",
-                    save: "="
+                    evaluating: "=",
+                    command: "="
                 },
                 link: function($scope, element, attrs) {
 
                     // initialize scope variables
-                    $scope.isEvaluating = false;
+                    $scope.evaluating = false;
                     $scope.isRotated = true;
 
                     // initialize orbit position variables
@@ -37,6 +36,15 @@ diagramApp
                     // pause and expand the orbit buttons
                     $timeout(expand, 500);
 
+                    //
+                    $scope.$watch("evaluating", function(newValue, oldValue){
+
+                        if (newValue)
+                            collapse();
+                        else
+                            expand();
+                    });
+
                     function collapse(){
                         $scope.isRotated = true;
                         $scope.orbitWest = initialPos;
@@ -51,52 +59,11 @@ diagramApp
                         $scope.orbitSouthwest = southwestPos;
                     }
 
-                    $scope.onEvaluate = function(evt){
+                    $scope.onClick = function(evt, id){
 
-                        if ($scope.evaluate){
+                        if ($scope.command){
 
-                            collapse();
-                            $scope.isEvaluating = true;
-
-                            $scope.evaluate(function(){
-
-                                $scope.isEvaluating = false;
-                                expand();
-
-                                // $scope.$$phase || $scope.$apply();
-                            },
-                            function(){
-
-                                $scope.isEvaluating = false;
-                                expand();
-
-                                // $scope.$$phase || $scope.$apply();
-                            });
-                        }
-
-                        evt.stopPropagation();
-                        evt.preventDefault();
-                    };
-
-                    /**
-                     * method bound to load data click event
-                     */
-                    $scope.onLoad = function(evt){
-
-                        if ($scope.load){
-
-                            $scope.load();
-                        }
-
-                        evt.stopPropagation();
-                        evt.preventDefault();
-                    };
-
-                    $scope.onSave = function(evt){
-
-                        if ($scope.save){
-
-                            $scope.save();
+                            $scope.command(id);
                         }
 
                         evt.stopPropagation();
