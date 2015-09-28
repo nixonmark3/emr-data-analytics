@@ -348,6 +348,8 @@ var analyticsApp = angular.module('analyticsApp',
         // represents the current state of the online diagram { 0 = 'idle', 1 = 'downloading', 2 = 'running' }
         $scope.onlineState = 0;
 
+        $scope.evaluating = false;
+
         $scope.offlineDiagramMethods = {};
 
         $scope.diagrams = [];
@@ -597,7 +599,7 @@ var analyticsApp = angular.module('analyticsApp',
         /**
          *
          */
-        $scope.onLoadData = function(){
+        var loadData = function(){
 
             // todo: calculate new block position
 
@@ -697,11 +699,33 @@ var analyticsApp = angular.module('analyticsApp',
             );
         };
 
+        $scope.onDiagramCommand = function(id){
+
+            switch(id){
+
+                case 'c': // center - evaluate
+                    evaluate();
+                    break;
+
+                case 'o1': // orbit 1 - load
+                    loadData();
+                    break;
+
+                case 'o2': // orbit 2 - add block
+
+                    break;
+
+                case 'o3': // orbit 3 - save
+                    save();
+                    break;
+            }
+        };
+
         /**
          * Save the current diagram
          * @param evt
          */
-        $scope.onSave = function() {
+        var save = function() {
 
             // check whether the diagram is new
             var isNew = false;
@@ -729,8 +753,9 @@ var analyticsApp = angular.module('analyticsApp',
             );
         };
 
-        $scope.onEvaluate = function(success, failure) {
+        var evaluate = function() {
 
+            $scope.evaluating = true;
             $scope.offlineState = 1;   // pending
 
             var offlineDiagram = $scope.diagramViewModel.data;
@@ -739,7 +764,14 @@ var analyticsApp = angular.module('analyticsApp',
 
             var data = {'offline': offlineDiagram, 'online': onlineDiagram};
 
-            diagramService.evaluate(data).then(success, failure);
+            diagramService.evaluate(data).then(
+                function (data) {
+
+                },
+                function (code) {
+
+                    console.log(code); // TODO show exception
+                });
         };
 
         $scope.deploy = function(evt) {
@@ -1070,14 +1102,17 @@ var analyticsApp = angular.module('analyticsApp',
                     $scope.offlineState = 2;
                     break;
                 case "COMPLETED":
+                    $scope.evaluating = false;
                     $scope.offlineState = 0;
                     break;
                 case "FAILED":
+                    $scope.evaluating = false;
                     $scope.offlineState = 0;
 
                     // todo: create failure alert
                     break;
                 case "STOPPED":
+                    $scope.evaluating = false;
                     $scope.offlineState = 0;
 
                     // todo: create stopped alert
