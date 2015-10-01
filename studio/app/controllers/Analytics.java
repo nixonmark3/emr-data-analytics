@@ -3,6 +3,7 @@ package controllers;
 import actors.SessionActor;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import emr.analytics.models.blocks.Load;
 import emr.analytics.models.definition.Mode;
 import emr.analytics.models.diagram.Diagram;
 import emr.analytics.models.diagram.DiagramContainer;
@@ -114,5 +115,21 @@ public class Analytics extends Controller {
         }
 
         return ok(Json.toJson(jobInfos));
+    }
+
+    /**
+     *
+     * @return
+     */
+    @BodyParser.Of(BodyParser.Json.class)
+    public static Result load() {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        Load load = objectMapper.convertValue(request().body().asJson(), Load.class);
+
+        // start a pyspark offline job  and load the data
+
+        return ok();
     }
 }

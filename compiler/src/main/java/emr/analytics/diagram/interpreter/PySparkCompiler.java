@@ -246,6 +246,7 @@ public class PySparkCompiler implements TargetCompiler {
 
         public class BlockOperation {
 
+            public String blockName;
             public String variableName;
             public String objectName;
             public String operations;
@@ -255,11 +256,13 @@ public class PySparkCompiler implements TargetCompiler {
                 Signature signature = modeDefinition.getSignature();
 
                 if (block.getOutputConnectors().size() > 0) {
+                    this.blockName = block.getId().toString();
                     this.variableName = block.getOutputConnectors().stream()
                             .map(c -> String.format("%s_%s", createVariableName(block.getId().toString()), c.getName()))
                             .collect(Collectors.joining(", "));
                 }
                 else{
+                    this.blockName = block.getId().toString();
                     this.variableName = createVariableName(block.getId().toString());
                 }
 

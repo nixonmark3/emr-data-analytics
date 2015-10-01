@@ -9,5 +9,9 @@ import <%.%>
 <%/packages%>
 
 <%#blocks%>
+interpreter.onNotify("<%blockName%>", "2")
 <%variableName%> = <%objectName%><%& operations%>
+interpreter.onNotify("<%blockName%>", "3")
 <%/blocks%>
+
+interpreter.onNotify("COMPLETED", "true")

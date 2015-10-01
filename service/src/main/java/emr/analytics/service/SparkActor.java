@@ -9,6 +9,7 @@ import emr.analytics.models.definition.TargetEnvironments;
 import emr.analytics.models.messages.JobInfo;
 import emr.analytics.service.interpreters.*;
 import emr.analytics.service.jobs.SparkJob;
+import emr.analytics.service.messages.JobProgress;
 import emr.analytics.service.messages.JobStatus;
 import emr.analytics.service.messages.JobStatusTypes;
 import scala.PartialFunction;
@@ -133,6 +134,15 @@ public class SparkActor extends AbstractActor implements InterpreterNotification
     }
 
     public void send(InterpreterNotification notification){
+
+        if (notification.getKey().equals("COMPLETED")) {
+
+            statusActor.tell(new JobStatus(JobStatusTypes.COMPLETED), self());
+        }
+        else {
+
+            statusActor.tell(new JobProgress("STATE", String.format("%s,%s", notification.getKey(), notification.getValue())), self());
+        }
 
         System.out.println(notification.toString());
     }
