@@ -792,6 +792,10 @@ analyticsApp
             function onNext(){
                 $scope.activeStep++;
                 configureActiveStep();
+
+                if ($scope.activeStep == 1){
+                    diagramService.load($scope.loadData);
+                }
             }
 
             function onSave(transitionDuration){

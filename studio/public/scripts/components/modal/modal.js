@@ -111,8 +111,8 @@ angular.module('emr.ui.modal', ['emr.ui.popup', 'emr.ui.shared'])
                                 initialScale = 0.01,
                                 animation = {
                                     type: 'zoom',
-                                    durationIn: 500,
-                                    durationOut: 500
+                                    durationIn: 400,
+                                    durationOut: 400
                                 };
 
                             // capture overrides

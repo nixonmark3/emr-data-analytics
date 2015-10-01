@@ -6,16 +6,16 @@ import java.util.List;
 
 public class Load implements Serializable {
 
-    private List<String> files = new ArrayList<String>();
+    private List<DataFile> files = new ArrayList<DataFile>();
 
     private Load() {}
 
-    public List<String> getFiles() {
+    public List<DataFile> getFiles() {
 
         return files;
     }
 
-    public void setFiles(List<String> files) {
+    public void setFiles(List<DataFile> files) {
 
         this.files = files;
     }
