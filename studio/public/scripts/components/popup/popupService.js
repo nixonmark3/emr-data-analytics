@@ -1,6 +1,7 @@
 'use strict';
 
 angular.module('emr.ui.popup', ['emr.ui.shared', 'ngAnimate'])
+
     .factory('popupService', ['$document', '$compile', '$controller', '$rootScope', '$q', 'sharedService', '$animate', '$timeout',
         function($document, $compile, $controller, $rootScope, $q, sharedService, $animate, $timeout) {
 

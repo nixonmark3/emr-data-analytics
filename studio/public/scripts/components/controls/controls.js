@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('emr.ui.controls', [])
+var controlsApp = angular.module('emr.ui.controls', [])
 
     .directive('rangeSlider', [function(){
 

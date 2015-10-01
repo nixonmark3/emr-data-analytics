@@ -9,8 +9,7 @@ angular.module('emr.ui.modal', ['emr.ui.popup', 'emr.ui.shared'])
             templateUrl: '/assets/scripts/components/modal/modal.html',
             transclude: true,
             scope: {
-                close: "=",
-                save: "=",
+                methods: "=",
                 position: "=",
                 config: "="
             },
@@ -66,14 +65,22 @@ angular.module('emr.ui.modal', ['emr.ui.popup', 'emr.ui.shared'])
 
                 $scope.onSave = function(){
 
-                    $scope.save($scope.position.animation.durationOut);
+                    $scope.methods.save($scope.position.animation.durationOut);
                     zoomOut();
+                };
+
+                $scope.onBack = function(){
+                    $scope.methods.back();
                 };
 
                 $scope.onClose = function(){
 
-                    $scope.close($scope.position.animation.durationOut);
+                    $scope.methods.close($scope.position.animation.durationOut);
                     zoomOut();
+                };
+
+                $scope.onNext = function(){
+                    $scope.methods.next();
                 };
             }
         }
@@ -93,7 +100,7 @@ angular.module('emr.ui.modal', ['emr.ui.popup', 'emr.ui.shared'])
                         .then(function(template) {
 
                             // wrap the specified template with a modal directive
-                            var popupTemplate = "<modal config='config' position='position' close='close' save='save'>" + template + "</modal>";
+                            var popupTemplate = "<modal config='config' position='position' methods='methods'>" + template + "</modal>";
 
                             // capture / calculate modal start and end positions and dimensions
                             // set default variables

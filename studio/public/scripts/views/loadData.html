@@ -1,1 +1,68 @@
-<div></div>
+<div id="load-data-wrapper">
+
+    <!-- load data source -->
+    <div class="load-data-container" ng-show="activeStep==0">
+
+        <div class="load-data-menu">
+            <ul>
+                <li ng-class="{'active': activeSource==0}"
+                    ng-click="setActiveSource(0)">Local File System</li>
+                <li ng-class="{'active': activeSource==1}"
+                    ng-click="setActiveSource(1)">Web Address (URL)</li>
+                <li ng-class="{'active': activeSource==2}"
+                    ng-click="setActiveSource(2)">HBase</li>
+                <li ng-class="{'active': activeSource==3}"
+                    ng-click="setActiveSource(3)">MongoDB</li>
+                <li ng-class="{'active': activeSource==4}"
+                    ng-click="setActiveSource(4)">DeltaV Historian</li>
+                <li ng-class="{'active': activeSource==5}"
+                    ng-click="setActiveSource(5)">OSI PI</li>
+            </ul>
+        </div>
+
+        <div class="load-data-content">
+            <div class="load-data-source-container" ng-show="activeSource == 0">
+                <div class="load-data-navbar">
+                    <input type="file" id="fileBrowser" onchange="angular.element(this).scope().addFiles(this.files)" value="Browse" multiple style="display:none;">
+                    <span class="pull-left">Browse or drag and drop files below:</span>
+                    <button type="button" class="btn btn-default pull-right" ng-click="onBrowse($event)">Browse</button>
+                </div>
+                <div class="load-data-source-canvas" file-drop>
+                    <div class="drop-target">Drop Data</div>
+
+                    <div class="load-data-source" ng-repeat="file in loadData.files">
+                        <progress-circle
+                                class="load-data-source-progress pull-left"
+                                background-color="#ccc"
+                                foreground-color="#2ca02c"
+                                progress="file.progress">
+                        </progress-circle>
+                        <div class="load-data-source-title pull-left">
+                            <div>{{file.name}}</div>
+                            <div class="load-data-source-label">File Name</div>
+                        </div>
+                        <div class="load-data-source-close pull-right" ng-click="onFileRemove(file.name)">
+                            <a><i class="fa fa-times"></i></a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="load-data-source-container" ng-show="activeSource > 0">
+                This features has not been implemented.
+            </div>
+        </div>
+
+    </div>
+
+    <!-- parse data -->
+    <div class="load-data-container" ng-show="activeStep==1">
+        Parsing data
+    </div>
+
+    <!-- clean data -->
+    <div class="load-data-container" ng-show="activeStep==2">
+        Loading data
+    </div>
+
+</div>

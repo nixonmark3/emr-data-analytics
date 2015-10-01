@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     class="progress-circle">
+    <g>
+        <path ng-attr-d="{{circlePath(radius, centerX, centerY)}}"
+              ng-attr-stroke-dasharray="{{perimeter(radius)}}"
+              ng-attr-stroke="{{backgroundColor}}">
+        </path>
+        <path class="progress-fg"
+              ng-attr-d="{{circlePath(radius, centerX, centerY)}}"
+              ng-attr-stroke-dasharray="{{perimeter(radius)}}"
+              ng-attr-stroke="{{foregroundColor}}"
+              ng-attr-stroke-dashoffset="{{strokeOffset}}">
+        </path>
+        <text class="progress-txt"
+              ng-attr-x="{{centerX}}"
+              ng-attr-y="{{centerY}}"
+              text-anchor="middle"
+              alignment-baseline="central">{{progress | number:0}}%</text>
+    </g>
+</svg>

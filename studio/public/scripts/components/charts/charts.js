@@ -270,6 +270,59 @@ angular.module('emr.ui.charts', [])
         }
     }])
 
+    .directive('progressCircle', ['$timeout', function($timeout){
+
+        return {
+            restrict: 'E',
+            replace: false,
+            templateUrl: '/assets/scripts/components/charts/progressCircle.html',
+            scope: {
+                backgroundColor: "@",
+                foregroundColor: "@",
+                progress: "="
+            },
+            link: function($scope, element, attrs){
+
+                var padding = 12;
+
+                $scope.radius = (element.width() - padding) / 2;
+                $scope.centerX = element.width() / 2;
+                $scope.centerY = element.height() / 2;
+
+                $scope.$watch("progress", function(newValue, oldValue){
+                    var perimeter = $scope.perimeter($scope.radius);
+                    $scope.strokeOffset = perimeter - perimeter * newValue / 100;
+                });
+
+                $scope.circlePath = function(radius, centerX, centerY){
+                    return "M " + centerX  + " " + centerY + " m 0,-" + radius + " a " + radius + ","
+                        + radius + " 0 1,1 0," + (radius * 2) + " a " + radius + "," + radius + " 0 1,1 0,-" + (radius * 2);
+                };
+
+                function init(){
+
+                    $scope.strokeOffset = $scope.perimeter($scope.radius);
+                    $scope.progressValue = 0;
+
+                    // set the
+                    $timeout(function(){
+                        element.children("svg")
+                            .children("g")
+                            .children(".progress-fg")
+                            .css("transition", "stroke-dashoffset 0.2s");
+                    }, 10);
+                }
+
+                $scope.perimeter = function(radius) {
+
+                    return 2 * Math.PI * radius;
+                };
+
+                init();
+            }
+        }
+    }])
+
     .directive('statisticsHistogram', [function() {
 
         return {

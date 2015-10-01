@@ -9,10 +9,13 @@ analyticsApp
             $scope.block = block.data;
             $scope.config = config;
 
-            $scope.close = function(transitionDuration){
-
-                close(null, transitionDuration);
+            $scope.methods = {
+                close: onClose
             };
+
+            function onClose(transitionDuration){
+                close(null, transitionDuration);
+            }
 
             $scope.getBlockData = function(type, key, success){
 
@@ -205,6 +208,10 @@ analyticsApp
 
             $scope.config.subTitle = "Explore";
 
+            $scope.methods = {
+                close: onClose
+            };
+
             // load the set of features after the modal animation has completed
             $timeout(function() {
 
@@ -279,15 +286,10 @@ analyticsApp
 
             /* general methods */
 
-            $scope.close = function(transitionDelay) {
+            function onClose(transitionDelay) {
 
                 close(null, transitionDelay);
-            };
-
-            $scope.save = function(transitionDelay) {
-
-                close(null, transitionDelay);
-            };
+            }
 
             $scope.setActiveIndex = function(index) {
 
@@ -638,14 +640,172 @@ analyticsApp
         }
     ])
 
-    .controller('loadDataController', ['$scope', '$element', 'diagramService', 'config', 'position', 'close',
-        function($scope, $element, diagramService, config, position, close){
+    /**
+     *
+     */
+    .controller('loadDataController', ['$scope', '$document', '$element', 'diagramService', 'config', 'position', 'close',
+        function($scope, $document, $element, diagramService, config, position, close){
 
+            // add the position and config variables to the current scope so that they can be accessed by modal
             $scope.position = position;
             $scope.config = config;
+            $scope.config.icon = "fa-upload";
+            $scope.config.subTitle = "Load Data";
+            $scope.config.saveLabel = "Finish";
 
-            $scope.close = function(transitionDuration){
-
-                close(null, transitionDuration);
+            $scope.methods = {
+                close: onClose,
+                next: onNext,
+                back: onBack,
+                save: onSave
             };
+
+            $scope.activeStep = 0;
+            $scope.activeSource = 0;
+
+            // a dictionary of file names and their associated index numbers
+            $scope.fileDict = {};
+
+            // the load data object
+            $scope.loadData = {
+                files: []
+            };
+
+            $scope.addFiles = function(files){
+
+                $scope.onFileDropStart(files);
+
+                for(var index = 0; index < files.length; index++){
+
+                    var file = files[index];
+                    diagramService.upload(file).then(
+                        function(result){   // on success
+
+                            $scope.onFileDrop(result);
+                        },
+                        function(message){     // on error
+
+                            $scope.onFileDropError(message);
+                        },
+                        function(evt){      // on notification
+
+                            if (evt.lengthComputable) {
+
+                                var complete = (evt.loaded / evt.total * 100 | 0);
+                                $scope.onFileDropNotification(file, complete);
+                            }
+                        }
+                    );
+                }
+            };
+
+            $scope.setActiveSource = function(index){
+                $scope.activeSource = index;
+            };
+
+            function configureActiveStep(){
+
+                switch($scope.activeStep){
+
+                    case 0:
+                        $scope.config.title = "Select a Data Source";
+                        $scope.config.showBack = false;
+                        $scope.config.showNext = true;
+                        $scope.config.showSave = false;
+                        break;
+                    case 1:
+                        $scope.config.title = "Parse the Data";
+                        $scope.config.showBack = true;
+                        $scope.config.showNext = true;
+                        $scope.config.showSave = false;
+                        break;
+                    case 2:
+                        $scope.config.title = "Clean the Data";
+                        $scope.config.showBack = true;
+                        $scope.config.showNext = false;
+                        $scope.config.showSave = true;
+                        break;
+                }
+            }
+
+            $scope.onFileDrop = function(files, evt){
+
+                for(var i = 0; i < files.length; i++) {
+
+                    var file = files[i];
+                    var fileIndex = $scope.fileDict[file.name];
+                    if (fileIndex !== undefined) {
+                        var item = $scope.loadData.files[fileIndex];
+                        if(item !== undefined){
+                            item.progress = 100;
+                            item.path = file.path;
+                        }
+                    }
+                }
+            };
+
+            $scope.onFileDropStart = function(files){
+
+                for(var i = 0; i < files.length; i++){
+
+                    var file = files[i];
+
+                    if($scope.fileDict[file.name] === undefined){
+
+                        $scope.fileDict[file.name] = $scope.loadData.files.length;
+                        $scope.loadData.files.push({
+                            name: file.name,
+                            progress: 0,
+                            path: ''
+                        });
+                    }
+                    else{
+
+                        // todo: notify user file already exists
+                    }
+                }
+            };
+
+            $scope.onFileDropNotification = function(file, complete){
+
+                var fileIndex = $scope.fileDict[file.name];
+                if(fileIndex !== undefined)
+                    $scope.loadData.files[fileIndex].progress = complete;
+            };
+
+            function onBack(){
+                $scope.activeStep--;
+                configureActiveStep();
+            }
+
+            $scope.onBrowse = function(evt){
+                document.getElementById("fileBrowser").click();
+
+                evt.stopPropagation();
+                evt.preventDefault();
+            };
+
+            function onClose(transitionDuration){
+                close(null, transitionDuration);
+            }
+
+            function onNext(){
+                $scope.activeStep++;
+                configureActiveStep();
+            }
+
+            function onSave(transitionDuration){
+                close(null, transitionDuration);
+            }
+
+            $scope.onFileRemove = function(name){
+
+                var fileIndex = $scope.fileDict[name];
+                if(fileIndex !== undefined) {
+                    delete $scope.fileDict[name];
+                    $scope.loadData.files.splice(fileIndex, 1);
+                }
+            };
+
+            configureActiveStep();
     }]);

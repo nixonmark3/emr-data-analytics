@@ -18,7 +18,6 @@ diagramApp
                 link: function($scope, element, attrs) {
 
                     // initialize scope variables
-                    $scope.evaluating = false;
                     $scope.isRotated = true;
 
                     // initialize orbit position variables
@@ -31,18 +30,10 @@ diagramApp
                         southPos = { x: centerOffset, y: $scope.offsetRadius + centerOffset },
                         southwestPos = { x: swOffset, y: swOffset };
 
-                    // initialize the orbit buttons to collapsed
-                    collapse();
-                    // pause and expand the orbit buttons
-                    $timeout(expand, 500);
-
                     //
-                    $scope.$watch("evaluating", function(newValue, oldValue){
+                    $scope.$watch("evaluating", function(){
 
-                        if (newValue)
-                            collapse();
-                        else
-                            expand();
+                        toggle();
                     });
 
                     function collapse(){
@@ -59,6 +50,20 @@ diagramApp
                         $scope.orbitSouthwest = southwestPos;
                     }
 
+                    function init(){
+                        $scope.initializing = true;
+
+                        // initialize the orbit buttons to collapsed
+                        collapse();
+                        // pause and expand the orbit buttons
+                        $timeout(function(){
+
+                            expand();
+                            $scope.initializing = false;
+                            toggle();
+                        }, 500);
+                    }
+
                     $scope.onClick = function(evt, id){
 
                         if ($scope.command){
@@ -69,6 +74,19 @@ diagramApp
                         evt.stopPropagation();
                         evt.preventDefault();
                     };
+
+                    function toggle(){
+
+                        if ($scope.initializing)
+                            return;
+
+                        if ($scope.evaluating)
+                            collapse();
+                        else
+                            expand();
+                    }
+
+                    init();
                 }
             }
     }]);
