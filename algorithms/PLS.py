@@ -1,6 +1,7 @@
 import pandas as pd
 import collections as coll
 import sys
+import traceback
 
 from sklearn.cross_decomposition import PLSRegression
 from FunctionBlock import FunctionBlock
@@ -69,10 +70,12 @@ class PLS(FunctionBlock):
 
             results_df = pd.DataFrame(data_dict)
 
+            model_values = [x[1] for x in model]
+
             FunctionBlock.add_statistics_result(self, results_df)
             FunctionBlock.add_plot_result(self, results_df)
             FunctionBlock.add_general_results(self, pls_result)
-            FunctionBlock.add_persisted_connector_result(self, 'model', model)
+            FunctionBlock.add_persisted_connector_result(self, 'model', model_values)
             FunctionBlock.add_persisted_connector_result(self, 'x_mean', x_mean)
             FunctionBlock.add_persisted_connector_result(self, 'x_std', x_std)
             FunctionBlock.add_persisted_connector_result(self, 'y_mean', y_mean)
@@ -84,7 +87,7 @@ class PLS(FunctionBlock):
             return {FunctionBlock.getFullPath(self, 'model'): model,
                     FunctionBlock.getFullPath(self, 'y_comp'): results_df}
 
-        except Exception as err:
+        except:
             FunctionBlock.save_results(self)
             FunctionBlock.report_status_failure(self)
-            print(err.args, file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)

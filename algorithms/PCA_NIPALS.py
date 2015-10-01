@@ -1,9 +1,11 @@
 import numpy as np
 import collections
 import pandas as pd
+import sys
+import traceback
+
 from scipy.stats import f
 from scipy.stats import norm
-import sys
 
 from FunctionBlock import FunctionBlock
 
@@ -16,8 +18,8 @@ class PCA_NIPALS(FunctionBlock):
         try:
             FunctionBlock.report_status_executing(self)
 
-            FunctionBlock.check_connector_has_one_wire(self, 'in')
-            df = results_table[self.input_connectors['in'][0]]
+            FunctionBlock.check_connector_has_one_wire(self, 'x')
+            df = results_table[self.input_connectors['x'][0]]
 
             raw = df.values
 
@@ -45,7 +47,6 @@ class PCA_NIPALS(FunctionBlock):
             scores = np.zeros((N, A))
             loadings = np.zeros((K, A))
 
-            debugoutfile = open('/Users/noelbell/bds_datafiles/debug.csv', 'w+')
             tolerance = 1E-6
             for a in range(A):
 
@@ -75,9 +76,6 @@ class PCA_NIPALS(FunctionBlock):
                     itern += 1
 
                 #  We've converged, or reached the limit on the number of iteration
-
-                debugoutfile.write(str(itern)+','+' '+str(np.linalg.norm(t_a_guess - t_a))+'\n')
-
 
                 # Deflate the part of the data in X that we've explained with t_a and p_a
                 X = X - np.dot(t_a, p_a.T)
@@ -115,7 +113,7 @@ class PCA_NIPALS(FunctionBlock):
                     varContribT2[i, j] = np.dot(scores[i, 0:A] / eig_value[0:A], temp_x_score.T) / t2_lim
 
                     # Continue calculation of variable contributions to score
-                    for a in range(5):    #range(A):
+                    for a in range(A):
                         varContrib[i, j] = np.sum((original_data[i, j] * loadings[j, a] * eig_value[a]) / scores[i, a])
 
             # Calculate the variable contributions to Q
@@ -125,7 +123,7 @@ class PCA_NIPALS(FunctionBlock):
             sliceTemp = np.matrix(eig_vector_inv[:, 0:A].T)
             reconstructed = np.array(scoreTemp * sliceTemp)
 
-            varContribQ = original_data #- reconstructed
+            varContribQ = original_data - reconstructed
 
             # Calculate Q limits
             q_lim = 0
@@ -163,20 +161,12 @@ class PCA_NIPALS(FunctionBlock):
                         h2 = theta2*h0*(h0-1)/(theta1**2)
                         q_lim = theta1*(1+h1+h2)**(1/h0)
 
-            results = collections.OrderedDict()
-            results['N components'] = A
-            results['Confidence Level'] = confidence_level
-            results['Q Limit'] = q_lim
-            results['T2 Limit'] = t2_lim
-
-            FunctionBlock.save_results(self, df=None, statistics=False, plot=False, results=results)
-
             scores = pd.DataFrame(scores)
             scores.columns = [str('Score_{0}'.format(x+1)) for x in scores.columns.values.tolist()]
             scores.index = df.index
 
-            loadings = pd.DataFrame(loadings)
-            loadings.columns = [str('Loading_{0}'.format(x+1)) for x in loadings.columns.values.tolist()]
+            loadings_df = pd.DataFrame(loadings)
+            loadings_df.columns = [str('Loading_{0}'.format(x+1)) for x in loadings_df.columns.values.tolist()]
 
             q = pd.DataFrame(spe)
             q.columns = [str('Q_{0}'.format(x+1)) for x in q.columns.values.tolist()]
@@ -204,9 +194,24 @@ class PCA_NIPALS(FunctionBlock):
             eig_vector = pd.DataFrame(eig_vector)
             eig_vector.columns = [str('EVEC_{0}'.format(x+1)) for x in eig_vector.columns.values.tolist()]
 
+            pca_results = collections.OrderedDict()
+            pca_results['N components'] = A
+            pca_results['Confidence Level'] = confidence_level
+            pca_results['Q Limit'] = q_lim
+            pca_results['T2 Limit'] = t2_lim
+
+            mean = df.mean(axis=0)
+            std = df.std(axis=0)
+
+            FunctionBlock.add_general_results(self, pca_results)
+            FunctionBlock.add_persisted_connector_result(self, 'Loadings', loadings.transpose().tolist())
+            FunctionBlock.add_persisted_connector_result(self, 'x_mean', mean.tolist())
+            FunctionBlock.add_persisted_connector_result(self, 'x_std', std.tolist())
+            FunctionBlock.save_all_results(self)
+
             FunctionBlock.report_status_complete(self)
 
-            return {FunctionBlock.getFullPath(self, 'Loadings'): loadings,
+            return {FunctionBlock.getFullPath(self, 'Loadings'): loadings_df,
                     FunctionBlock.getFullPath(self, 'Scores'): scores,
                     FunctionBlock.getFullPath(self, 'ScoresCont'): varContribScore,
                     FunctionBlock.getFullPath(self, 'T2'): t2,
@@ -217,12 +222,12 @@ class PCA_NIPALS(FunctionBlock):
                     FunctionBlock.getFullPath(self, 'QCont'): varContribQ,
                     FunctionBlock.getFullPath(self, 'EigenValues'): eig_value,
                     FunctionBlock.getFullPath(self, 'EigenVectors'): eig_vector,
-                    FunctionBlock.getFullPath(self, 'Mean'): df.mean(axis=0),
-                    FunctionBlock.getFullPath(self, 'Std'): df.std(axis=0)}
+                    FunctionBlock.getFullPath(self, 'Mean'): mean,
+                    FunctionBlock.getFullPath(self, 'Std'): std}
 
-        except Exception as err:
+        except:
             FunctionBlock.save_results(self)
             FunctionBlock.report_status_failure(self)
-            print(err.args, file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
 
 

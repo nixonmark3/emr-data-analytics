@@ -11,7 +11,7 @@ public class PCA_NIPALS extends BlockDefinition implements IExport {
 
     @Override
     public Definition createDefinition() {
-        Definition definition = new Definition("PCA_NIPALS", "PCA_NIPALS", Category.TRANSFORMERS.toString());
+        Definition definition = new Definition(DefinitionType.MODEL, "PCA_NIPALS", "PCA_NIPALS", Category.TRANSFORMERS.toString());
         definition.setW(300);
         return definition;
     }
@@ -27,33 +27,29 @@ public class PCA_NIPALS extends BlockDefinition implements IExport {
         return modeDefinition;
     }
 
-    @Override
-    public ModeDefinition createOnlineMode(){
-
-        return null;
-    }
-
     public List<ConnectorDefinition> createInputConnectors() {
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
-        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("x", DataType.FRAME.toString()));
         return inputConnectors;
     }
 
     public List<ConnectorDefinition> createOutputConnectors() {
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-        outputConnectors.add(new ConnectorDefinition("Loadings", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("Scores", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("ScoresCont", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("T2", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("T2Lim", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("T2Cont", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("Q", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("QLim", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("QCont", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("EigenValues", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("EigenVectors", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("Mean", DataType.FRAME.toString()));
-        outputConnectors.add(new ConnectorDefinition("Std", DataType.FRAME.toString()));
+        outputConnectors.add(new ConnectorDefinition("Loadings", DataType.FRAME.toString(), true, true));
+        outputConnectors.add(new ConnectorDefinition("Scores", DataType.FRAME.toString(), true, false));
+        outputConnectors.add(new ConnectorDefinition("ScoresCont", DataType.FRAME.toString(), true, false));
+        outputConnectors.add(new ConnectorDefinition("T2", DataType.FRAME.toString(), true, false));
+        outputConnectors.add(new ConnectorDefinition("T2Lim", DataType.FRAME.toString(), true, false));
+        outputConnectors.add(new ConnectorDefinition("T2Cont", DataType.FRAME.toString(), true, false));
+        outputConnectors.add(new ConnectorDefinition("Q", DataType.FRAME.toString(), true, false));
+        outputConnectors.add(new ConnectorDefinition("QLim", DataType.FRAME.toString(), true, false));
+        outputConnectors.add(new ConnectorDefinition("QCont", DataType.FRAME.toString(), true, false));
+        outputConnectors.add(new ConnectorDefinition("EigenValues", DataType.FRAME.toString(), true, false));
+        outputConnectors.add(new ConnectorDefinition("EigenVectors", DataType.FRAME.toString(), true, false));
+        outputConnectors.add(new ConnectorDefinition("Mean", DataType.FRAME.toString(), true, false));
+        outputConnectors.add(new ConnectorDefinition("Std", DataType.FRAME.toString(), true, false));
+        outputConnectors.add(new ConnectorDefinition("x_mean", DataType.LIST.toString(), false, true));
+        outputConnectors.add(new ConnectorDefinition("x_std", DataType.LIST.toString(), false, true));
         return outputConnectors;
     }
 
@@ -75,4 +71,38 @@ public class PCA_NIPALS extends BlockDefinition implements IExport {
 
         return parameters;
     }
+
+    @Override
+    public ModeDefinition createOnlineMode(){
+
+        ModeDefinition modeDefinition = new ModeDefinition();
+        List<ConnectorDefinition> inputs = new ArrayList<ConnectorDefinition>();
+        inputs.add(new ConnectorDefinition("x", DataType.FRAME.toString()));
+        modeDefinition.setInputs(inputs);
+
+        List<ConnectorDefinition> outputs = new ArrayList<ConnectorDefinition>();
+        outputs.add(new ConnectorDefinition("out", DataType.FLOAT.toString()));
+        modeDefinition.setOutputs(outputs);
+
+        modeDefinition.setSignature(new Signature("input:x", new Operation[]{
+                new Operation(Operation.OperationType.MAP,
+                        "Transformations",
+                        "normalize",
+                        new String[]{
+                                "lambda:x",
+                                "block:x_mean",
+                                "block:x_std"
+                        }),
+                new Operation(Operation.OperationType.MAP,
+                        "Transformations",
+                        "dotProduct",
+                        new String[]{
+                                "lambda:x",
+                                "block:Loadings"
+                        })
+        }));
+
+        return modeDefinition;
+    }
+
 }
