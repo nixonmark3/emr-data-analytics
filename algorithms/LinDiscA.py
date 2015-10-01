@@ -71,13 +71,9 @@ class LinDiscA(FunctionBlock):
 
             #FunctionBlock.add_statistics_result(self, results_df)
             #.add_plot_result(self, results_df)
-            FunctionBlock.add_general_results(self, mean_accuracy_train)
-            FunctionBlock.add_general_results(self, mean_accuracy_test)
-            #FunctionBlock.add_persisted_connector_result(self, 'y_train', y_train_prediction)
-            #FunctionBlock.add_persisted_connector_result(self, 'y_test', y_test_prediction)
-            # FunctionBlock.add_persisted_connector_result(self, 'x_std', x_std)
-            # FunctionBlock.add_persisted_connector_result(self, 'y_mean', y_mean)
-            # FunctionBlock.add_persisted_connector_result(self, 'y_std', y_std)
+            #FunctionBlock.add_general_results(self, mean_accuracy_train)
+            FunctionBlock.add_general_results(self, lda_result)
+
             FunctionBlock.save_all_results(self)
 
             FunctionBlock.report_status_complete(self)
