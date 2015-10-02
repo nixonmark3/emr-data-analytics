@@ -43,6 +43,28 @@ def concat_dfs(dfs):
 
     return pd.concat(dfs, axis=1), all_timestamp
 
+def unique_col_name(dfs):
+
+    num_of_df = len(dfs)
+    if num_of_df > 1:
+
+        for i in range(0,num_of_df-1):
+            j = 0
+            col_list_1 = dfs[i].columns
+            for icnt in range(0,num_of_df):
+                for tag in col_list_1:
+                    tagcnt = 0
+
+
+                    if icnt == i:
+                        continue
+                    else:
+                        listnames = dfs[icnt].columns
+                        if tag in listnames:
+                            tagcnt+=i
+                            new_tag = tag + "_" + str(tagcnt)
+                            dfs[i] = dfs[i].rename(columns={tag: new_tag})
+    return dfs
 
 class Explore(FunctionBlock):
 
@@ -75,7 +97,9 @@ class Explore(FunctionBlock):
             if len(dfs) == 1:
                 df = dfs[0]
             else:
-                df, time_series = concat_dfs(dfs)
+                #check for and create unique names
+                unique_dfs = unique_col_name(dfs)
+                df, time_series = concat_dfs(unique_dfs)
                 fill_nan = True
 
             FunctionBlock.add_statistics_result(self, df)
