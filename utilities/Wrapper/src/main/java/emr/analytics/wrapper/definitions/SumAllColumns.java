@@ -20,6 +20,7 @@ public class SumAllColumns extends BlockDefinition implements IExport {
         ModeDefinition modeDefinition = new ModeDefinition();
         modeDefinition.setInputs(createInputConnectors());
         modeDefinition.setOutputs(createOutputConnectors());
+        modeDefinition.setParameters(createParameters());
 
 
         return modeDefinition;
@@ -43,4 +44,16 @@ public class SumAllColumns extends BlockDefinition implements IExport {
         return outputConnectors;
     }
 
+    public List<ParameterDefinition> createParameters() {
+
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+
+        parameters.add(new ParameterDefinition("ColumnName",
+                DataType.STRING.toString().toString(),
+                "sum",
+                new ArrayList<String>(),
+                null));
+
+        return parameters;
+    }
 }

@@ -21,10 +21,12 @@ class SumAllColumns(FunctionBlock):
 
             FunctionBlock.check_connector_has_one_wire(self, 'in')
 
+            col_name = self.parameters["ColumnName"]
+
             df = results_table[self.input_connectors['in'][0]]
 
             df_sum = pd.DataFrame()
-            df_sum['sum'] = df.sum(axis=1)
+            df_sum[col_name] = df.sum(axis=1)
 
             results = collections.OrderedDict()
 
