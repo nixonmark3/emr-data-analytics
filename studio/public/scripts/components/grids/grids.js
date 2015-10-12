@@ -153,7 +153,8 @@ angular.module('emr.ui.grids', [])
                 features: "=",
                 columnWidth: "=",
                 rowHeaderWidth: "=",
-                onPage: "="
+                onPage: "=",
+                showData: "="
             },
             link: function ($scope, element, attrs) {
 
@@ -203,9 +204,9 @@ angular.module('emr.ui.grids', [])
 
                 });
 
-                function init(){
+                function init() {
 
-                    $scope.gridFeatures.forEach(function(feature) {
+                    $scope.gridFeatures.forEach(function (feature) {
 
                         for (var i in feature.statistics) {
 
@@ -216,41 +217,49 @@ angular.module('emr.ui.grids', [])
                         }
                     });
 
-                    $scope.onPage().then(function(data) {
+                    if ($scope.showData) {
 
-                        $scope.indexes = data[1].slice((page * pageSize), ((page + 1) * pageSize));
+                        $scope.onPage().then(function (data) {
 
-                        if (indexType == 'datetime64[ns]' || indexType == 'float64') {
+                            $scope.indexes = data[1].slice((page * pageSize), ((page + 1) * pageSize));
 
-                            for (var item in $scope.indexes) {
+                            if (indexType == 'datetime64[ns]' || indexType == 'float64') {
 
-                                $scope.indexes[item] = formatUnixTime($scope.indexes[item]);
+                                for (var item in $scope.indexes) {
+
+                                    $scope.indexes[item] = formatUnixTime($scope.indexes[item]);
+                                }
                             }
-                        }
-                        else {
+                            else {
 
-                            for (var item in $scope.indexes) {
+                                for (var item in $scope.indexes) {
 
-                                $scope.indexes[item] = parseInt(item) + 1;
+                                    $scope.indexes[item] = parseInt(item) + 1;
+                                }
                             }
-                        }
 
-                        recordCount = $scope.indexes.length;
+                            recordCount = $scope.indexes.length;
+                            setGridHeight();
+
+                            for (var feature in $scope.gridFeatures) {
+
+                                var featureIndex = data[0].indexOf($scope.gridFeatures[feature].column) + featureOffset;
+                                $scope.data.push(data[featureIndex].slice((page * pageSize), ((page + 1) * pageSize)).map(formatNumber));
+                            }
+
+                            page++;
+                        });
+                    }
+                    else {
+
+                        recordCount = 0;
                         setGridHeight();
-
-                        for(var feature in $scope.gridFeatures) {
-
-                            var featureIndex = data[0].indexOf($scope.gridFeatures[feature].column) + featureOffset;
-                            $scope.data.push(data[featureIndex].slice((page * pageSize), ((page + 1) * pageSize)).map(formatNumber));
-                        }
-
-                        page++;
-                    });
-                }
+                    }
+                };
 
                 function setGridHeight(){
 
-                    $scope.gridHeight = ((recordCount + 10) * $scope.rowHeight + 3 * $scope.padding);
+                    $scope.gridHeight = ((recordCount + 10) * $scope.rowHeight + 3 * $scope.padding) + (200 + $scope.rowHeight + 3 * $scope.padding);
                 }
 
                 var formatUnixTime = function(item) {
@@ -269,22 +278,28 @@ angular.module('emr.ui.grids', [])
 
                 var formatNumber = function(item) {
 
-                    if (isNaN(item)) {
+                    if (typeof item === "number") {
 
-                        return 'NaN';
-                    }
 
-                    var n = 0.01;
+                        if (isNaN(item)) {
 
-                    if (item != 0) {
-
-                        if (Math.abs(item) < n) {
-
-                            return item.toExponential(5);
+                            return 'NaN';
                         }
+
+                        var n = 0.01;
+
+                        if (item != 0) {
+
+                            if (Math.abs(item) < n) {
+
+                                return item.toExponential(5);
+                            }
+                        }
+
+                        return item.toFixed(5);
                     }
 
-                    return item.toFixed(5);
+                    return item;
                 };
 
                 init();

@@ -513,11 +513,17 @@ var analyticsApp = angular.module('analyticsApp',
                     break;
                 default:
 
+                    var mode = diagram().mode();
+
+                    var definition = new viewmodels.definitionViewModel(mode, $scope.library[block.definition()]);
+
                     modalService.show({
                         templateUrl: '/assets/scripts/views/blockData.html',
                         controller: 'blockDataController',
                         inputs: {
-                            block: block
+                            block: new viewmodels.configuringBlockViewModel(definition, block.data),
+                            loadSources: $scope.loadSources,
+                            diagram: diagram()
                         },
                         config: {
                             // todo put this back when refactor results name: block.data.name,

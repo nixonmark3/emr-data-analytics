@@ -34,7 +34,7 @@
 
             </div>
 
-            <div class="grid-row-header" ng-style="{ width: rowHeaderWidth, top: 200 + padding + 10 * rowHeight + padding }">
+            <div class="grid-row-header" ng-style="{ width: rowHeaderWidth, top: 200 + padding + 10 * rowHeight + padding }" ng-show="showData">
 
                 <div ng-repeat="index in indexes">{{index}}</div>
 
@@ -49,12 +49,6 @@
         <div class="grid-content" ng-style="{ left: rowHeaderWidth + 2 * padding, top: rowHeight + 2 * padding, width: gridWidth, height: gridHeight }">
 
             <div class="grid-content-row" ng-style="{ height: 200 + padding }">
-
-                <!--<div class="hist-container" ng-repeat="feature in data" ng-style="{ width: columnWidth, left: $index * (columnWidth + padding) }">-->
-
-                    <!--<statistics-histogram values="feature"></statistics-histogram>-->
-
-                <!--</div>-->
 
                 <div class="hist-container" ng-repeat="feature in gridFeatures" ng-style="{ width: columnWidth, left: $index * (columnWidth + padding) }">
 
@@ -84,14 +78,10 @@
 
             </div>
 
-            <div class="grid-content-row">
-
+            <div class="grid-content-row" ng-show="showData">
                 <div class="grid-content-column" ng-repeat="feature in data" ng-style="{ width: columnWidth, left: $index * (columnWidth + padding) }">
-
                     <div ng-repeat="item in feature track by $index">{{item}}</div>
-
                 </div>
-
             </div>
 
         </div>
