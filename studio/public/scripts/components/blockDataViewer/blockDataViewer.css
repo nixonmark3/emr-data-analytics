@@ -1,7 +1,7 @@
 .block-data-view-container { height: 100%; padding: 30px; }
 .block-data-view-result-name { text-align: right; margin-bottom: 20px; color: #666; font-weight: 700; font-size: 14px; padding-left: 15px; padding-top: 7px; }
-.block-data-view-result-value { text-align: left; margin-bottom: 20px; color: #666; font-weight: 700; font-size: 14px; padding-right: 15px; padding-top: 7px; }
+.block-data-view-result-value { text-align: left; margin-bottom: 20px; color: #666; font-size: 14px; padding-right: 15px; padding-top: 7px; }
 .block-data-view-multi-value-result-container { border-radius: 5px; height: 150px; border: 1px solid #e5e5e5; padding: 0px; margin-bottom: 20px; }
 .block-data-view-multi-value-result-data { overflow-y: auto; height: 100%; width: 100%; float: right; }
-.block-data-view-multi-result-name { text-align: right; margin-bottom: 5px; color: #666; font-weight: 700; font-size: 14px; padding-left: 15px; }
-.block-data-view-multi-result-value { text-align: left; margin-bottom: 5px; color: #666; font-weight: 700; font-size: 14px; padding-right: 15px; }
+.block-data-view-multi-result-name { text-align: right; margin-bottom: 5px; color: #666; font-size: 14px; padding-left: 15px; }
+.block-data-view-multi-result-value { text-align: left; margin-bottom: 5px; color: #666; font-size: 14px; padding-right: 15px; }
