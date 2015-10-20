@@ -35,6 +35,6 @@ class Shift(FunctionBlock):
 
 def time_shift(df, delays):
     df_out = df.copy(deep=True)
-    for key, delay in delays.items():
-        df_out[key] = df_out[key].shift(delay)
+    for key in df.columns.values:
+        df_out[key] = df_out[key].shift(delays[key].values)
     return df_out
