@@ -24,20 +24,28 @@ class TimeDelay(FunctionBlock):
             FunctionBlock.check_connector_has_one_wire(self, 'y')
             y_df = results_table[self.input_connectors['y'][0]]
 
-            lag = self.parameters['Max Lag']
+            col_list = y_df.columns.tolist()
+
+            # change sign of max lag so that positive lag value means y lags x by a positive number of samples
+            lag = -self.parameters['Max Lag']
 
             df_result = pd.DataFrame()
 
             already_correlated = list()
 
             for x_tag in x_df.columns:
+
                 for y_tag in y_df.columns:
+
                     if y_tag == x_tag:
                         continue
                     if y_tag in already_correlated:
                         continue
+
                     x = x_df[x_tag]
+
                     y = y_df[y_tag]
+
                     if len(x) != len(y):
                         raise 'Input variables of different lengths.'
                     if np.isscalar(lag):
@@ -55,28 +63,35 @@ class TimeDelay(FunctionBlock):
                         lag = np.asarray(lag)
                     result = []
                     for ii in lag:
+
                         if ii < 0:
                             result.append(pearsonr(x[:ii], y[-ii:]))
                         elif ii == 0:
                             result.append(pearsonr(x, y))
                         elif ii > 0:
-                            result.append(pearsonr(x[ii:], y[:-ii]))
+                            result.append(pearsonr(x[ii:],y[:-ii]))
+
                     df_result['{0}'.format(x_tag)] = [r[0] for r in result]
                 already_correlated.append(x_tag)
 
             time_delays = collections.OrderedDict()
+            test_dict = dict()
 
             for k, v in df_result.idxmax().items():
+
                 time_delays[k] = int(v)
+                test_dict[k] = int(v)
 
             time_delay_results = collections.OrderedDict()
             time_delay_results['Time Delays'] = list(time_delays.items())
+
+            td_df = pd.DataFrame(test_dict, index=col_list)
 
             FunctionBlock.save_results(self, results=time_delay_results)
 
             FunctionBlock.report_status_complete(self)
 
-            return {FunctionBlock.getFullPath(self, 'out'): time_delays}
+            return {FunctionBlock.getFullPath(self, 'out'): td_df}
 
         except Exception as err:
             FunctionBlock.save_results(self)
