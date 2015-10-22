@@ -19,7 +19,9 @@ class Shift(FunctionBlock):
             FunctionBlock.check_connector_has_one_wire(self, 'delay')
             time_delays = results_table[self.input_connectors['delay'][0]]
 
+            saved_index = df.index
             shifted_df = time_shift(df, time_delays)
+            shifted_df.index = saved_index
 
             FunctionBlock.save_results(self, df=shifted_df, statistics=True, plot=True)
 
