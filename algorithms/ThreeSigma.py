@@ -26,6 +26,7 @@ class ThreeSigma(FunctionBlock):
 
             variable_name = df.columns.values
             clean_data = df.copy()
+            temp_index = df.index
 
             if mw <= 0 or g <= 0:
                 # warnings.simplefilter("always", ImportWarning)
@@ -39,22 +40,22 @@ class ThreeSigma(FunctionBlock):
             temp_data_list = []
 
             for j in range(0, num_var):
-                temp_data = pd.DataFrame()
-                temp_data['value'] = pd.DataFrame(df[variable_name[j]])
+
+                temp_data = pd.DataFrame(index=temp_index, columns=['value','y0','s0','upper_bound','lower_bound','indicator','outliers'])
+
+                current_col = variable_name[j]
+                temp_data['value'] = pd.DataFrame(df[current_col])
                 temp_data['y0'] = pd.rolling_mean(temp_data.value, mw)
                 temp_data['s0'] = pd.rolling_std(temp_data.value, mw)
                 temp_data['upper_bound'] = temp_data.y0 + g*temp_data.s0
                 temp_data['lower_bound'] = temp_data.y0 - g*temp_data.s0
                 temp_data['indicator'] = ((temp_data.value > temp_data.upper_bound) | (temp_data.value < temp_data.lower_bound))
-                temp_data['outliers'] = temp_data.apply(lambda x: x.value if x.indicator else np.NaN, axis=1)
+                temp_data['outliers'] = temp_data.apply(lambda x: x.value if not x.indicator else np.NaN, axis=1)
 
-                col = clean_data[variable_name[j]]
 
-                for i in range(num_obs):
-                    if temp_data.indicator[i]:
-                        col.iat[i] = temp_data.y0[i]
+                col = clean_data[current_col]
 
-                clean_data[variable_name[j]] = col
+                clean_data[current_col] = temp_data['outliers']
 
                 temp_data_list.append(temp_data)
 
