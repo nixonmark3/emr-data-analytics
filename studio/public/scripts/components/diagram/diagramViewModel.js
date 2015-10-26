@@ -505,7 +505,8 @@ viewmodels.diagramViewModel = function(data) {
 
     var blockNames = {},        // tracks the current set of block names
         boundary = { x1: Number.MIN_VALUE, x2: Number.MIN_VALUE, y1: Number.MIN_VALUE, y2: Number.MIN_VALUE }, // track the diagram boundary
-        selectionCount = 0;     // tracks the current number of selected blocks
+        selectionCount = 0,     // tracks the current number of selected blocks
+        defaultName = "New Diagram";    // the default name given to a new diagram
 
     /**
      * public properties
@@ -516,7 +517,55 @@ viewmodels.diagramViewModel = function(data) {
     };
 
     this.setId = function(id){
-        data.id = id;
+        this.data.id = id;
+    };
+
+    this.getName = function () {
+        return this.data.name;
+    };
+
+    this.setName = function(value){
+        this.data.name = value;
+    };
+
+    this.getDescription = function () {
+        return this.data.description;
+    };
+
+    this.setDescription = function(value){
+        this.data.description = value;
+    };
+
+    this.getTargetEnvironment = function () {
+        return this.data.targetEnvironment;
+    };
+
+    this.setTargetEnvironment = function(value){
+        this.data.targetEnvironment = value;
+    };
+
+    this.getOwner = function () {
+        return this.data.owner;
+    };
+
+    this.setOwner = function(value){
+        this.data.owner = value;
+    };
+
+    this.getOwner = function () {
+        return this.data.owner;
+    };
+
+    this.setOwner = function(value){
+        this.data.owner = value;
+    };
+
+    this.getCategory = function () {
+        return this.data.category;
+    };
+
+    this.setCategory = function(value){
+        this.data.category = value;
     };
 
     //
@@ -929,7 +978,7 @@ viewmodels.diagramViewModel = function(data) {
 
         return {
             name: this.generateBlockName(definition.name()),
-            id: generateUniqueName(),
+            id: newGuid(),
             definition: definition.name(),
             x: x,
             y: y
@@ -1051,7 +1100,7 @@ viewmodels.diagramViewModel = function(data) {
      * Generate guid
      * @returns {string}
      */
-    var generateUniqueName = function() {
+    var newGuid = function() {
 
         var delim = "-";
 
@@ -1060,6 +1109,14 @@ viewmodels.diagramViewModel = function(data) {
         }
 
         return (S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4());
+    };
+
+    /**
+     * checks whether this diagram has the default diagram name
+     * @returns {boolean}
+     */
+    this.hasDefaultName = function(){
+        return (this.getName() == defaultName);
     };
 
     /**

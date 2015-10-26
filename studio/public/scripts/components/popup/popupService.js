@@ -101,6 +101,7 @@ angular.module('emr.ui.popup', ['emr.ui.shared', 'ngAnimate'])
                                     "<div class='" + options.backdropClass + "'></div>");
                             }
 
+                            // decide whether the popup should be animated
                             var isAnimated = (options.isAnimated === undefined || options.isAnimated == null)
                                 ? true : options.isAnimated;
 
@@ -116,7 +117,6 @@ angular.module('emr.ui.popup', ['emr.ui.shared', 'ngAnimate'])
                             if (options.appendElement) {
                                 // append to custom append element
                                 append(options.appendElement, popupElement, isAnimated);
-                                // $animate.enter(popupElement, options.appendElement);
                             } else {
                                 // append to body when no custom append element is specified
 
@@ -124,7 +124,6 @@ angular.module('emr.ui.popup', ['emr.ui.shared', 'ngAnimate'])
                                     append(body, backdropElement, isAnimated);
 
                                 append(body, popupElement, isAnimated);
-                                // $animate.enter(popupElement, body);
                             }
 
                             var popup = {

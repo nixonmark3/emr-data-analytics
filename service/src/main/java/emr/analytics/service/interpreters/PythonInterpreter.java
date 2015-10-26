@@ -20,8 +20,9 @@ public class PythonInterpreter extends Interpreter implements ExecuteResultHandl
     // apache common class used to fork and execute another process
     private DefaultExecutor executor;
 
-    // stream used for new processes output and error streams
-    private ByteArrayOutputStream outputStream;
+    // define streams for output and errors
+    private InterpreterOutputStream outputStream;
+    private InterpreterOutputStream errorStream;
 
     // tracks the many state of the python process
     protected InterpreterFlags flags;
@@ -65,8 +66,11 @@ public class PythonInterpreter extends Interpreter implements ExecuteResultHandl
         executor = new DefaultExecutor();
         executor.setWorkingDirectory(this.getWorkingDirectory());
 
-        outputStream = new ByteArrayOutputStream();
-        PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, outputStream);
+        // instantiate the output and error streams
+        outputStream = new InterpreterOutputStream(this.notificationHandler, InterpreterOutputStream.OutputLevel.OUT);
+        errorStream = new InterpreterOutputStream(this.notificationHandler, InterpreterOutputStream.OutputLevel.ERROR);
+
+        PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, errorStream);
         executor.setStreamHandler(streamHandler);
         executor.setWatchdog(new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT));
 
@@ -105,9 +109,6 @@ public class PythonInterpreter extends Interpreter implements ExecuteResultHandl
                             outputStream.toString()));
         }
 
-        // reset the output stream
-        outputStream.reset();
-
         // confirm the script has been initialized
         int scriptInitializerWait = 10;  // wait a maximum of 10 seconds
         synchronized (scriptInitializedNotifier) {
@@ -137,7 +138,9 @@ public class PythonInterpreter extends Interpreter implements ExecuteResultHandl
                             outputStream.toString()));
         }
 
-        // create the request and set the
+        // todo: what if the interpreting is already interpreting ?
+
+        // create the request and set the run flags
         interpreterRequest = new InterpreterRequest(statements);
         flags.setFlag(InterpreterFlags.InterpreterFlag.RUNNING);
         flags.clearFlag(InterpreterFlags.InterpreterFlag.FAILED);
@@ -265,32 +268,34 @@ public class PythonInterpreter extends Interpreter implements ExecuteResultHandl
         }
     }
 
-    /**
-     *
-     * @param out
-     * @param error
-     */
-    public void setStatementsFinished(String out, boolean error) {
+    public void setStatementsComplete() {
 
         synchronized (statementCompletedNotifier) {
-
             flags.clearFlag(InterpreterFlags.InterpreterFlag.RUNNING);
-            if (error)
-                flags.setFlag(InterpreterFlags.InterpreterFlag.FAILED);
-
-            interpreterOutput = out;
             statementCompletedNotifier.notify();
         }
 
     }
 
+    public void setStatementsFailed(String message) {
+
+        synchronized (statementCompletedNotifier) {
+            flags.clearFlag(InterpreterFlags.InterpreterFlag.RUNNING);
+            flags.setFlag(InterpreterFlags.InterpreterFlag.FAILED);
+            interpreterOutput = message;
+            statementCompletedNotifier.notify();
+        }
+    }
+
     @Override
     public void onProcessComplete(int exitValue) {
+
         flags.clearFlag(InterpreterFlags.InterpreterFlag.STARTED);
     }
 
     @Override
     public void onProcessFailed(ExecuteException e) {
+
         flags.clearFlag(InterpreterFlags.InterpreterFlag.STARTED);
     }
 

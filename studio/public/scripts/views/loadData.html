@@ -1,27 +1,48 @@
-<div id="load-data-wrapper">
+<div id="load-data-wrapper" ng-switch on="activeStep">
 
-    <!-- load data source -->
-    <div class="load-data-container" ng-show="activeStep==0">
+    <div id="load-data-evaluation" ng-class="{ 'evaluating' : isEvaluating }">
+        <i class="fa fa-2x fa-gear ng-class:{'fa-spin' : isEvaluating }"></i>
+    </div>
 
-        <div class="load-data-menu">
+    <div id="load-data-progress">
+        <progress-tracker
+                radius="16"
+                steps="progressSteps"
+                active-step="activeStep"
+                direction="direction">
+        </progress-tracker>
+    </div>
+
+    <!-- select data sources -->
+    <div class="load-data-container" ng-switch-when="0">
+
+        <div class="load-data-menu" ng-style="{ 'width': menuWidth + '%' }">
+            <div class="resizable-handle resizable-e" ng-mousedown="onResizeMenu($event)"></div>
+
             <ul>
-                <li ng-class="{'active': activeSource==0}"
-                    ng-click="setActiveSource(0)">Local File System</li>
-                <li ng-class="{'active': activeSource==1}"
-                    ng-click="setActiveSource(1)">Web Address (URL)</li>
-                <li ng-class="{'active': activeSource==2}"
-                    ng-click="setActiveSource(2)">HBase</li>
-                <li ng-class="{'active': activeSource==3}"
-                    ng-click="setActiveSource(3)">MongoDB</li>
-                <li ng-class="{'active': activeSource==4}"
-                    ng-click="setActiveSource(4)">DeltaV Historian</li>
-                <li ng-class="{'active': activeSource==5}"
-                    ng-click="setActiveSource(5)">OSI PI</li>
+                <li ng-class="{'active': source.sourceType==='FILES'}">
+                    <a ng-click="setSourceType('FILES')">Local File System</a>
+                </li>
+                <li ng-class="{'active': source.sourceType==='WEB'}">
+                    <a ng-click="setSourceType('WEB')">Web Address (URL)</a>
+                </li>
+                <li ng-class="{'active': source.sourceType==='HBASE'}">
+                    <a ng-click="setSourceType('HBASE')">HBase</a>
+                </li>
+                <li ng-class="{'active': source.sourceType==='MONGO'}">
+                    <a ng-click="setSourceType('MONGO')">MongoDB</a>
+                </li>
+                <li ng-class="{'active': source.sourceType==='DV'}">
+                    <a ng-click="setSourceType('DV')">DeltaV Historian</a>
+                </li>
+                <li ng-class="{'active': source.sourceType==='PI'}">
+                    <a ng-click="setSourceType('PI')">OSI PI</a>
+                </li>
             </ul>
         </div>
 
-        <div class="load-data-content">
-            <div class="load-data-source-container" ng-show="activeSource == 0">
+        <div class="load-data-content" ng-style="{ 'width': (100 - menuWidth) + '%' }">
+            <div class="load-data-source-container" ng-show="source.sourceType==='FILES'">
                 <div class="load-data-navbar">
                     <input type="file" id="fileBrowser" onchange="angular.element(this).scope().addFiles(this.files)" value="Browse" multiple style="display:none;">
                     <span class="pull-left">Browse or drag and drop files below:</span>
@@ -30,7 +51,7 @@
                 <div class="load-data-source-canvas" file-drop>
                     <div class="drop-target">Drop Data</div>
 
-                    <div class="load-data-source" ng-repeat="file in loadData.files">
+                    <div class="load-data-source" ng-repeat="file in source.dataSources">
                         <progress-circle
                                 class="load-data-source-progress pull-left"
                                 background-color="#ccc"
@@ -48,7 +69,7 @@
 
                 </div>
             </div>
-            <div class="load-data-source-container" ng-show="activeSource > 0">
+            <div class="load-data-source-container" ng-show="source.sourceType!=='FILES'">
                 This features has not been implemented.
             </div>
         </div>
@@ -56,12 +77,88 @@
     </div>
 
     <!-- parse data -->
-    <div class="load-data-container" ng-show="activeStep==1">
-        Parsing data
+    <div class="load-data-container" ng-switch-when="1">
+
+        <div class="load-data-menu" ng-style="{ 'width': menuWidth + '%' }">
+            <div class="resizable-handle resizable-e" ng-mousedown="onResizeMenu($event)"></div>
+
+            <ul>
+                <li ng-class="{'active': parse.parseType==='SEPARATED_VALUES'}">
+                    <a ng-click="setParseType('SEPARATED_VALUES')">Separator Based Files</a>
+                    <div expand="parse.parseType==='SEPARATED_VALUES'" class="control-container">
+                        <div class="load-data-menu-controls">
+                            <div class="checkbox" style="margin-bottom: 15px;">
+                                <label>
+                                    <input type="checkbox" ng-model="parse.header">
+                                    Header Row
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>Delimiter</label>
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="delimiterOptions" ng-model="parse.delimiterType" ng-value="'COMMA'">
+                                        Comma (CSV)
+                                    </label>
+                                </div>
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="delimiterOptions" ng-model="parse.delimiterType" ng-value="'TAB'">
+                                        Tab (TSV)
+                                    </label>
+                                </div>
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="delimiterOptions" ng-model="parse.delimiterType" ng-value="'OTHER'">
+                                        Other
+                                    </label>
+                                    <input type="text" class="form-control" ng-model="parse.delimiterChar" style="display: inline-block; width: 50px; height: 20px; margin-left: 10px;" maxlength="1">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Mode</label>
+                                <select class="form-control" ng-model="parse.missingValueMode">
+                                    <option value="PERMISSIVE">Permissive</option>
+                                    <option value="DROPMALFORMED">Drop Malformed</option>
+                                    <option value="FAILFAST">Fail Fast</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Quote Character</label>
+                                <input type="text" class="form-control" ng-model="parse.quoteChar" maxlength="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Comment Character</label>
+                                <input type="text" class="form-control" ng-model="parse.commentChar" maxlength="1">
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li ng-class="{'active': parse.parseType==='JSON'}">
+                    <a ng-click="setParseType('JSON')">JSON</a>
+                    <div expand="parse.parseType==='JSON'" class="control-container">
+                        <div class="load-data-menu-controls" style="height: 100px;">This features has not been implemented.</div>
+                    </div>
+                </li>
+                <li ng-class="{'active': parse.parseType==='XML'}">
+                    <a ng-click="setParseType('XML')">XML</a>
+                    <div expand="parse.parseType==='XML'" class="control-container">
+                        <div class="load-data-menu-controls" style="height: 100px;">This features has not been implemented.</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="load-data-content" ng-style="{ 'width': (100 - menuWidth) + '%' }">
+
+            <explore-grid features="features"></explore-grid>
+
+        </div>
+
     </div>
 
     <!-- clean data -->
-    <div class="load-data-container" ng-show="activeStep==2">
+    <div class="load-data-container" ng-switch-when="2">
         Loading data
     </div>
 

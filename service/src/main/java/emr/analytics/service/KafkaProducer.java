@@ -5,9 +5,8 @@ import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
-import emr.analytics.models.messages.JobStates;
-import emr.analytics.models.messages.StreamingInfo;
-import emr.analytics.models.messages.StreamingSourceRequest;
+import emr.analytics.models.messages.StreamingTask;
+import emr.analytics.models.messages.StreamingRequest;
 import emr.analytics.service.kafka.JsonSerializer;
 import emr.analytics.service.sources.SourceFactory;
 import emr.analytics.service.sources.SourceValues;
@@ -29,12 +28,12 @@ public class KafkaProducer extends AbstractActor {
     private boolean running;
     private org.apache.kafka.clients.producer.KafkaProducer producer;
     private final ActorRef client;
-    private final StreamingSourceRequest request;
-    private final StreamingInfo info;
+    private final StreamingRequest request;
+    private final StreamingTask info;
 
-    public static Props props(StreamingSourceRequest request, ActorRef client) { return Props.create(KafkaProducer.class, request, client); }
+    public static Props props(StreamingRequest request, ActorRef client) { return Props.create(KafkaProducer.class, request, client); }
 
-    public KafkaProducer(StreamingSourceRequest request, ActorRef client){
+    public KafkaProducer(StreamingRequest request, ActorRef client){
 
         // initialize the running flag
         this.running = false;
@@ -46,9 +45,9 @@ public class KafkaProducer extends AbstractActor {
         this.client = client;
 
         // retrieve the analytics host name stored as an environmental variable
-        String host = JobServiceHelper.getEnvVariable("ANALYTICS_HOST", "127.0.0.1");
+        String host = TaskServiceHelper.getEnvVariable("ANALYTICS_HOST", "127.0.0.1");
 
-        info = new StreamingInfo(request.getTopic(),
+        info = new StreamingTask(request.getTopic(),
                 request.getStreamingSource().getPollingSourceType(),
                 request.getStreamingSource().getFrequency());
 
@@ -79,7 +78,7 @@ public class KafkaProducer extends AbstractActor {
              */
             .match(String.class, s -> s.equals("start"), s -> {
 
-                this.client.tell(new StreamingInfo(info), self());
+                this.client.tell(new StreamingTask(info), self());
                 run();
             })
 
@@ -91,8 +90,7 @@ public class KafkaProducer extends AbstractActor {
                 // set running flag to false and close producer
                 this.running = false;
 
-                info.setState(JobStates.STOPPED);
-                this.client.tell(new StreamingInfo(info), self());
+                this.client.tell(new StreamingTask(info), self());
 
                 this.producer.close();
 

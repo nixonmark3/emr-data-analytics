@@ -1,9 +1,8 @@
 package actors;
 
-import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.JsonNode;
-import emr.analytics.models.messages.BaseMessage;
+import emr.analytics.models.messages.OutputMessage;
 import play.libs.Json;
 
 import java.util.*;
@@ -54,7 +53,7 @@ public class SessionManager {
      * @param message
      * @param excludedId
      */
-    public void notifyAll(BaseMessage message, UUID excludedId){
+    public void notifyAll(OutputMessage message, UUID excludedId){
 
         JsonNode node = Json.toJson(message);
         for(Session session : _sessions.values()){
@@ -70,7 +69,7 @@ public class SessionManager {
      *
      * @param message
      */
-    public void notifyAll(BaseMessage message) {
+    public void notifyAll(OutputMessage message) {
         notifyAll(message, null);
     }
 
@@ -78,7 +77,7 @@ public class SessionManager {
      *
      * @param message
      */
-    public void notifyDashboards(BaseMessage message) {
+    public void notifyDashboards(OutputMessage message) {
 
         JsonNode node = Json.toJson(message);
 
@@ -97,7 +96,7 @@ public class SessionManager {
      * @param excludedId
      * @param message
      */
-    public void notifySubscribers(UUID diagramId, UUID excludedId, BaseMessage message){
+    public void notifySubscribers(UUID diagramId, UUID excludedId, OutputMessage message){
 
         // convert base message into JSON
         JsonNode node = Json.toJson(message);
@@ -122,7 +121,7 @@ public class SessionManager {
      * @param diagramId
      * @param message
      */
-    public void notifySubscribers(UUID diagramId, BaseMessage message){
+    public void notifySubscribers(UUID diagramId, OutputMessage message){
 
         notifySubscribers(diagramId, null, message);
     }

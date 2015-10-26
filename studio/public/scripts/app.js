@@ -11,6 +11,7 @@ var analyticsApp = angular.module('analyticsApp',
         'emr.ui.modal',
         'emr.ui.panel',
         'emr.ui.popup',
+        'ui.codemirror',
         'ngRoute',
         'ngSanitize',
         'ngAnimate'])
@@ -112,17 +113,31 @@ var analyticsApp = angular.module('analyticsApp',
             };
 
             /**
-             *
+             * @param label
              * @param predicate
              * @param handler
              * @param persist
              */
-            websocket.listen = function (predicate, handler, persist) {
+            websocket.listen = function (label, predicate, handler, persist) {
 
                 if (persist == null)
                     persist = false;
 
-                listeners.push({ p: predicate, h: handler, persist: persist });
+                listeners.push({ label: label, predicate: predicate, handler: handler, persist: persist });
+            };
+
+            /**
+             *
+             * @param label
+             */
+            websocket.unlisten = function(label) {
+
+                var position = listeners.map(function(x) { return x.label; }).indexOf(label);
+
+                console.log("Unlisten position " + position);
+
+                if (position > -1)
+                    listeners.splice(position, 1);
             };
 
             /**
@@ -166,8 +181,8 @@ var analyticsApp = angular.module('analyticsApp',
                 var obj = JSON.parse(msg.data);
                 for (var i = 0; i < listeners.length; i++) {
                     var listener = listeners[i];
-                    if (listener.p(obj))
-                        listener.h(obj);
+                    if (listener.predicate(obj))
+                        listener.handler(obj);
                 }
             };
 
@@ -236,10 +251,10 @@ var analyticsApp = angular.module('analyticsApp',
         $rootScope.alerts = [];
 
         // listen for analytic service pings
-        $webSockets.listen(function(msg) { return msg.type == "ping"; }, setPing, true);
+        $webSockets.listen("ping", function(msg) { return msg.messageType == "ping"; }, setPing, true);
 
         // ping the analytics service
-        $webSockets.send({ type: "ping" });
+        $webSockets.send({ messageType: "ping" });
 
         /**
          *
@@ -326,17 +341,25 @@ var analyticsApp = angular.module('analyticsApp',
 
     }])
 
-    .controller('studioController', ['$scope', '$window', '$timeout', '$webSockets', 'diagramService', 'modalService', 'popupService',
-        function($scope, $window, $timeout, $webSockets, diagramService, modalService, popupService) {
+    .controller('studioController', ['$scope', '$window', '$timeout', '$webSockets', 'diagramService', 'modalService', 'toasterService', 'popupService', function($scope, $window, $timeout, $webSockets, diagramService, modalService, toasterService, popupService) {
+
+        // initialized internal variables
+        var studioWrapper = angular.element(document.querySelector('#studio-wrapper')), // reference to the studio parent element
+            lastTerminalWidth = 30, // initialize the variable that tracks the terminal windows' last width
+            toastContainerId = "toast-container"; // id of studio toast container
 
         //
         // initialize scope level properties
         //
 
+        // current width of the studio canvas
+        $scope.canvasWidth = 100;
+        // flag representing whether the terminal is visible
+        $scope.isTerminalVisible = false;
+        // flag representing whether the terminal is being resized
+        $scope.isResizingTerminal = false;
         // controls whether the library is displayed
         $scope.showLibrary = false;
-        // controls whether the off-canvas sidebar is displayed
-        $scope.showSidebar = false;
         // during some operations, we want to blur the background
         $scope.blurBackground = false;
         // controls whether the offline or online canvas is shown
@@ -353,14 +376,15 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.offlineDiagramMethods = {};
 
         $scope.diagrams = [];
+        //
+        $scope.terminalOutput = [];
 
         // setup websocket listeners
         $webSockets.reset();
-        $webSockets.listen(function(msg) { return msg.type == "evaluationStatus"; }, updateEvaluationStatus);
-        $webSockets.listen(
-            function(msg) { return msg.type == "deploymentStatus"; },
-            function(msg) { updateDeploymentStatus(msg.jobInfo); }
-        );
+        // listen for analytic task updates, append them to the terminal output
+        $webSockets.listen("task-status", function(msg) { return msg.messageType == "task-status"; }, appendTerminalOutput);
+        $webSockets.listen("evaluation-status", function(msg) { return msg.messageType == "evaluation-status"; }, updateEvaluationStatus);
+        $webSockets.listen("deployment-status", function(msg) { return msg.messageType == "deployment-status"; }, function(msg) { updateDeploymentStatus(msg.jobInfo); });
 
         //
         // load data from the service
@@ -407,6 +431,104 @@ var analyticsApp = angular.module('analyticsApp',
                 console.log(code);
             }
         );
+
+        //
+        // internal methods
+        //
+
+        /**
+         *
+         * @param taskStatus
+         */
+        function appendTerminalOutput(taskStatus){
+
+            $scope.terminalOutput.push(taskStatus);
+
+            $scope.$$phase || $scope.$apply();
+        }
+
+        /**
+         * Save the current diagram
+         */
+        function save(onSuccess, onFailure) {
+
+            // reference the diagram
+            var diagram = $scope.diagramViewModel;
+
+            // check whether this diagram still has the default name (which is invalid)
+            if (diagram.hasDefaultName()){
+
+                // prompt the user to give the diagram a new / unique name
+
+                // build a diagram properties object
+                var properties = {
+                    name: diagram.getName(),
+                    "description": diagram.getDescription(),
+                    "targetEnvironment": diagram.getTargetEnvironment(),
+                    "owner": diagram.getOwner(),
+                    "category": diagram.getCategory()
+                };
+
+                popupService.show({
+                    templateUrl: '/assets/scripts/views/createDiagram.html',
+                    controller: 'createDiagramController',
+                    backdropClass: 'emr-popup-backdrop',
+                    inputs: {
+                        diagramProperties: properties
+                    }
+                }).then(function(popup) {
+
+                    popup.close.then(function (properties) {
+
+                        if (properties) {   // on save, properties will be provided
+
+                            // capture new
+                            var diagram = $scope.diagramViewModel;
+                            diagram.setName(properties.name);
+                            diagram.setDescription(properties.description);
+                            diagram.setTargetEnvironment(properties.targetEnvironment);
+                            diagram.setOwner(properties.owner);
+                            diagram.setCategory(properties.category);
+
+                            // recursively call save again with a new (non-default) diagram name
+                            save(onSuccess, onFailure);
+                        }
+                    });
+                });
+            }
+            else{
+
+                // the diagram is valid and ready to be saved
+
+                // check whether the diagram is new
+                var isNew = false;
+                if (!$scope.diagramViewModel.getId())
+                    isNew = true;
+
+                // create diagram container
+                var offlineDiagram = $scope.diagramViewModel.data;
+                var onlineDiagram = $scope.onlineViewModel.data;
+                var data = {'offline': offlineDiagram, 'online': onlineDiagram};
+
+                diagramService.save(data).then(function (diagramId) {
+
+                        if (isNew) {
+                            // capture the new diagram id
+                            $scope.diagramViewModel.setId(diagramId);
+                            subscribe($scope.diagramViewModel.getId());
+                        }
+
+                        if (onSuccess)
+                            onSuccess();
+                    },
+                    function (code) {
+
+                        if (onFailure)
+                            onFailure();
+                    }
+                );
+            }
+        }
 
         /* Scope Level Methods */
 
@@ -603,37 +725,112 @@ var analyticsApp = angular.module('analyticsApp',
         };
 
         /**
+         * Method that allows you to drag the sizing handle of the terminal div
+         * @param evt
+         */
+        $scope.onResizeTerminal = function(evt){
+
+            var containerWidth,
+                originX;
+
+            $scope.$root.$broadcast("beginDrag", {
+                x: evt.pageX,
+                y: evt.pageY,
+                config: {
+
+                    dragStarted: function (x, y) {
+
+                        $scope.isResizingTerminal = true;
+                        containerWidth = studioWrapper.width();
+                        originX = studioWrapper.offset().left;
+
+                        $scope.$$phase || $scope.$apply();
+                    },
+
+                    dragging: function (x, y) {
+
+                        var width = (x - originX) * 100.0 / containerWidth;
+                        if (width > 5 && width < 95)
+                            $scope.canvasWidth = width;
+                    },
+
+                    dragEnded: function(){
+                        $scope.isResizingTerminal = false;
+
+                        $scope.$$phase || $scope.$apply();
+                    }
+                }
+            });
+        };
+
+        /**
+         * Toggle the terminal open and closed (shares space with canvas)
+         * @param evt
+         */
+        $scope.onToggleTerminal = function(evt){
+
+            if($scope.canvasWidth == 100) {
+                $scope.canvasWidth -= lastTerminalWidth;
+                $scope.isTerminalVisible = true;
+            }
+            else{
+                lastTerminalWidth = 100 - $scope.canvasWidth;
+                $scope.canvasWidth = 100;
+                $scope.isTerminalVisible = false;
+            }
+
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
+
+        /**
          *
          */
         var loadData = function(){
 
-            // todo: calculate new block position
+            // for context, get this diagram's id
+            var diagramId = $scope.diagramViewModel.getId();
+            if (!diagramId){
 
-            modalService.show({
-                templateUrl: '/assets/scripts/views/loadData.html',
-                controller: 'loadDataController',
-                animation: {
-                    type: 'fadeIn',
-                    durationIn: 600
-                },
-                position: null,
-                inputs: {
+                // save the diagram first
+                save(
+                    function(){ // on success: recursively call this method again
+                        loadData();
+                    },
+                    function() { }
+                );
+            }
+            else { // a valid diagram exists
 
-                },
-                config: {
-                    backdropClass: 'emr-modal-backdrop',
-                    showCancel: true,
-                    showNext: true
-                }
-            }).then(function (modal) {
+                // todo: calculate new block position
 
-                modal.close.then(function (result) {
+                modalService.show({
+                    templateUrl: '/assets/scripts/views/loadData.html',
+                    controller: 'loadDataController',
+                    animation: {
+                        type: 'fadeIn',
+                        durationIn: 600
+                    },
+                    inputs: {
+                        diagramId: diagramId,
+                        diagramName: $scope.diagramViewModel.getName()
+                    },
+                    config: {
+                        backdropClass: 'emr-modal-backdrop',
+                        showCancel: true,
+                        showNext: true
+                    },
+                    position: null
+                }).then(function (modal) {
 
-                    if (result) {
+                    modal.close.then(function (result) {
 
-                    }
+                        if (result) {
+
+                        }
+                    });
                 });
-            });
+            }
         };
 
         $scope.toggleDiagrams = function() {
@@ -660,9 +857,11 @@ var analyticsApp = angular.module('analyticsApp',
 
                     subscribe($scope.diagramViewModel.getId());
 
-                    $scope.info($scope.diagramViewModel.getId(), function(data){
+                    $scope.tasks($scope.diagramViewModel.getId(), function(data){
 
-                            data.items.forEach(function(item) {
+                            console.log(JSON.stringify(data));
+
+                            data.tasks.forEach(function(item) {
 
                                 if (item.mode == "OFFLINE") {
 
@@ -672,6 +871,10 @@ var analyticsApp = angular.module('analyticsApp',
 
                                     updateDeploymentStatus(item);
                                 }
+                            },
+                            function (code) {
+
+                                console.log(code); // TODO show exception
                             });
                         }
                     );
@@ -722,42 +925,24 @@ var analyticsApp = angular.module('analyticsApp',
                     break;
 
                 case 'o3': // orbit 3 - save
-                    save();
+
+                    save(function(){
+                        var message = 'Diagram successfully saved.';
+                        toasterService.success(message,
+                            message,
+                            toastContainerId);
+                    },
+                    function(){
+                        var message = 'Diagram failed to save.';
+                        toasterService.error(message,
+                            message,
+                            toastContainerId);
+                    });
                     break;
             }
         };
 
-        /**
-         * Save the current diagram
-         * @param evt
-         */
-        var save = function() {
 
-            // check whether the diagram is new
-            var isNew = false;
-            if (!$scope.diagramViewModel.getId())
-                isNew = true;
-
-            // create diagram container
-            var offlineDiagram = $scope.diagramViewModel.data;
-            var onlineDiagram = $scope.onlineViewModel.data;
-            var data = {'offline': offlineDiagram, 'online': onlineDiagram};
-
-            diagramService.save(data).then(function (diagramId) {
-
-                    if (isNew) {
-
-                        // capture the new diagram id
-                        $scope.diagramViewModel.setId(diagramId);
-                        subscribe($scope.diagramViewModel.getId());
-                    }
-                },
-                function (code) {
-
-                    console.log(code); // TODO show exception
-                }
-            );
-        };
 
         var evaluate = function() {
 
@@ -803,17 +988,51 @@ var analyticsApp = angular.module('analyticsApp',
             evt.preventDefault();
         };
 
-        $scope.info = function(diagramId, onSuccess){
+        $scope.tasks = function(diagramId, onSuccess, onFailure){
 
-            // send info request
-            diagramService.info(diagramId).then(onSuccess,
-                function (code) {
-
-                    console.log(code); // TODO show exception
-                }
-            );
+            // send tasks request
+            diagramService.tasks(diagramId).then(onSuccess, onFailure);
 
             $scope.$$phase || $scope.$apply();
+        };
+
+        /**
+         *
+         * @param source
+         * @param onSuccess
+         * @param onFailure
+         */
+        $scope.interpret = function(source, onSuccess, onFailure){
+
+            // for context, get this diagram's id
+            var diagramId = $scope.diagramViewModel.getId();
+            if (!diagramId){
+
+                // save the diagram first
+                save(
+                    function(){ // on success: recursively call this method again
+                        $scope.interpret(source, onSuccess, onFailure);
+                    },
+                    function() {   // on failure: call the on failure method
+                        if (onFailure)
+                            onFailure();
+                    }
+                );
+            }
+            else{ // a valid diagram exists
+
+                // buid a task request including the interpreter source code
+                var request = {
+                    diagramId: diagramId,
+                    diagramName: $scope.diagramViewModel.getName(),
+                    mode: "OFFLINE",
+                    targetEnvironment: $scope.diagramViewModel.getTargetEnvironment(),
+                    source: source,
+                    metaData: ""
+                };
+
+                diagramService.interpret(request).then(onSuccess, onFailure);
+            }
         };
 
         $scope.kill = function(evt) {
@@ -1141,7 +1360,7 @@ var analyticsApp = angular.module('analyticsApp',
         function subscribe(id){
 
             console.log("subscribing to diagram: " + id);
-            $webSockets.send({ type: "subscribe", id: id });
+            $webSockets.send({ messageType: "subscribe", id: id });
         }
 
     }]);

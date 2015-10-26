@@ -754,11 +754,8 @@ analyticsApp
         }
     ])
 
-    /**
-     *
-     */
-    .controller('loadDataController', ['$scope', '$document', '$element', 'diagramService', 'config', 'position', 'close',
-        function($scope, $document, $element, diagramService, config, position, close){
+    .controller('loadDataController', ['$scope', '$element', '$webSockets', 'diagramService', 'diagramId', 'diagramName', 'config', 'position', 'close',
+        function($scope, $element, $webSockets, diagramService, diagramId, diagramName, config, position, close){
 
             // add the position and config variables to the current scope so that they can be accessed by modal
             $scope.position = position;
@@ -774,16 +771,100 @@ analyticsApp
                 save: onSave
             };
 
+            $scope.features = [];
+
             $scope.activeStep = 0;
-            $scope.activeSource = 0;
+            $scope.direction = 0;
+            $scope.isEvaluating = false;
+            $scope.menuWidth = 20;
+
+            $webSockets.listen("describe", function(msg){ return msg.messageType == "describe"; }, onDescribe);
 
             // a dictionary of file names and their associated index numbers
             $scope.fileDict = {};
 
-            // the load data object
-            $scope.loadData = {
-                files: []
+            $scope.source = {
+                sourceType: 'FILES',
+                dataSources: []
             };
+
+            $scope.parse = {
+                parseType: 'SEPARATED_VALUES',
+                header: true,
+                delimiterType: 'COMMA',
+                delimiterChar: '',
+                missingValueMode: 'PERMISSIVE',
+                quoteChar: '"',
+                commentChar: '#'
+            };
+
+            $scope.transformations = [];
+
+            $scope.progressSteps = [
+                { name: 'source', icon: 'fa-database' },
+                { name: 'parse', icon: 'fa-code' },
+                { name: 'clean', icon: 'fa-paint-brush' }
+            ];
+
+            // internal methods
+
+            function configureActiveStep(){
+
+                switch($scope.activeStep){
+
+                    case 0:
+                        $scope.config.title = "Select a Data Source";
+                        $scope.config.showBack = false;
+                        $scope.config.showNext = true;
+                        $scope.config.showSave = false;
+                        break;
+                    case 1:
+                        $scope.config.title = "Parse the Data";
+                        $scope.config.showBack = true;
+                        $scope.config.showNext = true;
+                        $scope.config.showSave = false;
+                        break;
+                    case 2:
+                        $scope.config.title = "Clean the Data";
+                        $scope.config.showBack = true;
+                        $scope.config.showNext = false;
+                        $scope.config.showSave = true;
+                        break;
+                }
+            }
+
+            function onBack(){
+                $scope.direction = 0;
+                $scope.activeStep--;
+                configureActiveStep();
+            }
+
+            function onClose(transitionDuration){
+
+                $webSockets.unlisten("describe");
+                close(null, transitionDuration);
+            }
+
+            function onDescribe(describe){
+
+
+            }
+
+            function onNext(){
+                $scope.direction = 1;
+                $scope.activeStep++;
+                configureActiveStep();
+
+                if ($scope.activeStep == 1){
+                    $scope.onLoad();
+                }
+            }
+
+            function onSave(transitionDuration){
+                close(null, transitionDuration);
+            }
+
+            // public methods
 
             $scope.addFiles = function(files){
 
@@ -813,34 +894,12 @@ analyticsApp
                 }
             };
 
-            $scope.setActiveSource = function(index){
-                $scope.activeSource = index;
+            $scope.onBrowse = function(evt){
+                document.getElementById("fileBrowser").click();
+
+                evt.stopPropagation();
+                evt.preventDefault();
             };
-
-            function configureActiveStep(){
-
-                switch($scope.activeStep){
-
-                    case 0:
-                        $scope.config.title = "Select a Data Source";
-                        $scope.config.showBack = false;
-                        $scope.config.showNext = true;
-                        $scope.config.showSave = false;
-                        break;
-                    case 1:
-                        $scope.config.title = "Parse the Data";
-                        $scope.config.showBack = true;
-                        $scope.config.showNext = true;
-                        $scope.config.showSave = false;
-                        break;
-                    case 2:
-                        $scope.config.title = "Clean the Data";
-                        $scope.config.showBack = true;
-                        $scope.config.showNext = false;
-                        $scope.config.showSave = true;
-                        break;
-                }
-            }
 
             $scope.onFileDrop = function(files, evt){
 
@@ -849,7 +908,7 @@ analyticsApp
                     var file = files[i];
                     var fileIndex = $scope.fileDict[file.name];
                     if (fileIndex !== undefined) {
-                        var item = $scope.loadData.files[fileIndex];
+                        var item = $scope.source.dataSources[fileIndex];
                         if(item !== undefined){
                             item.progress = 100;
                             item.path = file.path;
@@ -866,8 +925,9 @@ analyticsApp
 
                     if($scope.fileDict[file.name] === undefined){
 
-                        $scope.fileDict[file.name] = $scope.loadData.files.length;
-                        $scope.loadData.files.push({
+                        $scope.fileDict[file.name] = $scope.source.dataSources.length;
+                        $scope.source.dataSources.push({
+                            dataSourceType: 'FILE',
                             name: file.name,
                             progress: 0,
                             path: ''
@@ -884,46 +944,212 @@ analyticsApp
 
                 var fileIndex = $scope.fileDict[file.name];
                 if(fileIndex !== undefined)
-                    $scope.loadData.files[fileIndex].progress = complete;
+                    $scope.source.dataSources[fileIndex].progress = complete;
             };
-
-            function onBack(){
-                $scope.activeStep--;
-                configureActiveStep();
-            }
-
-            $scope.onBrowse = function(evt){
-                document.getElementById("fileBrowser").click();
-
-                evt.stopPropagation();
-                evt.preventDefault();
-            };
-
-            function onClose(transitionDuration){
-                close(null, transitionDuration);
-            }
-
-            function onNext(){
-                $scope.activeStep++;
-                configureActiveStep();
-
-                if ($scope.activeStep == 1){
-                    diagramService.load($scope.loadData);
-                }
-            }
-
-            function onSave(transitionDuration){
-                close(null, transitionDuration);
-            }
 
             $scope.onFileRemove = function(name){
 
                 var fileIndex = $scope.fileDict[name];
                 if(fileIndex !== undefined) {
                     delete $scope.fileDict[name];
-                    $scope.loadData.files.splice(fileIndex, 1);
+                    $scope.source.dataSources.splice(fileIndex, 1);
                 }
             };
 
+            $scope.onLoad = function(){
+
+                var data = {
+                    diagramId: diagramId,
+                    diagramName: diagramName,
+                    source: $scope.source,
+                    parse: $scope.parse,
+                    transformations: $scope.transformations
+                };
+
+                diagramService.load(data).then(
+                    function(result){
+
+                    },
+                    function(){
+
+                    }
+                );
+            };
+
+            $scope.onResizeMenu = function(evt){
+
+                var containerWidth,
+                    originX;
+
+                $scope.$root.$broadcast("beginDrag", {
+                    x: evt.pageX,
+                    y: evt.pageY,
+                    config: {
+
+                        dragStarted: function (x, y) {
+
+                            // create reference to dialog container
+                            var container = angular.element(document.querySelector('#load-data-wrapper'));
+                            containerWidth = container.width();
+                            originX = container.offset().left;
+                        },
+
+                        dragging: function (x, y) {
+
+                            var width = (x - originX) * 100.0 / containerWidth;
+                            if (width > 5 && width < 95)
+                                $scope.menuWidth = width;
+                        }
+                    }
+                });
+            };
+
+            $scope.setSourceType = function(sourceType){
+                $scope.source.sourceType = sourceType;
+            };
+
+            $scope.setParseType = function(parseType){
+                $scope.parse.parseType = parseType;
+            };
+
             configureActiveStep();
+    }])
+
+    .controller('createDiagramController', ['$scope', 'diagramProperties', 'close', function($scope, diagramProperties, close){
+
+        // add properties to the scope so that they accessible to the popup
+        $scope.diagramProperties = diagramProperties;
+
+        // internal variables
+        var delay = 0;
+
+        $scope.onCancel = function(){
+            close(null, delay);
+        };
+
+        $scope.onSave = function(){
+            close($scope.diagramProperties, delay);
+        };
+    }])
+
+    /**
+     * Studio terminal controller:
+     */
+    .controller('terminalController', [ '$scope', '$timeout',
+        function($scope, $timeout){
+
+            // internal variables
+            var terminalWrapper = angular.element(document.querySelector('#terminal')), // reference to the terminal div
+                lastInputHeight = 35, // initialize the variable that tracks the last input height
+                editor; // reference to the code mirror editor
+
+            // flag to track whether the terminal input is open
+            $scope.isTerminalInputOpen = false;
+            // current terminal input height
+            $scope.inputHeight = 0;
+            // flag to track whether the terminal input is being resized (by dragging)
+            $scope.isResizing = false;
+
+            // code mirror options
+            $scope.options = { mode: 'python' };
+
+            //
+            // internal methods
+            //
+
+            /**
+             * opens and closes the terminal input control
+             */
+            function toggleTerminalInput(){
+                $scope.isTerminalInputOpen = !$scope.isTerminalInputOpen;
+                if ($scope.isTerminalInputOpen){
+                    $scope.inputHeight = lastInputHeight;
+                    editor.focus();
+                }
+                else{
+                    lastInputHeight = $scope.inputHeight;
+                    $scope.inputHeight = 0;
+                }
+            }
+
+            //
+            // public methods
+            //
+
+            /**
+             * Called when code mirror control is loaded
+             * @param _editor: reference to the code mirror editor
+             */
+            $scope.codemirrorLoaded = function(_editor){
+                editor = _editor;
+            };
+
+            /**
+             * Cancel - close the terminal input and clear the source code
+             */
+            $scope.onCancel = function(){
+                toggleTerminalInput();
+                $scope.source = "";
+            };
+
+            /**
+             * Resizes the terminal input and output controls
+             * @param evt
+             */
+            $scope.onResize = function(evt){
+
+                var containerHeight,
+                    originY;
+
+                $scope.$root.$broadcast("beginDrag", {
+                    x: evt.pageX,
+                    y: evt.pageY,
+                    config: {
+
+                        dragStarted: function (x, y) {
+
+                            $scope.isResizing = true;
+                            containerHeight = terminalWrapper.height();
+                            originY = terminalWrapper.offset().top;
+
+                            $scope.$$phase || $scope.$apply();
+                        },
+
+                        dragging: function (x, y) {
+
+                            var height = 100 - (y - originY) * 100.0 / containerHeight;
+                            if (height > 5 && height < 95)
+                                $scope.inputHeight = height;
+                        },
+
+                        dragEnded: function(){
+                            $scope.isResizing = false;
+
+                            $scope.$$phase || $scope.$apply();
+                        }
+                    }
+                });
+            };
+
+            /**
+             * Send the source code to the interpreter
+             */
+            $scope.onSend = function(){
+
+                $scope.interpret(
+                    $scope.source,
+                    function(){     // on success
+                        $scope.source = "";
+                    },
+                    function(){     // on failure
+
+                    });
+            };
+
+            /**
+             * Toggle the terminal input controls
+             */
+            $scope.onToggle = function(){
+                toggleTerminalInput();
+            };
     }]);

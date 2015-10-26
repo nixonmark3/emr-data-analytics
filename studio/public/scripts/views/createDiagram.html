@@ -1,0 +1,32 @@
+<div class="create-diagram-wrapper">
+
+    <form>
+        <div class="emr-modal-header">
+
+            <div class="emr-modal-icon">
+                <i class="fa fa-3x fa-sitemap"></i>
+            </div>
+            <div class="emr-modal-header-text">
+                <input id="create-diagram-name"
+                       type="text"
+                       ng-model="diagramProperties.name"
+                       placeholder="Name"
+                       required pattern="^(?! *?New Diagram *?$).*$"
+                       oninvalid="this.setCustomValidity('Please provide a new name for this Diagram.')">
+                <div class="emr-modal-header-sub-title">Create Diagram</div>
+            </div>
+
+        </div>
+
+        <div class="emr-modal-body">
+
+        </div>
+
+        <div class="emr-modal-footer">
+            <button type="button" class="btn btn-default" ng-click="onCancel()">Cancel</button>
+            <button type="submit" class="btn btn-default" ng-click="onSave()">Save</button>
+        </div>
+
+    </form>
+
+</div>

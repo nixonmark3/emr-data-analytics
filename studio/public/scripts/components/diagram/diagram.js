@@ -28,7 +28,6 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                 $scope.draggingWire = false;
                 $scope.mouseOverBlock = null;
                 $scope.mouseOverConnector = null;
-                $scope.renamingBlock = false;
 
                 $scope.boundary = { x: 0, y: 0, width: 0, height: 0 };
 
@@ -41,25 +40,6 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                     zoom(evt.wheelDeltaY / -100, { x: evt.offsetX, y: evt.offsetY });
                     $scope.$$phase || $scope.$apply();
                 });
-
-                // todo: only need to bind to window resize once in the entire application
-                // todo: move to app.js
-                angular.element($window).bind("resize", function () {
-
-                    $scope.$apply(function () {
-
-                        setConsolePosition();
-                    });
-                });
-
-                var init = function(){
-                    setConsolePosition();
-                };
-
-                var setConsolePosition = function(){
-
-                    $scope.consolePosition = { x: (element.width() - 54), y: (element.height() - 156) };
-                };
 
                 var beginDragEvent = function (x, y, config) {
 
@@ -151,7 +131,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                 //
                 $scope.internalMethods.translateCoordinates = function (x, y, evt) {
 
-                    var diagram = element[0];
+                    var diagram = element[0].querySelector('svg');
                     var matrix = diagram.getScreenCTM();
                     var point = diagram.createSVGPoint();
                     point.x = (x - evt.view.scrollX);
@@ -168,7 +148,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                 var inverseCoordinates = function (x, y) {
 
-                    var diagram = element[0];
+                    var diagram = element[0].querySelector('svg');
                     var transX =  $scope.canvasMatrix[0] * x + $scope.canvasMatrix[4];
                     var transY =  $scope.canvasMatrix[3] * y + $scope.canvasMatrix[5];
 
@@ -343,8 +323,6 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                 };
 
                 $scope.diagramMouseDown = function (evt) {
-
-                    clearRename();
 
                     // ignore right clicks
                     if (evt.which === 3 || evt.button === 2)
@@ -558,47 +536,6 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                     return mode;
                 };
-
-                $scope.renameBlockClick = function(block) {
-
-                    $scope.renameBlock = {
-
-                        x: block.x(),
-                        y: block.y(),
-                        w: 147,
-                        block: block
-                    };
-
-                    $scope.renamingBlock = true;
-
-                    // We need to set the focus on the rename input element but we must
-                    // wait a while as the element has not been created yet.
-                    setInterval(function() { $('#rename-input').focus() }, 10);
-                };
-
-                $scope.endRenameOnEnter = function() {
-
-                    if(event.keyCode === 13) {
-
-                        clearRename();
-                    }
-                };
-
-                $scope.diagramClick = function() {
-
-                    clearRename();
-                };
-
-                function clearRename() {
-
-                    if ($scope.renamingBlock === true) {
-
-                        $scope.renamingBlock = false;
-                        delete $scope.renameBlock;
-                    }
-                };
-
-                init();
             }
         }
     }]);

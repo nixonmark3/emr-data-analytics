@@ -1,0 +1,10 @@
+<ul class="progress-tracker">
+
+    <li ng-repeat="step in steps" ng-style="{ marginLeft: ($first ? 0 : stepMargin) + 'px' }">
+        <span class="bubble ng-class:{'active': ( $index <= activeStep ), 'right': direction==1 }" ng-style="{ width: 2*radius+'px', height: 2*radius+'px', lineHeight: 2*radius+'px' }">
+            <i class="fa ng-class:step.icon"></i>
+        </span>
+        <span class="bubble-path ng-class:{'active': ( $index < activeStep ), 'left': direction==0 }" ng-show="!$last" ng-style="{ width: stepMargin + 'px', top: radius-3 + 'px', left: 2*radius + 'px' }"></span>
+    </li>
+
+</ul>
