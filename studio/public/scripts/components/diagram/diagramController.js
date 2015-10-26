@@ -2,360 +2,446 @@
 
 diagramApp
     .controller('diagramNavigationController',
-    ['$scope', '$element', 'diagService', 'closeDialog', 'openDiagram', 'createNewDiagram', 'deleteExistingDiagram', 'close',
-        function($scope, $element, diagService, closeDialog, openDiagram, createNewDiagram, deleteExistingDiagram, close) {
+    function($scope, $element, $timeout, diagService, closeDialog, openDiagram, createNewDiagram, deleteExistingDiagram, currentDiagram, close) {
 
-            $scope.pages = [];
-            $scope.pageIndex = 0;
-            $scope.path = "/";
-            $scope.toggleAddNewCategory = false;
-            $scope.categories = [""];
+        $scope.pages = [];
+        $scope.pageIndex = 0;
+        $scope.path = "/";
+        $scope.toggleAddNewCategory = false;
+        $scope.categories = [""];
+        $scope.diagramProperties = resetDiagramProperties();
+        $scope.newDiagramProperties = resetNewDiagramProperties();
 
-            var currentPage = 0;
-            var maxVisiblePages = 5;
+        var currentPage = 0;
+        var previousLength = 0;
+        var shiftInc = 0;
+        var shift = '';
+        var maxNumberOfPages = 3;
+        var pageWidth = 250;
 
-            $scope.isPageVisible = function(index) {
+        $scope.onAddNewCategory = function() {
 
-                if ($scope.pages.length > maxVisiblePages) {
+            $scope.toggleAddNewCategory = !$scope.toggleAddNewCategory;
+        };
 
-                    if (index < ($scope.pages.length - maxVisiblePages)) {
+        $scope.deleteDiagram = function(item) {
 
-                        return false;
+            deleteExistingDiagram(item.name);
+
+            $timeout(function() { loadDiagrams(); }, 300);
+
+        };
+
+        $scope.isHighLighted = function(name) {
+
+            var highlighted = false;
+
+            if ($scope.pages.length > 1) {
+
+                for (var i = 1; i < $scope.pages.length; i++) {
+
+                    if ($scope.pages[i].name === name) {
+
+                        highlighted = true;
                     }
                 }
-
-                return true;
-            };
-
-            $scope.onAddNewCategory = function() {
-
-                $scope.toggleAddNewCategory = !$scope.toggleAddNewCategory;
-            };
-
-            $scope.deleteDiagram = function(item) {
-
-                deleteExistingDiagram(item.name);
-
-                loadDiagrams();
-            };
-
-            $scope.copyDiagram = function() {
-
-                console.log("copy diagram!")
-            };
-
-            $scope.exportDiagram = function() {
-
-                console.log("export diagram!")
-            };
-
-            $scope.isHighLighted = function(name) {
-
-                var highlighted = false;
-
-                if ($scope.pages.length > 1) {
-
-                    for (var i = 1; i < $scope.pages.length; i++) {
-
-                        if ($scope.pages[i].name === name) {
-
-                            highlighted = true;
-                        }
-                    }
-                }
-
-                return highlighted;
-            };
-
-            $scope.isDiagramPage = function(type) {
-
-                if (type != "Container") {
-
-                    return true;
-                }
-
-                return false;
             }
 
-            $scope.hideFileType = function(index, currentType, requestedType) {
+            return highlighted;
+        };
 
-                var hide = true;
+        $scope.isDiagramPage = function(type) {
+
+            if (type != "Container") {
+
+                return true;
+            }
+
+            return false;
+        }
+
+        $scope.hideFileType = function(index, currentType, requestedType) {
+
+            var hide = true;
+
+            if (index > 0) {
+
+                if (currentType === requestedType) {
+
+                    hide = false;
+                }
+            }
+
+            return hide;
+        };
+
+        $scope.isFirstPage = function(index) {
+
+            if (index === 0) {
+
+                return true;
+            }
+
+            return false;
+        };
+
+        $scope.hideCaret = function(index, currentType) {
+
+            if (currentType != "Create") {
 
                 if (index > 0) {
 
-                    if (currentType === requestedType) {
-
-                        hide = false;
-                    }
+                    return false;
                 }
+            }
 
-                return hide;
-            };
+            return true;
+        };
 
-            $scope.isFirstPage = function(index) {
+        $scope.setCurrentPage = function(index) {
 
-                if (index === 0) {
+            currentPage = index;
+        }
 
-                    return true;
-                }
+        $scope.isCurrentPage = function(index) {
 
-                return false;
-            };
-
-            $scope.hideCaret = function(index, currentType) {
-
-                if (currentType != "Create") {
-
-                    if (index > 0) {
-
-                        return false;
-                    }
-                }
+            if ($scope.pageIndex.indexOf(index) > -1) {
 
                 return true;
-            };
-
-            $scope.setCurrentPage = function(index) {
-
-                currentPage = index;
             }
 
-            $scope.isCurrentPage = function(index) {
+            return false;
+        };
 
-                if ($scope.pageIndex.indexOf(index) > -1) {
+        $scope.close = function() {
 
-                    return true;
-                }
+            close();
+        };
 
-                return false;
-            };
+        function removePagesIfRequired() {
 
-            $scope.close = function() {
+            if ($scope.pages.length > 1) {
 
-                close();
-            };
+                if (currentPage < $scope.pageIndex) {
 
-            $scope.switchPage = function(item) {
+                    for (var i = $scope.pageIndex; i > currentPage; i--) {
 
-                if ($scope.pages.length > 1) {
-
-                    if (currentPage < $scope.pageIndex) {
-
-                        for (var i = $scope.pageIndex; i > currentPage; i--) {
-
-                            $scope.pages.splice(i);
-                            $scope.pageIndex = $scope.pageIndex - 1;
-                        }
-                    }
-                }
-
-                $scope.pages.push(item);
-                $scope.pageIndex = $scope.pageIndex + 1;
-            };
-
-            $scope.loadDiagram = function(item) {
-
-                if (item.type === "Diagram") {
-
-                    openDiagram(item.name);
-
-                    closeDialog();
-                }
-            };
-
-            $scope.createNewDiagram = function() {
-
-                var lastPage = $scope.pages[$scope.pages.length-1];
-
-                if (lastPage.type != "Create") {
-
-                    if (lastPage.type === "Diagram") {
-
-                        $scope.pages.pop();
+                        $scope.pages.splice(i);
                         $scope.pageIndex = $scope.pageIndex - 1;
                     }
-
-                    $scope.currentPath = getCurrentPath();
-
-                    var item = {
-                        "type": "Create",
-                        "diagramName": "Diagram",
-                        "description": "",
-                        "targetEnvironment": "PYTHON",
-                        "owner": "",
-                        "category": $scope.currentPath
-                    };
-
-                    $scope.pages.push(item);
-                    $scope.pageIndex = $scope.pageIndex + 1;
                 }
-            };
+            }
+        };
 
-            $scope.onCancel = function() {
+        $scope.switchPage = function(item) {
 
-                $scope.pages.pop();
-                $scope.pageIndex = $scope.pageIndex - 1;
-                $scope.toggleAddNewCategory = false;
+            removePagesIfRequired();
 
-            };
+            $scope.pages.push(item);
+            $scope.pageIndex = $scope.pageIndex + 1;
+        };
 
-            $scope.onCreate = function(item) {
+        $scope.loadDiagram = function(item) {
 
-                createNewDiagram(item);
+            if (item.type === "Diagram") {
+
+                openDiagram(item.name);
 
                 closeDialog();
-            };
+            }
+        };
 
-            $scope.onNavPathItemClick = function(index) {
+        $scope.onOpenPropertiesCancel = function() {
 
-                for (var i = $scope.pageIndex; i > index; i--) {
+            $scope.pages.pop();
+            $scope.pageIndex = $scope.pageIndex - 1;
+            $scope.toggleAddNewCategory = false;
+        };
 
-                    $scope.pages.splice(i);
-                    $scope.pageIndex = $scope.pageIndex - 1;
-                }
-            };
+        $scope.onNavPathItemClick = function(index) {
 
-            this.close = $scope.close;
+            for (var i = $scope.pageIndex; i > index; i--) {
 
-            function loadDiagrams() {
-
-                diagService.listDiagrams().then(
-                    function (data) {
-
-                        $scope.pages = prepareData(data);
-                    },
-                    function (code) {
-
-                        // todo: show exception
-                        console.log(code);
-                    }
-                );
-            };
-
-            function getCurrentPath() {
-
-                var pathItems = [];
-
-                $scope.pages.forEach(function(page){
-
-                    if (page.name) {
-
-                        pathItems.push(page.name);
-                    }
-                });
-
-                return pathItems.join("/");
+                $scope.pages.splice(i);
+                $scope.pageIndex = $scope.pageIndex - 1;
             }
 
-            function prepareData(data) {
+        };
 
-                var rootItems = [];
+        this.close = $scope.close;
 
-                for (var i = 0; i < data.length; i++) {
+        function loadDiagrams() {
 
-                    var item = data[i];
-                    item.type = "Diagram";
+            diagService.listDiagrams().then(
+                function (data) {
 
-                    if (item.category === "") {
+                    $scope.pages = prepareData(data);
+                },
+                function (code) {
 
-                        rootItems.push(item);
+                    // todo: show exception
+                    console.log(code);
+                }
+            );
+        };
+
+        function getCurrentPath() {
+
+            var pathItems = [];
+
+            $scope.pages.forEach(function(page){
+
+                if (page.name) {
+
+                    pathItems.push(page.name);
+                }
+            });
+
+            return pathItems.join("/");
+        }
+
+        function prepareData(data) {
+
+            var rootItems = [];
+
+            for (var i = 0; i < data.length; i++) {
+
+                var item = data[i];
+                item.type = "Diagram";
+
+                if (item.category === "") {
+
+                    rootItems.push(item);
+                }
+                else {
+
+                    if ($scope.categories.indexOf(item.category) == -1) {
+
+                        $scope.categories.push(item.category);
                     }
-                    else {
 
-                        if ($scope.categories.indexOf(item.category) == -1) {
+                    var categories = item.category.split("/");
 
-                            $scope.categories.push(item.category);
+                    var current = null;
+
+                    rootItems.forEach(function(x) {
+
+                        if (x.type === "Container") {
+
+                            if (x.name === categories[0]) {
+
+                                current = x;
+                            }
                         }
+                    });
 
-                        var categories = item.category.split("/");
+                    if (current === null) {
 
-                        var current = null;
+                        current = { "type" : "Container", "items" : [], "name" : categories[0] }
 
-                        rootItems.forEach(function(x) {
+                        rootItems.push(current);
+                    }
+
+                    for (var c = 1; c < categories.length; c++) {
+
+                        var next_current = null;
+
+                        current.items.forEach(function(x) {
 
                             if (x.type === "Container") {
 
-                                if (x.name === categories[0]) {
+                                if (x.name === categories[c]) {
 
-                                    current = x;
+                                    next_current = x;
                                 }
                             }
                         });
 
-                        if (current === null) {
+                        if (next_current === null) {
 
-                            current = { "type" : "Container", "items" : [], "name" : categories[0] }
-
-                            rootItems.push(current);
+                            next_current = { "type" : "Container", "items" : [], "name" : categories[c] }
+                            current.items.push(next_current);
+                            current.items.sort(sortByName);
+                            current.items.sort(sortByType);
                         }
 
-                        for (var c = 1; c < categories.length; c++) {
-
-                            var next_current = null;
-
-                            current.items.forEach(function(x) {
-
-                                if (x.type === "Container") {
-
-                                    if (x.name === categories[c]) {
-
-                                        next_current = x;
-                                    }
-                                }
-                            });
-
-                            if (next_current === null) {
-
-                                next_current = { "type" : "Container", "items" : [], "name" : categories[c] }
-                                current.items.push(next_current);
-                                current.items.sort(sortByName);
-                                current.items.sort(sortByType);
-                            }
-
-                            current = next_current;
-                        }
-
-                        current.items.push(item);
-                        current.items.sort(sortByName);
-                        current.items.sort(sortByType);
+                        current = next_current;
                     }
+
+                    current.items.push(item);
+                    current.items.sort(sortByName);
+                    current.items.sort(sortByType);
                 }
-
-                var diagrams = [];
-
-                rootItems.sort(sortByName);
-                rootItems.sort(sortByType);
-
-                var root = {"type" : "Container", "items" : rootItems};
-
-                diagrams.push(root);
-
-                return diagrams;
             }
 
-            function sortByName(a, b) {
+            var diagrams = [];
 
-                var x = a.name.toLowerCase()
-                var y = b.name.toLowerCase();
-                return x < y ? -1 : x > y ? 1 : 0;
-            }
+            rootItems.sort(sortByName);
+            rootItems.sort(sortByType);
 
-            function sortByType(a, b) {
+            var root = {"type" : "Container", "items" : rootItems};
 
-                var x = a.type.toLowerCase()
-                var y = b.type.toLowerCase();
-                return x < y ? -1 : x > y ? 1 : 0;
-            }
+            diagrams.push(root);
 
-            function sortBy(a, b) {
+            return diagrams;
+        }
 
-                var x = a.toLowerCase()
-                var y = b.toLowerCase();
-                return x < y ? -1 : x > y ? 1 : 0;
-            }
+        function sortByName(a, b) {
+
+            var x = a.name.toLowerCase()
+            var y = b.name.toLowerCase();
+            return x < y ? -1 : x > y ? 1 : 0;
+        }
+
+        function sortByType(a, b) {
+
+            var x = a.type.toLowerCase()
+            var y = b.type.toLowerCase();
+            return x < y ? -1 : x > y ? 1 : 0;
+        }
+
+        function sortBy(a, b) {
+
+            var x = a.toLowerCase()
+            var y = b.toLowerCase();
+            return x < y ? -1 : x > y ? 1 : 0;
+        }
+
+        $scope.activeOption = "";
+
+        $scope.onPropertiesClick = function() {
+
+            $scope.activeOption = "properties";
+        };
+
+        $scope.onNewClick = function() {
+
+            $scope.activeOption = "new";
+        };
+
+        $scope.onOpenClick = function() {
+
+            $scope.activeOption = "open";
+        };
+
+        $scope.onDiagramPropertyChanged = function() {
+
+            $scope.diagramProperties.isDirty = true;
+        };
+
+        $scope.onDiagramPropertiesReset = function() {
+
+            resetDiagramProperties();
+        };
+
+        $scope.onDiagramPropertiesSave = function() {
+
+            currentDiagram.data.name = $scope.diagramProperties.name;
+            currentDiagram.data.description = $scope.diagramProperties.description;
+            currentDiagram.data.owner = $scope.diagramProperties.owner;
+            currentDiagram.data.targetEnvironment = $scope.diagramProperties.targetEnvironment;
+            currentDiagram.data.category = $scope.diagramProperties.category;
+
+            resetDiagramProperties();
+
+            closeDialog();
+        }
+
+        function resetDiagramProperties() {
+
+            $scope.diagramProperties = {
+
+                name: currentDiagram.data.name,
+                description: currentDiagram.data.description,
+                owner: currentDiagram.data.owner,
+                targetEnvironment: currentDiagram.data.targetEnvironment,
+                category: currentDiagram.data.category,
+                isDirty: false
+            };
+        };
+
+        $scope.onDiagramNewReset = function() {
+
+            resetNewDiagramProperties();
+        };
+
+        $scope.onDiagramNewCreate = function() {
+
+            createNewDiagram($scope.newDiagramProperties);
+
+            closeDialog();
+        };
+
+        $scope.onNewDiagramPropertyChanged = function() {
+
+            $scope.newDiagramProperties.isDirty = true;
+        };
+
+        function resetNewDiagramProperties() {
+
+            $scope.newDiagramProperties = {
+
+                diagramName: "",
+                description: "",
+                owner: "",
+                targetEnvironment: "PYTHON",
+                category: "",
+                isDirty: false
+            };
+        };
+
+        function initialize() {
 
             loadDiagrams();
-        }
+
+            resetDiagramProperties();
+
+            resetNewDiagramProperties();
+
+            $scope.onPropertiesClick();
+        };
+
+        $scope.getStyle = function(index) {
+
+            var style = {};
+
+            style['z-index'] = 1500 - index;
+
+            if (index === ($scope.pages.length-1)) {
+
+                style['border-right'] = '2px solid #1f77b4';
+            }
+
+            return style;
+        };
+
+        $scope.getShift = function() {
+
+            if ($scope.pages.length <= maxNumberOfPages) {
+
+                shiftInc = 0;
+                shift = 'translateX(0px)';
+            }
+            else if ($scope.pages.length > previousLength) {
+
+                shiftInc++;
+                shift = 'translateX(-' + (pageWidth * shiftInc) + 'px)';
+            }
+            else if ($scope.pages.length < previousLength) {
+
+                shiftInc = shiftInc - (previousLength - $scope.pages.length);
+                shift = 'translateX(-' + (pageWidth * shiftInc) + 'px)';
+            }
+
+            previousLength = $scope.pages.length;
+
+            return {'-webkit-transform': shift};
+        };
+
+        initialize();
+
+    },
+    ['$scope', '$element', 'diagService', 'closeDialog', 'openDiagram', 'createNewDiagram', 'deleteExistingDiagram', 'close'
     ])
     .controller('diagramConfigController',
     ['$scope', '$element', 'diagram', 'close',

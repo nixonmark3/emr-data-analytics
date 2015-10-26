@@ -972,7 +972,8 @@ var analyticsApp = angular.module('analyticsApp',
                     closeDialog: endDiagramNavigation,
                     openDiagram: $scope.open,
                     createNewDiagram: $scope.createDiagram,
-                    deleteExistingDiagram: $scope.deleteDiagram
+                    deleteExistingDiagram: $scope.deleteDiagram,
+                    currentDiagram: diagram()
                 }
             }).then(function(popup) {
 
