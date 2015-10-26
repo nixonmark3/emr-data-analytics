@@ -2,22 +2,81 @@
 
 analyticsApp
 
-    .controller('blockDataController', ['$scope', '$element', '$window', '$timeout', 'diagramService', 'block', 'config', 'position', 'close',
-        function($scope, $element, $window, $timeout, diagramService, block, config, position, close){
+    .controller('blockDataController', ['$scope', '$element', '$window', '$timeout', '$q', 'diagramService', 'block', 'loadSources', 'diagram', 'config', 'position', 'close',
+        function($scope, $element, $window, $timeout, $q, diagramService, block, loadSources, diagram, config, position, close){
 
             $scope.position = position;
-            $scope.block = block.data;
+            $scope.block = block.block;
             $scope.config = config;
+            $scope.config.icon = "fa-cube";
+            $scope.config.cancelLabel = "Close";
+            $scope.pages = [];
+            $scope.currentPage = null;
+            $scope.activePage = 0;
+            $scope.blockProperties = block;
+            $scope.loadData = loadSources;
+            $scope.loading = true;
+
+            $scope.savePropertiesChanges = function() {
+
+                diagram.updateBlock($scope.blockProperties);
+
+                $scope.propertiesConfig.isDirty = false;
+            };
+
+            $scope.cancelPropertiesChanges = function() {
+
+                $scope.blockProperties = $scope.blockProperties.reset();
+
+                $scope.propertiesConfig.isDirty = false;
+            };
+
+            $scope.propertiesChanged = function() {
+
+                $scope.propertiesConfig.isDirty = true;
+            };
+
+            $scope.propertiesConfig = {
+
+                isDirty: false
+            };
+
+            $scope.setActivePage = function(selectedIndex, selectedPage) {
+
+                $scope.loading = true;
+                $scope.activePage = selectedIndex;
+                $scope.currentPage = selectedPage;
+
+                getData();
+            };
 
             $scope.methods = {
+
                 close: onClose
             };
 
-            function onClose(transitionDuration){
+            function onClose(transitionDuration) {
+
                 close(null, transitionDuration);
             }
 
-            $scope.getBlockData = function(type, key, success){
+            $scope.setGridWidth = function(columns) {
+
+                if (columns != null) {
+
+                    var additionalLength = 0;
+
+                    if (columns.length < 3) {
+                        additionalLength++;
+                    }
+
+                    return (columns.length + additionalLength) * 220;
+                }
+
+                return 1000;
+            };
+
+            $scope.getBlockData = function(type, key, success) {
 
                 switch(type){
                     case "Pages":
@@ -62,7 +121,64 @@ analyticsApp
                         break;
                 }
             };
+
+            function init() {
+
+                $timeout(function() {
+
+                    $scope.getBlockData('Pages',
+                        $scope.block.id,
+                        function(results) {
+
+                            if ($scope.blockProperties.parameters.length > 0) {
+
+                                $scope.pages.push({name:"Properties",type:"props", data: null});
+                            }
+
+                            for(var i = 0; i < results.length; i++) {
+
+                                $scope.pages.push(results[i]);
+                            }
+
+                            if ($scope.pages.length > 0) {
+
+                                $scope.currentPage = $scope.pages[0];
+                            }
+
+                            $scope.config.title = $scope.block.name;
+                            $scope.config.subTitle = "Configure and review block details";
+
+                            getData();
+                        });
+                }, 500);
+            };
+
+            function getData() {
+
+                if ($scope.currentPage != null) {
+
+                    if ($scope.currentPage.data == null) {
+
+                        $scope.getBlockData(
+                            $scope.currentPage.name,
+                            $scope.block.id,
+                            function (results) {
+
+                                $scope.currentPage.data = results;
+                                $scope.loading = false;
+                            });
+                    }
+                    else {
+
+                        $scope.loading = false;
+                    }
+                }
+
+            };
+
+            init();
         }
+
     ])
 
     .controller('blockGroupController', ['$scope', '$element', '$timeout', 'diagramService', 'position', 'diagram', 'close',
@@ -259,7 +375,6 @@ analyticsApp
                 function() {
                     if($scope.loading || $scope.fetching) {
 
-                        console.log("fetching...");
                         return;
                     }
 
@@ -275,7 +390,6 @@ analyticsApp
                 function() {
                     if($scope.loading || $scope.fetching) {
 
-                        console.log("fetching...");
                         return;
                     }
 

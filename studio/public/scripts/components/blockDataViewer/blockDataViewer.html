@@ -1,121 +1,36 @@
-<div class="block-data-viewer-container">
+<div class="block-data-view-container">
 
-    <div class="block-data-viewer-header">
-        <span class="header-text">{{block.name}}</span>
-    </div>
+    <div ng-repeat="result in results" ng-switch on="result.type">
 
-    <div class="block-data-viewer-body">
+        <div class="row">
 
-        <div class="block-data-page ng-class:{'page-left': pagingForward, 'page-right': pagingForward==false}" ng-repeat="page in pages" ng-hide="!isCurrentPage($index)" ng-switch on="page.name">
+            <div class="col-md-2 block-data-view-result-name" >{{result.name}}</div>
 
-            <div class="stats-grid-container" ng-switch-when="Statistics">
+            <div class="col-md-8 block-data-view-result-value" ng-switch-when="singleValue">{{result.data}}</div>
 
-                <div class="grid-fixed-col">
-                    <div class="grid-fixed-cell grid-fixed-cell-header">&nbsp;</div>
-                    <div class="grid-fixed-cell">Count</div>
-                    <div class="grid-fixed-cell">Mean</div>
-                    <div class="grid-fixed-cell">StdDev</div>
-                    <div class="grid-fixed-cell">Min</div>
-                    <div class="grid-fixed-cell">25%</div>
-                    <div class="grid-fixed-cell">50%</div>
-                    <div class="grid-fixed-cell">75%</div>
-                    <div class="grid-fixed-cell">Max</div>
-                    <div class="grid-fixed-cell">NaN</div>
-                    <div class="grid-fixed-cell">Type</div>
-                </div>
-
-                <div class="grid-horizontal-scroll">
-
-                    <div class="grid-col-container" ng-style="{width: setGridWidth(page.data)}">
-
-                        <div class="grid-col" ng-repeat="point in page.data" ng-if="$index > 0">
-                            <div class="grid-cell grid-cell-header">{{::point.column}}</div>
-                            <div class="grid-cell">{{::point.statistics.count}}</div>
-                            <div class="grid-cell">{{::point.statistics.mean}}</div>
-                            <div class="grid-cell">{{::point.statistics.std}}</div>
-                            <div class="grid-cell">{{::point.statistics.min}}</div>
-                            <div class="grid-cell">{{::point.statistics.twentyFive}}</div>
-                            <div class="grid-cell">{{::point.statistics.fifty}}</div>
-                            <div class="grid-cell">{{::point.statistics.seventyFive}}</div>
-                            <div class="grid-cell">{{::point.statistics.max}}</div>
-                            <div class="grid-cell">{{::point.statistics.missing}}</div>
-                            <div class="grid-cell">{{::point.statistics.dtype}}</div>
+            <div class="col-md-8 block-data-view-multi-value-result-container" ng-switch-when="listOfValues">
+                <div class="block-data-view-multi-value-result-data">
+                    <div ng-repeat="value in result.data" >
+                        <div class="row">
+                            <div class="col-md-1 block-data-view-multi-result-name">{{$index+1}}</div>
+                            <div class="col-md-3 block-data-view-multi-result-value">{{value}}</div>
                         </div>
-
                     </div>
-
                 </div>
             </div>
 
-            <img width="100%" ng-switch-when="Plot" ng-src="data:image/png;base64,{{page.data}}">
-
-            <div class="results-container" ng-switch-when="Results">
-
-                <div ng-repeat="result in page.data" ng-switch on="result.type">
-
-                    <div class="result-container-multi-value" ng-switch-when="dictOfValues">
-                        <div class="result-name">
-                            <span class="result-name-text">{{result.name}}</span>
-                        </div>
-                        <div class="result-data-multi-value">
-                            <div class="result-dict-item" ng-repeat="(key, value) in result.data" >
-                                <div class="result-dict-item-key">
-                                    <span class="result-dict-item-text">{{key}}</span>
-                                </div>
-                                <div class="result-dict-item-value">
-                                    <span class="result-dict-item-text">{{value}}</span>
-                                </div>
-                            </div>
+            <div class="col-md-8 block-data-view-multi-value-result-container" ng-switch-when="dictOfValues">
+                <div class="block-data-view-multi-value-result-data">
+                    <div ng-repeat="(key, value) in result.data" >
+                        <div class="row">
+                            <div class="col-md-4 block-data-view-multi-result-name">{{key}}</div>
+                            <div class="col-md-3 block-data-view-multi-result-value">{{value}}</div>
                         </div>
                     </div>
-
-                    <div class="result-container-multi-value" ng-switch-when="listOfValues">
-                        <div class="result-name">
-                            <span class="result-name-text">{{result.name}}</span>
-                        </div>
-                        <div class="result-data-multi-value">
-                            <div class="result-list-item" ng-repeat="value in result.data" >
-                                <div class="result-list-item-index">
-                                    <span class="result-item-item-text">{{$index+1}}</span>
-                                </div>
-                                <div class="result-list-item-value">
-                                    <span class="result-list-item-text">{{value}}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="result-container-single-value" ng-switch-when="singleValue">
-                        <div class="result-name">
-                            <span class="result-name-text">{{result.name}}</span>
-                        </div>
-                        <div class="result-data-single-value">
-                            <div class="result-single-value-item">
-                                {{result.data}}
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
-
             </div>
 
         </div>
-
-    </div>
-
-    <div class="block-data-viewer-footer">
-
-        <div class="footer-control footer-control-left" ng-click="pageLeft();">
-            <i class="fa fa-arrow-left"></i>
-        </div>
-
-        <div class="footer-label">&#160;{{pageName}}&#160;</div>
-
-        <div class="footer-control footer-control-right" ng-click="pageRight();">
-            <i class="fa fa-arrow-right"></i>
-        </div>
-
 
     </div>
 

@@ -18,7 +18,7 @@ public class BlockResults extends ControllerBase {
 
     public static Result getAvailableResults(String blockName) {
 
-        List<String> availableResults;
+        List<BasicDBObject> availableResults;
 
         try {
 

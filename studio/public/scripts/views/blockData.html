@@ -1,1 +1,54 @@
-<block-data-viewer block="block" get-block-data="getBlockData"></block-data-viewer>
+
+<div id="block-data-wrapper">
+
+    <div id="block-data-tabs">
+        <ul class="vertical-tabs">
+            <li class="vertical-tab  ng-class:{active: (activePage==$index)}" ng-click="setActivePage($index, tab)" ng-repeat="tab in pages track by $index">
+                <div class="tab-icon" ng-switch="tab.type">
+                    <i ng-switch-when="props" class="fa fa-edit fa-2x"></i>
+                    <i ng-switch-when="stats" class="fa fa-table fa-2x"></i>
+                    <i ng-switch-when="plot" class="fa fa-line-chart fa-2x"></i>
+                    <i ng-switch-when="results" class="fa fa-th-list fa-2x"></i>
+                </div>
+                <div class="tab-text">{{tab.name}}</div>
+            </li>
+        </ul>
+    </div>
+
+    <div id="block-data-container" ng-switch="currentPage.type">
+
+        <div ng-switch-when="props">
+            <div class="block-data-content">
+                <block-config
+                        block="blockProperties"
+                        load-sources="loadData"
+                        on-change="propertiesChanged"
+                        on-save="savePropertiesChanges"
+                        on-cancel="cancelPropertiesChanges"
+                        on-props-changed="propertiesConfig.isDirty">
+                </block-config>
+            </div>
+        </div>
+
+
+        <div ng-switch-when="stats">
+            <div class="block-data-content">
+                <features-grid ng-if="!loading" features="currentPage.data" column-width="200" row-header-width="200" on-page="" show-data="false"></features-grid>
+            </div>
+        </div>
+
+        <div ng-switch-when="plot">
+            <div class="block-data-content">
+                <img height="100%" ng-src="data:image/png;base64,{{currentPage.data}}">
+            </div>
+        </div>
+
+        <div ng-switch-when="results">
+            <div class="block-data-content">
+                <block-data-viewer ng-if="!loading" results="currentPage.data"></block-data-viewer>
+            </div>
+        </div>
+
+    </div>
+
+</div>

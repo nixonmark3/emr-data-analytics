@@ -1,49 +1,74 @@
 
 <div class="block-config-container">
 
-    <div class="block-parameter"
-         ng-repeat="parameter in block.parameters">
-        <label>{{parameter.name()}}</label>
+    <form class="form-horizontal" role="form">
 
-        <div class="input-group" ng-switch on="parameter.type()">
+        <div ng-repeat="parameter in block.parameters">
 
-            <span class="input-group-addon">
-                <i ng-attr-class="fa {{parameter.loading && 'fa-spinner fa-spin' || parameter.type()=='list' && 'fa-list-ul' || parameter.type()=='multiSelectList' && 'fa-list-alt' || parameter.type()=='query' && 'fa-pencil-square-o' || parameter.type()=='int' && 'fa-list-ol' || parameter.type()=='editableQuery' && 'fa-edit' || 'fa-file-text-o'}}"></i>
-            </span>
+            <div class="form-group">
 
-            <select ng-switch-when="list"
-                    class="form-control"
-                    ng-model="parameter.value"
-                    ng-disabled="!parameter.loaded"
-                    ng-change="setValue(parameter);">
+                <label class="col-sm-2 control-label">{{parameter.name()}}</label>
 
-                <option ng-repeat="option in parameter.fieldOptions" ng-selected="{{option==parameter.value}}" value="{{option}}">
-                    {{option}}
-                </option>
+                <div class="col-sm-9">
 
-            </select>
+                    <div class="input-group" ng-switch on="parameter.type()">
 
-            <select ng-switch-when="multiSelectList"
-                    class="form-control"
-                    multiple="multiple"
-                    ng-model="parameter.value"
-                    ng-disabled="!parameter.loaded"
-                    ng-change="setValue(parameter);">
+                        <span class="input-group-addon">
+                            <i ng-attr-class="fa {{parameter.loading && 'fa-spinner fa-spin' || parameter.type()=='list' && 'fa-list-ul' || parameter.type()=='multiSelectList' && 'fa-list-alt' || parameter.type()=='query' && 'fa-pencil-square-o' || parameter.type()=='int' && 'fa-list-ol' || parameter.type()=='editableQuery' && 'fa-edit' || 'fa-file-text-o'}}"></i>
+                        </span>
 
-                <option ng-repeat="option in parameter.fieldOptions" ng-selected="option.selected">{{option.itemName}}</option>
+                        <select ng-switch-when="list"
+                                class="form-control"
+                                ng-model="parameter.value"
+                                ng-disabled="!parameter.loaded"
+                                ng-change="setValue(parameter);">
 
-            </select>
+                            <option ng-repeat="option in parameter.fieldOptions" ng-selected="{{option==parameter.value}}" value="{{option}}">
+                                {{option}}
+                            </option>
 
-            <input ng-switch-when="int" class="form-control" type="number" ng-model="parameter.value" ng-change="setValue(parameter);" />
+                        </select>
 
-            <textarea ng-switch-when="query" class="form-control" type="text" ng-model="parameter.value" ng-change="setValue(parameter);" />
+                        <select ng-switch-when="multiSelectList"
+                                class="form-control"
+                                multiple="multiple"
+                                ng-model="parameter.value"
+                                ng-disabled="!parameter.loaded"
+                                ng-change="setValue(parameter);"
+                                size="10">
 
-            <button type="button" class="btn btn-success editable-query-btn" ng-switch-when="editableQuery" class="form-control" ng-click="editQuery($event, parameter)">Edit</button>
+                            <option ng-repeat="option in parameter.fieldOptions" ng-selected="option.selected">{{option.itemName}}</option>
 
-            <input ng-switch-default class="form-control" type="text" ng-model="parameter.value" ng-change="setValue(parameter);" />
+                        </select>
+
+                        <input ng-switch-when="int" class="form-control" type="number" ng-model="parameter.value" ng-change="setValue(parameter);" />
+
+                        <textarea ng-switch-when="query" class="form-control" type="text" ng-model="parameter.value" ng-change="setValue(parameter);" />
+
+                        <button type="button" class="btn btn-success editable-query-btn" ng-switch-when="editableQuery" class="form-control" ng-click="editQuery($event, parameter)">Edit</button>
+
+                        <input ng-switch-default class="form-control" type="text" ng-model="parameter.value" ng-change="setValue(parameter);" />
+
+                    </div>
+
+                </div>
+
+            </div>
 
         </div>
 
-    </div>
+        <div class="col-sm-offset-2 col-sm-9 block-config-changed">
+
+            <button ng-show="onPropsChanged" type="button" class="btn btn-success btn-sm pull-right" ng-click="onSave()">
+                <i class="fa fa-check"></i>
+            </button>
+
+            <button ng-show="onPropsChanged" type="button" class="btn btn-default btn-sm pull-right block-config-changed-btn" ng-click="onCancel()">
+                <i class="fa fa-times"></i>
+            </button>
+
+        </div>
+
+    </form>
 
 </div>

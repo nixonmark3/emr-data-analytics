@@ -157,7 +157,10 @@ angular.module('browserApp', ['ngAnimate', 'emr.ui.interact'])
             scope: {
                 block: "=",
                 loadSources: "=",
-                onChange: "="
+                onChange: "=",
+                onSave: "=",
+                onCancel: "=",
+                onPropsChanged: "="
             },
             link: function ($scope, element, attrs) {
 

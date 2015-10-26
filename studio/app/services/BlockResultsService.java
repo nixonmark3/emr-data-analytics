@@ -23,15 +23,41 @@ import plugins.MongoDBPlugin;
 
 public class BlockResultsService {
 
-    public List<String> getAvailableResults(String blockName) {
+    public List<BasicDBObject> getAvailableResults(String blockName) {
 
-        List<String> availableResults = new ArrayList<>();
+        List<BasicDBObject> availableResults = new ArrayList<>();
 
         BasicDBObject results = getResults(blockName);
 
         if (results != null) {
 
-            results.keySet().forEach(resultName -> availableResults.add(resultName));
+            results.keySet().forEach(resultName -> {
+
+                BasicDBObject availableResult = new BasicDBObject();
+                availableResult.append("name", resultName);
+
+                String resultType = "";
+                if (resultName.equals("Statistics")) {
+
+                    resultType = "stats";
+                }
+                else if (resultName.equals("Plot")) {
+
+                    resultType = "plot";
+                }
+                else if (resultName.equals("Results")) {
+
+                    resultType = "results";
+                }
+
+                if (!resultType.isEmpty()) {
+
+                    availableResult.append("type", resultType);
+
+                    availableResults.add(availableResult);
+                }
+
+            });
         }
 
         return availableResults;
