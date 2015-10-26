@@ -1,14 +1,16 @@
 
-<div id="studio-wrapper" ng-class="{'show-sidebar': showSidebar, 'blur-background': blurBackground}">
+<div id="studio-wrapper" ng-class="{'blur-background': blurBackground}">
 
     <div class="navbar">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-xs-4">
-                    <button type="button" class="btn btn-default navbar-btn pull-left" ng-click="toggleDiagramNavigation($event)">
-                        <i class="fa fa-folder-open"></i>
-                    </button>
-                    <span class="navbar-title">{{diagramViewModel.data.name}}</span>
+                    <span class="navbar-item">
+                        <a ng-click="toggleDiagramNavigation($event)">
+                            <i class="fa fa-folder-open"></i>
+                        </a>
+                    </span>
+                    <span class="navbar-item">{{diagramViewModel.data.name}}</span>
                 </div>
                 <div class="col-xs-4 navbar-tabs">
                     <div class="navbar-tab ng-class:{'selected': !onlineCanvas}" ng-switch on="offlineState" ng-click="toggleCanvas(false);">
@@ -29,15 +31,20 @@
                     </div>
                 </div>
                 <div class="col-xs-4">
-
-                    <!-- todo: search -->
-
+                    <span class="navbar-item pull-right">
+                        <a class="fa-stack" style="font-size: 0.7em;" ng-click="onToggleTerminal($event)">
+                            <i class="fa fa-square fa-stack-2x"></i>
+                            <i class="fa fa-terminal fa-stack-1x fa-inverse"></i>
+                        </a>
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="studio-container" file-drop>
+    <div id="toast-container"></div>
+
+    <div id="studio-container" class="studio-item ng-class:{ 'studio-item-transition': !isResizingTerminal }" ng-style="{ 'width': canvasWidth + '%' }" file-drop>
 
         <div class="drop-target">Drop Data</div>
 
@@ -97,6 +104,52 @@
             </div>
         </div>
 
+    </div>
+
+    <div id="terminal-wrapper" class="studio-item ng-class:{ 'studio-item-transition': !isResizingTerminal }" ng-style="{ 'width': (100 - canvasWidth) + '%' }">
+        <div class="resizable-handle resizable-w" ng-mousedown="onResizeTerminal($event)"></div>
+
+        <div class="terminal-container" ng-controller="terminalController">
+
+            <div id="terminal">
+                <div class="terminal-output-container ng-class:{ 'terminal-transition': !isResizing }" ng-style="{ 'height': (100 - inputHeight) + '%' }">
+
+                    <div class="terminal-output" ng-repeat="output in terminalOutput">
+                        <div class="terminal-output-date"><span class="pull-right">{{output.dateTime}}</span></div>
+                        <div class="terminal-output-description ng-class:output.statusType">
+                            <div>{{output.statusType}}</div>
+                            <div>{{output.message}}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="terminal-input-container ng-class:{ 'terminal-transition': !isResizing }" ng-style="{ 'height': inputHeight + '%' }">
+                    <div ng-if="isTerminalInputOpen" class="resizable-handle resizable-n" ng-mousedown="onResize($event)"></div>
+                    <textarea ui-codemirror="{ onLoad : codemirrorLoaded }" ng-model="source" ui-codemirror-opts="options" placeholder="Enter PySpark Commands..."></textarea>
+                </div>
+            </div>
+
+            <div class="terminal-menu">
+                <div class="terminal-buttons" ng-if="isTerminalVisible">
+                    <div id="terminal-input-cancel" ng-show="isTerminalInputOpen" class="terminal-button terminal-input-button ng-class:{ 'active':isTerminalInputOpen }">
+                        <a ng-click="onCancel()">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                    <div id="terminal-input-send" ng-show="isTerminalInputOpen" class="terminal-button terminal-input-button ng-class:{ 'active':isTerminalInputOpen }">
+                        <a ng-click="onSend()">
+                            <i class="fa fa-paper-plane"></i>
+                        </a>
+                    </div>
+                    <div id="terminal-input-open" ng-if="!isTerminalInputOpen" class="terminal-button">
+                        <a ng-click="onToggle()">
+                            <i class="fa fa-plus"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
 </div>

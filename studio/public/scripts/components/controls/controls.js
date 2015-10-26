@@ -95,4 +95,58 @@ var controlsApp = angular.module('emr.ui.controls', [])
             }
         }
 
+    }])
+
+    .directive('expand', ['$timeout', function($timeout){
+
+        return {
+            restrict: 'A',
+            scope: {
+                expand: "="
+            },
+            link: function($scope, element, attrs){
+
+                var steps = 20, delay = 10, childHeight = 0;
+
+                $scope.$watch("expand", toggle);
+
+                // internal variables
+
+                function expand(step, stepSize, start){
+                    element.height((step + 1) * stepSize + start);
+
+                    step += 1;
+                    if (step < steps)
+                        $timeout(function(){ expand(step, stepSize, start); }, delay);
+                }
+
+                function getChildHeight(){
+                    var height = 0,
+                        children = element.children();
+
+                    for(var i = 0; i < children.length; i++)
+                        height += children[i].clientHeight;
+
+                    return height;
+                }
+
+                function init(){
+                    childHeight = getChildHeight();
+                    toggle();
+                }
+
+                function toggle(){
+
+                    var start = element.height();
+                    var end = ($scope.expand) ? childHeight : 0;
+
+                    if (start != end){
+                        var stepSize = (end - start) / steps;
+                        expand(0, stepSize, start);
+                    }
+                }
+
+                init();
+            }
+        }
     }]);

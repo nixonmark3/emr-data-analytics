@@ -46,7 +46,7 @@ public class KafkaConsumer extends AbstractActor {
         consumerJobs = new HashMap<>();
 
         // retrieve the analytics host name stored as an environmental variable
-        String host = JobServiceHelper.getEnvVariable("ANALYTICS_HOST", "127.0.0.1");
+        String host = TaskServiceHelper.getEnvVariable("ANALYTICS_HOST", "127.0.0.1");
 
         try {
             // instantiate a kafka producer

@@ -161,7 +161,10 @@ angular.module('emr.ui.grids', [])
                 var featureOffset = 2;
                 var page = 0;
                 var pageSize = 100;
-                var indexType = $scope.features[0].dtype;
+
+                var indexType = "unknown";
+                if ($scope.features.length > 0)
+                    indexType = $scope.features[0].dtype;
 
                 // initialize position variables
                 $scope.padding = 10;
@@ -218,6 +221,9 @@ angular.module('emr.ui.grids', [])
 
                     $scope.onPage().then(function(data) {
 
+                        if (data.length == 0)
+                            return;
+
                         $scope.indexes = data[1].slice((page * pageSize), ((page + 1) * pageSize));
 
                         if (indexType == 'datetime64[ns]' || indexType == 'float64') {
@@ -251,6 +257,91 @@ angular.module('emr.ui.grids', [])
                 function setGridHeight(){
 
                     $scope.gridHeight = ((recordCount + 10) * $scope.rowHeight + 3 * $scope.padding);
+                }
+
+                var formatUnixTime = function(item) {
+
+                    var date = new Date(item * 1000);
+
+                    var validDate = !isNaN(date.valueOf());
+
+                    if (!validDate) {
+
+                        return item;
+                    }
+
+                    return date.toISOString().replace('T', ' ').replace('Z', '');
+                };
+
+                var formatNumber = function(item) {
+
+                    if (isNaN(item)) {
+
+                        return 'NaN';
+                    }
+
+                    var n = 0.01;
+
+                    if (item != 0) {
+
+                        if (Math.abs(item) < n) {
+
+                            return item.toExponential(5);
+                        }
+                    }
+
+                    return item.toFixed(5);
+                };
+
+                init();
+            }
+        }
+    }])
+
+    .directive('exploreGrid', ['$window', function($window){
+
+        return {
+            restrict: 'E',
+            replace: true,
+            templateUrl: '/assets/scripts/components/grids/exploreGrid.html',
+            scope: {
+                features: "="
+            },
+            link: function ($scope, element, attrs) {
+
+                // initialize position variables
+                $scope.padding = 10;
+                $scope.rowHeight = 36;
+                $scope.columnHeaderPosition = 0;
+                $scope.rowHeaderPosition = 0;
+                $scope.columnWidth = 180;
+                $scope.rowHeaderWidth = 180;
+                $scope.originX = $scope.rowHeaderWidth + 2 * $scope.padding;
+                $scope.originY = $scope.rowHeight + 2 * $scope.padding;
+
+                var featureCount = 0;
+                $scope.gridWidth = (featureCount * ($scope.columnWidth + $scope.padding) + $scope.originX);
+                setGridHeight();
+
+                $scope.indexes = [];
+
+                angular.element('#grid-content-container').bind('scroll', function(event) {
+
+                    $scope.$apply(function() {
+
+                        $scope.columnHeaderPosition = -1 * event.target.scrollLeft;
+                        $scope.rowHeaderPosition = -1 * event.target.scrollTop;
+                    });
+
+                });
+
+                function init(){
+
+                }
+
+                function setGridHeight(){
+
+                    $scope.gridHeight = (10 * $scope.rowHeight + 3 * $scope.padding);
                 }
 
                 var formatUnixTime = function(item) {

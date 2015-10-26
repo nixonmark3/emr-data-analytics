@@ -1,6 +1,6 @@
 package emr.analytics.service.sources;
 
-import emr.analytics.models.messages.StreamingSourceRequest;
+import emr.analytics.models.messages.StreamingRequest;
 
 import org.json.JSONObject;
 
@@ -12,7 +12,7 @@ public class OpcPollingSource extends DataSource implements StreamingSource {
     private String url;
     private List<String> keys;
 
-    public OpcPollingSource(StreamingSourceRequest request) {
+    public OpcPollingSource(StreamingRequest request) {
 
         this.url = request.getStreamingSource().getUrl();
         this.keys = request.getStreamingSource().getKeys();

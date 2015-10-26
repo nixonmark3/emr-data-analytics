@@ -1,6 +1,6 @@
 package controllers;
 
-import models.project.DataSet;
+import models.DataSet;
 
 import org.jongo.MongoCollection;
 import org.jongo.MongoCursor;

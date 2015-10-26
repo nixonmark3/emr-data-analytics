@@ -1,12 +1,13 @@
 package services;
 
-import actors.AnalyticsActor;
+import actors.AnalyticsClient;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.typesafe.config.ConfigFactory;
-import emr.analytics.models.messages.BaseMessage;
+import emr.analytics.models.messages.InputMessage;
+import emr.analytics.models.messages.OutputMessage;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -21,7 +22,7 @@ public class AnalyticsService {
     public AnalyticsService(){
 
         ActorSystem system = ActorSystem.create("analytics-client-system", ConfigFactory.load("analytics"));
-        client = system.actorOf(AnalyticsActor.props(), "analytics");
+        client = system.actorOf(AnalyticsClient.props(), "analytics");
     }
 
     public static AnalyticsService getInstance() {
@@ -41,7 +42,7 @@ public class AnalyticsService {
      * @param message
      * @param actor
      */
-    public void send(BaseMessage message, ActorRef actor){
+    public void send(InputMessage message, ActorRef actor){
         client.tell(message, actor);
     }
 
@@ -49,7 +50,7 @@ public class AnalyticsService {
      *
      * @param message
      */
-    public void send(BaseMessage message) { this.send(message, null); }
+    public void send(InputMessage message) { this.send(message, null); }
 
     /**
      *
@@ -58,11 +59,11 @@ public class AnalyticsService {
      * @return
      * @throws Exception
      */
-    public BaseMessage sendSync(BaseMessage message, int timeout) throws Exception {
+    public OutputMessage sendSync(InputMessage message, int timeout) throws Exception {
         Timeout duration = new Timeout(Duration.create(timeout, TimeUnit.SECONDS));
         Future<Object> future = Patterns.ask(client, message, duration);
 
-        return (BaseMessage) Await.result(future, duration.duration());
+        return (OutputMessage) Await.result(future, duration.duration());
     }
 
     /**
@@ -71,7 +72,7 @@ public class AnalyticsService {
      * @return
      * @throws Exception
      */
-    public BaseMessage sendSync(BaseMessage message) throws Exception {
+    public OutputMessage sendSync(InputMessage message) throws Exception {
         return sendSync(message, 20);
     }
 }

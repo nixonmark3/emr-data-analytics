@@ -160,11 +160,26 @@ analyticsApp
             return deferred.promise;
         },
 
-        info: function (id) {
+        tasks: function (id) {
 
             var deferred = $q.defer();
 
-            $http.get('/analytics/info/' + id)
+            $http.get('/analytics/tasks/' + id)
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
+
+        interpret: function(data) {
+
+            var deferred = $q.defer();
+
+            $http.post('/analytics/interpret', data)
                 .success(function (data, status, headers, config) {
                     deferred.resolve(data);
                 })
@@ -240,7 +255,7 @@ analyticsApp
 
             var deferred = $q.defer();
 
-            $http.get('/getDefinitions')
+            $http.get('/definitions/all')
                 .success(function (data, status, headers, config) {
 
                     deferred.resolve(data);
@@ -288,8 +303,7 @@ analyticsApp
 
             var deferred = $q.defer();
 
-            $http.get('/getDiagrams')
-            //$http({ method: 'GET', url: '/assets/data/diagrams/diagrams.json' })
+            $http.get('/diagrams/all')
                 .success(function (data, status, headers, config) {
 
                     deferred.resolve(data);

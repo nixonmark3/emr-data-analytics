@@ -1,10 +1,10 @@
 package emr.analytics.service.sources;
 
-import emr.analytics.models.messages.StreamingSourceRequest;
+import emr.analytics.models.messages.StreamingRequest;
 
 public class SourceFactory {
 
-    public static StreamingSource get(StreamingSourceRequest request) throws SourceException {
+    public static StreamingSource get(StreamingRequest request) throws SourceException {
 
         StreamingSource source;
         switch(request.getStreamingSource().getPollingSourceType()){

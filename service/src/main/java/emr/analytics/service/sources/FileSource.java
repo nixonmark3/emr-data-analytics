@@ -1,6 +1,6 @@
 package emr.analytics.service.sources;
 
-import emr.analytics.models.messages.StreamingSourceRequest;
+import emr.analytics.models.messages.StreamingRequest;
 
 import java.io.*;
 import java.util.*;
@@ -10,7 +10,7 @@ public class FileSource implements StreamingSource {
     private int index;
     private List<SourceValues<Double>> values;
 
-    public FileSource(StreamingSourceRequest request){
+    public FileSource(StreamingRequest request){
 
         this.index = 0;
         this.readFile(request.getStreamingSource().getUrl(),

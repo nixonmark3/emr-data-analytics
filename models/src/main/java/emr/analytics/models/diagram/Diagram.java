@@ -20,7 +20,7 @@ public class Diagram implements Serializable {
     private String description = "";
     private String owner = "";
     private Mode mode = Mode.OFFLINE;
-    private TargetEnvironments targetEnvironment = TargetEnvironments.PYTHON;
+    private TargetEnvironments targetEnvironment = TargetEnvironments.PYSPARK;
     private int height = 1000;
     private int width = 1000;
     private int version = 0;

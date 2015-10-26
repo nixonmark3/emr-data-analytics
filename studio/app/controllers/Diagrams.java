@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import emr.analytics.diagram.interpreter.CompilerException;
 import emr.analytics.models.diagram.*;
 
-import models.project.GroupRequest;
+import models.GroupRequest;
 import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Result;

@@ -4,8 +4,8 @@ import com.mongodb.WriteResult;
 import emr.analytics.diagram.interpreter.*;
 import emr.analytics.models.definition.Definition;
 import emr.analytics.models.diagram.*;
-import emr.analytics.models.messages.JobRequest;
-import models.project.GroupRequest;
+import emr.analytics.models.messages.TaskRequest;
+import models.GroupRequest;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
 import plugins.MongoDBPlugin;
@@ -61,11 +61,11 @@ public class DiagramsService {
      * @return A job request
      * @throws CompilerException
      */
-    public JobRequest getJobRequest(Diagram diagram) throws CompilerException {
+    public TaskRequest getTaskRequest(Diagram diagram) throws CompilerException {
 
         CompiledDiagram compiledDiagram = this.compile(diagram);
 
-        JobRequest request = new JobRequest(diagram.getId(),
+        TaskRequest request = new TaskRequest(diagram.getId(),
             diagram.getMode(),
             diagram.getTargetEnvironment(),
             diagram.getName(),

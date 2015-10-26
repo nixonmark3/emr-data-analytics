@@ -29,48 +29,48 @@ public class SessionActor extends AbstractActor {
         receive(ReceiveBuilder
 
             // ping request from the client
-            .match(JsonNode.class, node -> (node.get("type").asText().equals("ping")), node -> {
+            .match(JsonNode.class, node -> (node.get("messageType").asText().equals("ping")), node -> {
 
-                AnalyticsService.getInstance().send(new Ping(), self());
+                AnalyticsService.getInstance().send(new PingRequest(), self());
             })
 
             // subscribe to updates for a specific diagram
-            .match(JsonNode.class, node -> (node.get("type").asText().equals("subscribe")), node -> {
+            .match(JsonNode.class, node -> (node.get("messageType").asText().equals("subscribe")), node -> {
 
                 UUID diagramId = UUID.fromString(node.get("id").asText());
                 SessionManager.getInstance().subscribe(this.id, diagramId);
             })
 
-            .match(JsonNode.class, node -> (node.get("type").asText().equals("dashboard")), node -> {
+            .match(JsonNode.class, node -> (node.get("messageType").asText().equals("dashboard")), node -> {
 
                 SessionManager.getInstance().subscribeToDashboard(this.id);
             })
 
             // jobs summary request from client
-            .match(JsonNode.class, node -> (node.get("type").asText().equals("jobs-summary")), node -> {
+            .match(JsonNode.class, node -> (node.get("messageType").asText().equals("jobs-summary")), node -> {
 
-                AnalyticsService.getInstance().send(new BaseMessage("jobs-summary"), self());
+                AnalyticsService.getInstance().send(new InputMessage("jobs-summary"), self());
             })
 
             //
-            .match(JsonNode.class, node -> (node.get("type").asText().equals("offline-jobs")), node -> {
+            .match(JsonNode.class, node -> (node.get("messageType").asText().equals("offline-jobs")), node -> {
 
-                AnalyticsService.getInstance().send(new BaseMessage("offline-jobs"), self());
+                AnalyticsService.getInstance().send(new InputMessage("offline-jobs"), self());
             })
 
             //
-            .match(JsonNode.class, node -> (node.get("type").asText().equals("online-jobs")), node -> {
+            .match(JsonNode.class, node -> (node.get("messageType").asText().equals("online-jobs")), node -> {
 
-                AnalyticsService.getInstance().send(new BaseMessage("online-jobs"), self());
+                AnalyticsService.getInstance().send(new InputMessage("online-jobs"), self());
             })
 
             //
-            .match(JsonNode.class, node -> (node.get("type").asText().equals("streaming-jobs")), node -> {
+            .match(JsonNode.class, node -> (node.get("messageType").asText().equals("streaming-jobs")), node -> {
 
-                AnalyticsService.getInstance().send(new BaseMessage("streaming-jobs"), self());
+                AnalyticsService.getInstance().send(new InputMessage("streaming-jobs"), self());
             })
 
-            .match(JobInfos.class, infos -> {
+/*            .match(JobInfos.class, infos -> {
 
                 out.tell(Json.toJson(infos), self());
             })
@@ -84,10 +84,10 @@ public class SessionActor extends AbstractActor {
             .match(JobsSummary.class, summary -> {
 
                 out.tell(Json.toJson(summary), self());
-            })
+            })*/
 
             // ping response from the analytics actor
-            .match(Ping.class, ping -> {
+            .match(PingResponse.class, ping -> {
 
                 out.tell(Json.toJson(ping), self());
             })

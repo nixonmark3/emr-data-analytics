@@ -2,7 +2,7 @@ package emr.analytics.service.sources;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import emr.analytics.models.messages.StreamingSourceRequest;
+import emr.analytics.models.messages.StreamingRequest;
 import emr.analytics.service.sources.serializers.PiResponse;
 
 import org.json.JSONObject;
@@ -22,7 +22,7 @@ public class PiPollingSource extends DataSource implements StreamingSource {
 
     private static int nThreads = 10;
 
-    public PiPollingSource(StreamingSourceRequest request) {
+    public PiPollingSource(StreamingRequest request) {
 
         this.url = request.getStreamingSource().getUrl();
         this.keys = request.getStreamingSource().getKeys();

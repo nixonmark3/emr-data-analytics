@@ -7,7 +7,7 @@ import java.util.Properties;
 public abstract class Interpreter {
 
     //
-    private final InterpreterNotificationHandler notificationHandler;
+    protected final InterpreterNotificationHandler notificationHandler;
 
     //
     private final Properties properties;
@@ -65,7 +65,7 @@ public abstract class Interpreter {
      * @param value
      */
     public void onNotify(String key, String value){
-        this.notificationHandler.send(new InterpreterNotification(key, value));
+        this.notificationHandler.notify(new InterpreterNotification(key, value));
     }
 }
 

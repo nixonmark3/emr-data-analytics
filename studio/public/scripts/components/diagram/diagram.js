@@ -41,25 +41,6 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                     $scope.$$phase || $scope.$apply();
                 });
 
-                // todo: only need to bind to window resize once in the entire application
-                // todo: move to app.js
-                angular.element($window).bind("resize", function () {
-
-                    $scope.$apply(function () {
-
-                        setConsolePosition();
-                    });
-                });
-
-                var init = function(){
-                    setConsolePosition();
-                };
-
-                var setConsolePosition = function(){
-
-                    $scope.consolePosition = { x: (element.width() - 54), y: (element.height() - 156) };
-                };
-
                 var beginDragEvent = function (x, y, config) {
 
                     $scope.$root.$broadcast("beginDrag", {
@@ -150,7 +131,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                 //
                 $scope.internalMethods.translateCoordinates = function (x, y, evt) {
 
-                    var diagram = element[0];
+                    var diagram = element[0].querySelector('svg');
                     var matrix = diagram.getScreenCTM();
                     var point = diagram.createSVGPoint();
                     point.x = (x - evt.view.scrollX);
@@ -167,7 +148,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                 var inverseCoordinates = function (x, y) {
 
-                    var diagram = element[0];
+                    var diagram = element[0].querySelector('svg');
                     var transX =  $scope.canvasMatrix[0] * x + $scope.canvasMatrix[4];
                     var transY =  $scope.canvasMatrix[3] * y + $scope.canvasMatrix[5];
 
@@ -555,8 +536,6 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                     return mode;
                 };
-
-                init();
             }
         }
     }]);

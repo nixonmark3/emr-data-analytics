@@ -1,8 +1,6 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import emr.analytics.models.messages.StreamingSourceKillRequest;
-import emr.analytics.models.messages.StreamingSourceRequest;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -17,7 +15,7 @@ public class Streaming extends Controller {
      *
      * @return
      */
-    @BodyParser.Of(BodyParser.Json.class)
+/*    @BodyParser.Of(BodyParser.Json.class)
     public static Result start() {
 
         try {
@@ -33,18 +31,18 @@ public class Streaming extends Controller {
         }
 
         return ok();
-    }
+    }*/
 
     /**
      *
      * @param topic
      * @return
      */
-    public static Result stop(String topic){
+/*    public static Result stop(String topic){
 
         StreamingSourceKillRequest request = new StreamingSourceKillRequest(topic);
         AnalyticsService.getInstance().send(request);
 
         return ok();
-    }
+    }*/
 }

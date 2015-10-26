@@ -1,5 +1,6 @@
 package emr.analytics.service.interpreters;
 
+import emr.analytics.models.messages.Describe;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -20,9 +21,13 @@ public class PySparkStreamingInterpreterTest {
             notifications = new ArrayList<InterpreterNotification>();
         }
 
-        public void send(InterpreterNotification notification){
+        public void notify(InterpreterNotification notification){
 
             notifications.add(notification);
+        }
+
+        public void describe(Describe describe){
+
         }
 
         public InterpreterNotification getNotification(int index){

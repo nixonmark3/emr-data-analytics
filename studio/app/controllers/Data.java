@@ -1,6 +1,6 @@
 package controllers;
 
-import models.project.UploadResult;
+import models.UploadResult;
 import play.Play;
 import play.libs.Json;
 import play.mvc.Controller;
