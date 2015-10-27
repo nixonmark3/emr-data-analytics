@@ -475,6 +475,10 @@ button.diagram-evaluating { color: #2ca02c; }
 .emr-popup-backdrop.ng-enter, .emr-popup-backdrop.ng-leave.ng-leave-active { opacity: 0; }
 .emr-popup-backdrop.ng-enter.ng-enter-active, .emr-popup-backdrop.ng-leave { opacity: 0.6; }
 
+.emr-popup-backdrop-nav { position: absolute; top: 50px; left: 0px; width: 100%; height: -webkit-calc(100% - 50px); background-color: #32404e; opacity: 0.6; z-index: 10; transition: opacity 0.4s ease; }
+.emr-popup-backdrop-nav.ng-enter, .emr-popup-backdrop-nav.ng-leave.ng-leave-active { opacity: 0; }
+.emr-popup-backdrop-nav.ng-enter.ng-enter-active, .emr-popup-backdrop-nav.ng-leave { opacity: 0.6; }
+
 .create-diagram-wrapper { position: absolute; width: 500px; height: 400px; top: 70px; left: 50%; margin-left: -250px; border-radius: 15px; box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.175); background-color: #fff; z-index: 11; }
 .create-diagram-wrapper.ng-enter { -webkit-animation: fadeIn 0.4s; }
 .create-diagram-wrapper.ng-leave { -webkit-animation: fadeOut 0.4s; }

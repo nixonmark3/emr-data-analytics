@@ -769,6 +769,11 @@ var analyticsApp = angular.module('analyticsApp',
          */
         $scope.onToggleTerminal = function(evt){
 
+            if ($scope.navigatingDiagrams) {
+
+                endDiagramNavigation();
+            }
+
             if($scope.canvasWidth == 100) {
                 $scope.canvasWidth -= lastTerminalWidth;
                 $scope.isTerminalVisible = true;
@@ -1109,6 +1114,11 @@ var analyticsApp = angular.module('analyticsApp',
 
         $scope.toggleCanvas = function(showOnline){
 
+            if ($scope.navigatingDiagrams) {
+
+                endDiagramNavigation();
+            }
+
             if (!$scope.onlineCanvas && showOnline){
 
                 if ($scope.showLibrary)
@@ -1186,6 +1196,7 @@ var analyticsApp = angular.module('analyticsApp',
             var result = popupService.show({
                 templateUrl: '/assets/scripts/components/diagram/diagramNavigation.html',
                 controller: 'diagramNavigationController',
+                backdropClass: 'emr-popup-backdrop-nav',
                 inputs: {
                     diagService: diagramService,
                     closeDialog: endDiagramNavigation,

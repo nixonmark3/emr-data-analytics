@@ -76,103 +76,70 @@
 .diag-nav-wrapper { position: absolute; z-index: 1000; top: 60px; left: 80px; width: 3000px; height: -webkit-calc(100% - 200px); }
 .diag-nav-wrapper.ng-enter { -webkit-animation: fadeIn 0.4s; }
 .diag-nav-wrapper.ng-leave { -webkit-animation: fadeOut 0.4s; }
-.diag-nav-wrapper:before { content: ""; position: absolute; top: -17px; left: 7.5px; border-right: 17px solid transparent; border-left: 17px solid transparent; border-bottom: 17px solid #1f77b4; }
-.diag-nav-wrapper:after { content: ""; position: absolute; top: -16px; left: 7.5px; border-right: 17px solid transparent; border-left: 17px solid transparent; border-bottom: 17px solid #1f77b4; }
+.diag-nav-wrapper:before { content: ""; position: absolute; top: -17px; left: 7.5px; border-right: 17px solid transparent; border-left: 17px solid transparent; border-bottom: 17px solid #5fa2dd; }
+.diag-nav-wrapper:after { content: ""; position: absolute; top: -16px; left: 7.5px; border-right: 17px solid transparent; border-left: 17px solid transparent; border-bottom: 17px solid #5fa2dd; }
 
 .diag-nav-container { position: absolute; width: 100%; height: 100%; top: 0px; left: 0px; overflow: hidden; }
 
-.diag-nav-home { position: absolute; z-index: 3000; top: 0px; left: 0px; width: 90px; height: 100%; background-color: #1f77b4; }
-.diag-nav-home-user { position: relative; width: 100%; height: 115px; text-align: center; vertical-align: middle; border-bottom: 1px solid #5fa2dd; }
-.diag-nav-home-user:hover { cursor: default; }
-.diag-nav-home-user-circle { border-radius: 50%; position: relative; top: 18%; width: 55px; height: 55px; line-height: 55px; display: inline-block; background-color: #5fa2dd; }
-.diag-nav-home-user-initials { color: white; font-size: 20px; }
-.diag-nav-home-user-name { bottom: 0; left: 0; width: 100%; height: 35px; position: absolute; color: white; }
-.diag-nav-home-option { position: relative; width: 100%; height: 90px; border-bottom: 1px solid #5fa2dd; text-align: center; }
-.diag-nav-home-option:hover { background-color: #5fa2dd; cursor: pointer; }
-.diag-nav-home-option-icon { color: white; position: relative; top: 18%; display: inline-block; }
-.diag-nav-home-option-name { bottom: 0; left: 0; width: 100%; height: 35px; position: absolute; color: white; }
-.diag-nav-home-active-option { background-color: #5fa2dd; }
+#diag-nav-home { display: block; position: relative; float: left; height: 100%; width: 70px; padding: 50px 0 0 0; margin: 0; background-color: #5fa2dd; }
+#diag-nav-home .vertical-tab { position: relative; color: #fff; margin: 0; border-radius: 0; }
+#diag-nav-home .vertical-tab:hover { color: #1f77b4; }
+#diag-nav-home .vertical-tab.active { background-color: #fff; color: #1f77b4; }
+#diag-nav-home .tab-text { font-size: 0.7em; }
 
-.diagNavHomeActiveOption { background-color: #5fa2dd; }
+.diag-nav-properties-wrapper { position: absolute; width: auto; height: 100%; top: 0px; left: 70px; z-index: 2000; overflow: hidden; }
+.diag-nav-properties-wrapper.ng-enter { -webkit-animation: fadeIn 0.4s; }
+.diag-nav-properties-wrapper.ng-leave { -webkit-animation: fadeOut 0.4s; }
+.diag-nav-properties-page { position: relative; width: 400px; height: 100%; top: 0px; background-color: white; float: left; }
 
-.diag-nav-properties-wrapper { position: absolute; width: auto; height: 100%; top: 0px; left: 90px; z-index: 2000; overflow: hidden; -webkit-transition: 0.4s ease-in-out; }
-.diag-nav-properties-wrapper.ng-enter { -webkit-transform: translateX(-750px); }
-.diag-nav-properties-wrapper.ng-leave-active { -webkit-transform: translateX(-750px); }
-.diag-nav-properties-page { position: relative; width: 400px; height: 100%; top: 0px; background-color: white; float: left; -webkit-transition: 0.4s ease-in-out; border-right: 2px solid #1f77b4; border-top: 2px solid #1f77b4; border-bottom: 2px solid #1f77b4; }
+.diag-nav-new-wrapper { position: absolute; width: auto; height: 100%; top: 0px; left: 70px; z-index: 2000; overflow: hidden; }
+.diag-nav-new-wrapper.ng-enter { -webkit-animation: fadeIn 0.4s; }
+.diag-nav-new-wrapper.ng-leave { -webkit-animation: fadeOut 0.4s; }
+.diag-nav-new-page { position: relative; width: 400px; height: 100%; top: 0px; background-color: white; float: left; }
 
-.diag-nav-new-wrapper { position: absolute; width: auto; height: 100%; top: 0px; left: 90px; z-index: 2000; overflow: hidden; -webkit-transition: 0.4s ease-in-out; }
-.diag-nav-new-wrapper.ng-enter { -webkit-transform: translateX(-750px); }
-.diag-nav-new-wrapper.ng-leave-active { -webkit-transform: translateX(-750px); }
-.diag-nav-new-page { position: relative; width: 400px; height: 100%; top: 0px; background-color: #ffffff; float: left; -webkit-transition: 0.4s ease-in-out; border-right: 2px solid #1f77b4; border-top: 2px solid #1f77b4; border-bottom: 2px solid #1f77b4; }
-
-.diag-nav-open-container { position: absolute; width: auto; height: 100%; top: 0px; left: 90px; z-index: 2000; overflow: hidden; -webkit-transition: 0.4s ease-out; }
-.diag-nav-open-container.ng-enter { -webkit-transform: translateX(-750px); }
-.diag-nav-open-container.ng-leave-active { -webkit-transform: translateX(-750px); }
-
+.diag-nav-open-container { position: absolute; width: auto; height: 100%; top: 0px; left: 70px; z-index: 2000; overflow: hidden; }
+.diag-nav-open-container.ng-enter { -webkit-animation: fadeIn 0.4s; }
+.diag-nav-open-container.ng-leave { -webkit-animation: fadeOut 0.4s; }
 .diag-nav-open-wrapper { position: relative; width: auto; height: 100%; top: 0px; left: 0px; z-index: 2000; overflow: hidden; -webkit-transition: 0.4s ease-out; }
 .diag-nav-open-wrapper.ng-enter { -webkit-transform: translateX(-250px); }
 .diag-nav-open-wrapper.ng-leave-active { -webkit-transform: translateX(-250px); }
-
-.diag-nav-open-page {  border-bottom: 2px solid #1f77b4; position: relative; width: 250px; height: 100%; top: 0px; border-top: 2px solid #1f77b4; background-color: white; float: left; -webkit-transition: 0.2s ease-in-out; }
+.diag-nav-open-page { position: relative; width: 250px; height: 100%; top: 0px; background-color: white; float: left; -webkit-transition: 0.2s ease-in-out; }
 .diag-nav-open-page.ng-enter { -webkit-transform: translateX(-250px); }
 .diag-nav-open-page.ng-leave-active { -webkit-transform: translateX(-250px); }
 .diag-nav-open-page-content { position: absolute; top: 0px; left: 0px; width: 100%; height: -webkit-calc(100% - 30px); padding: 5px; border-right: 1px solid lightgrey; border-bottom: 1px solid lightgrey; }
 .diag-nav-open-page-item { width: 100%; height: 25px; -webkit-user-select: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .diag-nav-open-page-item:hover { cursor: pointer; font-weight: bold; color: #1f77b4; }
+.diag-nav-open-path { position: absolute; bottom: 2px; left: 0px; height: 30px; width: auto; z-index: 3000; padding-left: 5px; vertical-align: middle; line-height: 30px; float: left; }
+.diag-nav-open-path-file-type { height: 30px; width: auto; float: left; }
+.diag-nav-open-path-item { height: 30px; float: left; }
+.diag-nav-open-path-item.ng-enter { -webkit-animation: fadeIn 0.4s; }
+.diag-nav-open-path-item.ng-leave { -webkit-animation: fadeOut 0.4s; }
+.diag-nav-open-path-item-clickable { float: left; margin-right: 3px; }
+.diag-nav-open-path-item-clickable:hover { cursor: pointer; color: #1f77b4; }
+.diag-nav-open-path-item-caret { float: left; margin-right: 3px; }
+.diag-nav-open-props-wrapper { width: 100%; height: 100%; height: -webkit-calc(100% - 30px); border-bottom: 1px solid lightgrey;}
+.diag-nav-open-props-body { font-size: 13px; width: 100%; height: -webkit-calc(100% - 49px); padding: 10px; }
+.diag-nav-open-props:hover { cursor: default; }
+.diag-nav-open-props-title { color: #989898; font-weight: normal; margin-bottom: 2px; height: 40px; line-height: 40px; width: 100%; text-align: center; vertical-align: middle; font-size: 1.5em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.diag-nav-open-props-title:hover { cursor: default; }
+.diag-nav-open-props-value { font-size: 14px; height: 30px; line-height: 30px; vertical-align: middle; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.diag-nav-open-props-value:hover { cursor: default; }
+.diag-nav-open-props-footer { height: 49px; width: 100%; padding: 10px; }
+.diag-nav-open-props-icon { height: 49px; line-height: 49px; width: 50px; text-align: center; vertical-align: middle; }
+.diag-nav-open-props-icon:hover { cursor: pointer; color: #1f77b4; }
+.diag-nav-open-page-highlight-file { font-weight: bold; }
+.diag-nav-open-page-file-type { margin-right: 5px; }
 
-.nav-path { position: absolute; bottom: 2px; left: 0px; height: 30px; width: auto; z-index: 3000; padding-left: 5px; vertical-align: middle; line-height: 30px; float: left; }
-.nav-path-file-type { height: 30px; width: auto; float: left; }
-.nav-path-item { height: 30px; float: left; }
-.nav-path-item.ng-enter { -webkit-animation: fadeIn 0.4s; }
-.nav-path-item.ng-leave { -webkit-animation: fadeOut 0.4s; }
-.nav-path-item-clickable { float: left; margin-right: 3px; }
-.nav-path-item-clickable:hover { cursor: pointer; color: #1f77b4; }
-.nav-path-item-caret { float: left; margin-right: 3px; }
-
-.nav-props-wrapper { width: 100%; height: 100%; height: -webkit-calc(100% - 30px); border-right: 1px solid lightgrey; border-bottom: 1px solid lightgrey;}
-.nav-props-body { font-size: 13px; width: 100%; height: -webkit-calc(100% - 49px); padding: 10px; }
-.nav-props:hover { cursor: default; }
-.nav-props-title { color: #989898; font-weight: normal; margin-bottom: 2px; height: 40px; line-height: 40px; width: 100%; text-align: center; vertical-align: middle; font-size: 1.5em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.nav-props-title:hover { cursor: default; }
-.nav-props-value { font-size: 14px; height: 30px; line-height: 30px; vertical-align: middle; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.nav-props-value:hover { cursor: default; }
-.nav-props-footer { height: 49px; width: 100%; padding: 10px; }
-.nav-props-icon { height: 49px; line-height: 49px; width: 50px; text-align: center; vertical-align: middle; }
-.nav-props-icon:hover { cursor: pointer; color: #1f77b4; }
-
-.nav-create-body { position: relative; font-size: 13px; width: 100%; height: -webkit-calc(100% - 49px); padding: 10px; }
-.nav-create-footer { height: 49px; width: 100%; padding: 10px; }
-.nav-create-footer.ng-hide { -webkit-animation: fadeOut 0.4s; }
-.nav-create-footer-btn-margin-right { margin-right: 10px; }
-.nav-create-category-container { height: 30px; width: 100%; }
-.nav-create-category-container-item { float: left; }
-.nav-create-category-select { width: -webkit-calc(100% - 42px); margin-right: 5px; }
-.nav-create-new-category { height: auto; width: 100%; }
-.nav-create-item-height { font-size: 12px; height: 30px; line-height: 19px; }
-.nav-create-title { color: #989898; font-weight: normal; margin-bottom: 2px; height: 28px; line-height: 28px; width: 100%; text-align: center; vertical-align: middle; font-size: 1.5em; }
-.nav-create-title:hover { cursor: default; }
-
-/*Old*/
-
-.diag-nav { position: fixed; z-index: 1000; top: 60px; left: 80px; width: auto; height: -webkit-calc(100% - 200px); border-radius: 5px; border: 1px solid #989898; box-shadow: 0px 6px 12px rgba(0,0,0,0.175); border-top: 4px solid #1f77b4; background-color: white; }
-.diag-nav.ng-enter { -webkit-animation: fadeIn 0.4s; }
-.diag-nav.ng-leave { -webkit-animation: fadeOut 0.4s; }
-.diag-nav:before { content: ""; position: absolute; top: -20px; left: 7.5px; border-right: 17px solid transparent; border-left: 17px solid transparent; border-bottom: 17px solid #1f77b4; }
-.diag-nav:after { content: ""; position: absolute; top: -19px; left: 7.5px; border-right: 17px solid transparent; border-left: 17px solid transparent; border-bottom: 17px solid #1f77b4; }
-
-.nav-page { width: 175px; height: -webkit-calc(100% - 29px); float: left; border-left: 1px solid #d3d3d3; padding: 10px; padding-right: 5px;  overflow-y: auto; background-color: white; }
-.nav-page.ng-enter, .nav-page.ng-move { -webkit-transition:0.5s linear all; opacity:0; }
-
-.nav-page-override { border-left: 0px solid #d3d3d3; }
-.nav-page-width-override { width: 235px; padding: 0px; padding-right: 0px; }
-.nav-page-highlight-file { font-weight: bold; }
-.nav-page-file-type { margin-right: 5px; }
-
-.nav-footer { position: absolute; bottom: 0px; left: 0px; width: 100%; height: 30px; border-top: 1px solid #d3d3d3; }
-.nav-footer:hover { cursor: default; }
-
-.nav-add { height: 29px; width: 30px; text-align: center; vertical-align: middle; line-height: 29px; border-right: 1px solid #d3d3d3; float: left; }
-.nav-add:hover { cursor: pointer; color: #1f77b4; }
+.diag-nav-props-body { position: relative; font-size: 13px; width: 100%; height: -webkit-calc(100% - 49px); padding: 10px; }
+.diag-nav-props-footer { height: 49px; width: 100%; padding: 10px; }
+.diag-nav-props-footer-btn-margin-right { margin-right: 10px; }
+.diag-nav-props-category-container { height: 30px; width: 100%; }
+.diag-nav-props-category-container-item { float: left; }
+.diag-nav-props-category-select { width: -webkit-calc(100% - 42px); margin-right: 5px; }
+.diag-nav-props-new-category { height: auto; width: 100%; }
+.diag-nav-props-item-height { font-size: 12px; height: 30px; line-height: 19px; }
+.diag-nav-props-title { color: #989898; font-weight: normal; margin-bottom: 2px; height: 28px; line-height: 28px; width: 100%; text-align: center; vertical-align: middle; font-size: 1.5em; }
+.diag-nav-props-title:hover { cursor: default; }
 
 /*
  * Diagram Configuration

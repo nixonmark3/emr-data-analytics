@@ -401,18 +401,9 @@ diagramApp
             $scope.onPropertiesClick();
         };
 
-        $scope.getStyle = function(index) {
+        $scope.getOpenPageStyle = function(index) {
 
-            var style = {};
-
-            style['z-index'] = 1500 - index;
-
-            if (index === ($scope.pages.length-1)) {
-
-                style['border-right'] = '2px solid #1f77b4';
-            }
-
-            return style;
+            return {'z-index' : (1500 - index) };
         };
 
         $scope.getShift = function() {
