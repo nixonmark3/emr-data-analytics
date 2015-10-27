@@ -103,8 +103,10 @@
 .diag-nav-open-wrapper { position: relative; width: auto; height: 100%; top: 0px; left: 0px; z-index: 2000; overflow: hidden; -webkit-transition: 0.4s ease-out; }
 .diag-nav-open-wrapper.ng-enter { -webkit-transform: translateX(-250px); }
 .diag-nav-open-wrapper.ng-leave-active { -webkit-transform: translateX(-250px); }
-.diag-nav-open-page { position: relative; width: 250px; height: 100%; top: 0px; background-color: white; float: left; -webkit-transition: 0.2s ease-in-out; }
+.diag-nav-open-page { position: relative; width: 250px; height: 100%; top: 0px; background-color: white; float: left; -webkit-transition: 0.4s ease all; }
 .diag-nav-open-page.ng-enter { -webkit-transform: translateX(-250px); }
+.diag-nav-open-page.ng-enter-active { -webkit-transform: translateX(0px); }
+.diag-nav-open-page.ng-leave { -webkit-transform: translateX(0px); }
 .diag-nav-open-page.ng-leave-active { -webkit-transform: translateX(-250px); }
 .diag-nav-open-page-content { position: absolute; top: 0px; left: 0px; width: 100%; height: -webkit-calc(100% - 30px); padding: 5px; border-right: 1px solid lightgrey; border-bottom: 1px solid lightgrey; }
 .diag-nav-open-page-item { width: 100%; height: 25px; -webkit-user-select: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
