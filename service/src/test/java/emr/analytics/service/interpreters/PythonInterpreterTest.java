@@ -1,6 +1,7 @@
 package emr.analytics.service.interpreters;
 
 import emr.analytics.models.messages.Describe;
+import emr.analytics.models.messages.Features;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -26,9 +27,9 @@ public class PythonInterpreterTest {
             notifications.add(notification);
         }
 
-        public void describe(Describe describe){
+        public void describe(Describe describe){}
 
-        }
+        public void collect(Features features){}
 
         public InterpreterNotification getNotification(int index){
             return this.notifications.get(index);

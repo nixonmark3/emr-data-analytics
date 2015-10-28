@@ -16,10 +16,11 @@ GET         /getPlot/:name                    controllers.BlockResults.getPlot(n
 GET         /getOutputResults/:name           controllers.BlockResults.getOutputResults(name: String)
 GET         /getFeatureGridData/:name         controllers.BlockResults.getFeatureGridData(name: String)
 
+POST        /analytics/collect                controllers.Analytics.collect()
 POST        /analytics/deploy                 controllers.Analytics.deploy()
 POST        /analytics/evaluate               controllers.Analytics.evaluate()
-POST        /analytics/load                   controllers.Analytics.load()
 POST        /analytics/interpret              controllers.Analytics.interpret()
+POST        /analytics/load                   controllers.Analytics.load()
 POST        /loadSources                      controllers.Sources.load()
 POST        /diagrams/compile                 controllers.Diagrams.compile()
 POST        /diagrams/save                    controllers.Diagrams.save()

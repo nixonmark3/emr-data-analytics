@@ -5,6 +5,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
 import emr.analytics.models.definition.Mode;
+import emr.analytics.models.messages.AnalyticsData;
 import emr.analytics.models.messages.AnalyticsDescribe;
 import emr.analytics.models.messages.AnalyticsTask;
 import emr.analytics.models.messages.TaskStatus;
@@ -45,6 +46,10 @@ public class TaskStatusManager extends AbstractActor {
 
             .match(AnalyticsDescribe.class, describe -> {
                 this.client.tell(describe, self());
+            })
+
+            .match(AnalyticsData.class, data -> {
+                this.client.tell(data, self());
             })
 
             .match(String.class, s -> s.equals("task"), s -> {

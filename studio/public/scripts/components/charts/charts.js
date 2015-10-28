@@ -270,6 +270,131 @@ angular.module('emr.ui.charts', [])
         }
     }])
 
+    .directive('exploreChart', [function(){
+
+        return {
+            restrict: 'E',
+            replace: true,
+            templateUrl: '/assets/scripts/components/charts/exploreChart.html',
+            scope: {
+                features: "=",
+                methods: "=",
+                onFetch: "="
+            },
+            link: function($scope, element, attrs){
+
+                // initialize the chart object
+                $scope.chartOptions = {
+                    type: "line",
+                    scaled: false,
+                    hasXCoordinate: false,
+                    override: false,
+                    colorSet: "default",
+                    x: { min: null, max: null },
+                    y: { min: null, max: null },
+                    series: []
+                };
+
+                // initialize new series object
+                $scope.newSeries = {
+                    x: {
+                        name: null
+                    },
+                    y: {
+                        name: null
+                    }
+                };
+
+                /**
+                 * Setup the methods callable from the methods input
+                 */
+                $scope.inputMethods = $scope.methods || {};
+
+                //
+                // private methods
+                //
+
+                function fetchData(){
+
+                    var featureNames = $scope.chartOptions.series.map(function(feature) { return feature.y.name });
+                    $scope.onFetch(featureNames, function(result){
+
+                        console.log("Initiated fetch.");
+                    });
+                }
+
+                function findFeature(name){
+                    var index = $scope.features.map(function(feature) { return feature.name; }).indexOf(name);
+                    return $scope.features[index];
+                }
+
+                function resetSeries() {
+                    $scope.newSeries.y.name = null;
+                    $scope.newSeries.x.name = null;
+                }
+
+                //
+                // public methods
+                //
+
+                /**
+                 * Adds the new series to the list of chart series
+                 */
+                $scope.addSeries = function(){
+
+                    // verify the series has been properly configured
+                    if ($scope.newSeries.y.name == null) return;
+                    if ($scope.chartOptions.hasXCoordinate && $scope.newSeries.x.name == null) return;
+
+                    // copy the new series and append to the list of series
+                    var series = angular.copy($scope.newSeries);
+
+                    // update chart boundaries
+                    var feature = findFeature(series.y.name);
+                    series.y.max = feature.max;
+                    series.y.min = feature.min;
+                    if ($scope.chartOptions.y.max == null || series.y.max > $scope.chartOptions.y.max)
+                        $scope.chartOptions.y.max = series.y.max;
+                    if ($scope.chartOptions.y.min == null || series.y.min < $scope.chartOptions.y.min)
+                        $scope.chartOptions.y.min = series.y.min;
+
+                    if ($scope.chartOptions.hasXCoordinate){
+
+                        feature = findFeature(series.x.name);
+                        series.x.max = feature.max;
+                        series.x.min = feature.min;
+                        if ($scope.chartOptions.x.max == null || series.x.max > $scope.chartOptions.x.max)
+                            $scope.chartOptions.x.max = series.x.max;
+                        if ($scope.chartOptions.x.min == null || series.x.min < $scope.chartOptions.x.min)
+                            $scope.chartOptions.x.min = series.x.min;
+                    }
+
+                    $scope.chartOptions.series.push(series);
+
+                    resetSeries();
+
+                    fetchData();
+                };
+
+                /**
+                 * called when chart type is updated, adjusts chart configuration based on chart type change
+                 */
+                $scope.onChartTypeUpdate = function() {
+
+                    // set whether chart has x coordinate
+                    $scope.chartOptions.hasXCoordinate = ($scope.chartOptions.type == "scatter");
+                };
+
+                /**
+                 * called when y-axis scale option is toggled, adjusts chart configuration based on change
+                 */
+                $scope.onToggleScale = function() {
+
+                };
+            }
+        }
+    }])
+
     .directive('progressCircle', ['$timeout', function($timeout){
 
         return {

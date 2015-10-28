@@ -9,13 +9,15 @@ public class Describe implements Serializable {
 
     private List<DescribeFeature> features;
 
-    public Describe(Collection<DescribeFeature> features){
-        this.features = new ArrayList<DescribeFeature>(features);
+    public Describe(){
+        this.features = new ArrayList<DescribeFeature>();
+    }
+
+    public void add(DescribeFeature feature){
+        features.add(feature);
     }
 
     public List<DescribeFeature> getFeatures() { return this.features; }
-
-    private Describe(){}
 
     public static class DescribeFeature implements Serializable {
 

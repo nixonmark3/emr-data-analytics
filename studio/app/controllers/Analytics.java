@@ -10,7 +10,8 @@ import emr.analytics.models.diagram.DiagramContainer;
 import emr.analytics.models.messages.AnalyticsTasks;
 import emr.analytics.models.messages.TaskRequest;
 import emr.analytics.models.messages.TaskSummaryRequest;
-import models.Load;
+import models.CollectRequest;
+import models.LoadRequest;
 import play.libs.Json;
 import play.mvc.*;
 import services.AnalyticsService;
@@ -137,24 +138,58 @@ public class Analytics extends Controller {
     }*/
 
     /**
-     *
-     * @return
+     * Initiates a load request
+     * @return confirmation of successful load request initialization
      */
     @BodyParser.Of(BodyParser.Json.class)
     public static Result load() {
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        Load load = objectMapper.convertValue(request().body().asJson(), Load.class);
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            LoadRequest load = objectMapper.convertValue(request().body().asJson(), LoadRequest.class);
 
-        TaskRequest request = new TaskRequest(load.getDiagramId(),
-                Mode.OFFLINE,
-                TargetEnvironments.PYSPARK,
-                load.getDiagramName(),
-                load.getCode());
+            TaskRequest request = new TaskRequest(load.getDiagramId(),
+                    Mode.OFFLINE,
+                    TargetEnvironments.PYSPARK,
+                    load.getDiagramName(),
+                    load.getCode());
 
-        // send request to analytics service
-        AnalyticsService.getInstance().send(request);
+            // send request to analytics service
+            AnalyticsService.getInstance().send(request);
 
-        return ok();
+            return ok();
+        }
+        catch (Exception ex){
+
+            return internalServerError(ex.getMessage());
+        }
+    }
+
+    /**
+     * Initiates a collect request
+     * @return confirmation of successful collect request initialization
+     */
+    @BodyParser.Of(BodyParser.Json.class)
+    public static Result collect(){
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            CollectRequest collectRequest = objectMapper.convertValue(request().body().asJson(), CollectRequest.class);
+
+            TaskRequest request = new TaskRequest(collectRequest.getDiagramId(),
+                    Mode.OFFLINE,
+                    TargetEnvironments.PYSPARK,
+                    collectRequest.getDiagramName(),
+                    collectRequest.getCode());
+
+            // send request to analytics service
+            AnalyticsService.getInstance().send(request);
+
+            return ok();
+        }
+        catch (Exception ex){
+
+            return internalServerError(ex.getMessage());
+        }
     }
 }

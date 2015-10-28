@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class Load implements Serializable {
+public class LoadRequest implements Serializable {
 
     private final String sqlContextName = "sqlContext";
     private final String variableName = "load_out";
@@ -16,7 +16,7 @@ public class Load implements Serializable {
     private Parse parse;
     private List<Transformation> transformations;
 
-    private Load() {
+    private LoadRequest() {
         transformations = new ArrayList<Transformation>();
     }
 

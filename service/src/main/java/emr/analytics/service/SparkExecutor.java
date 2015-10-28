@@ -168,6 +168,12 @@ public class SparkExecutor extends AbstractActor implements InterpreterNotificat
     }
 
     /**
+     * Wrap the features into an AnalyticsData object and associate with the current diagram id
+     * @param features
+     */
+    public void collect(Features features) { statusManager.tell(new AnalyticsData(diagramId, features), self()); }
+
+    /**
      * Send an identity message to initialize contact with parent
      */
     private void sendIdentifyRequest() {

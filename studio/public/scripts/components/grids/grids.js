@@ -317,13 +317,12 @@ angular.module('emr.ui.grids', [])
                 $scope.columnWidth = 180;
                 $scope.rowHeaderWidth = 180;
                 $scope.originX = $scope.rowHeaderWidth + 2 * $scope.padding;
-                $scope.originY = $scope.rowHeight + 2 * $scope.padding;
+                $scope.originY = $scope.rowHeight + $scope.padding;
+                $scope.gridHeight = (10 * $scope.rowHeight + 3 * $scope.padding);
 
-                var featureCount = 0;
-                $scope.gridWidth = (featureCount * ($scope.columnWidth + $scope.padding) + $scope.originX);
-                setGridHeight();
-
-                $scope.indexes = [];
+                $scope.$watch("features", function(){
+                    render();
+                });
 
                 angular.element('#grid-content-container').bind('scroll', function(event) {
 
@@ -335,50 +334,11 @@ angular.module('emr.ui.grids', [])
 
                 });
 
-                function init(){
-
+                function render(){
+                    // set the gridwidth based on the total number of features
+                    var featureCount = $scope.features.length;
+                    $scope.gridWidth = ((featureCount - 1) * ($scope.columnWidth + $scope.padding) + $scope.originX - $scope.padding);
                 }
-
-                function setGridHeight(){
-
-                    $scope.gridHeight = (10 * $scope.rowHeight + 3 * $scope.padding);
-                }
-
-                var formatUnixTime = function(item) {
-
-                    var date = new Date(item * 1000);
-
-                    var validDate = !isNaN(date.valueOf());
-
-                    if (!validDate) {
-
-                        return item;
-                    }
-
-                    return date.toISOString().replace('T', ' ').replace('Z', '');
-                };
-
-                var formatNumber = function(item) {
-
-                    if (isNaN(item)) {
-
-                        return 'NaN';
-                    }
-
-                    var n = 0.01;
-
-                    if (item != 0) {
-
-                        if (Math.abs(item) < n) {
-
-                            return item.toExponential(5);
-                        }
-                    }
-
-                    return item.toFixed(5);
-                };
-
-                init();
             }
         }
     }]);

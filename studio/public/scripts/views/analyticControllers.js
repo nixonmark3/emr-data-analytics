@@ -2,184 +2,182 @@
 
 analyticsApp
 
-    .controller('blockDataController', ['$scope', '$element', '$window', '$timeout', '$q', 'diagramService', 'block', 'loadSources', 'diagram', 'config', 'position', 'close',
-        function($scope, $element, $window, $timeout, $q, diagramService, block, loadSources, diagram, config, position, close){
+    .controller('blockDataController', ['$scope', '$element', '$window', '$timeout', '$q', 'diagramService', 'block', 'loadSources', 'diagram', 'config', 'position', 'close', function($scope, $element, $window, $timeout, $q, diagramService, block, loadSources, diagram, config, position, close){
 
-            $scope.position = position;
-            $scope.block = block.block;
-            $scope.config = config;
-            $scope.config.icon = "fa-cube";
-            $scope.config.cancelLabel = "Close";
-            $scope.pages = [];
-            $scope.currentPage = null;
-            $scope.activePage = 0;
-            $scope.blockProperties = block;
-            $scope.loadData = loadSources;
+        $scope.position = position;
+        $scope.block = block.block;
+        $scope.config = config;
+        $scope.config.icon = "fa-cube";
+        $scope.config.cancelLabel = "Close";
+        $scope.pages = [];
+        $scope.currentPage = null;
+        $scope.activePage = 0;
+        $scope.blockProperties = block;
+        $scope.loadData = loadSources;
+        $scope.loading = true;
+
+        $scope.savePropertiesChanges = function() {
+
+            diagram.updateBlock($scope.blockProperties);
+
+            $scope.propertiesConfig.isDirty = false;
+        };
+
+        $scope.cancelPropertiesChanges = function() {
+
+            $scope.blockProperties = $scope.blockProperties.reset();
+
+            $scope.propertiesConfig.isDirty = false;
+        };
+
+        $scope.propertiesChanged = function() {
+
+            $scope.propertiesConfig.isDirty = true;
+        };
+
+        $scope.propertiesConfig = {
+
+            isDirty: false
+        };
+
+        $scope.setActivePage = function(selectedIndex, selectedPage) {
+
             $scope.loading = true;
+            $scope.activePage = selectedIndex;
+            $scope.currentPage = selectedPage;
 
-            $scope.savePropertiesChanges = function() {
+            getData();
+        };
 
-                diagram.updateBlock($scope.blockProperties);
+        $scope.methods = {
 
-                $scope.propertiesConfig.isDirty = false;
-            };
+            close: onClose
+        };
 
-            $scope.cancelPropertiesChanges = function() {
+        function onClose(transitionDuration) {
 
-                $scope.blockProperties = $scope.blockProperties.reset();
-
-                $scope.propertiesConfig.isDirty = false;
-            };
-
-            $scope.propertiesChanged = function() {
-
-                $scope.propertiesConfig.isDirty = true;
-            };
-
-            $scope.propertiesConfig = {
-
-                isDirty: false
-            };
-
-            $scope.setActivePage = function(selectedIndex, selectedPage) {
-
-                $scope.loading = true;
-                $scope.activePage = selectedIndex;
-                $scope.currentPage = selectedPage;
-
-                getData();
-            };
-
-            $scope.methods = {
-
-                close: onClose
-            };
-
-            function onClose(transitionDuration) {
-
-                close(null, transitionDuration);
-            }
-
-            $scope.setGridWidth = function(columns) {
-
-                if (columns != null) {
-
-                    var additionalLength = 0;
-
-                    if (columns.length < 3) {
-                        additionalLength++;
-                    }
-
-                    return (columns.length + additionalLength) * 220;
-                }
-
-                return 1000;
-            };
-
-            $scope.getBlockData = function(type, key, success) {
-
-                switch(type){
-                    case "Pages":
-                        diagramService.availableBlockResults(key).then(
-                            function(data){
-                                success(data);
-                            },
-                            function (code) {
-                                console.log(code); // TODO show exception
-                            }
-                        );
-                        break;
-                    case "Statistics":
-                        diagramService.blockStatistics(key).then(
-                            function(data){
-                                success(data);
-                            },
-                            function (code) {
-                                console.log(code); // TODO show exception
-                            }
-                        );
-                        break;
-                    case "Plot":
-                        diagramService.blockPlot(key).then(
-                            function(data){
-                                success(data);
-                            },
-                            function (code) {
-                                console.log(code); // TODO show exception
-                            }
-                        );
-                        break;
-                    case "Results":
-                        diagramService.blockOutputResults(key).then(
-                            function(data){
-                                success(data);
-                            },
-                            function (code) {
-                                console.log(code); // TODO show exception
-                            }
-                        );
-                        break;
-                }
-            };
-
-            function init() {
-
-                $timeout(function() {
-
-                    $scope.getBlockData('Pages',
-                        $scope.block.id,
-                        function(results) {
-
-                            if ($scope.blockProperties.parameters.length > 0) {
-
-                                $scope.pages.push({name:"Properties",type:"props", data: null});
-                            }
-
-                            for(var i = 0; i < results.length; i++) {
-
-                                $scope.pages.push(results[i]);
-                            }
-
-                            if ($scope.pages.length > 0) {
-
-                                $scope.currentPage = $scope.pages[0];
-                            }
-
-                            $scope.config.title = $scope.block.name;
-                            $scope.config.subTitle = "Configure and review block details";
-
-                            getData();
-                        });
-                }, 500);
-            };
-
-            function getData() {
-
-                if ($scope.currentPage != null) {
-
-                    if ($scope.currentPage.data == null) {
-
-                        $scope.getBlockData(
-                            $scope.currentPage.name,
-                            $scope.block.id,
-                            function (results) {
-
-                                $scope.currentPage.data = results;
-                                $scope.loading = false;
-                            });
-                    }
-                    else {
-
-                        $scope.loading = false;
-                    }
-                }
-
-            };
-
-            init();
+            close(null, transitionDuration);
         }
 
-    ])
+        $scope.setGridWidth = function(columns) {
+
+            if (columns != null) {
+
+                var additionalLength = 0;
+
+                if (columns.length < 3) {
+                    additionalLength++;
+                }
+
+                return (columns.length + additionalLength) * 220;
+            }
+
+            return 1000;
+        };
+
+        $scope.getBlockData = function(type, key, success) {
+
+            switch(type){
+                case "Pages":
+                    diagramService.availableBlockResults(key).then(
+                        function(data){
+                            success(data);
+                        },
+                        function (code) {
+                            console.log(code); // TODO show exception
+                        }
+                    );
+                    break;
+                case "Statistics":
+                    diagramService.blockStatistics(key).then(
+                        function(data){
+                            success(data);
+                        },
+                        function (code) {
+                            console.log(code); // TODO show exception
+                        }
+                    );
+                    break;
+                case "Plot":
+                    diagramService.blockPlot(key).then(
+                        function(data){
+                            success(data);
+                        },
+                        function (code) {
+                            console.log(code); // TODO show exception
+                        }
+                    );
+                    break;
+                case "Results":
+                    diagramService.blockOutputResults(key).then(
+                        function(data){
+                            success(data);
+                        },
+                        function (code) {
+                            console.log(code); // TODO show exception
+                        }
+                    );
+                    break;
+            }
+        };
+
+        function init() {
+
+            $timeout(function() {
+
+                $scope.getBlockData('Pages',
+                    $scope.block.id,
+                    function(results) {
+
+                        if ($scope.blockProperties.parameters.length > 0) {
+
+                            $scope.pages.push({name:"Properties",type:"props", data: null});
+                        }
+
+                        for(var i = 0; i < results.length; i++) {
+
+                            $scope.pages.push(results[i]);
+                        }
+
+                        if ($scope.pages.length > 0) {
+
+                            $scope.currentPage = $scope.pages[0];
+                        }
+
+                        $scope.config.title = $scope.block.name;
+                        $scope.config.subTitle = "Configure and review block details";
+
+                        getData();
+                    });
+            }, 500);
+        }
+
+        function getData() {
+
+            if ($scope.currentPage != null) {
+
+                if ($scope.currentPage.data == null) {
+
+                    $scope.getBlockData(
+                        $scope.currentPage.name,
+                        $scope.block.id,
+                        function (results) {
+
+                            $scope.currentPage.data = results;
+                            $scope.loading = false;
+                        });
+                }
+                else {
+
+                    $scope.loading = false;
+                }
+            }
+
+        }
+
+        init();
+
+    }])
 
     .controller('blockGroupController', ['$scope', '$element', '$timeout', 'diagramService', 'position', 'diagram', 'close',
         function($scope, $element, $timeout, diagramService, position, diagram, close){
@@ -754,265 +752,305 @@ analyticsApp
         }
     ])
 
-    .controller('loadDataController', ['$scope', '$element', '$webSockets', 'diagramService', 'diagramId', 'diagramName', 'config', 'position', 'close',
-        function($scope, $element, $webSockets, diagramService, diagramId, diagramName, config, position, close){
+    .controller('loadDataController', ['$scope', '$element', '$webSockets', 'toasterService', 'diagramService', 'diagramId', 'diagramName', 'config', 'position', 'close', function($scope, $element, $webSockets, toasterService, diagramService, diagramId, diagramName, config, position, close){
 
-            // add the position and config variables to the current scope so that they can be accessed by modal
-            $scope.position = position;
-            $scope.config = config;
-            $scope.config.icon = "fa-upload";
-            $scope.config.subTitle = "Load Data";
-            $scope.config.saveLabel = "Finish";
 
-            $scope.methods = {
-                close: onClose,
-                next: onNext,
-                back: onBack,
-                save: onSave
-            };
 
-            $scope.features = [];
+        // add the position and config variables to the current scope so that they can be accessed by modal
+        $scope.position = position;
+        $scope.config = config;
+        $scope.config.icon = "fa-upload";
+        $scope.config.subTitle = "Load Data";
+        $scope.config.saveLabel = "Finish";
 
-            $scope.activeStep = 0;
+        $scope.methods = {
+            close: onClose,
+            next: onNext,
+            back: onBack,
+            save: onSave
+        };
+
+        $scope.features = [];
+
+        $scope.activeStep = 0;
+        $scope.direction = 0;
+        $scope.previewMode = 0;
+        $scope.isEvaluating = false;
+        $scope.menuWidth = 20;
+        $scope.chartMethods = {};
+
+        $webSockets.listen("describe", function(msg){ return msg.messageType == "describe"; }, onDescribe);
+
+        // a dictionary of file names and their associated index numbers
+        $scope.fileDict = {};
+
+        $scope.source = {
+            sourceType: 'FILES',
+            dataSources: []
+        };
+
+        $scope.parse = {
+            parseType: 'SEPARATED_VALUES',
+            header: true,
+            delimiterType: 'COMMA',
+            delimiterChar: '',
+            missingValueMode: 'PERMISSIVE',
+            quoteChar: '"',
+            commentChar: '#'
+        };
+
+        $scope.transformations = [];
+
+        $scope.progressSteps = [
+            { name: 'source', icon: 'fa-database' },
+            { name: 'parse', icon: 'fa-code' },
+            { name: 'clean', icon: 'fa-paint-brush' }
+        ];
+
+        var toastContainerId = "load-data-toaster";
+
+        // internal methods
+
+        function configureActiveStep(){
+
+            switch($scope.activeStep){
+
+                case 0:
+                    $scope.config.title = "Select a Data Source";
+                    $scope.config.showBack = false;
+                    $scope.config.showNext = true;
+                    $scope.config.showSave = false;
+                    break;
+                case 1:
+                    $scope.config.title = "Parse the Data";
+                    $scope.config.showBack = true;
+                    $scope.config.showNext = true;
+                    $scope.config.showSave = false;
+                    break;
+                case 2:
+                    $scope.config.title = "Clean the Data";
+                    $scope.config.showBack = true;
+                    $scope.config.showNext = false;
+                    $scope.config.showSave = true;
+                    break;
+            }
+        }
+
+        function onBack(){
             $scope.direction = 0;
-            $scope.isEvaluating = false;
-            $scope.menuWidth = 20;
+            $scope.activeStep--;
+            configureActiveStep();
+        }
 
-            $webSockets.listen("describe", function(msg){ return msg.messageType == "describe"; }, onDescribe);
+        function onClose(transitionDuration){
 
-            // a dictionary of file names and their associated index numbers
-            $scope.fileDict = {};
+            $webSockets.unlisten("describe");
+            close(null, transitionDuration);
+        }
 
-            $scope.source = {
-                sourceType: 'FILES',
-                dataSources: []
-            };
+        function onDescribe(describe){
+            $scope.features = describe.describe.features;
+        }
 
-            $scope.parse = {
-                parseType: 'SEPARATED_VALUES',
-                header: true,
-                delimiterType: 'COMMA',
-                delimiterChar: '',
-                missingValueMode: 'PERMISSIVE',
-                quoteChar: '"',
-                commentChar: '#'
-            };
+        function onNext(){
+            $scope.direction = 1;
 
-            $scope.transformations = [];
-
-            $scope.progressSteps = [
-                { name: 'source', icon: 'fa-database' },
-                { name: 'parse', icon: 'fa-code' },
-                { name: 'clean', icon: 'fa-paint-brush' }
-            ];
-
-            // internal methods
-
-            function configureActiveStep(){
-
-                switch($scope.activeStep){
-
-                    case 0:
-                        $scope.config.title = "Select a Data Source";
-                        $scope.config.showBack = false;
-                        $scope.config.showNext = true;
-                        $scope.config.showSave = false;
-                        break;
-                    case 1:
-                        $scope.config.title = "Parse the Data";
-                        $scope.config.showBack = true;
-                        $scope.config.showNext = true;
-                        $scope.config.showSave = false;
-                        break;
-                    case 2:
-                        $scope.config.title = "Clean the Data";
-                        $scope.config.showBack = true;
-                        $scope.config.showNext = false;
-                        $scope.config.showSave = true;
-                        break;
-                }
+            if ($scope.activeStep == 0){
+                $scope.onLoad(function(){
+                    $scope.activeStep++;
+                    configureActiveStep();
+                });
             }
-
-            function onBack(){
-                $scope.direction = 0;
-                $scope.activeStep--;
-                configureActiveStep();
-            }
-
-            function onClose(transitionDuration){
-
-                $webSockets.unlisten("describe");
-                close(null, transitionDuration);
-            }
-
-            function onDescribe(describe){
-
-
-            }
-
-            function onNext(){
-                $scope.direction = 1;
+            else{
                 $scope.activeStep++;
                 configureActiveStep();
-
-                if ($scope.activeStep == 1){
-                    $scope.onLoad();
-                }
             }
+        }
 
-            function onSave(transitionDuration){
-                close(null, transitionDuration);
-            }
+        function onSave(transitionDuration){
+            close(null, transitionDuration);
+        }
 
-            // public methods
+        // public methods
 
-            $scope.addFiles = function(files){
+        $scope.addFiles = function(files){
 
-                $scope.onFileDropStart(files);
+            $scope.onFileDropStart(files);
 
-                for(var index = 0; index < files.length; index++){
+            for(var index = 0; index < files.length; index++){
 
-                    var file = files[index];
-                    diagramService.upload(file).then(
-                        function(result){   // on success
+                var file = files[index];
+                diagramService.upload(file).then(
+                    function(result){   // on success
 
-                            $scope.onFileDrop(result);
-                        },
-                        function(message){     // on error
-
-                            $scope.onFileDropError(message);
-                        },
-                        function(evt){      // on notification
-
-                            if (evt.lengthComputable) {
-
-                                var complete = (evt.loaded / evt.total * 100 | 0);
-                                $scope.onFileDropNotification(file, complete);
-                            }
-                        }
-                    );
-                }
-            };
-
-            $scope.onBrowse = function(evt){
-                document.getElementById("fileBrowser").click();
-
-                evt.stopPropagation();
-                evt.preventDefault();
-            };
-
-            $scope.onFileDrop = function(files, evt){
-
-                for(var i = 0; i < files.length; i++) {
-
-                    var file = files[i];
-                    var fileIndex = $scope.fileDict[file.name];
-                    if (fileIndex !== undefined) {
-                        var item = $scope.source.dataSources[fileIndex];
-                        if(item !== undefined){
-                            item.progress = 100;
-                            item.path = file.path;
-                        }
-                    }
-                }
-            };
-
-            $scope.onFileDropStart = function(files){
-
-                for(var i = 0; i < files.length; i++){
-
-                    var file = files[i];
-
-                    if($scope.fileDict[file.name] === undefined){
-
-                        $scope.fileDict[file.name] = $scope.source.dataSources.length;
-                        $scope.source.dataSources.push({
-                            dataSourceType: 'FILE',
-                            name: file.name,
-                            progress: 0,
-                            path: ''
-                        });
-                    }
-                    else{
-
-                        // todo: notify user file already exists
-                    }
-                }
-            };
-
-            $scope.onFileDropNotification = function(file, complete){
-
-                var fileIndex = $scope.fileDict[file.name];
-                if(fileIndex !== undefined)
-                    $scope.source.dataSources[fileIndex].progress = complete;
-            };
-
-            $scope.onFileRemove = function(name){
-
-                var fileIndex = $scope.fileDict[name];
-                if(fileIndex !== undefined) {
-                    delete $scope.fileDict[name];
-                    $scope.source.dataSources.splice(fileIndex, 1);
-                }
-            };
-
-            $scope.onLoad = function(){
-
-                var data = {
-                    diagramId: diagramId,
-                    diagramName: diagramName,
-                    source: $scope.source,
-                    parse: $scope.parse,
-                    transformations: $scope.transformations
-                };
-
-                diagramService.load(data).then(
-                    function(result){
-
+                        $scope.onFileDrop(result);
                     },
-                    function(){
+                    function(message){     // on error
 
+                        $scope.onFileDropError(message);
+                    },
+                    function(evt){      // on notification
+
+                        if (evt.lengthComputable) {
+
+                            var complete = (evt.loaded / evt.total * 100 | 0);
+                            $scope.onFileDropNotification(file, complete);
+                        }
                     }
                 );
+            }
+        };
+
+        $scope.onBrowse = function(evt){
+            document.getElementById("fileBrowser").click();
+
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
+
+        $scope.onFetch = function(featureNames, onSuccess){
+
+            var request = {
+                diagramId: diagramId,
+                diagramName: diagramName,
+                dataFrameName: 'load_out',
+                features: featureNames
             };
 
-            $scope.onResizeMenu = function(evt){
+            diagramService.collect(request).then(
+                function(result){
+                    onSuccess(result);
+                },
+                function(data, status){
 
-                var containerWidth,
-                    originX;
+                    toasterService.error(data,
+                        data,
+                        toastContainerId);
+                }
+            );
+        };
 
-                $scope.$root.$broadcast("beginDrag", {
-                    x: evt.pageX,
-                    y: evt.pageY,
-                    config: {
+        $scope.onFileDrop = function(files, evt){
 
-                        dragStarted: function (x, y) {
+            for(var i = 0; i < files.length; i++) {
 
-                            // create reference to dialog container
-                            var container = angular.element(document.querySelector('#load-data-wrapper'));
-                            containerWidth = container.width();
-                            originX = container.offset().left;
-                        },
-
-                        dragging: function (x, y) {
-
-                            var width = (x - originX) * 100.0 / containerWidth;
-                            if (width > 5 && width < 95)
-                                $scope.menuWidth = width;
-                        }
+                var file = files[i];
+                var fileIndex = $scope.fileDict[file.name];
+                if (fileIndex !== undefined) {
+                    var item = $scope.source.dataSources[fileIndex];
+                    if(item !== undefined){
+                        item.progress = 100;
+                        item.path = file.path;
                     }
-                });
+                }
+            }
+        };
+
+        $scope.onFileDropStart = function(files){
+
+            for(var i = 0; i < files.length; i++){
+
+                var file = files[i];
+
+                if($scope.fileDict[file.name] === undefined){
+
+                    $scope.fileDict[file.name] = $scope.source.dataSources.length;
+                    $scope.source.dataSources.push({
+                        dataSourceType: 'FILE',
+                        name: file.name,
+                        progress: 0,
+                        path: ''
+                    });
+                }
+                else{
+
+                    // todo: notify user file already exists
+                }
+            }
+        };
+
+        $scope.onFileDropNotification = function(file, complete){
+
+            var fileIndex = $scope.fileDict[file.name];
+            if(fileIndex !== undefined)
+                $scope.source.dataSources[fileIndex].progress = complete;
+        };
+
+        $scope.onFileRemove = function(name){
+
+            var fileIndex = $scope.fileDict[name];
+            if(fileIndex !== undefined) {
+                delete $scope.fileDict[name];
+                $scope.source.dataSources.splice(fileIndex, 1);
+            }
+        };
+
+        $scope.onLoad = function(onSuccess){
+
+            var data = {
+                diagramId: diagramId,
+                diagramName: diagramName,
+                source: $scope.source,
+                parse: $scope.parse,
+                transformations: $scope.transformations
             };
 
-            $scope.setSourceType = function(sourceType){
-                $scope.source.sourceType = sourceType;
-            };
+            diagramService.load(data).then(
+                function(result){
 
-            $scope.setParseType = function(parseType){
-                $scope.parse.parseType = parseType;
-            };
+                    onSuccess(result);
+                },
+                function(data, status){
 
-            configureActiveStep();
+                    toasterService.error(data,
+                        data,
+                        toastContainerId);
+                }
+            );
+        };
+
+        $scope.onResizeMenu = function(evt){
+
+            var containerWidth,
+                originX;
+
+            $scope.$root.$broadcast("beginDrag", {
+                x: evt.pageX,
+                y: evt.pageY,
+                config: {
+
+                    dragStarted: function (x, y) {
+
+                        // create reference to dialog container
+                        var container = angular.element(document.querySelector('#load-data-wrapper'));
+                        containerWidth = container.width();
+                        originX = container.offset().left;
+                    },
+
+                    dragging: function (x, y) {
+
+                        var width = (x - originX) * 100.0 / containerWidth;
+                        if (width > 5 && width < 95)
+                            $scope.menuWidth = width;
+                    }
+                }
+            });
+        };
+
+        $scope.setSourceType = function(sourceType){
+            $scope.source.sourceType = sourceType;
+        };
+
+        $scope.setParseType = function(parseType){
+            $scope.parse.parseType = parseType;
+        };
+
+        $scope.setPreviewMode = function(mode){
+
+            $scope.previewMode = mode;
+        };
+
+        configureActiveStep();
     }])
 
     .controller('createDiagramController', ['$scope', 'diagramProperties', 'close', function($scope, diagramProperties, close){
@@ -1033,7 +1071,7 @@ analyticsApp
     }])
 
     /**
-     * Studio terminal controller:
+     * Studio terminal controller
      */
     .controller('terminalController', [ '$scope', '$timeout',
         function($scope, $timeout){

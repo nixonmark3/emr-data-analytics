@@ -1,5 +1,7 @@
 <div id="load-data-wrapper" ng-switch on="activeStep">
 
+    <div id="load-data-toaster"></div>
+
     <div id="load-data-evaluation" ng-class="{ 'evaluating' : isEvaluating }">
         <i class="fa fa-2x fa-gear ng-class:{'fa-spin' : isEvaluating }"></i>
     </div>
@@ -149,9 +151,20 @@
             </ul>
         </div>
 
-        <div class="load-data-content" ng-style="{ 'width': (100 - menuWidth) + '%' }">
+        <div class="load-data-content" ng-style="{ 'width': (100 - menuWidth) + '%' }" ng-switch on="previewMode">
 
-            <explore-grid features="features"></explore-grid>
+            <div ng-switch-when="0" class="load-data-tab" style="padding-top: 15px;">
+                <explore-grid features="features"></explore-grid>
+            </div>
+
+            <div ng-switch-when="1" class="load-data-tab">
+                <explore-chart features="features" methods="chartMethods" on-fetch="onFetch"></explore-chart>
+            </div>
+
+            <ul class="load-data-tabs">
+                <li ng-class="{ 'active' : previewMode == 1 }" ng-click="setPreviewMode(1)"><a><i class="fa fa-line-chart"></i>Chart</a></li>
+                <li ng-class="{ 'active' : previewMode == 0 }" ng-click="setPreviewMode(0)"><a><i class="fa fa-table"></i>Grid</a></li>
+            </ul>
 
         </div>
 

@@ -39,6 +39,10 @@ sqlContext = SQLContext(sc, jsql)
 # collection of methods to pass data through the gateway
 class DataGateway(object):
 
+    # sends a dataframe's schema and data to the interpreter
+    def collect(self, dataFrame):
+        interpreter.collect(dataFrame.schema.json(), dataFrame.columns, dataFrame.collect())
+
     # sends a dataframe's schema and describe statistics to the interpreter
     def describe(self, dataFrame):
         stats = dataFrame.describe()

@@ -117,6 +117,11 @@ public class AnalyticsClient extends AbstractActor {
                 SessionManager.getInstance().notifySubscribers(status.getDiagramId(), status);
             })
 
+            .match(AnalyticsData.class, data -> {
+
+                SessionManager.getInstance().notifySubscribers(data.getDiagramId(), data);
+            })
+
             .match(AnalyticsDescribe.class, describe -> {
 
                 SessionManager.getInstance().notifySubscribers(describe.getDiagramId(), describe);

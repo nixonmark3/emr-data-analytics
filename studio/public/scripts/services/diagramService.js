@@ -66,7 +66,20 @@ analyticsApp
             return deferred.promise;
         },
 
+        collect: function(request){
 
+            var deferred = $q.defer();
+
+            $http.post('/analytics/collect', request)
+                .success(function (data, status, headers, config) {
+                    deferred.resolve(data);
+                })
+                .error(function (data, status, headers, config){
+                    deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
 
         transform: function (data) {
 
@@ -245,7 +258,7 @@ analyticsApp
                 })
                 .error(function (data, status, headers, config){
 
-                    deferred.reject(status);
+                    deferred.reject(data, status);
                 });
 
             return deferred.promise;

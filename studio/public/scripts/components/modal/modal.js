@@ -90,7 +90,7 @@ angular.module('emr.ui.modal', ['emr.ui.popup', 'emr.ui.shared'])
 
             function ModalService(){
 
-                var defaultModalSize = 0.90;
+                var defaultModalSize = 0.95;
 
                 this.show = function(options){
 

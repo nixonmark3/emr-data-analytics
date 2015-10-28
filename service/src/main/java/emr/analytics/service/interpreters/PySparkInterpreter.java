@@ -2,6 +2,8 @@ package emr.analytics.service.interpreters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import emr.analytics.models.messages.Describe;
+import emr.analytics.models.messages.Feature;
+import emr.analytics.models.messages.Features;
 import emr.analytics.service.messages.DataFrameSchema;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.ExecuteResultHandler;
@@ -32,8 +34,11 @@ public class PySparkInterpreter extends PythonInterpreter implements ExecuteResu
         loadLogProperties();
 
         // create spark configuration and context
+
+        // todo: make master configurable for spark and pyspark streaming
+
         sparkConf = new SparkConf()
-                .setMaster("local[2]")
+                .setMaster("local[*]")
                 .setAppName(name);
         sparkContext = new JavaSparkContext(sparkConf);
         sqlContext = new SQLContext(sparkContext);
@@ -112,9 +117,49 @@ public class PySparkInterpreter extends PythonInterpreter implements ExecuteResu
             }
         }
 
-        Describe describe = new Describe(features.values());
+        Describe describe = new Describe();
+        for(DataFrameSchema.DFSchemaField field : schema.getFields())
+            describe.add(features.get(field.getName()));
 
         this.notificationHandler.describe(describe);
+    }
+
+    public void collect(String schemaJson, List<String> names, List<List<Object>> data){
+
+        Map<String, Feature> featureMap = new HashMap<>();
+
+        DataFrameSchema schema = this.schemaFromJson(schemaJson);
+        for(DataFrameSchema.DFSchemaField field : schema.getFields()){
+
+            Feature feature;
+            switch(field.getType()){
+                case "double":
+                    feature = new Feature<Double>(Double.class);
+                    break;
+                case "string":
+                    feature = new Feature<String>(String.class);
+                    break;
+                default:
+                    throw new InterpreterException(String.format("The specified data type, %s, is not supported.", field.getType()));
+            }
+
+            featureMap.put(field.getName(), feature);
+        }
+
+        for (List<Object> row : data){
+            for(int i = 0; i < row.size(); i++){
+
+                Feature feature = featureMap.get(names.get(i));
+                feature.addObject(row.get(i));
+            }
+        }
+
+        Features features = new Features();
+        for(String name : names){
+            features.add(featureMap.get(name));
+        }
+
+        this.notificationHandler.collect(features);
     }
 
     private DataFrameSchema schemaFromJson(String json){
