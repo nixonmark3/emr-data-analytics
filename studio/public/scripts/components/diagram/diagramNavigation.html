@@ -1,130 +1,244 @@
-<div class="diag-nav">
+<div class="diag-nav-wrapper">
 
-    <div class="nav-page"
-         ng-repeat="page in pages track by $index"
-         ng-mouseenter="setCurrentPage($index);"
-         ng-switch="page.type"
-         ng-class="{'nav-page-override': isFirstPage($index), 'nav-page-width-override': isDiagramPage(page.type) }"
-         ng-show="isPageVisible($index)">
+    <div class="diag-nav-container">
 
-        <div ng-switch-when="Container"
-             class="diag-nav-item"
-             ng-repeat="item in page.items track by $index"
-             ng-click="switchPage(item);"
-             ng-dblclick="loadDiagram(item);"
-             ng-class="{'nav-page-highlight-file': isHighLighted(item.name)}">
-
-            <div class="pull-left nav-page-file-type" ng-switch="item.type">
-                <i ng-switch-when="Container" class="fa fa-folder-o" ng-hide="isHighLighted(item.name)"></i>
-                <i ng-switch-when="Container" class="fa fa-folder-open-o" ng-show="isHighLighted(item.name)"></i>
-                <i ng-switch-when="Diagram" class="fa fa-file-o"></i>
-            </div>
-            <span>
-                {{item.name}}
-            </span>
-            <div class="pull-right" ng-switch="item.type">
-                <i ng-switch-when="Container" class="fa fa-caret-right"></i>
-            </div>
+        <div id="diag-nav-home">
+            <ul class="vertical-tabs">
+                <li class="vertical-tab ng-class:{active: (activeOption==='properties')}" ng-click="onPropertiesClick()">
+                    <div class="tab-icon"><i class="fa fa-2x fa-edit"></i></div>
+                    <div class="tab-text">Properties</div>
+                </li>
+                <li class="vertical-tab ng-class:{active: (activeOption==='new')}" ng-click="onNewClick()">
+                    <div class="tab-icon"><i class="fa fa-2x fa-file"></i></div>
+                    <div class="tab-text">New</div>
+                </li>
+                <li class="vertical-tab ng-class:{active: (activeOption==='open')}" ng-click="onOpenClick()">
+                    <div class="tab-icon"><i class="fa fa-2x fa-folder-open"></i></div>
+                    <div class="tab-text">Open</div>
+                </li>
+            </ul>
         </div>
 
-        <div class="nav-props-wrapper" ng-switch-when="Diagram">
-            <div class="nav-props-body">
-                <div class="nav-props-title">
-                    {{page.name}}
-                </div>
-                <div class="diagram-property" ng-hide="page.description.length === 0">
-                    <label>Description</label>
-                    <div class="nav-props-value">{{page.description}}</div>
-                </div>
-                <div class="diagram-property" ng-hide="page.owner.length === 0">
-                    <label>Owner</label>
-                    <div class="nav-props-value">{{page.owner}}</div>
-                </div>
-                <div class="diagram-property" ng-hide="page.targetEnvironment.length === 0">
-                    <label>Target Environment</label>
-                    <div class="nav-props-value">{{page.targetEnvironment}}</div>
-                </div>
-                <div class="diagram-property" ng-hide="page.category.length === 0">
-                    <label>Category</label>
-                    <div class="nav-props-value">{{page.category}}</div>
-                </div>
-            </div>
-            <div class="nav-props-footer">
-                <div class="nav-props-icon pull-right" ng-click="deleteDiagram(page);">
-                    <i class="fa fa-trash fa-lg"></i>
-                </div>
-            </div>
-        </div>
+        <div ng-switch="activeOption">
 
-        <div class="nav-create-wrapper" ng-switch-when="Create">
-            <div class="nav-create-body">
-                <div class="nav-create-title">
-                    {{page.diagramName}}
-                </div>
-                <div class="diagram-property">
-                    <label>Name</label>
-                    <input type="text" class="nav-create-item-height form-control" ng-model="page.diagramName">
-                </div>
-                <div class="diagram-property">
-                    <label>Description</label>
-                    <input type="text" class="nav-create-item-height form-control" ng-model="page.description">
-                </div>
-                <div class="diagram-property">
-                    <label>Owner</label>
-                    <input type="text" class="nav-create-item-height form-control" ng-model="page.owner">
-                </div>
-                <div class="diagram-property">
-                    <label>Target Environment</label>
-                    <select class="nav-create-item-height form-control" ng-model="page.targetEnvironment">
-                        <option value="PYTHON">Python</option>
-                        <option value="PYSPARK">PySpark</option>
-                    </select>
-                </div>
-                <div class="diagram-property">
-                    <label>Category</label>
-                    <div class="nav-create-category-container">
-                        <select class="nav-create-item-height form-control nav-create-category-select nav-create-category-container-item" ng-model="page.category">
-                            <option ng-repeat="category in categories track by $index" ng-selected="category==currentPath">{{category}}</option>
-                        </select>
-                        <button type="button" class="nav-create-item-height btn btn-default nav-create-category-container-item" ng-click="onAddNewCategory()">
-                            <i class="fa fa-plus"></i>
-                        </button>
+            <div class="diag-nav-properties-wrapper" ng-switch-when="properties">
+
+                <div class="diag-nav-properties-page">
+
+                    <div class="diag-nav-props-body">
+
+                        <div class="diag-nav-props-title">
+                            {{diagramProperties.name}}
+                        </div>
+
+                        <div class="diagram-property">
+                            <label>Name</label>
+                            <input type="text"
+                                   class="diag-nav-props-item-height form-control"
+                                   ng-model="diagramProperties.name"
+                                   ng-change="onDiagramPropertyChanged()">
+                        </div>
+
+                        <div class="diagram-property">
+                            <label>Description</label>
+                            <input type="text"
+                                   class="diag-nav-props-item-height form-control"
+                                   ng-model="diagramProperties.description"
+                                   ng-change="onDiagramPropertyChanged()">
+                        </div>
+
+                        <div class="diagram-property">
+                            <label>Owner</label>
+                            <input type="text"
+                                   class="diag-nav-props-item-height form-control"
+                                   ng-model="diagramProperties.owner"
+                                   ng-change="onDiagramPropertyChanged()">
+                        </div>
+
+                        <div class="diagram-property">
+                            <label>Target Environment</label>
+                            <select class="diag-nav-props-item-height form-control"
+                                    ng-model="diagramProperties.targetEnvironment"
+                                    ng-change="onDiagramPropertyChanged()">
+                                <option value="PYTHON">Python</option>
+                                <option value="PYSPARK">PySpark</option>
+                            </select>
+                        </div>
+
+                        <div class="diagram-property">
+                            <label>Category</label>
+                            <div class="diag-nav-props-category-container">
+                                <select class="diag-nav-props-item-height form-control diag-nav-props-category-select diag-nav-props-category-container-item" ng-model="diagramProperties.category" ng-change="onDiagramPropertyChanged()">
+                                    <option ng-repeat="category in categories track by $index" ng-selected="category==diagramProperties.category">{{category}}</option>
+                                </select>
+                                <button type="button" class="diag-nav-props-item-height btn btn-default diag-nav-props-category-container-item" ng-click="onAddNewCategory()">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                            <div class="diagram-property diag-nav-props-new-category" ng-show="toggleAddNewCategory">
+                                <label>New Category</label>
+                                <input type="text" class="form-control diag-nav-props-item-height" ng-model="diagramProperties.category" ng-change="onDiagramPropertyChanged()">
+                            </div>
+                        </div>
                     </div>
-                    <div class="diagram-property nav-create-new-category" ng-show="toggleAddNewCategory">
-                        <label>New Category</label>
-                        <input type="text" class="form-control nav-create-item-height" ng-model="page.category">
+                    <div class="diag-nav-props-footer" ng-show="diagramProperties.isDirty">
+                        <button type="button" class="btn btn-success btn-sm pull-right" ng-click="onDiagramPropertiesSave()">Save</button>
+                        <button type="button" class="btn btn-default btn-sm pull-right diag-nav-props-footer-btn-margin-right" ng-click="onDiagramPropertiesReset()">Reset</button>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="diag-nav-new-wrapper" ng-switch-when="new">
+
+                <div class="diag-nav-new-page">
+
+                    <div class="diag-nav-props-body">
+                        <div class="diagram-property">
+                            <label>Name</label>
+                            <input type="text"
+                                   class="diag-nav-props-item-height form-control"
+                                   ng-model="newDiagramProperties.diagramName"
+                                   ng-change="onNewDiagramPropertyChanged()">
+                        </div>
+                        <div class="diagram-property">
+                            <label>Description</label>
+                            <input type="text"
+                                   class="diag-nav-props-item-height form-control"
+                                   ng-model="newDiagramProperties.description"
+                                   ng-change="onNewDiagramPropertyChanged()">
+                        </div>
+                        <div class="diagram-property">
+                            <label>Owner</label>
+                            <input type="text"
+                                   class="diag-nav-props-item-height form-control"
+                                   ng-model="newDiagramProperties.owner"
+                                   ng-change="onNewDiagramPropertyChanged()">
+                        </div>
+                        <div class="diagram-property">
+                            <label>Target Environment</label>
+                            <select class="diag-nav-props-item-height form-control" ng-model="newDiagramProperties.targetEnvironment" ng-change="onNewDiagramPropertyChanged()">
+                                <option value="PYTHON">Python</option>
+                                <option value="PYSPARK">PySpark</option>
+                            </select>
+                        </div>
+                        <div class="diagram-property">
+                            <label>Category</label>
+                            <div class="diag-nav-props-category-container">
+                                <select class="diag-nav-props-item-height form-control diag-nav-props-category-select diag-nav-props-category-container-item" ng-model="newDiagramProperties.category" ng-change="onNewDiagramPropertyChanged()">
+                                    <option ng-repeat="category in categories track by $index">{{category}}</option>
+                                </select>
+                                <button type="button" class="diag-nav-props-item-height btn btn-default diag-nav-props-category-container-item" ng-click="onAddNewCategory()">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                            <div class="diagram-property diag-nav-props-new-category" ng-show="toggleAddNewCategory">
+                                <label>New Category</label>
+                                <input type="text" class="form-control diag-nav-props-item-height" ng-model="newDiagramProperties.category" ng-change="onNewDiagramPropertyChanged()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="diag-nav-props-footer" ng-show="newDiagramProperties.isDirty">
+                        <button type="button" class="btn btn-success btn-sm pull-right" ng-click="onDiagramNewCreate(page)">Create</button>
+                        <button type="button" class="btn btn-default btn-sm pull-right diag-nav-props-footer-btn-margin-right" ng-click="onDiagramNewReset()">Reset</button>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="diag-nav-open-container" ng-switch-when="open">
+
+                <div class="diag-nav-open-wrapper" ng-style="getShift()">
+
+                    <div class="diag-nav-open-page"
+                         ng-style="getOpenPageStyle($index)"
+                         ng-switch="page.type"
+                         ng-repeat="page in pages track by $index"
+                         ng-mouseenter="setCurrentPage($index);">
+
+                        <div class="diag-nav-open-page-content" ng-switch-when="Container">
+
+                            <div class="diag-nav-open-page-item"
+                                 ng-class="{'diag-nav-open-page-highlight-file': isHighLighted(item.name)}"
+                                 ng-repeat="item in page.items track by $index"
+                                 ng-click="switchPage(item);"
+                                 ng-dblclick="loadDiagram(item);">
+
+                                <div class="pull-left diag-nav-open-page-file-type" ng-switch="item.type">
+                                    <i ng-switch-when="Container" class="fa fa-folder-o" ng-hide="isHighLighted(item.name)"></i>
+                                    <i ng-switch-when="Container" class="fa fa-folder-open-o" ng-show="isHighLighted(item.name)"></i>
+                                    <i ng-switch-when="Diagram" class="fa fa-file-o"></i>
+                                </div>
+
+                                <span>{{item.name}}</span>
+
+                                <div class="pull-right" ng-switch="item.type">
+                                    <i ng-switch-when="Container" class="fa fa-caret-right"></i>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="diag-nav-open-props-wrapper" ng-switch-when="Diagram">
+                            <div class="diag-nav-open-props-body">
+                                <div class="diag-nav-open-props-title">
+                                    {{page.name}}
+                                </div>
+                                <div class="diagram-property" ng-hide="page.description.length === 0">
+                                    <label>Description</label>
+                                    <div class="diag-nav-open-props-value">{{page.description}}</div>
+                                </div>
+                                <div class="diagram-property" ng-hide="page.owner.length === 0">
+                                    <label>Owner</label>
+                                    <div class="diag-nav-open-props-value">{{page.owner}}</div>
+                                </div>
+                                <div class="diagram-property" ng-hide="page.targetEnvironment.length === 0">
+                                    <label>Target Environment</label>
+                                    <div class="diag-nav-open-props-value">{{page.targetEnvironment}}</div>
+                                </div>
+                                <div class="diagram-property" ng-hide="page.category.length === 0">
+                                    <label>Category</label>
+                                    <div class="diag-nav-open-props-value">{{page.category}}</div>
+                                </div>
+                            </div>
+                            <div class="diag-nav-open-props-footer">
+                                <button type="button" class="btn btn-success btn-sm pull-right" ng-click="loadDiagram(page)">Open</button>
+                                <button type="button" class="btn btn-danger btn-sm pull-right diag-nav-props-footer-btn-margin-right" ng-click="deleteDiagram(page)">Delete</button>
+                                <button type="button" class="btn btn-default btn-sm pull-right diag-nav-props-footer-btn-margin-right" ng-click="onOpenPropertiesCancel()">Cancel</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="diag-nav-open-path">
+                    <div class="diag-nav-open-path-item" ng-repeat="page in pages track by $index">
+                        <div class="diag-nav-open-path-item-clickable" ng-click="onNavPathItemClick($index)">
+                            <i class="fa fa-home" ng-show="isFirstPage($index)"></i>
+                        </div>
+                        <div class="diag-nav-open-path-item-caret">
+                            <i class="fa fa-caret-right" ng-hide="hideCaret($index, page.type);"></i>
+                        </div>
+                        <div class="diag-nav-open-path-item-clickable" ng-click="onNavPathItemClick($index)">
+                            <i class="fa fa-folder-open-o" ng-hide="hideFileType($index, page.type, 'Container');"></i>
+                            <i class="fa fa-file-o" ng-hide="hideFileType($index, page.type, 'Diagram');"></i>
+                            {{page.name}}
+                        </div>
                     </div>
                 </div>
+
+
             </div>
-            <div class="nav-create-footer">
-                <button type="button" class="btn btn-success btn-sm pull-right" ng-click="onCreate(page)">Create</button>
-                <button type="button" class="btn btn-default btn-sm pull-right nav-create-footer-btn-margin-right" ng-click="onCancel()">Cancel</button>
-            </div>
+
         </div>
 
     </div>
-
-    <div class="nav-footer">
-        <div class="nav-add" ng-click="createNewDiagram();">
-            <i class="fa fa-plus"></i>
-        </div>
-        <div class="nav-path">
-            <div class="nav-path-item" ng-repeat="page in pages track by $index">
-                <div class="nav-path-item-clickable" ng-click="onNavPathItemClick($index)">
-                    <i class="fa fa-home" ng-show="isFirstPage($index)"></i>
-                </div>
-                <div class="nav-path-item-caret">
-                    <i class="fa fa-caret-right" ng-hide="hideCaret($index, page.type);"></i>
-                </div>
-                <div class="nav-path-item-clickable" ng-click="onNavPathItemClick($index)">
-                    <i class="fa fa-folder-open-o" ng-hide="hideFileType($index, page.type, 'Container');"></i>
-                    <i class="fa fa-file-o" ng-hide="hideFileType($index, page.type, 'Diagram');"></i>
-                    {{page.name}}
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>
+
+
 
 
