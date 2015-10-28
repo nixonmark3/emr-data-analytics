@@ -28,6 +28,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                 $scope.draggingWire = false;
                 $scope.mouseOverBlock = null;
                 $scope.mouseOverConnector = null;
+                $scope.renamingBlock = false;
 
                 $scope.boundary = { x: 0, y: 0, width: 0, height: 0 };
 
@@ -324,6 +325,8 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                 $scope.diagramMouseDown = function (evt) {
 
+                    clearRename();
+
                     // ignore right clicks
                     if (evt.which === 3 || evt.button === 2)
                         return;
@@ -536,6 +539,46 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                     return mode;
                 };
+
+                $scope.renameBlockClick = function(block) {
+
+                    $scope.renameBlock = {
+
+                        x: block.x(),
+                        y: block.y(),
+                        w: 147,
+                        block: block
+                    };
+
+                    $scope.renamingBlock = true;
+
+                    // We need to set the focus on the rename input element but we must
+                    // wait a while as the element has not been created yet.
+                    setInterval(function() { $('#rename-input').focus() }, 10);
+                };
+
+                $scope.endRenameOnEnter = function() {
+
+                    if(event.keyCode === 13) {
+
+                        clearRename();
+                    }
+                };
+
+                $scope.diagramClick = function() {
+
+                    clearRename();
+                };
+
+                function clearRename() {
+
+                    if ($scope.renamingBlock === true) {
+
+                        $scope.renamingBlock = false;
+                        delete $scope.renameBlock;
+                    }
+                };
+
             }
         }
     }]);

@@ -24,9 +24,10 @@
          class="diagram-canvas ng-class:{'panning': panning}"
          ng-mousemove="mouseMove($event)"
          ng-mousedown="diagramMouseDown($event);"
-         ng-scroll="console.log('scrolling')">
+         ng-scroll="console.log('scrolling')"
+         ng-click="diagramClick()">
 
-        <g id="diagram-canvas-group" ng-attr-transform="matrix({{canvasMatrix[0]}},{{canvasMatrix[1]}},{{canvasMatrix[2]}},{{canvasMatrix[3]}},{{canvasMatrix[4]}},{{canvasMatrix[5]}})">
+    <g id="diagram-canvas-group" ng-attr-transform="matrix({{canvasMatrix[0]}},{{canvasMatrix[1]}},{{canvasMatrix[2]}},{{canvasMatrix[3]}},{{canvasMatrix[4]}},{{canvasMatrix[5]}})">
 
             <!--Blocks-->
             <g class="block-group"
@@ -78,8 +79,9 @@
                           y="22"
                           class="block-name"
                           text-anchor="middle"
-                          alignment-baseline="central">
-                        {{block.name()}}
+                          alignment-baseline="central"
+                          ng-dblclick="renameBlockClick(block)">
+                    {{block.name()}}
                     </text>
 
                 </g>
@@ -243,6 +245,13 @@
 
                 </g>
 
+            </g>
+
+            <!--block rename-->
+            <g ng-if="renamingBlock">
+                <foreignObject ng-attr-x="{{renameBlock.x + ((renameBlock.block.data.w / 2) - (renameBlock.w / 2))}}" ng-attr-y="{{renameBlock.y + 8}}" ng-attr-width="{{renameBlock.w}}" height="26">
+                    <input id="rename-input" type="text" ng-keyup="endRenameOnEnter()" ng-model="renameBlock.block.data.name" />
+                </foreignObject>
             </g>
 
             <!--dragging wire-->
