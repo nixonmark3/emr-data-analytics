@@ -130,13 +130,13 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                 //
                 // Translate coordinates so they are relative to the svg element
                 //
-                $scope.internalMethods.translateCoordinates = function (x, y, evt) {
+                $scope.internalMethods.translateCoordinates = function (x, y) {
 
                     var diagram = element[0].querySelector('svg');
                     var matrix = diagram.getScreenCTM();
                     var point = diagram.createSVGPoint();
-                    point.x = (x - evt.view.scrollX);
-                    point.y = (y - evt.view.scrollY);
+                    point.x = x;
+                    point.y = y;
 
                     var transform = point.matrixTransform(matrix.inverse());
 
@@ -145,6 +145,10 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                             x: (transform.x - $scope.canvasMatrix[4]) / $scope.canvasMatrix[0],
                             y: (transform.y - $scope.canvasMatrix[5]) / $scope.canvasMatrix[3]
                     };
+                };
+
+                $scope.internalMethods.getZoomLevel = function(){
+                    return $scope.canvasMatrix[0];
                 };
 
                 var inverseCoordinates = function (x, y) {
@@ -208,7 +212,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                         dragStarted: function (x, y) {
 
-                            coords = $scope.internalMethods.translateCoordinates(x, y, evt);
+                            coords = $scope.internalMethods.translateCoordinates(x, y);
 
                             // if necessary - select the block
                             if (!block.selected()) {
@@ -220,7 +224,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                         dragging: function (x, y) {
 
-                            var curCoords = $scope.internalMethods.translateCoordinates(x, y, evt);
+                            var curCoords = $scope.internalMethods.translateCoordinates(x, y);
                             var deltaX = curCoords.x - coords.x;
                             var deltaY = curCoords.y - coords.y;
 
@@ -254,7 +258,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                         dragStarted: function (x, y, evt) {
 
-                            var coords = $scope.internalMethods.translateCoordinates(x, y, evt);
+                            var coords = $scope.internalMethods.translateCoordinates(x, y);
                             initialPoint = { x: block.x() + connector.x(), y: block.y() + connector.y() };
 
                             $scope.draggingWire = true;
@@ -269,7 +273,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
 
                         dragging: function (x, y, evt) {
 
-                            var coords = $scope.internalMethods.translateCoordinates(x, y, evt);
+                            var coords = $scope.internalMethods.translateCoordinates(x, y);
 
                             $scope.dragPoint1 = initialPoint;
                             $scope.dragPoint2 = {

@@ -836,6 +836,17 @@ analyticsApp
             }
         }
 
+        function getConfiguration(){
+
+            return {
+                diagramId: diagramId,
+                diagramName: diagramName,
+                source: $scope.source,
+                parse: $scope.parse,
+                transformations: $scope.transformations
+            };
+        }
+
         function onBack(){
             $scope.direction = 0;
             $scope.activeStep--;
@@ -868,7 +879,9 @@ analyticsApp
         }
 
         function onSave(transitionDuration){
-            close(null, transitionDuration);
+
+            var data = getConfiguration();
+            close(data, transitionDuration);
         }
 
         // public methods
@@ -987,13 +1000,7 @@ analyticsApp
 
         $scope.onLoad = function(onSuccess){
 
-            var data = {
-                diagramId: diagramId,
-                diagramName: diagramName,
-                source: $scope.source,
-                parse: $scope.parse,
-                transformations: $scope.transformations
-            };
+            var data = getConfiguration();
 
             diagramService.load(data).then(
                 function(result){

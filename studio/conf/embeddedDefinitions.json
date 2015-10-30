@@ -1,0 +1,31 @@
+[
+  {
+    "definitionType": "LOAD",
+    "name": "Load",
+    "description": "",
+    "category": "Data Sources",
+    "friendlyName": "Load",
+    "w": 200,
+    "offlineDefinition": {
+      "signature": null,
+      "parameters": [
+        {
+          "name": "config",
+          "type": "json",
+          "value": {
+            "diagramId": null,
+            "diagramName": "",
+            "source": null,
+            "parse": null,
+            "transformations": []
+          },
+          "fieldOptions": [],
+          "source": null
+        }
+      ],
+      "inputs": [],
+      "outputs": [ { "name": "out", "type": "frame", "visible": true, "persisted": false } ]
+    },
+    "onlineDefinition": null
+  }
+]

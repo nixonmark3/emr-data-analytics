@@ -1,5 +1,5 @@
 package emr.analytics.models.definition;
 
 public enum DefinitionType {
-    CHART, CONTAINER, GENERAL, MODEL
+    CHART, CONTAINER, GENERAL, LOAD, MODEL
 }

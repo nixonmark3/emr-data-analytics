@@ -1,8 +1,6 @@
 package emr.analytics.models.definition;
 
-import java.util.*;
-
-public class Definition {
+public class Definition implements Comparable<Definition> {
 
     private DefinitionType definitionType;
     private String name = null;
@@ -17,10 +15,7 @@ public class Definition {
     private Definition() {}
 
     public Definition(String name, String friendlyName, String category) {
-        this.definitionType = DefinitionType.GENERAL;
-        this.name = name;
-        this.friendlyName = friendlyName;
-        this.category = category;
+        this(DefinitionType.GENERAL, name, friendlyName, category);
     }
 
     public Definition(DefinitionType definitionType, String name, String friendlyName, String category) {
@@ -87,5 +82,15 @@ public class Definition {
                 onlineDefinition = modeDefinition;
                 break;
         }
+    }
+
+    public int compareTo(Definition definition) {
+
+        // sort by category then name
+
+        if (this.getCategory().equals(definition.getCategory()))
+            return this.getName().compareTo(definition.getName());
+        else
+            return this.getCategory().compareTo(definition.getCategory());
     }
 }
