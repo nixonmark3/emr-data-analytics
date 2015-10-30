@@ -7,8 +7,11 @@ import java.util.UUID;
 
 public class LoadRequest implements Serializable {
 
+    private final String sparkContextName = "sc";
     private final String sqlContextName = "sqlContext";
+    private final String rddVariableName = "rdd";
     private final String variableName = "load_out";
+    private final String pysparkCsvVariableName = "py_spark_csv";
 
     private UUID diagramId;
     private String diagramName;
@@ -36,50 +39,75 @@ public class LoadRequest implements Serializable {
             throw new LoadException("Unable to load data, a file was not specified.");
 
         StringBuilder builder = new StringBuilder();
+
         if (parse.getParseType() == ParseTypes.SEPARATED_VALUES){
 
-            builder.append(String.format("%s = %s.read.format('com.databricks.spark.csv')",
-                    variableName,
-                    sqlContextName));
+            builder.append(String.format("import PySparkCSV as %s", pysparkCsvVariableName));
 
-            // configure options
-            builder.append(".options(inferschema='true'");
+            builder.append("\n");
 
-            if (parse.getHeader())
-                builder.append(", header='true'");
-
-            if (parse.getDelimiterType() == DelimiterTypes.TAB)
-                builder.append(", delimiter='\t'");
-            else if (parse.getDelimiterType() == DelimiterTypes.OTHER && Character.isDefined(parse.getDelimiterChar())){
-                builder.append(", delimiter='");
-                builder.append(parse.getDelimiterChar());
-                builder.append("'");
-            }
-
-            if (parse.getMissingValueMode() != MissingValueModes.PERMISSIVE){
-                builder.append(", mode='");
-                builder.append(parse.getMissingValueMode().toString());
-                builder.append("'");
-            }
-
-            if (Character.isDefined(parse.getQuoteChar()) && parse.getQuoteChar() != '"'){
-                builder.append(", quote='");
-                builder.append(parse.getQuoteChar());
-                builder.append("'");
-            }
-
-            if (Character.isDefined(parse.getCommentChar()) && parse.getCommentChar() != '#'){
-                builder.append(", comment='");
-                builder.append(parse.getCommentChar());
-                builder.append("'");
-            }
-
-            builder.append(String.format(").load('file://%s')",
+            builder.append(String.format("%s = %s.textFile('file://%s')",
+                    rddVariableName,
+                    sparkContextName,
                     source.getDataSources().get(0).getPath()));
+
+            builder.append("\n");
+
+            builder.append(String.format("%s = %s.csvToDataFrame(%s, %s",
+                    variableName,
+                    pysparkCsvVariableName,
+                    sqlContextName,
+                    rddVariableName));
+
+            builder.append(")");
+
+//            builder.append(String.format("%s = %s.read.format('com.databricks.spark.csv')",
+//                    variableName,
+//                    sqlContextName));
+//
+//            // configure options
+//            builder.append(".options(inferschema='true'");
+//
+//            if (parse.getHeader())
+//                builder.append(", header='true'");
+//
+//            if (parse.getDelimiterType() == DelimiterTypes.TAB) {
+//
+//                builder.append(", delimiter='\t'");
+//            }
+//            else if (parse.getDelimiterType() == DelimiterTypes.OTHER && Character.isDefined(parse.getDelimiterChar())) {
+//
+//                builder.append(", delimiter='");
+//                builder.append(parse.getDelimiterChar());
+//                builder.append("'");
+//            }
+//
+//            if (parse.getMissingValueMode() != MissingValueModes.PERMISSIVE){
+//                builder.append(", mode='");
+//                builder.append(parse.getMissingValueMode().toString());
+//                builder.append("'");
+//            }
+//
+//            if (Character.isDefined(parse.getQuoteChar()) && parse.getQuoteChar() != '"'){
+//                builder.append(", quote='");
+//                builder.append(parse.getQuoteChar());
+//                builder.append("'");
+//            }
+//
+//            if (Character.isDefined(parse.getCommentChar()) && parse.getCommentChar() != '#'){
+//                builder.append(", comment='");
+//                builder.append(parse.getCommentChar());
+//                builder.append("'");
+//            }
+//
+//            builder.append(String.format(").load('file://%s')",
+//                    source.getDataSources().get(0).getPath()));
         }
 
         builder.append("\n");
         builder.append(String.format("dataGateway.describe(%s)", variableName));
+
+//        System.out.println(builder.toString());
 
         return builder.toString();
     }

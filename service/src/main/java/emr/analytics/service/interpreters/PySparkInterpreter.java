@@ -43,8 +43,7 @@ public class PySparkInterpreter extends PythonInterpreter implements ExecuteResu
         sparkContext = new JavaSparkContext(sparkConf);
         sqlContext = new SQLContext(sparkContext);
 
-        sparkContext.addJar("/usr/local/spark/external/databricks/commons-csv-1.2.jar");
-        sparkContext.addJar("/usr/local/spark/external/databricks/spark-csv_2.10-1.2.0.jar");
+        this.sparkContext.addFile(String.format("%s/PySparkCSV.py", this.getWorkingDirectory().getAbsolutePath()));
     }
 
     @Override
