@@ -843,6 +843,8 @@ viewmodels.diagramViewModel = function(data) {
                 // Keep track of blocks that were deleted, so their wires can also
                 // be deleted.
                 deletedBlocks.push(block.data.id);
+
+                delete blockNames[block.name()];
             }
         }
 
@@ -876,6 +878,9 @@ viewmodels.diagramViewModel = function(data) {
         this.data.blocks = newBlocks;
         this.wires = newWireViewModels;
         this.data.wires = newWires;
+
+        // reset the diagram boundary
+        this.resetBoundary();
 
         return 0;
     };
@@ -1086,12 +1091,11 @@ viewmodels.diagramViewModel = function(data) {
 
         // generate unique block name
         var index = 1;
-        var name;
-        do{
+        var name = definitionName;
+        while(name in blockNames){
             name = definitionName + index;
             index++;
         }
-        while(name in blockNames);
 
         return name;
     };
@@ -1155,22 +1159,33 @@ viewmodels.diagramViewModel = function(data) {
     };
 
     /**
+     * Reset the diagram boundary
+     */
+    this.resetBoundary = function(){
+
+        var count = this.blocks.length;
+        if (count == 0)
+            boundary = { x1: Number.MIN_VALUE, x2: Number.MIN_VALUE, y1: Number.MIN_VALUE, y2: Number.MIN_VALUE };
+
+        for (var i = 0; i < count; ++i)
+            this.updateBoundary(this.blocks[i]);
+    };
+
+    /**
      * select all blocks
      */
     this.selectAll = function () {
 
         selectionCount = 0;
 
-        var blocks = this.blocks;
-        for (var i = 0; i < blocks.length; ++i) {
-            var block = blocks[i];
+        for (var i = 0; i < this.blocks.length; ++i) {
+            var block = this.blocks[i];
             selectionCount++;
             block.select();
         }
 
-        var wires = this.wires;
-        for (var j = 0; j < connections.length; ++j) {
-            var wire = wires[i];
+        for (var j = 0; j < this.connections.length; ++j) {
+            var wire = this.wires[i];
             wire.select();
         }
     };

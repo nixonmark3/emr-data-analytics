@@ -1,15 +1,16 @@
 package emr.analytics.models.definition;
 
 public enum DataType {
+    EDITABLE_QUERY("editableQuery"),
+    FLOAT("float"),
     FRAME("frame"),
     INT("int"),
-    FLOAT("float"),
-    STRING("string"),
-    TIMESTAMP("timestamp"),
+    JSON("json"),
     LIST("list"),
     MULTI_SELECT_LIST("multiSelectList"),
     QUERY("query"),
-    EDITABLE_QUERY("editableQuery");
+    STRING("string"),
+    TIMESTAMP("timestamp");
 
     private final String stringValue;
 

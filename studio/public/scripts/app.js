@@ -535,7 +535,7 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.compile = function(evt) {
 
             // retrieve the current diagram's data
-            var data = diagram().data;
+            var data = getDiagram().data;
 
             var position = {
                 width: 800,
@@ -559,13 +559,13 @@ var analyticsApp = angular.module('analyticsApp',
             evt.preventDefault();
         };
 
-        function getConfigurationBlock(x, y, evt, definitionName){
+        function getConfigurationBlock(x, y, definitionName){
 
-            var currentDiagram = diagram();
+            var currentDiagram = getDiagram();
 
             // translate diagram coordinates
             // todo: update to also support online diagram methods
-            var point = $scope.offlineDiagramMethods.translateCoordinates(x, y, evt);
+            var point = $scope.offlineDiagramMethods.translateCoordinates(x, y);
 
             var definition = new viewmodels.definitionViewModel(currentDiagram.mode(),
                 $scope.library[definitionName]);
@@ -582,7 +582,7 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.loadSources = function(request, success){
 
             // attach the diagram to the request
-            request.diagram = diagram().data;
+            request.diagram = getDiagram().data;
 
             diagramService.loadSources(request).then(
                 function (response) {
@@ -635,7 +635,7 @@ var analyticsApp = angular.module('analyticsApp',
                     break;
                 default:
 
-                    var mode = diagram().mode();
+                    var mode = getDiagram().mode();
 
                     var definition = new viewmodels.definitionViewModel(mode, $scope.library[block.definition()]);
 
@@ -645,7 +645,7 @@ var analyticsApp = angular.module('analyticsApp',
                         inputs: {
                             block: new viewmodels.configuringBlockViewModel(definition, block.data),
                             loadSources: $scope.loadSources,
-                            diagram: diagram()
+                            diagram: getDiagram()
                         },
                         config: {
                             // todo put this back when refactor results name: block.data.name,
@@ -679,10 +679,10 @@ var analyticsApp = angular.module('analyticsApp',
                 var block = blocks[0];
 
                 // select the block
-                diagram().onBlockClicked(block);
+                getDiagram().onBlockClicked(block);
 
                 // reference the current diagram mode
-                var mode = diagram().mode();
+                var mode = getDiagram().mode();
 
                 // retrieve the block's definition viewmodel
                 var definition = new viewmodels.definitionViewModel(mode, $scope.library[block.definition()]);
@@ -692,10 +692,10 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.onCreateBlock = function(x, y, evt, definitionName){
 
             // get configuration block
-            var configBlock = getConfigurationBlock(x, y, evt, definitionName);
+            var configBlock = getConfigurationBlock(x, y, definitionName);
 
             // create the block
-            diagram().createBlock(configBlock);
+            getDiagram().createBlock(configBlock);
         };
 
         /*
@@ -717,11 +717,11 @@ var analyticsApp = angular.module('analyticsApp',
             var x = evt.pageX - 100, y = evt.pageY - 20;
 
             // get configuration block
-            var configBlock = getConfigurationBlock(x, y, evt, definitionName);
+            var configBlock = getConfigurationBlock(x, y, definitionName);
             configBlock.setParameter("Filename", file.path);
 
             // create the block
-            diagram().createBlock(configBlock);
+            getDiagram().createBlock(configBlock);
         };
 
         /**
@@ -794,7 +794,9 @@ var analyticsApp = angular.module('analyticsApp',
         var loadData = function(){
 
             // for context, get this diagram's id
-            var diagramId = $scope.diagramViewModel.getId();
+            var diagram = getDiagram();
+            var diagramId = diagram.getId();
+
             if (!diagramId){
 
                 // save the diagram first
@@ -802,12 +804,33 @@ var analyticsApp = angular.module('analyticsApp',
                     function(){ // on success: recursively call this method again
                         loadData();
                     },
-                    function() { }
+                    function(){
+                        var message = 'Diagram failed to save.';
+                        toasterService.error(message,
+                            message,
+                            toastContainerId);
+                    }
                 );
             }
             else { // a valid diagram exists
 
-                // todo: calculate new block position
+                var zoomLevel = $scope.offlineDiagramMethods.getZoomLevel();
+
+                // determine the position of the new block
+                var diagramContainer = angular.element(document.querySelector('#studio-container'));
+                var position = { centerX: 0, centerY: diagramContainer.offset().top + zoomLevel * 90};
+
+                var boundary = diagram.getBoundary();
+                if (boundary.x2 == Number.MIN_VALUE){
+
+                    // the diagram is currently empty, set x to the center of the diagram
+                    position.centerX = diagramContainer.offset().left + diagramContainer.width() / 2;
+                }
+                else{
+
+                    // position the new block to the right of the diagram boundary
+                    position.centerX = diagramContainer.offset().left + boundary.x2 + zoomLevel * 120;
+                }
 
                 modalService.show({
                     templateUrl: '/assets/scripts/views/loadData.html',
@@ -825,13 +848,25 @@ var analyticsApp = angular.module('analyticsApp',
                         showCancel: true,
                         showNext: true
                     },
-                    position: null
+                    position: position
                 }).then(function (modal) {
+
+                    // drop the new block on the canvas
 
                     modal.close.then(function (result) {
 
                         if (result) {
 
+                            var definitionName = "Load";
+
+                            var x = position.centerX - zoomLevel * 100, y = position.centerY - zoomLevel * 40;
+
+                            // get configuration block
+                            var configBlock = getConfigurationBlock(x, y, definitionName);
+                            // configBlock.setParameter("Filename", file.path);
+
+                            // create the block
+                            getDiagram().createBlock(configBlock);
                         }
                     });
                 });
@@ -1043,7 +1078,7 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.kill = function(evt) {
 
             // retrieve the current diagram's data
-            var data = diagram().data;
+            var data = getDiagram().data;
 
             diagramService.kill(data.id, data.mode).then(
                 function (data) {
@@ -1203,7 +1238,7 @@ var analyticsApp = angular.module('analyticsApp',
                     openDiagram: $scope.open,
                     createNewDiagram: $scope.createDiagram,
                     deleteExistingDiagram: $scope.deleteDiagram,
-                    currentDiagram: diagram()
+                    currentDiagram: getDiagram()
                 }
             }).then(function(popup) {
 
@@ -1255,7 +1290,7 @@ var analyticsApp = angular.module('analyticsApp',
         /*
          * Returns the diagram that is currently in view
          * */
-        var diagram = function(){
+        var getDiagram = function(){
             if($scope.onlineCanvas)
                 return $scope.onlineViewModel;
             else
