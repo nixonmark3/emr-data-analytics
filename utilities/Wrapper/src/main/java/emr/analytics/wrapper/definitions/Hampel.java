@@ -12,8 +12,8 @@ public class Hampel extends BlockDefinition implements IExport {
     @Override
     public Definition createDefinition() {
 
-        Definition definition = new Definition("ThreeSigma", "Three Sigma", Category.FILTERS.toString());
-        definition.setDescription("Apply three (or g-order) sigma algorithm to a given data frame");
+        Definition definition = new Definition("Hampel", "Hampel", Category.FILTERS.toString());
+        definition.setDescription("Apply Hampel algorithm to a given data frame");
         return definition;
     }
 
@@ -58,7 +58,7 @@ public class Hampel extends BlockDefinition implements IExport {
                 null));
         parameters.add(new ParameterDefinition("g-Sigma",
                 DataType.FLOAT.toString(),
-                3.0,
+                5.2,
                 new ArrayList<String>(),
                 null));
         return parameters;
