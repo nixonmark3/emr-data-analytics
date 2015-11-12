@@ -1,3 +1,6 @@
+#Note: currently same as RowDelete
+
+
 import pickle
 import pandas as pd
 import json
@@ -87,3 +90,28 @@ class RowSelect(FunctionBlock):
             FunctionBlock.report_status_failure(self)
             print(err.args, file=sys.stderr)
 
+# sample Query:
+# {
+#   "query_name": "Query1",
+#   "docType": "json",
+#   "excludeTime": [
+#     {
+#       "exStartTime": "2015-01-01 01:06:00",
+#       "exEndTime": "2015-01-01 01:26:00"
+#     },
+#     {
+#       "exStartTime": "",
+#       "exEndTime": ""
+#     }
+#   ],
+#   "excludeRow": [
+#     {
+#       "exStartRow": "100",
+#       "exEndRow": "200"
+#     },
+#     {
+#       "exStartRow": "",
+#       "exEndRow": ""
+#     }
+#   ]
+# }
