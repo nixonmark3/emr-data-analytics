@@ -70,6 +70,7 @@ class RowSelect(FunctionBlock):
                 df = df.drop(df.index[int(x):int(y)])
 
             # Second remove date_ranges
+            # find index in dataframe that has closest time to specified times
             for x,y in exclude_time_ranges:
                 i = np.argmin(np.abs(df.index.to_pydatetime() - pd.Timestamp(x)))
                 j = np.argmin(np.abs(df.index.to_pydatetime() - pd.Timestamp(y)))
