@@ -12,7 +12,7 @@ public class CalcOnCols extends BlockDefinition implements IExport {
     @Override
     public Definition createDefinition() {
 
-        return new Definition("RowDelete", "Delete Rows", Category.FILTERS.toString());
+        return new Definition("CalcOnCols", "Calc using df columns", Category.TRANSFORMERS.toString());
     }
 
     @Override
@@ -48,8 +48,8 @@ public class CalcOnCols extends BlockDefinition implements IExport {
     public List<ParameterDefinition> createParameters() {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
-        parameters.add(new ParameterDefinition("Query",
-                DataType.QUERY.toString(),
+        parameters.add(new ParameterDefinition("Calc",
+                DataType.STRING.toString(),
                 "None",
                 new ArrayList<String>(),
                 null));

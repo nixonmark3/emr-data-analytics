@@ -12,7 +12,7 @@ public class RowDelete extends BlockDefinition implements IExport {
     @Override
     public Definition createDefinition() {
 
-        return new Definition("RowSelect", "Select Rows", Category.FILTERS.toString());
+        return new Definition("RowDelete", "Delete Rows", Category.FILTERS.toString());
     }
 
     @Override
