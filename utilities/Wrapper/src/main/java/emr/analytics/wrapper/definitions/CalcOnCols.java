@@ -53,6 +53,11 @@ public class CalcOnCols extends BlockDefinition implements IExport {
                 "None",
                 new ArrayList<String>(),
                 null));
+        parameters.add(new ParameterDefinition("NewCol",
+                DataType.STRING.toString(),
+                "NewCol",
+                new ArrayList<String>(),
+                null));
         return parameters;
     }
 }
