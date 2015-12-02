@@ -45,6 +45,7 @@ public class LagCorrelate extends BlockDefinition implements IExport {
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
         outputConnectors.add(new ConnectorDefinition("out", DataType.FRAME.toString()));
+        outputConnectors.add(new ConnectorDefinition("summary_lag_corr", DataType.FRAME.toString()));
         return outputConnectors;
     }
 
@@ -52,7 +53,7 @@ public class LagCorrelate extends BlockDefinition implements IExport {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
 
-        parameters.add(new ParameterDefinition("Lag",
+        parameters.add(new ParameterDefinition("MaxLag",
                 DataType.INT.toString(),
                 60,
                 new ArrayList<String>(),
