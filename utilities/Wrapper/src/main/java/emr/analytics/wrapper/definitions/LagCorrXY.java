@@ -12,8 +12,8 @@ public class LagCorrXY extends BlockDefinition implements IExport {
     @Override
     public Definition createDefinition() {
 
-        Definition definition = new Definition("LagCorr", "Lag Correlate", Category.TRANSFORMERS.toString());
-        definition.setDescription("Performs a lag correlation a given data frame");
+        Definition definition = new Definition("LagCorrXY", "Lag Correlate Y & X", Category.TRANSFORMERS.toString());
+        definition.setDescription("Performs a lag correlation between Y and X dataframes");
         return definition;
     }
 
@@ -37,7 +37,8 @@ public class LagCorrXY extends BlockDefinition implements IExport {
     public List<ConnectorDefinition> createInputConnectors() {
 
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
-        inputConnectors.add(new ConnectorDefinition("in", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("x", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("y", DataType.FRAME.toString()));
         return inputConnectors;
     }
 
