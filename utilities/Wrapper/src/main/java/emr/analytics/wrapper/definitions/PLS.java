@@ -24,6 +24,7 @@ public class PLS extends BlockDefinition implements IExport {
         ModeDefinition modeDefinition = new ModeDefinition();
         modeDefinition.setInputs(createInputConnectors());
         modeDefinition.setOutputs(createOutputConnectors());
+        modeDefinition.setParameters(createParameters());
 
         return modeDefinition;
     }
@@ -46,6 +47,29 @@ public class PLS extends BlockDefinition implements IExport {
         outputConnectors.add(new ConnectorDefinition("y_std", DataType.LIST.toString(), false, true));
         outputConnectors.add(new ConnectorDefinition("y_comp", DataType.FRAME.toString()));
         return outputConnectors;
+    }
+
+    public List<ParameterDefinition> createParameters() {
+
+        List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
+
+        List<String> opts = new ArrayList<String>();
+        opts.add("True");
+        opts.add("False");
+
+        parameters.add(new ParameterDefinition("Scale",
+                DataType.LIST.toString(),
+                "True",
+                opts,
+                null));
+
+        parameters.add(new ParameterDefinition("NumberComponents",
+                DataType.INT.toString(),
+                "3",
+                opts,
+                null));
+
+        return parameters;
     }
 
     @Override

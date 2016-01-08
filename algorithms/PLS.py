@@ -2,6 +2,7 @@ import pandas as pd
 import collections as coll
 import sys
 import traceback
+import ast
 
 from sklearn.cross_decomposition import PLSRegression
 from FunctionBlock import FunctionBlock
@@ -35,24 +36,38 @@ class PLS(FunctionBlock):
             FunctionBlock.check_connector_has_one_wire(self, 'y')
             y_df = results_table[self.input_connectors['y'][0]]
 
-            pls_model = PLSRegression(n_components=x_df.shape[1])
+            n_components = int(self.parameters['NumberComponents'])
+            print('number comp = ', n_components)
+            scale = self.parameters['Scale']
+            print('Scale = ', scale)
+            print('scale tupe = ', type(scale))
+
+            pls_model = PLSRegression(n_components, ast.literal_eval(scale))  #n_components=set as parameter in block definitionl
+            print('scale_2 = ', scale)
 
             x_values = x_df.values
 
             y_values = y_df.values
+            print('y_df mean = ', y_df.mean())
 
             pls_model.fit(x_values, y_values)
 
             y_prediction = pls_model.predict(x_values)
+            print('y pred.....\n', y_prediction)
 
-            ss_error_total = sum(y_values**2)
+            r2 = pls_model.score(x_values, y_values)
+
+            print('rsq from pls_model = ', r2)
+
+            #ss_error_total = ((y_values - y_df.mean())**2).sum()
 
             ss_error_residual = 0
 
             for x in range(len(y_values)):
                 ss_error_residual += (y_values[x] - y_prediction[x])**2
 
-            r2 = 1 - ss_error_residual/ss_error_total
+
+            #r2 = 1 - ss_error_residual/ss_error_total
 
             coefficients = [x[0] for x in pls_model.coefs]
 
@@ -63,7 +78,7 @@ class PLS(FunctionBlock):
 
             pls_result = coll.OrderedDict()
             pls_result['Coefficients'] = model
-            pls_result['R-Squared'] = r2[0]
+            pls_result['R-Squared'] = r2
             pls_result['MSE'] = float(ss_error_residual) / len(y_values)
 
             data_dict = {'Y-Values': list(y_values[:, 0]), 'Y-Prediction': list(y_prediction[:, 0])}
