@@ -37,37 +37,25 @@ class PLS(FunctionBlock):
             y_df = results_table[self.input_connectors['y'][0]]
 
             n_components = int(self.parameters['NumberComponents'])
-            print('number comp = ', n_components)
+
             scale = self.parameters['Scale']
-            print('Scale = ', scale)
-            print('scale tupe = ', type(scale))
 
             pls_model = PLSRegression(n_components, ast.literal_eval(scale))  #n_components=set as parameter in block definitionl
-            print('scale_2 = ', scale)
 
             x_values = x_df.values
 
             y_values = y_df.values
-            print('y_df mean = ', y_df.mean())
 
             pls_model.fit(x_values, y_values)
 
             y_prediction = pls_model.predict(x_values)
-            print('y pred.....\n', y_prediction)
 
             r2 = pls_model.score(x_values, y_values)
-
-            print('rsq from pls_model = ', r2)
-
-            #ss_error_total = ((y_values - y_df.mean())**2).sum()
 
             ss_error_residual = 0
 
             for x in range(len(y_values)):
                 ss_error_residual += (y_values[x] - y_prediction[x])**2
-
-
-            #r2 = 1 - ss_error_residual/ss_error_total
 
             coefficients = [x[0] for x in pls_model.coefs]
 
