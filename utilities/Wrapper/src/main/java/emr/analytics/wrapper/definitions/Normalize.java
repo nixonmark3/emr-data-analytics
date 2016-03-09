@@ -57,19 +57,22 @@ public class Normalize extends BlockDefinition implements IExport {
         opts.add("False");
 
         parameters.add(new ParameterDefinition("Mean Center",
-                DataType.LIST.toString(),
+                ParameterType.ENUMERATION,
+                ValueType.SCALAR,
                 "True",
                 opts,
                 null));
 
         parameters.add(new ParameterDefinition("Unit Variance",
-                DataType.LIST.toString(),
+                ParameterType.ENUMERATION,
+                ValueType.SCALAR,
                 "True",
                 opts,
                 null));
 
         parameters.add(new ParameterDefinition("DivideByRange",
-                DataType.LIST.toString(),
+                ParameterType.ENUMERATION,
+                ValueType.SCALAR,
                 "False",
                 opts,
                 null));

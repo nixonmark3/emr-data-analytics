@@ -14,12 +14,13 @@
 
             <div class="grid-row-header" ng-style="{ width: rowHeaderWidth, top: padding }">
 
-                <div>Data Type</div>
-                <div>Observations</div>
-                <div>Mean</div>
-                <div>Standard Deviation</div>
-                <div>Minimum</div>
-                <div>Maximum</div>
+                <div ng-style="{ width: columnWidth, height: histogramHeight }"></div>
+                <div class="grid-row-label">Data Type</div>
+                <div class="grid-row-label">Observations</div>
+                <div class="grid-row-label">Mean</div>
+                <div class="grid-row-label">Standard Deviation</div>
+                <div class="grid-row-label">Minimum</div>
+                <div class="grid-row-label">Maximum</div>
 
             </div>
 
@@ -27,7 +28,7 @@
 
     </div>
 
-    <div id="grid-content-container">
+    <div class="grid-content-container">
 
         <div class="grid-content" ng-style="{ left: rowHeaderWidth + 2 * padding, top: rowHeight + 2 * padding, width: gridWidth, height: gridHeight }">
 
@@ -35,12 +36,16 @@
 
                 <div class="grid-content-column" ng-repeat="feature in features" ng-style="{ width: columnWidth, left: $index * (columnWidth + padding) }">
 
-                    <div>{{feature.type}}</div>
-                    <div>{{feature.count}}</div>
-                    <div>{{feature.avg}}</div>
-                    <div>{{feature.stdev}}</div>
-                    <div>{{feature.min}}</div>
-                    <div>{{feature.max}}</div>
+                    <div ng-style="{ width: columnWidth, height: histogramHeight }">
+                        <bar-chart class="histogram" values="feature.histogram"></bar-chart>
+                    </div>
+
+                    <div class="grid-content-item">{{feature.type}}</div>
+                    <div class="grid-content-item">{{feature.count}}</div>
+                    <div class="grid-content-item">{{feature.avg}}</div>
+                    <div class="grid-content-item">{{feature.stdev}}</div>
+                    <div class="grid-content-item">{{feature.min}}</div>
+                    <div class="grid-content-item">{{feature.max}}</div>
 
                 </div>
 

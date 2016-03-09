@@ -7,7 +7,7 @@ public class StreamingTerminationRequest extends InputMessage implements Seriali
     private final String topic;
 
     public StreamingTerminationRequest(String topic) {
-        super("streaming-termination-request");
+        super(null, "streaming-termination-request");
 
         this.topic = topic;
     }

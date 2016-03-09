@@ -1,0 +1,46 @@
+<div id="load-data-wrapper">
+
+    <div id="load-data-toaster"></div>
+
+    <div class="load-data-menu" ng-style="{ 'width': menuWidth + '%' }">
+        <div class="resizable-handle resizable-e" ng-mousedown="onResizeMenu($event)"></div>
+
+        <ul class="select-data-menu">
+            <li ng-class="{'active': streamConfig.sourceType==='DELTAV_STREAM'}">
+                <a ng-click="setSourceType('DELTAV_STREAM')">DeltaV Stream</a>
+            </li>
+            <li ng-class="{'active': streamConfig.sourceType==='FILES'}">
+                <a ng-click="setSourceType('FILES')">Local File System</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="load-data-content" ng-switch on="streamConfig.sourceType" ng-style="{ 'width': (100 - menuWidth) + '%' }">
+
+        <div class="load-data-source-container" ng-switch-when="FILES">
+            <div class="load-data-navbar">
+                <input type="file" id="fileBrowser" onchange="angular.element(this).scope().addFiles(this.files)" value="Browse" multiple style="display:none;">
+                <div class="file-input-container" file-drop>
+                    <progress-circle
+                            class="file-input-progress pull-left"
+                            background-color="#ccc"
+                            foreground-color="#2ca02c"
+                            show-value="false"
+                            progress="streamConfig.dataSource.progress">
+                    </progress-circle>
+                    <div class="file-input-label pull-left ng-class:{ 'configured': (isWorking || isConfigured) }">{{streamConfig.dataSource.name || "Browse or drag and drop a data file here"}}</div>
+                    <a ng-if="streamConfig.dataSource.progress==100" class="file-input-clear pull-right" ng-click="onClearFile($event)">
+                        <i class="fa fa-times"></i>
+                    </a>
+                </div>
+                <a class="file-input-search pull-right" ng-click="onBrowse($event)">
+                    <i class="fa fa-search"></i>
+                </a>
+            </div>
+        </div>
+        <div class="load-data-source-container" ng-switch-default>
+            This features has not been implemented.
+        </div>
+    </div>
+
+</div>

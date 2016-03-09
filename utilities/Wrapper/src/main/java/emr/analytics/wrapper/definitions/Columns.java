@@ -14,6 +14,7 @@ public class Columns extends BlockDefinition implements IExport {
 
         Definition definition = new Definition("Columns", "Columns", Category.TRANSFORMERS.toString());
         definition.setDescription("Selects columns from a given data frame");
+        definition.setMode(Mode.BOTH);
         return definition;
     }
 
@@ -67,15 +68,16 @@ public class Columns extends BlockDefinition implements IExport {
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
 
         List<Argument> arguments = new ArrayList<Argument>();
-        arguments.add(new Argument("BlockName", 1, "BlockName.Value"));
+        arguments.add(new Argument("Input", "input:in"));
 
         parameters.add(new ParameterDefinition("Columns",
-                DataType.MULTI_SELECT_LIST.toString(),
+                ParameterType.ENUMERATION,
+                ValueType.LIST,
                 new ArrayList<String>(),
                 new ArrayList<String>(),
-                new ParameterSource("Jar",
-                        "plugins-1.0-SNAPSHOT.jar",
-                        "Columns",
+                new ParameterSource(ParameterSource.ParameterSourceTypes.PYTHONSCRIPT,
+                        "",
+                        "dataGateway.columns(output[\"%s\"])",
                         arguments)));
 
         return parameters;

@@ -1,10 +1,12 @@
 package emr.analytics.service.interpreters;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import emr.analytics.models.messages.Describe;
 import emr.analytics.models.messages.Feature;
 import emr.analytics.models.messages.Features;
-import emr.analytics.service.messages.DataFrameSchema;
+import emr.analytics.service.models.RawStatistics;
+import emr.analytics.service.models.Schema;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.ExecuteResultHandler;
 import org.apache.log4j.PropertyConfigurator;
@@ -12,12 +14,10 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.sql.SQLContext;
 import org.apache.spark.api.java.JavaSparkContext;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 public class PySparkInterpreter extends PythonInterpreter implements ExecuteResultHandler {
 
@@ -25,11 +25,8 @@ public class PySparkInterpreter extends PythonInterpreter implements ExecuteResu
     protected JavaSparkContext sparkContext;
     protected SQLContext sqlContext;
 
-    public PySparkInterpreter(String name, InterpreterNotificationHandler notificationHandler){
-        super(notificationHandler);
-
-        loadProperties("spark");
-        loadProperties("pyspark");
+    public PySparkInterpreter(String name, InterpreterNotificationHandler notificationHandler, Properties properties){
+        super(notificationHandler, properties);
 
         loadLogProperties();
 
@@ -48,7 +45,7 @@ public class PySparkInterpreter extends PythonInterpreter implements ExecuteResu
 
     @Override
     protected String[] scriptFiles(){
-        return new String[] { "python_init", "pyspark_init", "python_eval" };
+        return new String[] { "python_init", "pyspark_init", "pyspark_methods", "python_eval" };
     }
 
     @Override
@@ -82,95 +79,133 @@ public class PySparkInterpreter extends PythonInterpreter implements ExecuteResu
 
     public SQLContext getSQLContext(){ return this.sqlContext; }
 
-    public void describe(String schemaJson, List<String> names, List<List<Object>> stats){
+    @Override
+    protected File getWorkingDirectory(){
+        return new File(this.getProperties().getProperty("pyspark.workingDir"));
+    }
+
+    public void describe(String name, String schema, String stats){
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        List<Schema> dataSchema;
+        try{
+            TypeReference<List<Schema>> typeReference
+                    = new TypeReference<List<Schema>>() {};
+
+            dataSchema = objectMapper.readValue(schema, typeReference);
+        }
+        catch(IOException ex){
+            throw new InterpreterException(ex);
+        }
+
+        RawStatistics<String> rawStatistics;
+        try{
+            TypeReference<RawStatistics<String>> typeReference
+                    = new TypeReference<RawStatistics<String>>() {};
+
+            rawStatistics = objectMapper.readValue(stats, typeReference);
+        }
+        catch(IOException ex){
+            throw new InterpreterException(ex);
+        }
 
         Map<String, Describe.DescribeFeature> features = new HashMap<>();
 
-        DataFrameSchema schema = this.schemaFromJson(schemaJson);
-        for(DataFrameSchema.DFSchemaField field : schema.getFields())
-            features.put(field.getName(), new Describe.DescribeFeature(field.getName(), field.getType()));
+        for(Schema entry : dataSchema)
+            features.put(entry.getName(), new Describe.DescribeFeature(entry.getName(), entry.getType(), name));
 
-        for (List<Object> stat : stats){
+        for(int row = 0; row < rawStatistics.getData().size(); row++){
 
-            String statName = stat.get(0).toString();
-            for(int i = 1; i < stat.size(); i++){
+            List<String> stat = rawStatistics.getData().get(row);
+            String statName = stat.get(0);
+            for(int col = 1; col < stat.size(); col++){
 
-                Describe.DescribeFeature feature = features.get(names.get(i));
+                Describe.DescribeFeature feature = features.get(rawStatistics.getColumns().get(col));
                 switch(statName){
                     case "count":
-                        feature.setCount(Integer.parseInt(stat.get(i).toString()));
+                        feature.setCount(Integer.parseInt(stat.get(col)));
                         break;
                     case "max":
-                        feature.setMax(Double.parseDouble(stat.get(i).toString()));
+                        feature.setMax(Double.parseDouble(stat.get(col)));
                         break;
                     case "mean":
-                        feature.setAvg(Double.parseDouble(stat.get(i).toString()));
+                        feature.setAvg(Double.parseDouble(stat.get(col)));
                         break;
                     case "min":
-                        feature.setMin(Double.parseDouble(stat.get(i).toString()));
+                        feature.setMin(Double.parseDouble(stat.get(col)));
                         break;
                     case "stddev":
-                        feature.setStdev(Double.parseDouble(stat.get(i).toString()));
+                        feature.setStdev(Double.parseDouble(stat.get(col)));
                         break;
                 }
             }
         }
 
         Describe describe = new Describe();
-        for(DataFrameSchema.DFSchemaField field : schema.getFields())
-            describe.add(features.get(field.getName()));
+        for(Schema entry : dataSchema)
+            describe.add(features.get(entry.getName()));
 
         this.notificationHandler.describe(describe);
     }
 
-    public void collect(String schemaJson, List<String> names, List<List<Object>> data){
+    public void collect(String schema, String data){
 
-        Map<String, Feature> featureMap = new HashMap<>();
-
-        DataFrameSchema schema = this.schemaFromJson(schemaJson);
-        for(DataFrameSchema.DFSchemaField field : schema.getFields()){
-
-            Feature feature;
-            switch(field.getType()){
-                case "double":
-                    feature = new Feature<Double>(Double.class);
-                    break;
-                case "string":
-                    feature = new Feature<String>(String.class);
-                    break;
-                default:
-                    throw new InterpreterException(String.format("The specified data type, %s, is not supported.", field.getType()));
-            }
-
-            featureMap.put(field.getName(), feature);
-        }
-
-        for (List<Object> row : data){
-            for(int i = 0; i < row.size(); i++){
-
-                Feature feature = featureMap.get(names.get(i));
-                feature.addObject(row.get(i));
-            }
-        }
-
-        Features features = new Features();
-        for(String name : names){
-            features.add(featureMap.get(name));
-        }
-
-        this.notificationHandler.collect(features);
-    }
-
-    private DataFrameSchema schemaFromJson(String json){
-        DataFrameSchema schema;
         ObjectMapper objectMapper = new ObjectMapper();
+
+        List<Schema> dataSchema;
         try{
-            schema = objectMapper.readValue(json, DataFrameSchema.class);
+            TypeReference<List<Schema>> typeReference
+                    = new TypeReference<List<Schema>>() {};
+
+            dataSchema = objectMapper.readValue(schema, typeReference);
         }
         catch(IOException ex){
             throw new InterpreterException(ex);
         }
 
-        return schema;
+        List<List<Object>> rawData;
+        try{
+            TypeReference<List<List<Object>>> typeReference
+                    = new TypeReference<List<List<Object>>>() {};
+
+            rawData = objectMapper.readValue(data, typeReference);
+        }
+        catch(IOException ex){
+            throw new InterpreterException(ex);
+        }
+
+        Features features = new Features();
+        for(Schema entry : dataSchema){
+
+            String name = entry.getName();
+            String dataType = entry.getType();
+
+            Feature feature;
+            switch(dataType){
+                case "timestamp":
+                    feature = new Feature<Date>(name, Date.class);
+                    break;
+                case "double":
+                    feature = new Feature<Double>(name, Double.class);
+                    break;
+                case "string":
+                    feature = new Feature<String>(name, String.class);
+                    break;
+                default:
+                    throw new InterpreterException(String.format("The specified data type, %s, is not supported.", dataType));
+            }
+
+            features.add(feature);
+        }
+
+        for (List<Object> row : rawData){
+            for(int i = 0; i < row.size(); i++){
+                Feature feature = features.getFeature(i);
+                feature.addObject(row.get(i));
+            }
+        }
+
+        this.notificationHandler.collect(features);
     }
 }

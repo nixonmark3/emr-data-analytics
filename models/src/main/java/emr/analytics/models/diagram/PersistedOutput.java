@@ -1,8 +1,9 @@
 package emr.analytics.models.diagram;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class PersistedOutput {
+public class PersistedOutput implements Serializable {
     public UUID id;
     public String name;
     public String type;

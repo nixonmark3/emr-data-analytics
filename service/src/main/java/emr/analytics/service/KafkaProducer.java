@@ -47,7 +47,8 @@ public class KafkaProducer extends AbstractActor {
         // retrieve the analytics host name stored as an environmental variable
         String host = TaskServiceHelper.getEnvVariable("ANALYTICS_HOST", "127.0.0.1");
 
-        info = new StreamingTask(request.getTopic(),
+        info = new StreamingTask(request.getId(),
+                request.getTopic(),
                 request.getStreamingSource().getPollingSourceType(),
                 request.getStreamingSource().getFrequency());
 

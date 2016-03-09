@@ -60,13 +60,15 @@ public class PCA_NIPALS extends BlockDefinition implements IExport {
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
 
         parameters.add(new ParameterDefinition("N Components",
-                DataType.INT.toString(),
+                ParameterType.INT,
+                ValueType.SCALAR,
                 2,
                 new ArrayList<String>(),
                 null));
 
         parameters.add(new ParameterDefinition("Confidence Level",
-                DataType.FLOAT.toString(),
+                ParameterType.FLOAT,
+                ValueType.SCALAR,
                 0.95,
                 new ArrayList<String>(),
                 null));
@@ -76,7 +78,8 @@ public class PCA_NIPALS extends BlockDefinition implements IExport {
         opts.add("False");
 
         parameters.add(new ParameterDefinition("Calculate Contributions",
-                DataType.LIST.toString(),
+                ParameterType.ENUMERATION,
+                ValueType.SCALAR,
                 "False",
                 opts,
                 null));

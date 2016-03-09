@@ -13,7 +13,9 @@ public class PLS extends BlockDefinition implements IExport {
     @Override
     public Definition createDefinition() {
 
-        Definition definition = new Definition(DefinitionType.MODEL, "PLS", "PLS Analysis", Category.TRANSFORMERS.toString());
+        Definition definition = new Definition(DefinitionType.MODEL, "PLS", "PLS Model", Category.TRANSFORMERS.toString());
+        definition.setMode(Mode.OFFLINE);
+        definition.setComplement("PLS Predict");
         definition.setW(200);
         return definition;
     }
@@ -50,42 +52,6 @@ public class PLS extends BlockDefinition implements IExport {
 
     @Override
     public ModeDefinition createOnlineMode(){
-
-        ModeDefinition modeDefinition = new ModeDefinition();
-        List<ConnectorDefinition> inputs = new ArrayList<ConnectorDefinition>();
-        inputs.add(new ConnectorDefinition("x", DataType.FRAME.toString()));
-        modeDefinition.setInputs(inputs);
-
-        List<ConnectorDefinition> outputs = new ArrayList<ConnectorDefinition>();
-        outputs.add(new ConnectorDefinition("out", DataType.FLOAT.toString()));
-        modeDefinition.setOutputs(outputs);
-
-        modeDefinition.setSignature(new Signature("input:x", new Operation[] {
-                new Operation(Operation.OperationType.MAP,
-                        "Transformations",
-                        "normalize",
-                        new String[]{
-                                "lambda:x",
-                                "block:x_mean",
-                                "block:x_std"
-                        }),
-                new Operation(Operation.OperationType.MAP,
-                        "Transformations",
-                        "dotProduct",
-                        new String[]{
-                                "lambda:x",
-                                "block:model"
-                        }),
-                new Operation(Operation.OperationType.MAP,
-                        "Transformations",
-                        "deNormalize",
-                        new String[]{
-                                "lambda:x",
-                                "block:y_mean",
-                                "block:y_std"
-                        })
-        }));
-
-        return modeDefinition;
+        return null;
     }
 }

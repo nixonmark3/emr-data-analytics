@@ -65,116 +65,79 @@ viewmodels.connectorViewModel = function (data, x, y, parent) {
 
 viewmodels.blockViewModel = function (data) {
 
-    //
     // reference the block data
-    //
     this.data = data;
 
-    //
     // Hardcoded height of each block
-    //
     this._blockHeight = 80;
 
-    //
     // Set to true when the block is selected
-    //
     this._selected = false;
 
-    //
-    // Set to true when the mouse is hovering over the block
-    //
-    this._hover = false;
+    this.state = 0;
 
-    //
-    // block type
-    //
-    this.definition = function () {
-        return this.data.definition;
+    this._progress = "UNKNOWN";
+
+    /**
+     * block state enumeration
+     */
+    this.blockState = {
+        configuring: 0,
+        ready: 1,
+        executing: 2,
+        complete: 3,
+        error: 4
     };
 
     //
-    // Enumeration repressenting the type of definition
+    // block's definition
     //
-    this.definitionType = function(){
-        return this.data.definitionType;
-    };
+    this.definition = function () { return this.data.definition; };
+
+    //
+    // Enumeration representing the type of definition
+    //
+    this.definitionType = function(){ return this.data.definitionType; };
 
     //
     // Name of the block
     //
-    this.name = function () {
-        return this.data.name;
-    };
+    this.name = function () { return this.data.name; };
 
     //
     // Unique Name of the block
     //
-    this.id = function () {
-        return this.data.id;
-    };
+    this.id = function () { return this.data.id; };
 
     //
     // X coordinate of the block
     //
-    this.x = function () {
-        return this.data.x;
-    };
+    this.x = function () { return this.data.x; };
 
     //
     // Y coordinate of the block
     //
-    this.y = function () {
-        return this.data.y;
-    };
+    this.y = function () { return this.data.y; };
 
     //
     // Width of the block
     //
-    this.width = function () {
-        return this.data.w;
-    };
+    this.width = function () { return this.data.w; };
 
     //
     // Height of the block
     //
-    this.height = function () {
-        return this._blockHeight;
-    };
-
-    //
-    // Flag block as hovering
-    //
-    this.hover = function () {
-        this._hover = true;
-    };
-
-    //
-    // Flag block as not hovering
-    //
-    this.leaveHover = function () {
-        this._hover = false;
-    };
-
-    //
-    // Is the block hovering
-    //
-    this.hovering = function(){
-        return this._hover;
-    };
+    this.height = function () { return this._blockHeight; };
 
     //
     // Select this block
     //
-    this.select = function () {
-        this._selected = true;
-    };
+    this.select = function () { this._selected = true; };
 
     //
     // Deselect this block
     //
-    this.deselect = function () {
-        this._selected = false;
-    };
+    this.deselect = function () { this._selected = false; };
 
     //
     // Toggle the selection state of this block
@@ -190,24 +153,29 @@ viewmodels.blockViewModel = function (data) {
         return this._selected;
     };
 
-    this.settings = function(){
-        return "test";
+    /**
+     * Resolve this block's current state
+     */
+    this.getState = function(){
+
+        var state;
+
+        if (!this.data.configured){
+            state = this.blockState.configuring;
+        }
+        else{
+            state = this.blockState.ready;
+        }
+
+        return state;
     };
 
-    this.advanceProgress = function(){
-
-        this.data.state = (this.data.state + 1) % 5;
-    };
-
-    this.updateProgress = function(state) {
-
-        setTimeout(this.data.state = state, 500);
-    };
+    this.updateProgress = function(state) { setTimeout(this.state = state, 10); };
 
     this.progressText = function(){
 
         var text;
-        switch(this.data.state){
+        switch(this.state){
             case 0: // configuring
                 text = "\uf040";
                 break;
@@ -231,7 +199,7 @@ viewmodels.blockViewModel = function (data) {
     this.stateBgStroke = function(){
 
         var text;
-        switch(this.data.state){
+        switch(this.state){
             case 0: // configuring
                 text = "#fdd0a2";
                 break;
@@ -255,7 +223,7 @@ viewmodels.blockViewModel = function (data) {
     this.stateFgStroke = function(){
 
         var text;
-        switch(this.data.state){
+        switch(this.state){
             case 0: // configuring
                 text = "#ff7f0e";
                 break;
@@ -279,7 +247,7 @@ viewmodels.blockViewModel = function (data) {
     this.stateStrokeOffset = function(){
 
         var offset;
-        switch(this.data.state){
+        switch(this.state){
             case 0: // configuring
                 offset = 65.625;
                 break;
@@ -306,7 +274,7 @@ viewmodels.blockViewModel = function (data) {
     this.stateClass = function(){
 
         var result;
-        switch(this.data.state){
+        switch(this.state){
             case 0:
                 result = "block-config";
                 break;
@@ -508,9 +476,66 @@ viewmodels.diagramViewModel = function(data) {
         selectionCount = 0,     // tracks the current number of selected blocks
         defaultName = "New Diagram";    // the default name given to a new diagram
 
+    //
+    // private methods
+    //
+
+    var BlockData = function(id, name, x, y, definitionViewModel){
+
+        // generate a new guid for this block
+        this.id = id;
+        this.name = name;
+        this.definition = definitionViewModel.name();
+        this.definitionType = definitionViewModel.definitionType();
+        this.configured = false;
+        this.dirty = false;
+        this.w = definitionViewModel.w();
+        this.x = x;
+        this.y = y;
+        this.inputConnectors = angular.copy(definitionViewModel.inputs());
+        this.outputConnectors = angular.copy(definitionViewModel.outputs());
+
+        var parameters = [];
+        definitionViewModel.parameters().forEach(function(parameter){
+
+            var newParam = {
+                name: parameter.name,
+                parameterType: parameter.parameterType,
+                valueType: parameter.valueType
+            };
+            if (typeof(parameter.value) === 'object')
+                newParam.value = angular.copy(parameter.value);
+            else
+                newParam.value = parameter.value;
+
+            parameters.push(newParam);
+        });
+
+        this.parameters = parameters;
+
+        // if the block does not contain any parameters, set to configured
+        if (this.parameters.length == 0)
+            this.configured = true;
+    };
+
     /**
-     * public properties
+     * Generate guid
+     * @returns {string}
      */
+    var newGuid = function() {
+
+        var delim = "-";
+
+        function S4() {
+            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+        }
+
+        return (S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4());
+    };
+
+    //
+    // public properties
+    //
 
     this.getId = function(){
         return data.id;
@@ -552,14 +577,6 @@ viewmodels.diagramViewModel = function(data) {
         this.data.owner = value;
     };
 
-    this.getOwner = function () {
-        return this.data.owner;
-    };
-
-    this.setOwner = function(value){
-        this.data.owner = value;
-    };
-
     this.getCategory = function () {
         return this.data.category;
     };
@@ -568,16 +585,13 @@ viewmodels.diagramViewModel = function(data) {
         this.data.category = value;
     };
 
-    //
-    // gets the diagram's mode
-    //
-    this.mode = function(){
-        return this.data.mode;
-    };
+    this.getMode = function(){ return this.data.mode; };
 
-    /**
-     * methods
-     */
+    this.mode = function(){ return this.data.mode; };
+
+    //
+    // public methods
+    //
 
     /**
      * Select blocks and wires that fall within the selection rect
@@ -705,12 +719,10 @@ viewmodels.diagramViewModel = function(data) {
     };
 
     /**
-     * create a new block based on the specified config block
-     * @param configBlock
+     * Add a new block to the diagram
+     * @param blockData
      */
-    this.createBlock = function (configBlock) {
-
-        var blockData = getDataBlock(configBlock);
+    this.addBlock = function (blockData) {
 
         if (!this.data.blocks) {
             this.data.blocks = [];
@@ -914,9 +926,19 @@ viewmodels.diagramViewModel = function(data) {
 
         for (var i = 0; i < this.blocks.length; ++i) {
             var block = this.blocks[i];
-            if (block.data.id == id) {
+            if (block.data.id == id)
                 return block;
-            }
+        }
+
+        throw new Error("Failed to find block " + id);
+    };
+
+    this.findBlockByName = function(name) {
+
+        for (var i = 0; i < this.blocks.length; ++i) {
+            var block = this.blocks[i];
+            if (block.data.name == name)
+                return block;
         }
 
         throw new Error("Failed to find block " + name);
@@ -973,70 +995,59 @@ viewmodels.diagramViewModel = function(data) {
     };
 
     /**
-     * Get a summary of the block's details
+     * Returns an array of all input wires for the specified connector (blockId, connector name)
+     * @param id: block id
+     * @param connectorName
+     * @returns {Array}
+     */
+    this.findInputWires = function(id, connectorName){
+
+        var wires = [];
+        for(var i = 0; i < this.wires.length; i++){
+            var wire = this.wires[i].data;
+            if (wire["to_node"] == id && wire["to_connector"] == connectorName)
+                wires.push(wire);
+        }
+
+        return wires;
+    };
+
+    /**
+     * Returns an array of all output wires for the specified connector (blockId, connector name)
+     * @param id: block id
+     * @param connectorName
+     * @returns {Array}
+     */
+    this.findOutputWires = function(id, connectorName) {
+
+        var wires = [];
+        for(var i = 0; i < this.wires.length; i++){
+            var wire = this.wires[i];
+            if (wire["from_node"] == id && wire["from_connector"] == connectorName)
+                wires.push(wire);
+        }
+
+        return wires;
+    };
+
+    /**
+     *
      * @param x
      * @param y
-     * @param definition
-     * @returns {{name, id, definition: *, x: *, y: *}}
+     * @param definitionViewModel
+     * @returns {BlockData}
      */
-    this.getBlockDescription = function(x, y, definition){
+    this.getBlockData = function(x, y, definitionViewModel){
 
-        return {
-            name: this.generateBlockName(definition.name()),
-            id: newGuid(),
-            definition: definition.name(),
-            x: x,
-            y: y
-        };
+        var id = newGuid(),
+            name = this.generateBlockName(definitionViewModel.name());
+
+        return new BlockData(id, name, x, y, definitionViewModel);
     };
 
     this.getBoundary = function(){
 
         return boundary;
-    };
-
-    /**
-     * returns a dataBlock object representing the specified config block
-     * @param configBlock
-     * @returns {DataBlock}
-     */
-    var getDataBlock = function(configBlock){
-
-        return new DataBlock(configBlock);
-    };
-
-    var DataBlock = function(configBlock){
-
-        this.name = configBlock.name;
-        this.id = configBlock.id;
-        this.definition = configBlock.definition.name();
-        this.definitionType = configBlock.definition.definitionType();
-        this.state = 0;
-        this.w = configBlock.definition.w();
-        this.x = configBlock.x;
-        this.y = configBlock.y;
-        this.inputConnectors = angular.copy(configBlock.definition.inputs()); // todo copy over only what we need from definition
-        this.outputConnectors = angular.copy(configBlock.definition.outputs()); // todo copy over only what we need from definition
-
-        var parameters = [];
-        var configured = true;
-        configBlock.parameters.forEach(function(parameter){
-
-            if (!parameter.collected)
-                configured = false;
-
-            parameters.push({
-                name:parameter.name(),
-                type:parameter.type(),
-                value:parameter.value,
-                collected:parameter.collected
-            });
-        });
-
-        if (configured)
-            this.state = 1;
-
-        this.parameters = parameters;
     };
 
     /**
@@ -1098,21 +1109,6 @@ viewmodels.diagramViewModel = function(data) {
         }
 
         return name;
-    };
-
-    /**
-     * Generate guid
-     * @returns {string}
-     */
-    var newGuid = function() {
-
-        var delim = "-";
-
-        function S4() {
-            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-        }
-
-        return (S4() + S4() + delim + S4() + delim + S4() + delim + S4() + delim + S4() + S4() + S4());
     };
 
     /**
@@ -1230,10 +1226,12 @@ viewmodels.diagramViewModel = function(data) {
             parameter.collected = configParameter.collected;
         });
 
+        /*
         if (dirty && configured)
             block.data.state = 1;
         else if (!configured)
             block.data.state = 0;
+            */
     };
 
     /**
@@ -1332,43 +1330,43 @@ viewmodels.diagramViewModel = function(data) {
     };
 };
 
-viewmodels.configuringBlockViewModel = function (definition, block) {
+viewmodels.configuringBlockViewModel = function (definitionViewModel, blockData) {
 
-    this.name = block.name;
-    this.id = block.id;
-    this.x = block.x;
-    this.y = block.y;
-    this.state = block.state;
+    this.id = blockData.id;
+    this.name = blockData.name;
+    this.parameters = [];
 
-    this.block = block;
-    this.definition = definition;
+    this.data = blockData;
+    this.definitionViewModel = definitionViewModel;
 
-    var blockParameters = block.parameters;
+    //
+    // public methods
+    //
 
-    // capture the block's parameters
-    var parameters = [];
-    this.definition.parameters().forEach(function(parameterDefinition){
+    this.getBlock = function(){
 
-        // if exists - reference block parameter
-        var blockParameter;
-        if (blockParameters){
-            for(var i = 0; i < blockParameters.length; i++){
+        // update the name
+        this.data.name = this.name;
 
-                if (blockParameters[i].name == parameterDefinition.name){
+        // update block parameter values
+        var configured = true,
+            parameters = [];
+        this.parameters.forEach(function(parameter){
 
-                    blockParameter = blockParameters[i];
-                    break;
-                }
-            }
-        }
+            if (!parameter.collected)
+                configured = false;
 
-        // copy parameter definition
-        var parameter = new viewmodels.configuringParameterViewModel(parameterDefinition, blockParameter);
+            parameters.push({
+                name: parameter.name(),
+                type: parameter.type(),
+                value: parameter.value,
+                collected: parameter.collected
+            });
+        });
+        this.data.parameters = parameters;
 
-        // add to list of parameters
-        parameters.push(parameter);
-    });
-    this.parameters = parameters;
+        return this.data;
+    };
 
     this.getParameter = function(name){
 
@@ -1377,8 +1375,39 @@ viewmodels.configuringBlockViewModel = function (definition, block) {
                 return this.parameters[p];
     };
 
+    this.init = function(){
+
+        var blockParameters = this.data.parameters;
+
+        // capture the block's parameters
+        var parameters = [];
+        this.definitionViewModel.parameters().forEach(function(parameterDefinition){
+
+            // if exists - reference block parameter
+            var blockParameter;
+            if (blockParameters){
+                for(var i = 0; i < blockParameters.length; i++){
+
+                    if (blockParameters[i].name == parameterDefinition.name){
+
+                        blockParameter = blockParameters[i];
+                        break;
+                    }
+                }
+            }
+
+            // copy parameter definition
+            var parameter = new viewmodels.configuringParameterViewModel(parameterDefinition, blockParameter);
+
+            // add to list of parameters
+            parameters.push(parameter);
+        });
+
+        this.parameters = parameters;
+    };
+
     this.reset = function() {
-        return new viewmodels.configuringBlockViewModel(this.definition, this.block);
+        return new viewmodels.configuringBlockViewModel(this.definition, this.data);
     };
 
     this.setParameter = function(name, value){
@@ -1388,6 +1417,8 @@ viewmodels.configuringBlockViewModel = function (definition, block) {
         parameter.dirty = true;
         parameter.collected = true;
     };
+
+    this.init();
 };
 
 viewmodels.configuringParameterViewModel = function (definitionParameter, blockParameter) {
@@ -1413,16 +1444,53 @@ viewmodels.configuringParameterViewModel = function (definitionParameter, blockP
         this.value = this.data.value;
     }
 
+    this.editTypes = {
+        number: 0,
+        text: 1,
+        textArea: 2,
+        list: 3,
+        multiSelectList: 4
+    };
+
+    this.editType = function(){
+
+        var result;
+        switch(this.parameterType()){
+            case "ENUMERATION":
+                if (this.valueType() == "SCALAR")
+                    result = this.editTypes.list;
+                else
+                    result = this.editTypes.multiSelectList;
+                break;
+            case "INT":
+                result = this.editTypes.number;
+                break;
+            case "JSON":
+                result = this.editTypes.textArea;
+            case "STRING":
+            default:
+                result = this.editTypes.text;
+                break;
+
+        }
+
+        return result;
+    };
+
     this.name = function(){
         return this.data.name;
     };
 
-    this.type = function(){
-        return this.data.type;
+    this.parameterType = function(){
+        return this.data.parameterType;
     };
 
     this.source = function(){
         return this.data.source;
+    };
+
+    this.valueType = function(){
+        return this.data.valueType;
     };
 };
 
@@ -1432,6 +1500,18 @@ viewmodels.definitionViewModel = function (mode, data) {
     this.mode = mode;
     this.data = data;
 
+    switch(this.mode){
+        case "OFFLINE":
+            this.modeDefinition = this.data.offlineDefinition;
+            break;
+        case "ONLINE":
+            if (this.data.onlineDefinition)
+                this.modeDefinition = this.data.onlineDefinition;
+            else
+                this.modeDefinition = this.data.offlineDefinition;
+            break;
+    }
+
     //
     // get the definition type
     //
@@ -1440,27 +1520,14 @@ viewmodels.definitionViewModel = function (mode, data) {
     //
     // get the input connectors
     //
-    this.inputs = function(){ return this.modeDefinition().inputs; };
+    this.inputs = function(){ return this.modeDefinition.inputs; };
 
     //
     // returns the mode definition according to the specified mode
     //
-    this.modeDefinition = function(){
+    this.setModeDefinition = function(){
 
-        var modeDefinition;
-        switch(this.mode){
-            case "OFFLINE":
-                modeDefinition = this.data.offlineDefinition;
-                break;
-            case "ONLINE":
-                if (this.data.onlineDefinition)
-                    modeDefinition = this.data.onlineDefinition;
-                else
-                    modeDefinition = this.data.offlineDefinition;
-                break;
-        }
 
-        return modeDefinition;
     };
 
     //
@@ -1471,12 +1538,12 @@ viewmodels.definitionViewModel = function (mode, data) {
     //
     // get the output connectors
     //
-    this.outputs = function(){ return this.modeDefinition().outputs; };
+    this.outputs = function(){ return this.modeDefinition.outputs; };
 
     //
     // get the parameters
     //
-    this.parameters = function(){ return this.modeDefinition().parameters; };
+    this.parameters = function(){ return this.modeDefinition.parameters; };
 
     //
     // get the width

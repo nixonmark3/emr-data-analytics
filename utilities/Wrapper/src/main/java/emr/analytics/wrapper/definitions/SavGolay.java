@@ -52,17 +52,20 @@ public class SavGolay extends BlockDefinition implements IExport {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
         parameters.add(new ParameterDefinition("PointsToLeft",
-                DataType.INT.toString().toString(),
+                ParameterType.INT,
+                ValueType.SCALAR,
                 10,
                 new ArrayList<String>(),
                 null));
         parameters.add(new ParameterDefinition("PointsToRight",
-                DataType.INT.toString().toString(),
+                ParameterType.INT,
+                ValueType.SCALAR,
                 10,
                 new ArrayList<String>(),
                 null));
         parameters.add(new ParameterDefinition("PolynomialOrder",
-                DataType.INT.toString().toString(),
+                ParameterType.INT,
+                ValueType.SCALAR,
                 3, new ArrayList<String>(),
                 null));
         return parameters;

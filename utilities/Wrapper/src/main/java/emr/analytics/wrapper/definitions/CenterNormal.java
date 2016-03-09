@@ -54,13 +54,15 @@ public class CenterNormal extends BlockDefinition implements IExport {
         opts.add("False");
 
         parameters.add(new ParameterDefinition("Subtract Mean",
-                DataType.LIST.toString(),
+                ParameterType.ENUMERATION,
+                ValueType.SCALAR,
                 "True",
                 opts,
                 null));
 
         parameters.add(new ParameterDefinition("Divide Std",
-                DataType.LIST.toString(),
+                ParameterType.ENUMERATION,
+                ValueType.SCALAR,
                 "True",
                 opts,
                 null));

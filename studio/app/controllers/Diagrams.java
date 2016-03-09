@@ -2,78 +2,114 @@ package controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import emr.analytics.diagram.interpreter.CompilerException;
+import emr.analytics.database.DiagramsRepository;
 import emr.analytics.models.diagram.*;
 
 import models.GroupRequest;
 import play.libs.Json;
 import play.mvc.BodyParser;
+import play.mvc.Controller;
 import play.mvc.Result;
 
-import org.jongo.*;
+import plugins.MongoPlugin;
 import services.*;
 
+import java.util.List;
 import java.util.UUID;
 
-public class Diagrams extends ControllerBase {
+public class Diagrams extends Controller {
 
-    @BodyParser.Of(BodyParser.Json.class)
-    public static Result compile() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
+    private static DiagramsRepository repository = new DiagramsRepository(MongoPlugin.getPlugin().getConnection());
 
-        String source;
-        try{
-            source = DiagramsService.getInstance().compile(diagram).getSource();
-        }
-        catch(CompilerException ex){
-            return internalServerError(String.format("Compile Exception: %s", ex.toString()));
-        }
-
-        return ok(source);
-    }
-
-    @BodyParser.Of(BodyParser.Json.class)
-    public static Result transform() {
-
-        Diagram online = null;
+    /**
+     * List all diagrams
+     * @return projection of all diagrams
+     */
+    public static Result all() {
+        List<DiagramRoot> diagrams = null;
 
         try {
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            DiagramContainer diagramContainer = objectMapper.convertValue(request().body().asJson(), DiagramContainer.class);
-
-            UUID id = DiagramsService.getInstance().save(diagramContainer);
-
-            Diagram offline = diagramContainer.getOffline();
-            if (offline.getId() == null)
-                offline.setId(id);
-
-            online = DiagramsService.getInstance().transform(offline);
+            diagrams = repository.all();
         }
-        catch (Exception exception) {
+        catch (Exception ex) {
 
-            exception.printStackTrace();
-            return internalServerError(String.format("Failed to compile diagram."));
+            String errorMessage = ex.getMessage();
+            if (errorMessage == null)
+                errorMessage = ex.toString();
+
+            return internalServerError(errorMessage);
         }
 
-        return ok(Json.toJson(online));
+        return ok(Json.toJson(diagrams));
     }
 
+    /**
+     * Compile the specified diagram and return the resulting source
+     * @return: source code
+     */
+    @BodyParser.Of(BodyParser.Json.class)
+    public static Result compile(){
+
+        try{
+            ObjectMapper objectMapper = new ObjectMapper();
+            Diagram diagram = objectMapper.convertValue(request().body().asJson(), Diagram.class);
+
+            return ok(CompilerService.getInstance().compile(diagram));
+        }
+        catch (Exception ex) {
+
+            ex.printStackTrace();
+            String errorMessage = ex.getMessage();
+            if (errorMessage == null)
+                errorMessage = ex.toString();
+
+            return internalServerError(errorMessage);
+        }
+    }
+
+    /**
+     * Delete the specified diagram
+     * @param name: diagram name
+     * @return: ok response
+     */
+    public static Result delete(String name) {
+
+        try {
+            repository.delete(name);
+        }
+        catch (Exception ex) {
+
+            String errorMessage = ex.getMessage();
+            if (errorMessage == null)
+                errorMessage = ex.toString();
+
+            return internalServerError(errorMessage);
+        }
+
+        // todo delete all other document related to this diagram
+
+        return ok();
+    }
+
+    /**
+     * Create a new diagram
+     * @return diagram
+     */
+    public static Result empty() {
+        return ok(Json.toJson(Diagram.Create()));
+    }
+
+    /**
+     * Get the specified diagram
+     * @param name: diagram name
+     * @return: diagram collection { offline, online }
+     */
     public static Result get(String name) {
 
         Diagram diagram = null;
 
         try {
-            MongoCollection diagrams = getMongoCollection(DIAGRAMS_COLLECTION);
-
-            if (diagrams != null) {
-                diagram = diagrams.findOne(String.format(QUERY_BY_UNIQUE_ID, name)).as(Diagram.class);
-            }
-            else {
-                return internalServerError(String.format(COLLECTION_NOT_FOUND, DIAGRAMS_COLLECTION));
-            }
+            diagram = repository.get(name);
         }
         catch (Exception exception) {
             exception.printStackTrace();
@@ -87,6 +123,10 @@ public class Diagrams extends ControllerBase {
         return ok(Json.toJson(diagram));
     }
 
+    /**
+     * Group a set of blocks together
+     * @return the diagram container the new group
+     */
     @BodyParser.Of(BodyParser.Json.class)
     public static Result group() {
 
@@ -98,18 +138,26 @@ public class Diagrams extends ControllerBase {
             ObjectMapper objectMapper = new ObjectMapper();
             request = objectMapper.convertValue(request().body().asJson(), GroupRequest.class);
 
-            DiagramsService service = new DiagramsService();
+            CompilerService service = new CompilerService();
             diagram = service.group(request);
         }
-        catch (Exception exception) {
+        catch (Exception ex) {
 
-            exception.printStackTrace();
-            return internalServerError(String.format("Failed to group blocks."));
+            ex.printStackTrace();
+            String errorMessage = ex.getMessage();
+            if (errorMessage == null)
+                errorMessage = ex.toString();
+
+            return internalServerError(errorMessage);
         }
 
         return ok(Json.toJson(diagram));
     }
 
+    /**
+     * Save the specified diagram
+     * @return diagram id
+     */
     @BodyParser.Of(BodyParser.Json.class)
     public static Result save() {
 
@@ -120,68 +168,53 @@ public class Diagrams extends ControllerBase {
 
             ObjectMapper objectMapper = new ObjectMapper();
             diagramContainer = objectMapper.convertValue(request().body().asJson(), DiagramContainer.class);
-
-            DiagramsService service = new DiagramsService();
-            diagramId = service.save(diagramContainer);
+            diagramId = repository.save(diagramContainer);
         }
-        catch (Exception exception) {
+        catch (Exception ex) {
 
-            exception.printStackTrace();
-            return internalServerError(String.format("Failed to save diagram."));
+            ex.printStackTrace();
+            String errorMessage = ex.getMessage();
+            if (errorMessage == null)
+                errorMessage = ex.toString();
+
+            return internalServerError(errorMessage);
         }
 
         return ok(diagramId.toString());
     }
 
-    public static Result all() {
-        MongoCursor<BasicDiagram> diagrams = null;
+    /**
+     * Transform the specified offline diagram into its online equivalent
+     * @return the online version of the diagram
+     */
+    @BodyParser.Of(BodyParser.Json.class)
+    public static Result transform() {
+
+        Diagram online = null;
 
         try {
-            MongoCollection diagramsCollection = getMongoCollection(DIAGRAMS_COLLECTION);
 
-            if (diagramsCollection != null) {
-                diagrams = diagramsCollection.find().projection(DIAGRAM_PROJECTION).sort(SORT_BY_NAME).as(BasicDiagram.class);
-            }
-            else {
-                return internalServerError(String.format(COLLECTION_NOT_FOUND, DIAGRAMS_COLLECTION));
-            }
+            ObjectMapper objectMapper = new ObjectMapper();
+            DiagramContainer diagramContainer = objectMapper.convertValue(request().body().asJson(), DiagramContainer.class);
+
+            UUID id = repository.save(diagramContainer);
+
+            Diagram offline = diagramContainer.getOffline();
+            if (offline.getId() == null)
+                offline.setId(id);
+
+            online = CompilerService.getInstance().transform(offline);
         }
-        catch (Exception exception) {
-            exception.printStackTrace();
-            return internalServerError("Failed to get diagrams.");
+        catch (Exception ex) {
+
+            ex.printStackTrace();
+            String errorMessage = ex.getMessage();
+            if (errorMessage == null)
+                errorMessage = ex.toString();
+
+            return internalServerError(errorMessage);
         }
 
-        return ok(Json.toJson(diagrams));
+        return ok(Json.toJson(online));
     }
-
-    public static Result delete(String name) {
-        try {
-            MongoCollection diagrams = getMongoCollection(DIAGRAMS_COLLECTION);
-
-            if (diagrams != null) {
-                diagrams.remove(String.format(QUERY_BY_UNIQUE_ID, name));
-            }
-            else {
-                return internalServerError(String.format(COLLECTION_NOT_FOUND, DIAGRAMS_COLLECTION));
-            }
-        }
-        catch (Exception exception) {
-            exception.printStackTrace();
-            return internalServerError(String.format("Failed to remove diagram."));
-        }
-
-        // todo delete all other document related to this diagram
-
-        return ok("Diagram removed successfully.");
-    }
-
-    public static Result empty() {
-        return ok(Json.toJson(Diagram.Create()));
-    }
-
-    private static final String DIAGRAM_PROJECTION = "{_id: 0, name: 1, description: 1, owner: 1, category: 1, mode: 1, targetEnvironment: 1, version: 1}";
-    private static final String DIAGRAMS_COLLECTION = "diagrams";
-    private static final String QUERY_BY_UNIQUE_ID = "{name: '%s'}";
-    private static final String SORT_BY_NAME = "{name: 1}";
-    private static final String COLLECTION_NOT_FOUND = "'%s' collection could not be found!";
 }

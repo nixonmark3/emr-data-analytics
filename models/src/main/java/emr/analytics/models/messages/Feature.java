@@ -7,11 +7,13 @@ import java.util.List;
 public class Feature<T> implements Serializable {
 
     private Class<T> clazz;
-    private List<T> feature;
+    private String name;
+    private List<T> data;
 
-    public Feature(Class<T> clazz){
+    public Feature(String name, Class<T> clazz){
         this();
 
+        this.name = name;
         this.clazz = clazz;
     }
 
@@ -30,12 +32,14 @@ public class Feature<T> implements Serializable {
     }
 
     public void add(T value){
-        this.feature.add(value);
+        this.data.add(value);
     }
 
-    public List<T> getFeature() { return this.feature; }
+    public List<T> getData() { return this.data; }
+
+    public String getName() { return this.name; }
 
     private Feature(){
-        feature = new ArrayList<T>();
+        data = new ArrayList<T>();
     }
 }

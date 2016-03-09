@@ -1,17 +1,12 @@
 package emr.analytics.diagram.interpreter;
 
-public class CompilerException extends Exception{
+public class CompilerException extends RuntimeException {
 
-    private static final String _message = "An exception occurred while compiling the specified diagram.";
-    private String _additionalInfo;
-
-    public CompilerException(String additionalInfo) {
-        super(_message);
-        this._additionalInfo = additionalInfo;
+    public CompilerException(Throwable e) {
+        super(e);
     }
 
-    @Override
-    public String getMessage() {
-        return super.getMessage() + " Addition Info: " + _additionalInfo;
+    public CompilerException(String m) {
+        super(m);
     }
 }

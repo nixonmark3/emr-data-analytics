@@ -1,29 +1,37 @@
 <div class="diag-ctrls">
-    <a class="diag-ctrls-btn diag-ctrls-btn-c round-button ng-class: {'evaluating': evaluating};"
+    <a class="diag-ctrls-btn diag-ctrls-btn-c round-button ng-class: {'starting': (state==1), 'evaluating': (state==2), 'stopping': (state==3) };"
        ng-style="{'height': 2 * centerRadius, 'width': 2 * centerRadius, 'line-height': 2 * (centerRadius) + 'px' }"
        ng-click="onClick($event, 'c');"
-       ng-switch on="evaluating">
+       ng-switch on="state">
 
-        <i ng-switch-when="false" class="fa fa-play"></i>
-        <i ng-switch-when="true" class="fa fa-cog fa-spin"></i>
+        <i ng-switch-when="1" class="fa fa-cog fa-spin"></i>
+        <i ng-switch-when="2" class="fa fa-bolt"></i>
+        <i ng-switch-when="3" class="fa fa-spinner fa-spin"></i>
+        <i ng-switch-default class="fa">{{ centerIcon }}</i>
 
     </a>
-    <a class="diag-ctrls-btn diag-ctrls-btn-o round-button ng-class: {'rotated': isRotated};"
+    <a ng-if="state==2"
+       class="diag-ctrls-btn-x round-button"
+       ng-style="{'height': 2 * centerRadius, 'width': 2 * centerRadius, 'line-height': 2 * (centerRadius) + 'px' }"
+       ng-click="onClick($event, 'x');">
+        <i class="fa fa-times"></i>
+    </a>
+    <a class="diag-ctrls-btn diag-ctrls-btn-o round-button ng-class: {'rotated': isCollapsed};"
        ng-style="{'height': 2 * orbitRadius, 'width': 2 * orbitRadius, 'line-height': 2 * (orbitRadius) + 'px', 'top': orbitWest.y, 'right': orbitWest.x }"
        ng-click="onClick($event, 'o1');">
 
-        <i class="fa fa-upload"></i>
+        <i class="fa">{{ orbit1Icon }}</i>
     </a>
-    <a class="diag-ctrls-btn diag-ctrls-btn-o round-button ng-class: {'rotated': isRotated};"
+    <a class="diag-ctrls-btn diag-ctrls-btn-o round-button ng-class: {'rotated': isCollapsed};"
        ng-style="{'height': 2 * orbitRadius, 'width': 2 * orbitRadius, 'line-height': 2 * (orbitRadius) + 'px', 'top': orbitSouthwest.y, 'right': orbitSouthwest.x }"
        ng-click="onClick($event, 'o2');">
 
-        <i class="fa fa-cube"></i>
+        <i class="fa">{{ orbit2Icon }}</i>
     </a>
-    <a class="diag-ctrls-btn diag-ctrls-btn-o round-button ng-class: {'rotated': isRotated};"
+    <a class="diag-ctrls-btn diag-ctrls-btn-o round-button ng-class: {'rotated': isCollapsed};"
        ng-style="{'height': 2 * orbitRadius, 'width': 2 * orbitRadius, 'line-height': 2 * (orbitRadius) + 'px', 'top': orbitSouth.y, 'right': orbitSouth.x }"
        ng-click="onClick($event, 'o3');">
 
-        <i class="fa fa-save"></i>
+        <i class="fa">{{ orbit3Icon }}</i>
     </a>
 </div>

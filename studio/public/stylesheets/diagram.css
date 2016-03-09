@@ -3,7 +3,7 @@
  * Diagram
  */
 
-.diagram-canvas-container { width: 100%; height: 100%; }
+.diagram-canvas-container { width: 100%; height: 100%; background-color: #e5e5e5; }
 .diagram-canvas { width: 100%; height: 100%; }
 .panning { cursor: -webkit-grabbing; }
 
@@ -29,7 +29,6 @@
 .block-header{ stroke: #d8d8d8; stroke-width: 1; }
 
 .block-name{ fill: #686868; font-size: 1.1em; }
-.block-name:hover { cursor: text; }
 .block-definition{ fill: #b8b8b8; }
 
 .block-button-wrapper { cursor: pointer; opacity: 0; -webkit-transition: opacity 0.4s ease-in-out; transition: opacity 0.4s ease-in-out; }
@@ -74,7 +73,7 @@
  * Diagram Navigation
  */
 
-.diag-nav-wrapper { position: absolute; z-index: 1000; top: 60px; left: 80px; width: 3000px; height: -webkit-calc(100% - 200px); }
+.diag-nav-wrapper { position: absolute; z-index: 1000; top: 60px; left: 10px; width: 3000px; height: -webkit-calc(100% - 70px); }
 .diag-nav-wrapper.ng-enter { -webkit-animation: fadeIn 0.4s; }
 .diag-nav-wrapper.ng-leave { -webkit-animation: fadeOut 0.4s; }
 .diag-nav-wrapper:before { content: ""; position: absolute; top: -17px; left: 7.5px; border-right: 17px solid transparent; border-left: 17px solid transparent; border-bottom: 17px solid #5fa2dd; }

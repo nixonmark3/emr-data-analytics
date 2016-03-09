@@ -10,5 +10,8 @@ public class Features implements Serializable {
 
     public void add(Feature feature) { features.add(feature); }
 
+    public Feature getFeature(int index) { return this.features.get(index); }
+
     public List<Feature> getFeatures() { return this.features; }
 }
+

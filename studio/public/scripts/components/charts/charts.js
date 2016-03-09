@@ -7,7 +7,14 @@ angular.module('emr.ui.charts', [])
         return {
             clearCanvas: function(context, width, height) { context.clearRect(0, 0, width, height); },
 
-            createCanvas: function(parent){ return d3.select(parent).append("canvas"); },
+            createCanvas: function(parent, cssClass){
+
+                var canvas = d3.select(parent).append("canvas");
+                if(cssClass)
+                    canvas.attr("class", cssClass);
+
+                return canvas;
+            },
 
             drawLine: function(context, from, to, color, lineWidth){
                 color = color || "#666";
@@ -41,17 +48,71 @@ angular.module('emr.ui.charts', [])
             },
 
             getXScale: function(type){
-                var scale;
-                if (type == 'time')
-                    scale = d3.time.scale();
-                else
-                    scale = d3.scale.linear();
 
+                var scale;
+                switch(type){
+                    case "time":
+                        scale = d3.time.scale();
+                        break;
+                    default:
+                        scale = d3.scale.linear();
+                        break;
+                }
                 return scale;
             },
 
-            getYScale: function(type){ return d3.scale.linear(); }
+            getYScale: function(){ return d3.scale.linear(); }
         };
+    }])
+
+    .directive('barChart', ['$timeout', function($timeout) {
+
+        return {
+            restrict: 'E',
+            replace: true,
+            scope: {
+                values: "="
+            },
+            link: function ($scope, element, attrs) {
+
+                function draw() {
+
+                    // bail if there is no data
+                    if (!$scope.values)
+                        return;
+
+                    var margin = { top: 10, right: 10, bottom: 10, left: 10},
+                        width = element.width(),
+                        height = element.height();
+
+                    var xScale = d3.scale.ordinal()
+                        .rangeRoundBands([0, width - margin.left - margin.right], .1)
+                        .domain($scope.values.map(function(d, i) { return i; }));
+
+                    var yScale = d3.scale.linear()
+                        .range([height - margin.top - margin.bottom, 0])
+                        .domain([0, d3.max($scope.values, function(d) { return d; })]);
+
+                    var svg = d3.select(element[0]).append("svg")
+                        .attr("width", width)
+                        .attr("height", height)
+                        .append("g")
+                            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                    svg.selectAll("rect").data($scope.values).enter()
+                        .append("rect")
+                            .attr("fill", "steelblue")
+                            .attr("x", function(d, i) { return xScale(i); })
+                            .attr("width", xScale.rangeBand())
+                            .attr("y", function(d) { return yScale(d); })
+                            .attr("height", function(d) { return height - margin.top - margin.bottom - yScale(d); });
+                }
+
+                $timeout(function(){
+                    draw();
+                }, 10);
+            }
+        }
     }])
 
     .directive('chart2d', ['chartService', 'colorService', function(chartService, colorService){
@@ -64,28 +125,41 @@ angular.module('emr.ui.charts', [])
             },
             link: function($scope, element, attrs){
 
-                // initialize the chart canvas
-                var canvas = chartService.createCanvas(element[0]);
-                var context = canvas.node().getContext('2d');
-                var margin = { top: 16, right: 16, bottom: 50, left: 50 };
+                var margin = { top: 20, right: 16, bottom: 50, left: 50 };
                 var tickSize = 5;
                 var isRendered = false;
-                var data, options, chartType, width, height, xScale, yScale;
-                var featureIndex = 1;
-                var featureOffset = 2;
+                var options = null,
+                    data = null,
+                    xAxisData = null;
+                var width, height, xScale, yScale, isTimeScale;
+
+                // initialize a canvas for each axis and and the plot area
+                var plotArea = chartService.createCanvas(element[0], "plot-area"),
+                    yAxis = chartService.createCanvas(element[0], "y-axis"),
+                    xAxis = chartService.createCanvas(element[0], "x-axis"),
+                    plotAreaContext = plotArea.node().getContext('2d'),
+                    yAxisContext = yAxis.node().getContext('2d'),
+                    xAxisContext = xAxis.node().getContext('2d');
+
+                $scope.internalMethods = $scope.methods || {};
 
                 /**
                  * Internal methods
                  */
 
                 /**
-                 *
+                 * draw the chart
                  */
                 function draw(){
 
-                    if (isRendered)
-                        chartService.clearCanvas(context, width, height);
+                    // if previously rendered, clear the canvas
+                    if (isRendered) {
+                        chartService.clearCanvas(plotAreaContext, width, height);
+                        chartService.clearCanvas(yAxisContext, margin.left, height);
+                        chartService.clearCanvas(xAxisContext, width, margin.bottom);
+                    }
 
+                    // exit if no data is present
                     if (!data) return;
 
                     var markerSize = 4;
@@ -95,89 +169,82 @@ angular.module('emr.ui.charts', [])
                         var color = colorService.getColor(options.colorSet, seriesIndex);
 
                         // reference the x and y features
-                        var yFeature = data[data[0].indexOf(series.y.name)  + featureOffset];
+                        var yFeature = data[series.y.name];
                         var xFeature = null;
-                        if (chartType == 'time')
-                            xFeature = data[featureIndex];
-                        else if(series.x != null)
-                            xFeature = data[data[0].indexOf(series.x.name) + featureOffset];
+                        if (options.hasXCoordinate)
+                            xFeature = data[series.x.name];
+                        else if(options.x.type === "TimeStamp")
+                            xFeature = xAxisData;
 
                         var index = 0, n = yFeature.length, y, x;
 
                         if (options.type == 'scatter'){
                             // draw marker
 
-                            context.fillStyle = color;
+                            plotAreaContext.fillStyle = color;
                             while (index++ < n) {
 
-                                y = yScale((options.scaled) ? (parseFloat(yFeature[index]) - series.y.min) / (series.y.max - series.y.min) : parseFloat(yFeature[index]));
-                                x = (xFeature == null) ? xScale(index + 1) : xScale((options.scaled) ? (parseFloat(yFeature[index]) - series.y.min) / (series.y.max - series.y.min) : parseFloat(xFeature[index]));
+                                y = yScale((options.scaled) ? (yFeature[index] - series.y.min) / (series.y.max - series.y.min) : yFeature[index]);
+                                x = (xFeature == null) ? xScale(index + 1) : xScale((options.scaled) ? (yFeature[index] - series.y.min) / (series.y.max - series.y.min) : xFeature[index]);
 
-                                context.fillRect(x, y, markerSize, markerSize);
-                                /*context.beginPath();
-                                context.arc(x, y, markerSize, 0, 2 * Math.PI);
-                                context.fill();*/
+                                plotAreaContext.fillRect(x, y, markerSize, markerSize);
                             }
                         }
                         else{
                             // draw line
 
-                            y = yScale((options.scaled) ? (parseFloat(yFeature[index]) - series.y.min) / (series.y.max - series.y.min) : parseFloat(yFeature[index]));
+                            y = yScale((options.scaled) ? (yFeature[index] - series.y.min) / (series.y.max - series.y.min) : yFeature[index]);
                             x = (xFeature == null) ? xScale(1) : xScale(xFeature[index]);
 
-                            context.strokeStyle = color;
-                            context.lineWidth = 1;
-                            context.lineCap = "round";
-                            context.beginPath();
-                            context.moveTo(x, y);
+                            plotAreaContext.strokeStyle = color;
+                            plotAreaContext.lineWidth = 1;
+                            plotAreaContext.lineCap = "round";
+                            plotAreaContext.beginPath();
+                            plotAreaContext.moveTo(x, y);
                             while (++index < n) {
 
-                                y = yScale((options.scaled) ? (parseFloat(yFeature[index]) - series.y.min) / (series.y.max - series.y.min) : parseFloat(yFeature[index]));
+                                y = yScale((options.scaled) ? (yFeature[index] - series.y.min) / (series.y.max - series.y.min) : yFeature[index]);
                                 x = (xFeature == null) ? xScale(index + 1) : xScale(xFeature[index]);
-                                context.lineTo(x, y);
+                                plotAreaContext.lineTo(x, y);
                             }
-                            context.stroke();
+                            plotAreaContext.stroke();
                         }
                     });
 
                     // draw axes
-                    var origin = { x: xScale.range()[0], y: yScale.range()[1] };
-
-                    // draw axis boundaries
-                    chartService.drawRect(context, {x: 0, y: 0}, {x: xScale.range()[0], y: height});
-                    chartService.drawRect(context, {x: 0, y: yScale.range()[1]}, {x: width, y: height});
+                    var t, pos;
 
                     // y-axis
-                    chartService.drawLine(context, origin, {x: xScale.range()[0], y: yScale.range()[0]});
+                    chartService.drawLine(yAxisContext, {x: xScale.range()[0] + margin.left, y: yScale.range()[1] + tickSize}, {x: xScale.range()[0] + margin.left, y: yScale.range()[0]});
                     var ticks = yScale.ticks();
-                    for(var t = 0; t < ticks.length; t++){
+                    for(t = 0; t < ticks.length; t++){
 
-                        var pos = { x: xScale.range()[0], y: yScale(ticks[t]) };
-                        chartService.drawLine(context, pos, {  x: pos.x - tickSize, y: pos.y });
-                        chartService.drawText(context, ticks[t], {  x: pos.x - tickSize - 2, y: pos.y }, "12px Arial", "#666", "end", "middle");
+                        pos = { x: xScale.range()[0] + margin.left, y: yScale(ticks[t]) };
+                        chartService.drawLine(yAxisContext, pos, {  x: pos.x - tickSize, y: pos.y });
+                        chartService.drawText(yAxisContext, ticks[t], {  x: pos.x - tickSize - 2, y: pos.y }, "12px Arial", "#666", "end", "middle");
                     }
 
                     // x-axis
-                    chartService.drawLine(context, origin, {x: xScale.range()[1], y: yScale.range()[1]});
+                    chartService.drawLine(xAxisContext, {x: xScale.range()[0] - tickSize, y: 0}, {x: xScale.range()[1] + tickSize, y: 0});
 
                     var tickCount = null;
-                    if (chartType == "time")
+                    if (isTimeScale)
                         tickCount = 8;
                     ticks = xScale.ticks(tickCount);
-                    for(var t = 0; t < ticks.length; t++){
+                    for(t = 0; t < ticks.length; t++){
 
-                        var pos = { x: xScale(ticks[t]), y: yScale.range()[1] };
-                        chartService.drawLine(context, pos, {  x: pos.x, y: pos.y + tickSize });
+                        pos = { x: xScale(ticks[t]) + tickSize, y: 0 };
+                        chartService.drawLine(xAxisContext, pos, {  x: pos.x, y: pos.y + tickSize });
 
-                        if (chartType == 'time'){
+                        if (isTimeScale){
                             var date = new Date(ticks[t]*1000);
                             var dateText = date.toLocaleDateString('en-US', {timeZone: "UTC", year: "numeric", month: "2-digit", day: "2-digit"});
                             var timeText = date.toLocaleTimeString('en-US', {timeZone: "UTC", hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit"});
-                            chartService.drawText(context, dateText, {  x: pos.x, y: pos.y + tickSize + 2 }, "12px Arial", "#666", "center", "top");
-                            chartService.drawText(context, timeText, {  x: pos.x, y: pos.y + tickSize + 14 }, "12px Arial", "#666", "center", "top");
+                            chartService.drawText(xAxisContext, dateText, {  x: pos.x, y: pos.y + tickSize + 2 }, "12px Arial", "#666", "center", "top");
+                            chartService.drawText(xAxisContext, timeText, {  x: pos.x, y: pos.y + tickSize + 14 }, "12px Arial", "#666", "center", "top");
                         }
                         else{
-                            chartService.drawText(context, ticks[t], {  x: pos.x, y: pos.y + tickSize + 2 }, "12px Arial", "#666", "center", "top");
+                            chartService.drawText(xAxisContext, ticks[t], {  x: pos.x, y: pos.y + tickSize + 2 }, "12px Arial", "#666", "center", "top");
                         }
                     }
 
@@ -185,26 +252,41 @@ angular.module('emr.ui.charts', [])
                 }
 
                 /**
-                 *
+                 * set the canvas size based on the parent
                  */
                 function setCanvasSize(){
                     // capture the parent's width and height
                     width = element.width();
                     height = element.height();
-                    canvas.attr("width", width).attr("height", height);
+
+                    // set the size of each plot canvas
+                    plotArea.attr("width", width - margin.left)
+                        .attr("height", height - margin.bottom);
+                    yAxis.attr("width", margin.left)
+                        .attr("height", height + tickSize - margin.bottom);
+                    xAxis.attr("width", width + tickSize - margin.left)
+                        .attr("height", margin.bottom);
                 }
 
+                /**
+                 * set the chart options
+                 */
                 function setOptions(){
 
-                    if (!data) return;
+                    /*
+                    * Options schema
+                    options = {
+                        type: "line",
+                        scaled: false,
+                        hasXCoordinate: false,
+                        colorSet: "default",
+                        x: { type: "Index", min: null, max: null },
+                        y: { min: null, max: null },
+                        series: []
+                    };
+                    */
 
-                    // capture the chart type and check whether the index is a datetime
-                    if (options.type == 'line' && data[featureIndex][0] > 946684800){
-                        chartType = 'time';
-                    }
-                    else{
-                        chartType = options.type;
-                    }
+                    if (!data) return;
 
                     var yMin = 0,
                         yMax = 1,
@@ -212,65 +294,63 @@ angular.module('emr.ui.charts', [])
                         xMax = 1;
 
                     if (!options.scaled){
-                        yMin = options.y.minActual || options.y.min || 0;
-                        yMax = options.y.maxActual || options.y.max || 1;
+                        yMin = options.y.min || 0;
+                        yMax = options.y.max || 1;
                     }
 
                     // capture the chart boundaries
-                    if (chartType == 'time'){
+                    if (options.x.type === "TimeStamp" && xAxisData !== null){
 
-                        var timeSeries = data[featureIndex];
-                        xMin = timeSeries[0];
-                        xMax = timeSeries[timeSeries.length - 1];
+                        // capture the time series min and max value
+                        xMin = xAxisData[0];
+                        xMax = xAxisData[xAxisData.length - 1];
+
+                        isTimeScale = true;
                     }
-                    else if (!options.scaled || chartType == 'line'){
+                    else if (!options.hasXCoordinate || !options.scaled){
 
-                        xMin = options.x.minActual || options.x.min || 0;
-                        xMax = options.x.maxActual || options.x.max || 1;
+                        xMin = options.x.min || 0;
+                        xMax = options.x.max || 1;
                     }
 
-                    // create the chart scales
-                    xScale = chartService.getXScale(chartType)
-                        .range([margin.left, width - margin.right])
+                    var xScaleType = (isTimeScale) ? "time" : "linear";
+                    xScale = chartService.getXScale(xScaleType)
+                        .range([0, width - (margin.left + margin.right)])
                         .domain([xMin, xMax])
                         .nice();
 
-                    yScale = chartService.getYScale(chartType)
+                    yScale = chartService.getYScale()
                         .range([margin.top, height - margin.bottom])
                         .domain([yMax, yMin])
                         .nice();
 
-                    // setup zoom
-                    canvas.call(d3.behavior.zoom()
+                    // configure x and y axis zooming
+                    yAxis.call(d3.behavior.zoom()
+                        .y(yScale)
+                        .on("zoom", draw));
+                    xAxis.call(d3.behavior.zoom()
                         .x(xScale)
                         .on("zoom", draw));
                 }
 
                 /**
-                 * Setup the publicly exposed chart methods
+                 * set chart variables and render
                  */
-                $scope.internalMethods = $scope.methods || {};
-
-                $scope.internalMethods.render = function(chartOptions, chartData){
+                $scope.internalMethods.render = function(chartOptions, axisData, chartData){
 
                     options = chartOptions;
+                    xAxisData = axisData;
+                    data = chartData;
 
-                    if (chartData != null)
-                        data = chartData;
-
+                    setCanvasSize();
                     setOptions();
                     draw();
                 };
-
-                // todo: handle window resize
-
-                // initialize
-                setCanvasSize();
             }
         }
     }])
 
-    .directive('exploreChart', [function(){
+    .directive('exploreChart', ['$timeout', 'colorService', function($timeout, colorService){
 
         return {
             restrict: 'E',
@@ -278,119 +358,271 @@ angular.module('emr.ui.charts', [])
             templateUrl: '/assets/scripts/components/charts/exploreChart.html',
             scope: {
                 features: "=",
-                methods: "=",
                 onFetch: "="
             },
-            link: function($scope, element, attrs){
+            link: {
 
-                // initialize the chart object
-                $scope.chartOptions = {
-                    type: "line",
-                    scaled: false,
-                    hasXCoordinate: false,
-                    override: false,
-                    colorSet: "default",
-                    x: { min: null, max: null },
-                    y: { min: null, max: null },
-                    series: []
-                };
+                pre: function($scope, element, attrs){
 
-                // initialize new series object
-                $scope.newSeries = {
-                    x: {
-                        name: null
-                    },
-                    y: {
-                        name: null
-                    }
-                };
+                    // initialize the chart methods object
+                    $scope.chartMethods = {};
+                },
+                post: function($scope, element, attrs){
 
-                /**
-                 * Setup the methods callable from the methods input
-                 */
-                $scope.inputMethods = $scope.methods || {};
+                    // initialize variables to track feature counts and the chart data
+                    var chartFeatures = {},
+                        chartData = {},
+                        xAxisData = null;
 
-                //
-                // private methods
-                //
+                    $scope.menuClosed = false;
 
-                function fetchData(){
+                    // initialize the chart object
+                    $scope.chartOptions = {
+                        type: "line",
+                        scaled: false,
+                        hasXCoordinate: false,
+                        colorSet: "default",
+                        x: { type: "Index", min: null, max: null },
+                        y: { min: null, max: null },
+                        series: []
+                    };
 
-                    var featureNames = $scope.chartOptions.series.map(function(feature) { return feature.y.name });
-                    $scope.onFetch(featureNames, function(result){
+                    // initialize new series object
+                    $scope.newSeries = { x: { name: null }, y: { name: null } };
 
-                        console.log("Initiated fetch.");
+                    // initialize the list of xlabels
+                    $scope.xAxisOptions = ["Index"];
+
+                    /**
+                     * on features change, update the list of available timestamps based whether a timestamp feature exists
+                     */
+                    $scope.$watch("features", function(){
+
+                        var index = timestampIndex();
+                        if (index > -1){ // a timestamp exists - update the list of xLabels
+                            $scope.xAxisOptions = ["Index", "TimeStamp"];
+                        }
+                        else{ // no timestamp feature
+                            $scope.xAxisOptions = ["Index"];
+                        }
                     });
-                }
 
-                function findFeature(name){
-                    var index = $scope.features.map(function(feature) { return feature.name; }).indexOf(name);
-                    return $scope.features[index];
-                }
+                    //
+                    // private methods
+                    //
 
-                function resetSeries() {
-                    $scope.newSeries.y.name = null;
-                    $scope.newSeries.x.name = null;
-                }
 
-                //
-                // public methods
-                //
+                    function fetchData(){
 
-                /**
-                 * Adds the new series to the list of chart series
-                 */
-                $scope.addSeries = function(){
+                        var featureSet = [];
+                        for (var chartFeature in chartFeatures) {
+                            if (chartFeatures.hasOwnProperty(chartFeature) && chartData[chartFeature] === undefined) {
+                                var feature = findFeature(chartFeature);
+                                featureSet.push(feature);
+                            }
+                        }
 
-                    // verify the series has been properly configured
-                    if ($scope.newSeries.y.name == null) return;
-                    if ($scope.chartOptions.hasXCoordinate && $scope.newSeries.x.name == null) return;
+                        if (featureSet.length > 0){
 
-                    // copy the new series and append to the list of series
-                    var series = angular.copy($scope.newSeries);
+                            $scope.onFetch(featureSet, function(data){
 
-                    // update chart boundaries
-                    var feature = findFeature(series.y.name);
-                    series.y.max = feature.max;
-                    series.y.min = feature.min;
-                    if ($scope.chartOptions.y.max == null || series.y.max > $scope.chartOptions.y.max)
-                        $scope.chartOptions.y.max = series.y.max;
-                    if ($scope.chartOptions.y.min == null || series.y.min < $scope.chartOptions.y.min)
-                        $scope.chartOptions.y.min = series.y.min;
+                                var features = data.features;
+                                for(var index = 0; index < features.length; index++)
+                                    chartData[features[index].name] = features[index].data;
 
-                    if ($scope.chartOptions.hasXCoordinate){
-
-                        feature = findFeature(series.x.name);
-                        series.x.max = feature.max;
-                        series.x.min = feature.min;
-                        if ($scope.chartOptions.x.max == null || series.x.max > $scope.chartOptions.x.max)
-                            $scope.chartOptions.x.max = series.x.max;
-                        if ($scope.chartOptions.x.min == null || series.x.min < $scope.chartOptions.x.min)
-                            $scope.chartOptions.x.min = series.x.min;
+                                $scope.chartMethods.render($scope.chartOptions, xAxisData, chartData);
+                            });
+                        }
                     }
 
-                    $scope.chartOptions.series.push(series);
+                    function findFeature(name){
+                        var index = findFeatureIndex(name);
+                        return $scope.features[index];
+                    }
 
-                    resetSeries();
+                    function findFeatureIndex(name){
+                        return $scope.features.map(function(feature) { return feature.name; }).indexOf(name);
+                    }
 
-                    fetchData();
-                };
+                    function incrementChartFeature(name){
+                        if (chartFeatures[name] === undefined)
+                            chartFeatures[name] = 0;
+                        chartFeatures[name] += 1;
+                    }
 
-                /**
-                 * called when chart type is updated, adjusts chart configuration based on chart type change
-                 */
-                $scope.onChartTypeUpdate = function() {
+                    function decrementChartFeature(name){
+                        // decrement chart feature count
+                        chartFeatures[name] -= 1;
+                        // remove if count drops to zero
+                        if (chartFeatures[name] == 0)
+                            delete chartFeatures[name];
+                    }
 
-                    // set whether chart has x coordinate
-                    $scope.chartOptions.hasXCoordinate = ($scope.chartOptions.type == "scatter");
-                };
+                    function timestampIndex(){
+                        return $scope.features.map(function(feature) { return feature.type; }).indexOf("timestamp");
+                    }
 
-                /**
-                 * called when y-axis scale option is toggled, adjusts chart configuration based on change
-                 */
-                $scope.onToggleScale = function() {
+                    function render(){
 
-                };
+                    }
+
+                    function resetSeries() {
+
+                        $scope.newSeries.y.name = null;
+                        $scope.newSeries.x.name = null;
+                    }
+
+                    //
+                    // public methods
+                    //
+
+                    /**
+                     * Adds the new series to the list of chart series
+                     */
+                    $scope.addSeries = function(){
+
+                        // verify the series has been properly configured
+                        if ($scope.newSeries.y.name == null) return;
+                        if ($scope.chartOptions.hasXCoordinate && $scope.newSeries.x.name == null) return;
+
+                        // copy the new series and append to the list of series
+                        var series = angular.copy($scope.newSeries);
+                        series.flipped = false;
+
+                        // y feature
+                        var feature = findFeature(series.y.name);
+                        // increment chart feature count
+                        incrementChartFeature(feature.name);
+
+                        // update chart boundaries
+                        series.y.max = feature.max;
+                        series.y.min = feature.min;
+                        series.y.count = feature.count;
+                        if ($scope.chartOptions.y.max == null || series.y.max > $scope.chartOptions.y.max)
+                            $scope.chartOptions.y.max = series.y.max;
+                        if ($scope.chartOptions.y.min == null || series.y.min < $scope.chartOptions.y.min)
+                            $scope.chartOptions.y.min = series.y.min;
+
+                        if ($scope.chartOptions.hasXCoordinate){
+
+                            // x feature
+                            feature = findFeature(series.x.name);
+                            incrementChartFeature(feature.name);
+
+                            series.x.max = feature.max;
+                            series.x.min = feature.min;
+                            series.x.count = feature.count;
+                            if ($scope.chartOptions.x.max == null || series.x.max > $scope.chartOptions.x.max)
+                                $scope.chartOptions.x.max = series.x.max;
+                            if ($scope.chartOptions.x.min == null || series.x.min < $scope.chartOptions.x.min)
+                                $scope.chartOptions.x.min = series.x.min;
+                        }
+                        else if ($scope.chartOptions.x.type === "Index") {
+
+                            // this chart is plotted against the data's index
+                            // use the feature counts to update the x -min and -max values
+
+                            $scope.chartOptions.x.min = 0;
+                            if ($scope.chartOptions.x.max == null || series.y.count > $scope.chartOptions.x.max)
+                                $scope.chartOptions.x.max = series.y.count;
+                        }
+
+                        $scope.chartOptions.series.push(series);
+
+                        resetSeries();
+
+                        fetchData();
+                    };
+
+                    /**
+                     * returns the color associated with the specified index
+                     * @param index
+                     * @returns {*}
+                     */
+                    $scope.getColor = function(index) {
+                        return colorService.getColor($scope.chartOptions.colorSet, index);
+                    };
+
+                    /**
+                     * called when chart type is updated, adjusts chart configuration based on chart type change
+                     */
+                    $scope.onChartTypeUpdate = function() {
+
+                        // set whether chart has x coordinate
+                        $scope.chartOptions.hasXCoordinate = ($scope.chartOptions.type == "scatter");
+                    };
+
+                    /**
+                     * Flips the series selector
+                     * @param item
+                     * @param isFlipped
+                     */
+                    $scope.onFlipCheck = function(item, isFlipped){
+                        item.flipped = isFlipped;
+                    };
+
+                    /**
+                     * remove a specific series
+                     * @param item
+                     */
+                    $scope.onRemoveSeries = function(item){
+
+                        // remove the specified series
+                        $scope.chartOptions.series.splice($scope.chartOptions.series.indexOf(item), 1);
+
+                        // decrement chart feature count
+                        chartFeatures[item.y.name] -= 1;
+                        // remove if count drops to zero
+                        if (chartFeatures[item.y.name] == 0)
+                            delete chartFeatures[item.y.name];
+
+                        // if applicable, decrement the x coordinate
+                        if ($scope.chartOptions.hasXCoordinate){
+                            chartFeatures[item.x.name] -= 1;
+                            // remove if count drops to zero
+                            if (chartFeatures[item.x.name] == 0)
+                                delete chartFeatures[item.x.name];
+                        }
+                    };
+
+                    /**
+                     * called when y-axis scale option is toggled, adjusts chart configuration based on change
+                     */
+                    $scope.onToggleScale = function() {
+
+                    };
+
+                    /**
+                     * Show / hides explore chart menu
+                     */
+                    $scope.onToggleMenu = function() {
+                        $scope.menuClosed = !$scope.menuClosed;
+
+                        $timeout(function(){
+                            $scope.chartMethods.render($scope.chartOptions, xAxisData, chartData);
+                        }, 10);
+                    };
+
+                    /**
+                     * called when the xlabel dropdown is modified
+                     */
+                    $scope.onXLabelUpdate = function(){
+
+                        if ($scope.chartOptions.x.type === "TimeStamp") {
+
+                            var index = timestampIndex();
+                            var fetchRequest = [];
+                            fetchRequest.push($scope.features[index]);
+                            $scope.onFetch(fetchRequest, function(data){
+
+                                xAxisData = data.features[0].data;
+                            });
+                        }
+                        else{
+                            xAxisData = null;
+                        }
+                    };
+                }
             }
         }
     }])
@@ -404,15 +636,23 @@ angular.module('emr.ui.charts', [])
             scope: {
                 backgroundColor: "@",
                 foregroundColor: "@",
+                showValue: "@?",
                 progress: "="
             },
             link: function($scope, element, attrs){
 
                 var padding = 12;
 
+                if ($scope.showValue === undefined)
+                    $scope.showValue = true;
+
                 $scope.radius = (element.width() - padding) / 2;
                 $scope.centerX = element.width() / 2;
                 $scope.centerY = element.height() / 2;
+
+                attrs.$observe('showValue', function() {
+                    $scope.showValue = $scope.$eval(attrs.showValue);
+                });
 
                 $scope.$watch("progress", function(newValue, oldValue){
                     var perimeter = $scope.perimeter($scope.radius);
@@ -439,7 +679,6 @@ angular.module('emr.ui.charts', [])
                 }
 
                 $scope.perimeter = function(radius) {
-
                     return 2 * Math.PI * radius;
                 };
 
@@ -448,108 +687,7 @@ angular.module('emr.ui.charts', [])
         }
     }])
 
-    .directive('statisticsHistogram', [function() {
-
-        return {
-            restrict: 'E',
-            replace: true,
-            scope: {
-                values: "="
-            },
-            link: function ($scope, element, attrs) {
-
-                function draw() {
-
-                    var margin = {top: 10, right: 10, bottom: 10, left: 10};
-                    var width = 180;
-                    var height = 180;
-
-                    var data = d3.layout.histogram().frequency(false)($scope.values);
-
-                    var maxY = d3.max(data, function(d) { return d.y; });
-
-                    var x = d3.scale.ordinal()
-                        .domain(data)
-                        .rangeBands([0, width], 0.1);
-
-                    var y = d3.scale.linear()
-                        .domain([0, maxY])
-                        .range([0, height]);
-
-                    var svg = d3.select(element[0])
-                        .append("svg:svg")
-                            .attr("width", width + margin.left + margin.right)
-                            .attr("height", height + margin.top + margin.bottom)
-                        .append("g")
-                            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-                    svg.selectAll("rect")
-                        .data(data)
-                        .enter()
-                        .append("svg:rect")
-                            .attr("x", x)
-                            .attr("y", function(d) { return height-y(d.y); })
-                            .attr("width", x.rangeBand())
-                            .attr("height", function(d) { return y(d.y); })
-                            .attr("fill", "steelblue")
-                            .attr("shape-rendering", "crispEdges");
-                }
-
-                draw();
-            }
-        }
-    }])
-
-    .directive('statisticsBarChart', [function() {
-
-        return {
-            restrict: 'E',
-            replace: true,
-            scope: {
-                values: "="
-            },
-            link: function ($scope, element, attrs) {
-
-                function draw() {
-
-                    var data = $scope.values.histogram;
-
-                    var margin = { top: 10, right: 10, bottom: 10, left: 10 };
-                    var width = 200 - margin.left - margin.right;
-                    var height = 200 - margin.top - margin.bottom;
-
-                    var x = d3.scale.ordinal()
-                        .rangeRoundBands([0, width], .1)
-                        .domain(data.map(function(d) { return d.x; }));
-
-                    var y = d3.scale.linear()
-                        .range([height, 0])
-                        .domain([0, d3.max(data, function(d) { return d.y; })]);
-
-                    var svg = d3.select(element[0])
-                        .append("svg")
-                            .attr("width", width + margin.left + margin.right)
-                            .attr("height", height + margin.top + margin.bottom)
-                        .append("g")
-                            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-                    svg.selectAll(".bar")
-                        .data(data)
-                        .enter()
-                        .append("rect")
-                            .attr("class", "bar")
-                            .attr("x", function(d) { return x(d.x); })
-                            .attr("width", x.rangeBand())
-                            .attr("y", function(d) { return y(d.y); })
-                            .attr("height", function(d) { return height - y(d.y); });
-                }
-
-                draw();
-            }
-        }
-    }])
-
-    .directive('trendLine', [function(){
+    .directive('trendLine', ['chartService', '$location',  function(chartService, $location){
 
         return {
             restrict: 'E',
@@ -560,49 +698,125 @@ angular.module('emr.ui.charts', [])
             },
             link: function($scope, element, attrs){
 
-                // initialize variables
-                var width, height;
-                var margin = { top: 10, right: 0, bottom: 10, left: 0 };
+                // initialize trend line variables
+                var margin = { top: 20, right: 16, bottom: 50, left: 50 };
+                var width,
+                    height,
+                    yMin = 0,
+                    yMax = 3,
+                    capacity = $scope.size - 1;
 
-                // initialize the chart canvas
+                // initialize chart data and scales
+                var chartData = $scope.data.map(function(value, index) { return { x: index, y: value }; });
+                var xScale = chartService.getXScale().domain([0, capacity-1]);
+                var yScale = chartService.getYScale().domain([yMax, yMin]);
+
+                // create line and axes functions
+                var line = d3.svg.line()
+                    .x(function(d) { return xScale(d.x); })
+                    .y(function(d) { return yScale(d.y); });
+
+                var xAxis = d3.svg.axis().scale(xScale).orient("bottom").outerTickSize(0).tickPadding(10);
+                var yAxis = d3.svg.axis().scale(yScale).orient("left").outerTickSize(0).tickPadding(10);
+
+                // initialize the chart, canvas, and clip path
                 var svg = d3.select(element[0]).append("svg");
-                var canvas = svg.append("g")
-                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                var canvas = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                var clip = canvas.append("defs").append("clipPath").attr("id", "clip").append("rect");
 
-                $scope.$watch('data', function(newValue, oldValue) {
-                    draw();
+                canvas.append("g").attr("class", "x axis");
+                canvas.append("g").attr("class", "y axis");
+
+                var path = canvas.append("g")
+                    .attr("clip-path", "url(" + $location.absUrl() + "#clip)")
+                    .append("path")
+                        .datum(chartData)
+                        .attr("class", "trend-line")
+                        .attr("d", line);
+
+                // watch for a change in the parent element's size
+                $scope.$watch(
+                    function () { return { width: element.width(), height: element.height() } },
+                    function () {
+                        setChartDimensions();
+                        redraw();
+                    },
+                    true
+                );
+
+                // watch for a change to the data
+                $scope.$watch('data', function (newValue, oldValue) {
+
+                    chartData = $scope.data.map(function(value, index) { return { x: index, y: value }; });
+                    redraw();
                 }, true);
 
-                function draw(){
+                function interpolation(data) {
 
-                    if ($scope.data === undefined || $scope.data.length == 0)
-                        return;
+                    return function (d, i, a) {
+                        var interpolate = d3.scale.linear()
+                            .domain([0,1])
+                            .range([data.length - 1, data.length]);
 
-                    // capture the parent's width and height
-                    width = element.width();
-                    height = element.height();
-                    svg.attr("width", width).attr("height", height);
+                        return function(t) {
+                            var flooredX = Math.floor(interpolate(t));
+                            var weight = interpolate(t) - flooredX;
+                            var interpolatedLine = data.slice(0, flooredX);
 
-                    var x = d3.scale.linear()
-                        .range([0, width])
-                        .domain([0, parseInt($scope.size)]);
+                            if(flooredX > 0 && flooredX < data.length) {
+                                var weightedLineAverage = data[flooredX].y * weight + data[flooredX-1].y * (1-weight);
+                                interpolatedLine.push({"x":interpolate(t)-1, "y":weightedLineAverage});
+                            }
 
-                    var y = d3.scale.linear()
-                        .range([height - margin.top - margin.bottom, 0])
-                        .domain(d3.extent($scope.data, function(d) { return parseFloat(d); } ));
-
-                    var line = d3.svg.line()
-                        .x(function(d, i) { return x(i); })
-                        .y(function(d) { return y(parseFloat(d)); });
-
-                    canvas.selectAll(".trend-line").remove();
-                    canvas.append("path")
-                        .datum($scope.data)
-                            .attr("class", "trend-line")
-                            .attr("d", line);
+                            return line(interpolatedLine);
+                        }
+                    }
                 }
 
-                draw();
+                function redraw(){
+
+                    if ($scope.data.length == 0)
+                        return;
+
+                    if(chartData.length > capacity){
+                        path.datum(chartData)
+                            .attr("d", line)
+                            .attr("transform", null)
+                            .transition()
+                                .duration(500)
+                                .ease("linear")
+                                .attr("transform", "translate(" + xScale(-1) + ",0)");
+                    }
+                    else{
+                        path.transition()
+                            .duration(500)
+                            .attrTween('d', interpolation(chartData));
+                    }
+
+                }
+
+                function setChartDimensions(){
+
+                    width = element.width();
+                    height = element.height();
+
+                    svg.attr("width", width).attr("height", height);
+
+                    var innerWidth = width - (margin.left + margin.right),
+                        innerHeight = height - (margin.top + margin.bottom);
+
+                    xScale.range([0, innerWidth]);
+                    yScale.range([0, innerHeight]);
+
+                    clip.attr("width", innerWidth)
+                        .attr("height", innerHeight);
+
+                    xAxis.innerTickSize(-innerHeight);
+                    yAxis.innerTickSize(-innerWidth);
+
+                    canvas.select(".x.axis").attr("transform", "translate(0," + innerHeight + ")").call(xAxis);
+                    canvas.select(".y.axis").call(yAxis);
+                }
             }
         }
     }]);

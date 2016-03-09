@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class TaskOutput extends TaskStatus {
 
-    public TaskOutput(UUID diagramId, String diagramName, Mode mode, String message){
-        super(diagramId, diagramName, mode, TaskStatusTypes.OUTPUT, message);
+    public TaskOutput(UUID id, UUID sessionId, UUID diagramId, String diagramName, Mode mode, String message){
+        super(id, sessionId, diagramId, diagramName, mode, TaskStatusTypes.OUTPUT, message);
     }
 }

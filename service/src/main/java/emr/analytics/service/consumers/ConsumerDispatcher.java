@@ -1,8 +1,6 @@
 package emr.analytics.service.consumers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import emr.analytics.service.consumers.serializers.Consumers;
+import emr.analytics.models.messages.Consumers;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -10,15 +8,17 @@ import java.util.concurrent.Executors;
 
 public class ConsumerDispatcher {
 
-    private static int nThreads = 10;
+    public static void send(String value, Consumers consumers) {
 
-    public static void send(String value, String consumersJsonString) {
+        // verify that consumers exist
+        if (consumers == null)
+            return;
+
+        int threadCount = 10;
 
         try {
 
-            Consumers consumers = new ObjectMapper().readValue(consumersJsonString, Consumers.class);
-
-            ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
+            ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
 
             consumers.getConsumers().stream().forEach(consumer -> {
 

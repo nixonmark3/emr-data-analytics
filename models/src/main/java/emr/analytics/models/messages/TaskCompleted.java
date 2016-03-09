@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class TaskCompleted extends TaskStatus {
 
-    public TaskCompleted(UUID diagramId, String diagramName, Mode mode){
-        super(diagramId, diagramName, mode, TaskStatusTypes.COMPLETED, "");
+    public TaskCompleted(UUID id, UUID sessionId, UUID diagramId, String diagramName, Mode mode){
+        super(id, sessionId, diagramId, diagramName, mode, TaskStatusTypes.COMPLETED, "");
     }
 }

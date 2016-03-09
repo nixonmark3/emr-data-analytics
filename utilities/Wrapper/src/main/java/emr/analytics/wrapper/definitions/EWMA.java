@@ -53,7 +53,8 @@ public class EWMA extends BlockDefinition implements IExport {
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
 
         parameters.add(new ParameterDefinition("Weight",
-                DataType.INT.toString(),
+                ParameterType.INT,
+                ValueType.SCALAR,
                 20,
                 new ArrayList<String>(),
                 null));

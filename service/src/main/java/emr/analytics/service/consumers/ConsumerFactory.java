@@ -1,6 +1,6 @@
 package emr.analytics.service.consumers;
 
-import emr.analytics.service.consumers.serializers.Consumer.ConsumerType;
+import emr.analytics.models.messages.Consumer.ConsumerType;
 
 import java.util.Optional;
 
@@ -12,8 +12,8 @@ public class ConsumerFactory {
 
         switch(consumerType) {
 
-            case File:
-                dataConsumer = new FileDataConsumer();
+            case LOG:
+                dataConsumer = new LogConsumer();
                 break;
 
             case OPC:
@@ -24,8 +24,8 @@ public class ConsumerFactory {
                 dataConsumer = new PiDataConsumer();
                 break;
 
-            case Simulated:
-                dataConsumer = new SimulatedDataConsumer();
+            case OUT:
+                dataConsumer = new OutConsumer();
                 break;
 
             default:

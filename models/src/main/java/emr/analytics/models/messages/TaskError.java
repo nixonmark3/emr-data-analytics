@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class TaskError extends TaskStatus {
 
-    public TaskError(UUID diagramId, String diagramName, Mode mode, String message){
-        super(diagramId, diagramName, mode, TaskStatusTypes.ERROR, message);
+    public TaskError(UUID id, UUID sessionId, UUID diagramId, String diagramName, Mode mode, String message){
+        super(id, sessionId, diagramId, diagramName, mode, TaskStatusTypes.ERROR, message);
     }
 }

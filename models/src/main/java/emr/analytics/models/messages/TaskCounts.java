@@ -1,5 +1,7 @@
 package emr.analytics.models.messages;
 
+import java.util.UUID;
+
 public class TaskCounts extends OutputMessage {
 
     private int offline;
@@ -11,7 +13,7 @@ public class TaskCounts extends OutputMessage {
     }
 
     public TaskCounts(int offline, int online, int streaming){
-        super("task-counts");
+        super(null, null, "task-counts");
 
         this.offline = offline;
         this.online = online;

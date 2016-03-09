@@ -3,12 +3,15 @@ package emr.analytics.service.interpreters;
 import emr.analytics.models.definition.Mode;
 import emr.analytics.models.definition.TargetEnvironments;
 
+import java.util.Properties;
+
 public class InterpreterFactory {
 
     public static Interpreter get(String name,
                                   InterpreterNotificationHandler notificationHandler,
                                   TargetEnvironments targetEnvironment,
-                                  Mode mode) throws InterpreterException {
+                                  Mode mode,
+                                  Properties properties) throws InterpreterException {
 
         Interpreter interpreter;
         switch(targetEnvironment){
@@ -16,10 +19,15 @@ public class InterpreterFactory {
             case PYSPARK:
 
                 if (mode == Mode.ONLINE)
-                    interpreter = new PySparkStreamingInterpreter(name, notificationHandler);
+                    interpreter = new PySparkStreamingInterpreter(name, notificationHandler, properties);
                 else
-                    interpreter = new PySparkInterpreter(name, notificationHandler);
+                    interpreter = new PySparkInterpreter(name, notificationHandler, properties);
 
+                break;
+
+            case PYTHON:
+
+                interpreter = new PythonInterpreter(notificationHandler, properties);
                 break;
 
             default:

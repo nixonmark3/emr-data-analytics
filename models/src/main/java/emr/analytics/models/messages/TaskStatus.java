@@ -15,8 +15,8 @@ public abstract class TaskStatus extends OutputMessage implements Serializable {
     private Date dateTime;
     private String message;
 
-    public TaskStatus(UUID diagramId, String diagramName, Mode mode, TaskStatusTypes statusType, String message){
-        super("task-status");
+    public TaskStatus(UUID taskId, UUID sessionId, UUID diagramId, String diagramName, Mode mode, TaskStatusTypes statusType, String message){
+        super(taskId, sessionId, "task-status");
 
         this.dateTime = new Date();
 
@@ -47,6 +47,7 @@ public abstract class TaskStatus extends OutputMessage implements Serializable {
         DATA,
         ERROR,
         NOTIFICATION,
-        OUTPUT
+        OUTPUT,
+        TERMINATED
     }
 }

@@ -15,12 +15,14 @@ import java.util.stream.Collectors;
  */
 public class Diagram implements Serializable {
 
+    private static String defaultName = "New Diagram";
+
     private UUID id = null;
     private String name = "";
     private String description = "";
     private String owner = "";
     private Mode mode = Mode.OFFLINE;
-    private TargetEnvironments targetEnvironment = TargetEnvironments.PYSPARK;
+    private TargetEnvironments targetEnvironment = TargetEnvironments.PYTHON;
     private int height = 1000;
     private int width = 1000;
     private int version = 0;
@@ -49,9 +51,7 @@ public class Diagram implements Serializable {
 
     private Diagram() {}
 
-    public static Diagram Create() {
-        return new Diagram("New Diagram", "", "");
-    }
+    public static Diagram Create() { return new Diagram(defaultName); }
 
     public int getHeight() {
         return height;
@@ -276,35 +276,66 @@ public class Diagram implements Serializable {
     }
 
     /**
-     * Retrieve the wires that lead to the specified block
+     * Retrieve the input wires for the specified block
+     * @param blockId
+     * @return
      */
-    public List<Wire> getLeadingWires(UUID blockId){
+    public List<WireSummary> getInputWires(UUID blockId){
 
         return this.wires.stream()
                 .filter(w -> w.getTo_node().equals(blockId))
+                .map(w -> new WireSummary(w,
+                        this.getBlock(w.getFrom_node()).getName(),
+                        this.getBlock(w.getTo_node()).getName()))
                 .collect(Collectors.toList());
     }
 
-    public List<Wire> getLeadingWires(UUID blockId, String connectorName){
+    /**
+     * Retieve the input wires for the specified block and connector
+     * @param blockId
+     * @param connectorName
+     * @return
+     */
+    public List<WireSummary> getInputWires(UUID blockId, String connectorName){
 
         return this.wires.stream()
                 .filter(w -> w.getTo_node().equals(blockId)
                         && w.getTo_connector().equals(connectorName))
+                .map(w -> new WireSummary(w,
+                        this.getBlock(w.getFrom_node()).getName(),
+                        this.getBlock(w.getTo_node()).getName()))
                 .collect(Collectors.toList());
     }
 
-    public List<Wire> getOutputWires(UUID blockId){
+    /**
+     * Retrieve the output wires for the specified block
+     * @param blockId
+     * @return
+     */
+    public List<WireSummary> getOutputWires(UUID blockId){
 
         return this.wires.stream()
                 .filter(w -> w.getFrom_node().equals(blockId))
+                .map(w -> new WireSummary(w,
+                        this.getBlock(w.getFrom_node()).getName(),
+                        this.getBlock(w.getTo_node()).getName()))
                 .collect(Collectors.toList());
     }
 
-    public List<Wire> getOutputWires(UUID blockId, String connectorName){
+    /**
+     * Retieve the output wires for the specified block and connector
+     * @param blockId
+     * @param connectorName
+     * @return
+     */
+    public List<WireSummary> getOutputWires(UUID blockId, String connectorName){
 
         return this.wires.stream()
                 .filter(w -> w.getFrom_node().equals(blockId)
                         && w.getFrom_connector().equals(connectorName))
+                .map(w -> new WireSummary(w,
+                        this.getBlock(w.getFrom_node()).getName(),
+                        this.getBlock(w.getTo_node()).getName()))
                 .collect(Collectors.toList());
     }
 
@@ -383,4 +414,6 @@ public class Diagram implements Serializable {
     public void setCategory(String category) {
         this.category = category;
     }
+
+    public boolean hasDefaultName() { return (this.name.equals(defaultName)); }
 }

@@ -8,8 +8,8 @@ public class AnalyticsDescribe extends OutputMessage implements Serializable {
     private UUID diagramId;
     private Describe describe;
 
-    public AnalyticsDescribe(UUID diagramId, Describe describe){
-        this();
+    public AnalyticsDescribe(UUID taskId, UUID sessionId, UUID diagramId, Describe describe){
+        this(taskId, sessionId);
 
         this.diagramId = diagramId;
         this.describe = describe;
@@ -19,7 +19,7 @@ public class AnalyticsDescribe extends OutputMessage implements Serializable {
 
     public Describe getDescribe() { return this.describe; }
 
-    private AnalyticsDescribe() {
-        super("describe");
+    private AnalyticsDescribe(UUID taskId, UUID sessionId) {
+        super(taskId, sessionId, "describe");
     }
 }

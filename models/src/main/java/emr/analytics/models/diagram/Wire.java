@@ -108,6 +108,10 @@ public class Wire implements Serializable {
      */
     private Wire() {}
 
+    public Wire(Wire wire){
+        this(wire.getFrom_node(), wire.getFrom_connector(), wire.getFrom_connectorIndex(), wire.getTo_node(), wire.getTo_connector(), wire.getTo_connectorIndex());
+    }
+
     public Wire(UUID from, String from_connector, int from_index, UUID to, String to_connector, int to_index){
 
         this.from_node = from;

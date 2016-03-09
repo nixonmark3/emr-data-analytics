@@ -5,27 +5,25 @@ import java.util.List;
 
 public class ParameterSource {
 
-    private String type;
+    private ParameterSourceTypes parameterSourceType;
     private String fileName;
     private String className;
     private List<Argument> arguments = new ArrayList<Argument>();
 
     private ParameterSource() {}
 
-    public ParameterSource(String type, String fileName, String className, List<Argument> arguments) {
-        this.type = type;
+    public ParameterSource(ParameterSourceTypes parameterSourceType, String fileName, String className, List<Argument> arguments) {
+        this.parameterSourceType = parameterSourceType;
         this.fileName = fileName;
         this.className = className;
         this.arguments = arguments;
     }
 
-    public String getType() {
-        return type;
+    public ParameterSourceTypes getParameterSourceType() {
+        return this.parameterSourceType;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
+    public void setParameterSourceType(ParameterSourceTypes parameterSourceType) { this.parameterSourceType = parameterSourceType; }
 
     public String getFileName() {
         return fileName;
@@ -49,5 +47,9 @@ public class ParameterSource {
 
     public void setArguments(List<Argument> arguments) {
         this.arguments = arguments;
+    }
+
+    public enum ParameterSourceTypes {
+        JAR, PYTHONSCRIPT
     }
 }

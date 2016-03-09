@@ -1,0 +1,117 @@
+<div id="modal-content-container">
+
+    <div id="modal-toaster"></div>
+
+    <div class="set-output-menu-container" ng-style="{ 'width': menuWidth + '%' }">
+        <div class="resizable-handle resizable-e" ng-mousedown="onResizeMenu($event)"></div>
+
+        <ul class="set-output-menu">
+            <li ng-repeat="outputOption in outputOptions" ng-class="{'active': outputOption.consumerType===activeConsumer.consumerType}">
+                <div class="set-output-state-window">
+                    <div class="set-output-states" ng-style="{ 'left': -40 * outputOption.state + 'px' } ">
+                        <div class="set-output-state output-disabled">
+                            <i class="fa fa-ban"></i>
+                        </div>
+                        <div class="set-output-state output-editing">
+                            <i class="fa fa-edit"></i>
+                        </div>
+                        <div class="set-output-state output-enabled">
+                            <i class="fa fa-check"></i>
+                        </div>
+                    </div>
+                </div>
+                <a ng-click="setActiveConsumerType(outputOption)">{{ outputOption.name }}</a>
+                <div style="clear: both;"></div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="modal-main-content-container" ng-switch on="activeConsumer.consumerType" ng-style="{ 'width': (100 - menuWidth) + '%' }">
+
+        <div class="modal-main-content" ng-switch-when="LOG">
+
+            <div class="set-output-header">
+                <span class="pull-left">Stream Output to a Log File</span>
+                <div class="pull-right" ng-switch on="activeConsumer.state">
+
+                    <div class="set-output-buttons" ng-switch-when="1">
+                        <button type="button" class="btn btn-default" ng-click="onOutputCancel($event)">Cancel</button>
+                        <button type="button" class="btn btn-success" ng-click="onOutputSave($event)">Save</button>
+                    </div>
+                    <div class="set-output-buttons" ng-switch-default>
+                        <button type="button" class="btn btn-primary" ng-click="onOutputEdit($event)">Edit</button>
+                    </div>
+
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row modal-grid-row">
+                    <div class="col-sm-3 modal-grid-label">Enabled</div>
+                    <div class="col-sm-7">
+                        <toggle-slider class="set-output-enable" disabled="activeConsumer.state!==optionState.editing" value="activeConsumer.enabled"></toggle-slider>
+                    </div>
+                </div>
+                <div class="row modal-grid-row">
+                    <div class="col-sm-3 modal-grid-label">Path to File</div>
+                    <div class="col-sm-7">
+                        <input class="form-control" type="text"
+                               ng-model="activeConsumer.path"
+                               ng-disabled="activeConsumer.state!==optionState.editing"
+                               placeholder="path/to/log/file.log">
+                    </div>
+                </div>
+                <div class="row modal-grid-row">
+                    <div class="col-sm-3 modal-grid-label">Key</div>
+                    <div class="col-sm-7">
+                        <input class="form-control" type="text"
+                               ng-model="activeConsumer.key"
+                               ng-disabled="activeConsumer.state!==optionState.editing"
+                               placeholder="key">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="modal-main-content" ng-switch-when="OUT">
+
+            <div class="set-output-header">
+                <span class="pull-left">Stream Output to a Standard Out (Debugging)</span>
+                <div class="pull-right" ng-switch on="activeConsumer.state">
+
+                    <div class="set-output-buttons" ng-switch-when="1">
+                        <button type="button" class="btn btn-default" ng-click="onOutputCancel($event)">Cancel</button>
+                        <button type="button" class="btn btn-success" ng-click="onOutputSave($event)">Save</button>
+                    </div>
+                    <div class="set-output-buttons" ng-switch-default>
+                        <button type="button" class="btn btn-primary" ng-click="onOutputEdit($event)">Edit</button>
+                    </div>
+
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row modal-grid-row">
+                    <div class="col-sm-3 modal-grid-label">Enabled</div>
+                    <div class="col-sm-7">
+                        <toggle-slider class="set-output-enable" disabled="activeConsumer.state!==optionState.editing" value="activeConsumer.enabled"></toggle-slider>
+                    </div>
+                </div>
+                <div class="row modal-grid-row">
+                    <div class="col-sm-3 modal-grid-label">Key</div>
+                    <div class="col-sm-7">
+                        <input class="form-control" type="text"
+                               ng-model="activeConsumer.key"
+                               ng-disabled="activeConsumer.state!==optionState.editing"
+                               placeholder="key">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="modal-main-content" ng-switch-default>
+            This features has not been implemented.
+        </div>
+    </div>
+
+</div>

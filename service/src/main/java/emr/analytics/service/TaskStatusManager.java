@@ -5,10 +5,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
 import emr.analytics.models.definition.Mode;
-import emr.analytics.models.messages.AnalyticsData;
-import emr.analytics.models.messages.AnalyticsDescribe;
-import emr.analytics.models.messages.AnalyticsTask;
-import emr.analytics.models.messages.TaskStatus;
+import emr.analytics.models.messages.*;
 
 import java.util.UUID;
 
@@ -26,7 +23,6 @@ public class TaskStatusManager extends AbstractActor {
     // define the maximum number of task statuses to cache
     private final int statusCapacity = 50;
 
-
     public static Props props(ActorRef parent, ActorRef client, UUID diagramId, String diagramName, Mode mode) {
         return Props.create(TaskStatusManager.class, parent, client, diagramId, diagramName, mode);
     }
@@ -38,6 +34,11 @@ public class TaskStatusManager extends AbstractActor {
         this.task = new AnalyticsTask(diagramId, diagramName, mode, statusCapacity);
 
         receive(ReceiveBuilder
+
+            .match(TaskTerminated.class, status -> {
+                this.client.tell(status, self());
+                sender().tell("finalize", self());
+            })
 
             .match(TaskStatus.class, status -> {
                 this.task.addStatus(status);

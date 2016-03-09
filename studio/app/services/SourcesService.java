@@ -17,11 +17,9 @@ import java.util.List;
 
 public class SourcesService {
 
-    private String path;
+    private static String pluginPath = ConfigurationService.getPluginPath();
 
-    public SourcesService(String path){
-        this.path = path;
-    }
+    public SourcesService(){}
 
     public void load(String name, ParameterDefinition parameter, Diagram diagram) {
 
@@ -40,7 +38,7 @@ public class SourcesService {
 
         List<String> results = new ArrayList<String>();
         try {
-            String jarPath = this.path + file;
+            String jarPath = this.pluginPath + file;
 
             URL[] classpathURLs = new URL[]{
                     new File(jarPath).toURI().toURL()

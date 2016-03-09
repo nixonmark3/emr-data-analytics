@@ -20,5 +20,5 @@ public class StreamingRequest extends InputMessage implements Serializable {
 
     public PollingSource getStreamingSource(){ return this.streamingSource; }
 
-    private StreamingRequest(){ super("streaming-request"); }
+    private StreamingRequest(){ super(null, "streaming-request"); }
 }

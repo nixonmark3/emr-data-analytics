@@ -34,7 +34,8 @@
                ng-repeat="block in diagram.blocks"
                ng-attr-transform="translate({{block.x()}}, {{block.y()}})">
 
-                <g ng-mousedown="blockMouseDown($event, block)">
+                <g ng-mousedown="blockMouseDown($event, block)"
+                   ng-dblclick="onRename(block)">
 
                     <rect ng-attr-class="block {{block.selected() && 'block-selected' || 'block-unselected'}}"
                           ry="6"
@@ -79,8 +80,7 @@
                           y="22"
                           class="block-name"
                           text-anchor="middle"
-                          alignment-baseline="central"
-                          ng-dblclick="renameBlockClick(block)">
+                          alignment-baseline="central">
                     {{block.name()}}
                     </text>
 
@@ -88,7 +88,6 @@
 
                 <!-- block data button -->
                 <g class="block-button-wrapper"
-                   ng-if="diagramMode()=='OFFLINE'"
                    ng-click="onBlockDisplay($event, block);">
 
                     <rect class="block-button"
@@ -106,7 +105,7 @@
                           ng-attr-y="{{block.height() - 19}}"
                           text-anchor="middle"
                           alignment-baseline="central">
-                        &#xf201
+                        &#xf0ad
                     </text>
 
                 </g>
@@ -250,7 +249,7 @@
             <!--block rename-->
             <g ng-if="renamingBlock">
                 <foreignObject ng-attr-x="{{renameBlock.x + ((renameBlock.block.data.w / 2) - (renameBlock.w / 2))}}" ng-attr-y="{{renameBlock.y + 8}}" ng-attr-width="{{renameBlock.w}}" height="26">
-                    <input id="rename-input" type="text" ng-keyup="endRenameOnEnter()" ng-model="renameBlock.block.data.name" />
+                    <input id="rename-input" type="text" ng-keyup="onRenameComplete()" ng-model="renameBlock.block.data.name" />
                 </foreignObject>
             </g>
 

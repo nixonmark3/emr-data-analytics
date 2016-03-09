@@ -1,9 +1,11 @@
 package emr.analytics.diagram.interpreter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import emr.analytics.models.definition.Definition;
 import emr.analytics.models.definition.DefinitionType;
 import emr.analytics.models.definition.Mode;
 import emr.analytics.models.diagram.*;
+import emr.analytics.models.messages.Consumers;
 
 import java.util.*;
 
@@ -22,7 +24,6 @@ public class DiagramOperations {
         // and a complimentary block
 
         Block block = new Block(name,
-                Integer.MAX_VALUE,
                 Integer.MAX_VALUE,
                 Integer.MAX_VALUE,
                 Mode.OFFLINE,
@@ -60,13 +61,13 @@ public class DiagramOperations {
             }
 
             // capture the group block's state that is lowest
-            if (groupBlock.getState() < block.getState())
-                block.setState(groupBlock.getState());
+            /*if (groupBlock.getState() < block.getState())
+                block.setState(groupBlock.getState());*/
 
             // iterate over each input connector - creating group connectors
             for(Connector connector : groupBlock.getInputConnectors()){
 
-                List<Wire> wires = parent.getLeadingWires(blockId, connector.getName());
+                List<WireSummary> wires = parent.getInputWires(blockId, connector.getName());
 
                 Connector groupConnector;;
                 if (wires.size() == 0){
@@ -118,7 +119,7 @@ public class DiagramOperations {
             for(Connector connector : groupBlock.getOutputConnectors()){
 
                 boolean isGroupConnector = false;
-                List<Wire> wires = parent.getOutputWires(blockId, connector.getName());
+                List<WireSummary> wires = parent.getOutputWires(blockId, connector.getName());
 
                 Connector groupConnector;;
                 if (wires.size() == 0){
@@ -187,5 +188,20 @@ public class DiagramOperations {
         parent.addDiagram(diagram);
 
         return parent;
+    }
+
+    public static Consumers getOnlineConsumers(Diagram diagram){
+
+        Consumers consumers = null;
+
+        // search for the diagrams output block (there can be only one)
+        Optional<Block> temp = diagram.getBlocks().stream().filter(b -> b.getDefinitionType().equals(DefinitionType.OUTPUT)).findFirst();
+        if (temp.isPresent()){
+            Block block = temp.get();
+
+            ObjectMapper mapper = new ObjectMapper();
+            consumers = mapper.convertValue(block.getParameters().get(0).getValue(), Consumers.class);
+        }
+        return consumers;
     }
 }

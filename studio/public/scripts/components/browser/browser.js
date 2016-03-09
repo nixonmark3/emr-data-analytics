@@ -1,6 +1,7 @@
 'use strict';
 
 angular.module('browserApp', ['ngAnimate', 'emr.ui.interact'])
+
     .directive('browser', ['$document', '$compile', function ($document, $compile) {
 
         return {
@@ -36,11 +37,7 @@ angular.module('browserApp', ['ngAnimate', 'emr.ui.interact'])
                 // been specified.
                 //
                 $scope.isConfigurable = function(){
-
-                    if ($scope.onDrop !== undefined)
-                        return false;
-                    else
-                        return true;
+                    return ($scope.onDrop===undefined);
                 };
 
                 // set page index
@@ -148,7 +145,12 @@ angular.module('browserApp', ['ngAnimate', 'emr.ui.interact'])
             }
         }
     }])
+
     .directive('blockConfig', ['modalService', function (modalService) {
+
+        /**
+         * interface used to configure block parameters
+         */
 
         return {
             restrict: 'E',
@@ -156,132 +158,93 @@ angular.module('browserApp', ['ngAnimate', 'emr.ui.interact'])
             templateUrl: '/assets/scripts/components/browser/blockConfig.html',
             scope: {
                 block: "=",
-                loadSources: "=",
-                onChange: "=",
-                onSave: "=",
+                diagram: "=",
                 onCancel: "=",
-                onPropsChanged: "="
+                onChange: "=",
+                onLoadParameter: "=",
+                onPropsChanged: "=",
+                onSave: "="
             },
             link: function ($scope, element, attrs) {
 
-                // list of dependants for reverse lookup
-                $scope.dependants = null;
+                var dependents = {},            // dictionary of dependents for reverse lookup
+                    dynamicSourceQueue = [];    // list of dynamic sources to be resolved
 
-                /*
-                ** Re-initialize this directive when the block changes
+                /**
+                 * initialize parameter configuration interface
                  */
-                $scope.$watch('block', function() {
-                    init();
-                });
+                function init(){
 
-                var init = function(){
-
-                    if (!$scope.block)
-                        return;
-
-                    $scope.dependants = {};
-
-                    // assemble initial list of dynamic parameters
-                    var dynamicSourceRequests = {
-                        name: $scope.block.id,
-                        parameters: [],
-                        diagram: null
-                    };
-
+                    // build a list of parameters with dynamic sources
                     $scope.block.parameters.forEach(function(parameter){
 
-                        if (parameter.source()) {
+                        if (parameter.source()) { // parameter has a dynamic source
 
-                            // build a list of dependencies and track whether dependencies have
-                            // been collected
+                            // track whether all of the dependencies have been collected for this parameter
                             var dependenciesCollected = true;
 
+                            // resolve arguments and identify dependents
                             parameter.source().arguments.forEach(function (argument) {
 
-                                if (argument.type === 0) {
-                                    // represents a parameter dependency
+                                dependenciesCollected = setArgument(argument);
 
-                                    var dependencyName = argument.name;
+                                // capture parameter dependencies
+                                var parts = argument.path.split(":");
+                                if (parts[0] === "parameter"){
 
-                                    if (!parameter.loaded) {
+                                    if (!(dependencyName in dependents))
+                                        dependents[dependencyName] = [];
 
-                                        var dependency = getParameter(dependencyName);
-                                        if (dependency.collected) {
-                                            argument.value = dependency.value;
-                                        }
-                                        else {
-                                            dependenciesCollected = false;
-                                        }
-                                    }
-
-                                    if (!(dependencyName in $scope.dependants))
-                                        $scope.dependants[dependencyName] = [];
-
-                                    $scope.dependants[dependencyName].push(parameter.name());
-                                }
-                                else if (argument.type === 1) { // represents a block name
-
-                                    argument.value = $scope.block.id;
+                                    dependents[dependencyName].push(parameter.name());
                                 }
                             });
 
-                            // if the parameter is not loaded and has no dependencies -
-                            // flag as loading and add to the dynamicSourceRequests list
+                            // if the parameter is not loaded and its dependencies have been collected -
+                            // flag as loading and add to the list of dynamic parameters
 
                             if (!parameter.loaded && dependenciesCollected) {
                                 parameter.loading = true;
-                                dynamicSourceRequests.parameters.push(parameter.data);
+                                dynamicSourceQueue.push(parameter.data);
                             }
                         }
                     });
 
-                    loadDynamicSources(dynamicSourceRequests);
-                };
+                    loadDynamicSource();
+                }
 
-                var loadDynamicSources = function(request){
+                /**
+                 * load the the next dynamic source
+                 */
+                function loadDynamicSource(){
 
-                    if (request.parameters.length === 0)
+                    if (dynamicSourceQueue.length == 0)
                         return;
 
-                    $scope.loadSources(request, function(response){
+                    // pull the next parameter off of the queue
+                    var dynamicSourceRequest = dynamicSourceQueue.shift();
+                    $scope.onLoadParameter(dynamicSourceRequest)
+                        .then(function(result){
 
-                        response.parameters.forEach(function(source) {
+                            var parameter = getParameter(dynamicSourceRequest.name);
+                            parameter.fieldOptions = result;
 
-                            var parameter = getParameter(source.name);
-
-                            // toggle value - todo: determine whether this is still necessary
-                            var temp = parameter.value;
-                            parameter.value = "";
-
-                            if (parameter.data.type == 'multiSelectList') {
-                                var idIndex = 0;
-                                var options = [];
-                                source.fieldOptions.forEach(function(fieldOption) {
-                                    var option = {};
-                                    option.id = idIndex;
-                                    option.itemName = fieldOption;
-                                    if (temp.indexOf(fieldOption) > -1) {
-                                        option.selected = true;
-                                    }
-                                    else {
-                                        option.selected = false;
-                                    }
-                                    idIndex++;
-                                    options.push(option);
-                                });
-                                parameter.fieldOptions = options;
-                            }
-                            else {
-                                parameter.fieldOptions = source.fieldOptions;
-                            }
-
-                            parameter.value = temp;
+                            // flag the parameter as loaded
                             parameter.loaded = true;
                             parameter.loading = false;
-                        });
-                    });
-                };
 
+                            // recursively
+                            loadDynamicSource();
+                        },
+                        function(){
+                            // todo: handle exception
+                        });
+                }
+
+                /**
+                 * Find parameter by name
+                 * @param name: name of the parameter
+                 * @returns Parameter
+                 */
                 var getParameter = function(name) {
 
                     var parameters = $scope.block.parameters;
@@ -291,12 +254,71 @@ angular.module('browserApp', ['ngAnimate', 'emr.ui.interact'])
                     }
                 };
 
+                /**
+                 * Resolves parameter arguments
+                 * @param argument: parameter argument { name, path, value }
+                 * @returns {boolean}: represents whether a parameter has been resolved
+                 */
+                function setArgument(argument){
+
+                    // verify the argument has not already been set
+                    if (argument.value !== null)
+                        return true;
+
+                    var argumentSet = false;
+
+                    var parts = argument.path.split(":");
+                    switch(parts[0]){
+
+                        case "block": // block property reference
+
+
+
+                            break;
+                        case "input": // input wire reference
+
+                            // query the diagram for a list of input wires
+                            var wires = $scope.diagram.findInputWires($scope.block.id, parts[1]);
+                            if (wires.length > 0) { // if at least 1 wire was found
+
+                                // only supports a single wire
+                                var wire = wires[0];
+
+                                // retrieve the block's name
+                                var blockName = $scope.diagram.findBlock(wire["from_node"]).name();
+
+                                argument.value = blockName + "/" + wire["from_connector"];
+                                argumentSet = true;
+                            }
+
+                            break;
+                        case "parameter": // parameter reference
+
+                            var parameter = parts[1].split(".");
+                            var dependency = getParameter(parameter[0]);
+                            if (dependency.collected) {
+                                argument.value = dependency.value;
+                                argumentSet = true;
+                            }
+
+                            break;
+
+                    }
+
+                    return argumentSet;
+                }
+
+                /**
+                 * on parameter value update; flag as collected and check for new dependents to resolve
+                 * @param parameter
+                 */
                 $scope.setValue = function(parameter) {
 
+                    /**
                     parameter.dirty = true;
                     parameter.collected = true;
 
-                    // check for dependants
+                    // check for dependents
                     if (parameter.name() in $scope.dependants){
 
                         var dependants = $scope.dependants[parameter.name()];
@@ -341,6 +363,7 @@ angular.module('browserApp', ['ngAnimate', 'emr.ui.interact'])
 
                     if ($scope.onChange)
                         $scope.onChange();
+                     */
                 };
 
                 $scope.editQuery = function(evt, parameter) {
@@ -376,6 +399,7 @@ angular.module('browserApp', ['ngAnimate', 'emr.ui.interact'])
                     });
                 };
 
+                init();
             }
         }
     }]);

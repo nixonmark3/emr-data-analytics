@@ -54,7 +54,8 @@ public class Split extends BlockDefinition implements IExport {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
         parameters.add(new ParameterDefinition("Split",
-                DataType.INT.toString(),
+                ParameterType.INT,
+                ValueType.SCALAR,
                 75,
                 new ArrayList<String>(),
                 null));

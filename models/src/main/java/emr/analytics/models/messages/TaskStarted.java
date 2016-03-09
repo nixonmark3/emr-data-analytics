@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class TaskStarted extends TaskStatus {
 
-    public TaskStarted(UUID diagramId, String diagramName, Mode mode, String source){
-        super(diagramId, diagramName, mode, TaskStatusTypes.STARTED, source);
+    public TaskStarted(UUID id, UUID sessionId, UUID diagramId, String diagramName, Mode mode, String source){
+        super(id, sessionId, diagramId, diagramName, mode, TaskStatusTypes.STARTED, source);
     }
 }

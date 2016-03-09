@@ -1,88 +1,104 @@
 <div class="explore-chart-container">
 
-    <div class="chart-menu">
+    <div class="chart-menu-container ng-class:{ 'menu-closed': menuClosed }">
 
-        <div class="chart-menu-header">
-            <div class="pull-left">Layout</div>
+        <div id="chart-menu-expander" ng-click="onToggleMenu()">
+            <i class="fa ng-class:{ 'fa-caret-left': !menuClosed, 'fa-caret-right': menuClosed }"></i>
         </div>
 
-        <select class="form-control chart-menu-item" ng-model="chartOptions.type" ng-change="onChartTypeUpdate()">
-            <option value="line">Line</option>
-            <option value="scatter">XY Scatter</option>
-        </select>
-
-        <div id="chart-axes-controls">
+        <div class="chart-menu">
 
             <div class="chart-menu-header">
-                <div class="pull-left">Axes</div>
+                <div class="pull-left">Layout</div>
             </div>
 
-            <div class="checkbox">
-                <label>
-                    <input type="checkbox" ng-model="chartOptions.scaled" ng-change="onToggleScale()">
-                    Scale the Y-Axis
-                </label>
-            </div>
+            <select class="form-control chart-menu-item" ng-model="chartOptions.type" ng-change="onChartTypeUpdate()">
+                <option value="line">Line</option>
+                <option value="scatter">XY Scatter</option>
+            </select>
 
-        </div>
+            <div id="chart-axes-controls">
 
-        <div class="chart-menu-header">
-            <div class="pull-left">Series</div>
-            <div class="pull-right">
-                <i class="series-expand fa fa-plus" ng-click="addAllSeries()" ng-show="!chartOptions.hasXCoordinate"></i>
-                <i class="series-expand fa fa-minus" ng-click="removeAllSeries()"></i>
-            </div>
-        </div>
-
-        <div class="chart-series" ng-repeat="item in chartOptions.series">
-            <div class="series-selector ng-class:{'series-front-to-back': item.flipToBack,'series-back-to-front': item.flipToFront}"
-                 ng-mouseenter="showClose(item)"
-                 ng-mouseleave="showCheck(item)"
-                 ng-click="removeSeries(item)">
-                <div class="series-face series-front" ng-style="{'background-color':getColor($index)}">
-                    <i class="fa fa-check"></i>
+                <div class="chart-menu-header">
+                    <div class="pull-left">Axes</div>
                 </div>
-                <div class="series-face series-back" ng-style="{'background-color':getColor($index)}">
-                    <i class="fa fa-close"></i>
+
+                <div ng-show="!chartOptions.hasXCoordinate" class="input-group chart-menu-item" style="margin-bottom: 16px;">
+                    <span class="input-group-addon">X</span>
+                    <select class="form-control" ng-model="chartOptions.x.type" ng-change="onXLabelUpdate()">
+                        <option ng-repeat="xAxisOption in xAxisOptions" ng-selected="xAxisOption==chartOptions.x.type" value="{{xAxisOption}}">{{xAxisOption}}</option>
+                    </select>
                 </div>
+
+                <div class="checkbox" style="margin-left:12px;">
+                    <label>
+                        <input type="checkbox" ng-model="chartOptions.scaled" ng-change="onToggleScale()">
+                        Scale Y-Axis
+                    </label>
+                </div>
+
             </div>
-            <div class="series-coords">
-                <div class="x-y-coord-container" ng-show="chartOptions.hasXCoordinate">
-                    <div class="x-y-coord">{{item.x.name}}</div>
-                    <div class="x-y-coord">{{item.y.name}}</div>
-                </div>
-                <div class="y-coord" ng-show="!chartOptions.hasXCoordinate">
-                    {{item.y.name}}
+
+            <div class="chart-menu-header">
+                <div class="pull-left">Series</div>
+                <div class="pull-right">
+                    <i class="series-expand fa fa-plus" ng-click="addAllSeries()" ng-show="!chartOptions.hasXCoordinate"></i>
+                    <i class="series-expand fa fa-minus" ng-click="removeAllSeries()"></i>
                 </div>
             </div>
-            <div style="clear: both;"></div>
-        </div>
 
-        <div class="add-series chart-menu-item">
+            <div class="chart-series" ng-repeat="item in chartOptions.series">
 
-            <div ng-show="chartOptions.hasXCoordinate" class="add-series-item input-group">
-                <span class="input-group-addon">X</span>
-                <select class="form-control" ng-model="newSeries.x.name">
-                    <option ng-repeat="feature in features" ng-selected="feature.name==newSeries.x.name" value="{{feature.name}}">{{feature.name}}</option>
-                </select>
+                <div class="series-button ng-class:{'xCoord': chartOptions.hasXCoordinate}" ng-mouseover="onFlipCheck(item, true)" ng-mouseout="onFlipCheck(item, false)" ng-click="onRemoveSeries(item)">
+                    <div class="series-selector ng-class:{'flipped': item.flipped}">
+                        <div class="series-face" ng-style="{'background-color':getColor($index)}">
+                            <i class="fa fa-check"></i>
+                        </div>
+                        <div class="series-face series-back" ng-style="{'background-color':getColor($index)}">
+                            <i class="fa fa-close"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="series-coords">
+                    <div ng-if="chartOptions.hasXCoordinate">
+                        {{item.x.name}}
+                    </div>
+                    <div>
+                        {{item.y.name}}
+                    </div>
+                </div>
+
+                <div style="clear: both;"></div>
             </div>
 
-            <div class="add-series-item input-group">
-                <span class="input-group-addon">Y</span>
-                <select class="form-control" ng-model="newSeries.y.name">
-                    <option ng-repeat="feature in features" ng-selected="feature.name==newSeries.y.name" value="{{feature.name}}">{{feature.name}}</option>
-                </select>
-            </div>
+            <div class="add-series chart-menu-item">
 
-            <div class="add-series-footer">
-                <button type="button" class="btn btn-success pull-right" ng-click="addSeries()">Add</button>
+                <div ng-show="chartOptions.hasXCoordinate" class="add-series-item input-group">
+                    <span class="input-group-addon">X</span>
+                    <select class="form-control" ng-model="newSeries.x.name">
+                        <option ng-repeat="feature in features" ng-selected="feature.name==newSeries.x.name" value="{{feature.name}}">{{feature.name}}</option>
+                    </select>
+                </div>
+
+                <div class="add-series-item input-group">
+                    <span class="input-group-addon">Y</span>
+                    <select class="form-control" ng-model="newSeries.y.name">
+                        <option ng-repeat="feature in features" ng-selected="feature.name==newSeries.y.name" value="{{feature.name}}">{{feature.name}}</option>
+                    </select>
+                </div>
+
+                <div class="add-series-footer">
+                    <button type="button" class="btn btn-success pull-right" ng-click="addSeries()">Add</button>
+                </div>
+
             </div>
 
         </div>
 
     </div>
 
-    <div class="chart-container">
+    <div class="chart-container ng-class:{ 'menu-closed': menuClosed }">
 
         <div id="loader-overlay" ng-if="fetching || rendering" style="background-color: #fff">
             <div class="loader"></div>

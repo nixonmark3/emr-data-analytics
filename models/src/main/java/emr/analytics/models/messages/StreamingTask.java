@@ -4,6 +4,7 @@ import emr.analytics.models.sources.PollingSource;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.UUID;
 
 public class StreamingTask extends OutputMessage implements Serializable {
 
@@ -12,8 +13,8 @@ public class StreamingTask extends OutputMessage implements Serializable {
     private int frequency;
     private Date started = null;
 
-    public StreamingTask(String topic, PollingSource.PollingSourceType pollingSourceType, int frequency){
-        super("streaming-info");
+    public StreamingTask(UUID id, String topic, PollingSource.PollingSourceType pollingSourceType, int frequency){
+        super(id, null, "streaming-info");
 
         this.topic = topic;
         this.pollingSourceType = pollingSourceType;
@@ -21,10 +22,10 @@ public class StreamingTask extends OutputMessage implements Serializable {
         this.started = new Date();
     }
 
-    public StreamingTask(StreamingTask streamingInfo){
-        this(streamingInfo.getTopic(), streamingInfo.getPollingSourceType(), streamingInfo.getFrequency());
+    public StreamingTask(StreamingTask streamingTask){
+        this(streamingTask.getId(), streamingTask.getTopic(), streamingTask.getPollingSourceType(), streamingTask.getFrequency());
 
-        this.started = streamingInfo.getStarted();
+        this.started = streamingTask.getStarted();
     }
 
     public String getTopic(){ return this.topic; }

@@ -1,0 +1,32 @@
+{
+  "query_name": "query1",
+  "docType": "json",
+  "version": "1.0",
+  "timeSelector": [
+    {
+      "startTime": "2016-01-10T14:55:00.000Z",
+      "endTime": "2016-01-13T15:39:00.000Z"
+    },
+    {
+      "startTime": "2016-01-01T14:14:00.000Z",
+      "endTime": "2016-01-18T14:50:00.000Z"
+    }
+  ],
+  "sampleRateSecs": 60,
+  "columns": [
+    {
+      "tag": "Emerson::33169/A6583E93D2/OUT.PV",
+      "alias": "FT601/DENSITY/OUT.CV",
+      "dataType": "Float",
+      "renderType": "VALUE",
+      "format": "0.###"
+    },
+    {
+      "tag": "18AI010.PV",
+      "alias": "PT615/WIRED_PSIA.CV",
+      "dataType": "Float",
+      "renderType": "VALUE",
+      "format": "0.###"
+    }
+  ]
+}

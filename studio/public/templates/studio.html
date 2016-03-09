@@ -15,19 +15,21 @@
                 <div class="col-xs-4 navbar-tabs">
                     <div class="navbar-tab ng-class:{'selected': !onlineCanvas}" ng-switch on="offlineState" ng-click="toggleCanvas(false);">
 
-                        <i ng-switch-when="0" class="fa fa-circle-o-notch state-icon idle navbar-tab-icon"></i>
-                        <i ng-switch-when="1" class="fa fa-cloud-download state-icon idle navbar-tab-icon"></i>
+                        <i ng-switch-when="0" class="fa fa-circle-thin state-icon idle navbar-tab-icon"></i>
+                        <i ng-switch-when="1" class="fa fa-cog fa-spin state-icon idle navbar-tab-icon"></i>
                         <i ng-switch-when="2" class="fa fa-bolt state-icon running navbar-tab-icon"></i>
+                        <i ng-switch-when="3" class="fa fa-spinner fa-spin state-icon idle navbar-tab-icon"></i>
 
-                        <span class="navbar-tab-text">Offline</span>
+                        <span class="navbar-tab-text">OFFLINE</span>
                     </div>
                     <div class="navbar-tab ng-class:{'selected': onlineCanvas}" ng-switch on="onlineState" ng-click="toggleCanvas(true);">
 
-                        <i ng-switch-when="0" class="fa fa-circle-o-notch state-icon idle navbar-tab-icon"></i>
-                        <i ng-switch-when="1" class="fa fa-cloud-download state-icon idle navbar-tab-icon"></i>
+                        <i ng-switch-when="0" class="fa fa-circle-thin state-icon idle navbar-tab-icon"></i>
+                        <i ng-switch-when="1" class="fa fa-cog fa-spin state-icon idle navbar-tab-icon"></i>
                         <i ng-switch-when="2" class="fa fa-bolt state-icon running navbar-tab-icon"></i>
+                        <i ng-switch-when="3" class="fa fa-spinner fa-spin state-icon idle navbar-tab-icon"></i>
 
-                        <span class="navbar-tab-text">Online</span>
+                        <span class="navbar-tab-text">ONLINE</span>
                     </div>
                 </div>
                 <div class="col-xs-4">
@@ -56,13 +58,26 @@
                     <button type="button" class="btn btn-default" ng-click="libraryToggle($event)">
                         <i class="fa fa-cubes"></i>
                     </button>
+
+                    <div id="pointer-controls" class="btn-group">
+                        <button type="button" class="btn btn-default">
+                            <i class="fa fa-hand-paper-o"></i>
+                        </button>
+                        <button type="button" class="btn btn-default">
+                            <span class="dotted-retangle"></span>
+                        </button>
+                    </div>
                 </div>
 
                 <diagram-controls id="offline-diagram-controls"
                       center-radius="26"
                       orbit-radius="20"
                       offset-radius="60"
-                      evaluating="evaluating"
+                      center-icon="&#xf04b;"
+                      orbit1-icon="&#xf019;"
+                      orbit2-icon="&#xf121;"
+                      orbit3-icon="&#xf0c7;"
+                      state="offlineState"
                       command="onDiagramCommand">
 
                 </diagram-controls>
@@ -82,24 +97,48 @@
 
             <div id="online-canvas" class="studio-canvas">
 
-                <div ng-if="!transforming" class="diagram-container">
-
-                    <diagram id="online-diagram"
-                             ng-if="onlineCanvas"
-                             view-model="onlineViewModel"
-                             on-deselection="onDiagramDeselection"
-                             on-display="onBlockDisplay"
-                             on-selection="onBlockSelection"
-                             nodes="nodes"
-                             library="library"
-                             load-sources="loadSources"
-                             blur-background="blurBackground"></diagram>
-
-                </div>
-
                 <div id="loader-overlay" ng-if="transforming">
                     <div class="loader"></div>
                 </div>
+
+                <diagram-controls id="online-diagram-controls"
+                                  center-radius="26"
+                                  orbit-radius="20"
+                                  offset-radius="60"
+                                  center-icon="&#xf135;"
+                                  orbit1-icon="&#xf1da;"
+                                  orbit2-icon="&#xf121;"
+                                  orbit3-icon="&#xf0c7;"
+                                  state="onlineState"
+                                  command="onDiagramCommand">
+                </diagram-controls>
+
+                <diagram id="online-diagram"
+                         ng-if="onlineCanvas"
+                         class="pip-page ng-class:{ 'minimized': (onlineViewState == 2), 'top': (onlineViewState == 2 || onlineViewState == 3) }"
+                         view-model="onlineViewModel"
+                         on-deselection="onDiagramDeselection"
+                         on-display="onBlockDisplay"
+                         on-selection="onBlockSelection"
+                         nodes="nodes"
+                         library="library"
+                         load-sources="loadSources"
+                         blur-background="blurBackground"></diagram>
+
+                <div id="online-view"
+                     class="pip-page ng-class:{ 'minimized': (onlineViewState == 0), 'top': (onlineViewState == 0 || onlineViewState == 1) }">
+
+                    <div class="online-view-menu">
+
+                    </div>
+                    <div class="online-chart-container">
+                        <trend-line class="online-chart" trend-data="onlineChart" size="onlineChartSize"></trend-line>
+                    </div>
+                    <div style="clear:both;"></div>
+
+                </div>
+
+                <div class="pip-mask ng-class:{ 'ready': (onlineViewState == 0 || onlineViewState == 2) }" ng-click="toggleOnlineView($event)"></div>
 
             </div>
         </div>
@@ -131,17 +170,17 @@
 
             <div class="terminal-menu">
                 <div class="terminal-buttons" ng-if="isTerminalVisible">
-                    <div id="terminal-input-cancel" ng-show="isTerminalInputOpen" class="terminal-button terminal-input-button ng-class:{ 'active':isTerminalInputOpen }">
+                    <div ng-show="isTerminalInputOpen" class="terminal-button terminal-input-button terminal-input-cancel ng-class:{ 'active':isTerminalInputOpen }">
                         <a ng-click="onCancel()">
                             <i class="fa fa-times"></i>
                         </a>
                     </div>
-                    <div id="terminal-input-send" ng-show="isTerminalInputOpen" class="terminal-button terminal-input-button ng-class:{ 'active':isTerminalInputOpen }">
+                    <div ng-show="isTerminalInputOpen" class="terminal-button terminal-input-button terminal-input-send ng-class:{ 'active':isTerminalInputOpen }">
                         <a ng-click="onSend()">
                             <i class="fa fa-paper-plane"></i>
                         </a>
                     </div>
-                    <div id="terminal-input-open" ng-if="!isTerminalInputOpen" class="terminal-button">
+                    <div ng-if="!isTerminalInputOpen" class="terminal-button terminal-input-open">
                         <a ng-click="onToggle()">
                             <i class="fa fa-plus"></i>
                         </a>

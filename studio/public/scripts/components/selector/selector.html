@@ -1,0 +1,23 @@
+<div class="multi-selector ng-class:{ 'disabled': isDisabled }" ng-mousedown="cancelBlur($event)" ng-click="setFocus()">
+    <ul>
+        <li class="selector-tag" ng-repeat="value in values">
+            <span>{{value}}</span><a ng-click="removeValue($index)"><i class="fa fa-times"></i></a>
+        </li>
+        <li>
+            <input type="text" ng-model="inputValue" ng-style="{ 'width': inputWidth + 'px' }" ng-change="onChange()" ng-focus="onFocus()" ng-blur="onBlur()">
+        </li>
+    </ul>
+    <div class="multi-selector-list" ng-show="optionsVisible">
+        <ul>
+            <li class="selector-header">
+                <div class="pull-left">{{header}}</div>
+                <div class="pull-right">
+                    <a ng-click="addValues()"><i class="fa fa-plus"></i></a>
+                    <a ng-click="removeValues()"><i class="fa fa-minus"></i></a>
+                </div>
+                <div style="clear:both;"></div>
+            </li>
+            <li class="selector-option" ng-repeat="option in filteredOptions" ng-mousedown="cancelBlur($event)" ng-click="addValue(option)">{{option}}</li>
+        </ul>
+    </div>
+</div>

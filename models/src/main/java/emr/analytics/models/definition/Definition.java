@@ -3,10 +3,12 @@ package emr.analytics.models.definition;
 public class Definition implements Comparable<Definition> {
 
     private DefinitionType definitionType;
-    private String name = null;
-    private String description = null;
-    private String category = null;
-    private String friendlyName = null;
+    private Mode mode;
+    private String name;
+    private String description;
+    private String category;
+    private String friendlyName;
+    private String complement;
     private int w = 200;
 
     private ModeDefinition offlineDefinition = null;
@@ -20,12 +22,17 @@ public class Definition implements Comparable<Definition> {
 
     public Definition(DefinitionType definitionType, String name, String friendlyName, String category) {
         this.definitionType = definitionType;
+        this.mode = Mode.OFFLINE;
         this.name = name;
         this.friendlyName = friendlyName;
         this.category = category;
     }
 
     public DefinitionType getDefinitionType() { return definitionType; }
+
+    public Mode getMode() { return this.mode; }
+
+    public void setMode(Mode mode) { this.mode = mode; }
 
     public int getW() { return w; }
 
@@ -46,6 +53,10 @@ public class Definition implements Comparable<Definition> {
     public String getFriendlyName() { return friendlyName; }
 
     public void setFriendlyName(String friendlyName) { this.friendlyName = friendlyName; }
+
+    public String getComplement() { return this.complement; }
+
+    public void setComplement(String complement) { this.complement = complement; }
 
     public ModeDefinition getOfflineDefinition() { return this.offlineDefinition; }
 

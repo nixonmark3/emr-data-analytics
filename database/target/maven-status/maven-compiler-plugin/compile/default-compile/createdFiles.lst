@@ -1,0 +1,8 @@
+emr/analytics/database/DefinitionsRepository.class
+emr/analytics/database/DataSet.class
+emr/analytics/database/MongoConnection.class
+emr/analytics/database/DatabaseException.class
+emr/analytics/database/ProjectsRepository.class
+emr/analytics/database/DefinitionsRepository$1.class
+emr/analytics/database/DiagramsRepository.class
+emr/analytics/database/ResultsRepository.class

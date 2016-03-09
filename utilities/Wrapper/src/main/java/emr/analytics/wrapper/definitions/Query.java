@@ -40,7 +40,8 @@ public class Query extends BlockDefinition implements IExport {
         // create parameters
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
         parameters.add(new ParameterDefinition("Topic",
-                DataType.STRING.toString(),
+                ParameterType.STRING,
+                ValueType.SCALAR,
                 "",
                 new ArrayList<String>(),
                 null));
@@ -69,10 +70,11 @@ public class Query extends BlockDefinition implements IExport {
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
 
         parameters.add(new ParameterDefinition("Project",
-                DataType.LIST.toString(),
+                ParameterType.ENUMERATION,
+                ValueType.SCALAR,
                 "None",
                 new ArrayList<String>(),
-                new ParameterSource("Jar",
+                new ParameterSource(ParameterSource.ParameterSourceTypes.JAR,
                         "plugins-1.0-SNAPSHOT.jar",
                         "Bricks",
                         new ArrayList<Argument>())));
@@ -99,7 +101,8 @@ public class Query extends BlockDefinition implements IExport {
                 + "}";
 
         parameters.add(new ParameterDefinition("Query",
-                DataType.EDITABLE_QUERY.toString(),
+                ParameterType.JSON,
+                ValueType.SCALAR,
                 defaultValue,
                 new ArrayList<String>(),
                 null));

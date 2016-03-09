@@ -8,7 +8,7 @@ public class TaskSummaryRequest extends InputMessage implements Serializable {
     private UUID diagramId;
 
     public TaskSummaryRequest(UUID diagramId){
-        super("task-summary-request");
+        super(null, "task-summary-request");
 
         this.diagramId = diagramId;
     }

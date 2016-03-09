@@ -51,7 +51,8 @@ public class TimeDelay extends BlockDefinition implements IExport {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
         parameters.add(new ParameterDefinition("Max Lag",
-                DataType.INT.toString(),
+                ParameterType.INT,
+                ValueType.SCALAR,
                 10,
                 new ArrayList<String>(),
                 null));

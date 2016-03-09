@@ -21,10 +21,6 @@ var analyticsApp = angular.module('analyticsApp',
             .when('/studio', {
                 templateUrl: "/assets/templates/studio.html",
                 controller: "studioController"
-            })
-            .when('/dashboard', {
-                templateUrl: "/assets/templates/dashboard.html",
-                controller: "dashboardController"
             });
         $routeProvider.otherwise({ redirectTo: '/studio' });
         $locationProvider.html5Mode({
@@ -58,29 +54,38 @@ var analyticsApp = angular.module('analyticsApp',
             return (s4() + s4() + delim + s4() + delim + s4() + delim + s4() + delim + s4() + s4() + s4());
         }
 
+        /**
+         * get or create session id
+         * @returns {guid}
+         */
+        function getSessionId(){
+
+            var sessionId;
+            var stored = window.sessionStorage.getItem("sessionId");
+            if (stored) {
+                sessionId = stored;
+            }
+            else{
+                // cache the websocket url
+                sessionId =  guid();
+                window.sessionStorage.setItem("sessionId", sessionId);
+            }
+
+            return sessionId;
+        }
+
         return {
 
             guid: guid,
+
+            getSessionId: getSessionId,
 
             /**
              * retrieve the websocket url
              */
             webSocketUrl: function(){
 
-                var id;
-                // attempt to retrieve the websocket url from session storage
-                if (window.sessionStorage) {
-                    var stored = window.sessionStorage.getItem("sessionId");
-                    if (stored) {
-                        id = stored;
-                    }
-                    else{
-                        // cache the websocket url
-                        id =  guid();
-                        window.sessionStorage.setItem("sessionId", id);
-                    }
-                }
-
+                var id = getSessionId();
                 return jsRoutes.controllers.Analytics.socket(id).webSocketURL();
             }
         }
@@ -335,18 +340,25 @@ var analyticsApp = angular.module('analyticsApp',
         }();
     }])
 
-    .controller('dashboardController', ['$scope', '$window', '$timeout', '$webSockets', 'diagramService', 'modalService', 'popupService',
-        function($scope, $window, $timeout, $webSockets, diagramService, modalService, popupService) {
+    .controller('studioController', ['$scope', '$window', '$q', '$timeout', '$webSockets', 'analyticsService', 'diagramService', 'modalService', 'toasterService', 'popupService', function($scope, $window, $q, $timeout, $webSockets, analyticsService, diagramService, modalService, toasterService, popupService) {
 
-
-    }])
-
-    .controller('studioController', ['$scope', '$window', '$timeout', '$webSockets', 'diagramService', 'modalService', 'toasterService', 'popupService', function($scope, $window, $timeout, $webSockets, diagramService, modalService, toasterService, popupService) {
-
-        // initialized internal variables
-        var studioWrapper = angular.element(document.querySelector('#studio-wrapper')), // reference to the studio parent element
+        // initialize internal variables
+        var callbacks = {},         // dictionary of deferred callbacks
+            studioWrapper = angular.element(document.querySelector('#studio-wrapper')), // reference to the studio parent element
             lastTerminalWidth = 30, // initialize the variable that tracks the terminal windows' last width
-            toastContainerId = "toast-container"; // id of studio toast container
+            toastContainerId = "toast-container", // id of studio toast container
+            evaluationState = {
+                idle: 0,
+                starting: 1,
+                running: 2,
+                stopping: 3
+            },
+            viewState = {
+                diagram: 0,
+                transitionDashboard: 1,
+                dashboard: 2,
+                transitionDiagram: 3
+            };
 
         //
         // initialize scope level properties
@@ -358,33 +370,39 @@ var analyticsApp = angular.module('analyticsApp',
         $scope.isTerminalVisible = false;
         // flag representing whether the terminal is being resized
         $scope.isResizingTerminal = false;
-        // controls whether the library is displayed
+        // flag representing whether the library is displayed
         $scope.showLibrary = false;
-        // during some operations, we want to blur the background
-        $scope.blurBackground = false;
         // controls whether the offline or online canvas is shown
         $scope.onlineCanvas = false;
         // indicates whether the diagram is being transformed
         $scope.transforming = false;
-        // represents the current state of the offline diagram { 0 = 'idle', 1 = 'downloading', 2 = 'running' }
-        $scope.offlineState = 0;
-        // represents the current state of the online diagram { 0 = 'idle', 1 = 'downloading', 2 = 'running' }
-        $scope.onlineState = 0;
-
-        $scope.evaluating = false;
-
+        // represents the current state of the offline diagram
+        $scope.offlineState = evaluationState.idle;
+        // represents the current state of the online diagram
+        $scope.onlineState = evaluationState.idle;
+        // flag representing whether the online data view or diagram is displayed
+        $scope.onlineViewState = viewState.diagram;
+        // set of offline diagram methods
         $scope.offlineDiagramMethods = {};
-
-        $scope.diagrams = [];
-        //
+        // terminal output messages
         $scope.terminalOutput = [];
+        // online trend data and number of points to display
+        $scope.onlineChart = [];
+        $scope.onlineChartSize = 40;
 
         // setup websocket listeners
         $webSockets.reset();
         // listen for analytic task updates, append them to the terminal output
-        $webSockets.listen("task-status", function(msg) { return msg.messageType == "task-status"; }, appendTerminalOutput);
-        $webSockets.listen("evaluation-status", function(msg) { return msg.messageType == "evaluation-status"; }, updateEvaluationStatus);
-        $webSockets.listen("deployment-status", function(msg) { return msg.messageType == "deployment-status"; }, function(msg) { updateDeploymentStatus(msg.jobInfo); });
+        $webSockets.listen("task-status", function(msg) { return msg.messageType == "task-status"; }, onTaskStatus);
+        // listen for task variables
+        $webSockets.listen("task-variable", function(msg) { return msg.messageType == "task-variable"; }, onTaskVariable);
+
+        $window.addEventListener("unload", unsubscribe);
+
+        $scope.$on("$destroy", function(){
+            $window.removeEventListener("unload", unsubscribe);
+            unsubscribe();
+        });
 
         //
         // load data from the service
@@ -437,14 +455,246 @@ var analyticsApp = angular.module('analyticsApp',
         //
 
         /**
-         *
-         * @param taskStatus
+         * compile the currrent diagram, display the source.
          */
-        function appendTerminalOutput(taskStatus){
+        function compile() {
 
-            $scope.terminalOutput.push(taskStatus);
+            // retrieve the current diagram's data
+            var data = getDiagram().data;
+            var title = ($scope.onlineCanvas) ? "Online Diagram" : "Offline Diagram";
+
+            modalService.show({
+                templateUrl: '/assets/scripts/views/editor.html',
+                controller: 'debugController',
+                animation: {
+                    type: 'fadeIn',
+                    durationIn: 600
+                },
+                inputs: { data: data },
+                config: {
+                    title: title,
+                    backdropClass: 'emr-modal-backdrop',
+                    showCancel: true
+                }
+            });
+        }
+
+        /**
+         * handle task status messages
+         * @param message: web sockets messages of type: task-status
+         */
+        function onTaskStatus(message){
+
+            if (message.statusType === "DATA")
+                resolveCallback(message);
+
+            if($scope.evaluationId && $scope.evaluationId === message.id)
+                updateEvaluationStatus(message);
+            else if($scope.deploymentId && $scope.deploymentId === message.id)
+                updateDeploymentStatus(message);
+
+            $scope.terminalOutput.push(message);
+            $scope.$$phase || $scope.$apply();
+        }
+
+        /**
+         * handle task variable messages
+         * @param message: web sockets messages of type: task-variable
+         */
+        function onTaskVariable(message){
+
+            var temp = [];
+            message.values.forEach(function (value) {
+                temp.push(parseFloat(value));
+            });
+            $scope.onlineChart = temp;
+            $scope.$$phase || $scope.$apply();
+        }
+
+        function beginDiagramNavigation(){
+
+            var result = popupService.show({
+                templateUrl: '/assets/scripts/components/diagram/diagramNavigation.html',
+                controller: 'diagramNavigationController',
+                backdropClass: 'emr-popup-backdrop-nav',
+                inputs: {
+                    diagService: diagramService,
+                    closeDialog: endDiagramNavigation,
+                    openDiagram: $scope.open,
+                    createNewDiagram: $scope.createDiagram,
+                    deleteExistingDiagram: $scope.deleteDiagram,
+                    currentDiagram: getDiagram()
+                }
+            }).then(function(popup) {
+
+                $scope.navigatingDiagrams = true;
+                $scope.diagramNavigation = popup;
+            });
+        }
+
+        function endDiagramNavigation(){
+
+            $scope.diagramNavigation.controller.close();
+
+            $scope.navigatingDiagrams = false;
+            delete $scope.diagramNavigation;
+        }
+
+        // fire the event to begin dragging an element
+        var beginDragEvent = function(x, y, config){
+
+            $scope.$root.$broadcast("beginDrag", {
+                x: x,
+                y: y,
+                config: config
+            });
+        };
+
+        /*
+         * Returns the diagram that is currently in view
+         * */
+        var getDiagram = function(){
+            if($scope.onlineCanvas)
+                return $scope.onlineViewModel;
+            else
+                return $scope.diagramViewModel;
+        };
+
+        // show library browser popup
+        var libraryBrowserShow = function(){
+
+            var result = popupService.show({
+                templateUrl: '/assets/scripts/views/libraryBrowser.html',
+                controller: 'libraryBrowserController',
+                appendElement: angular.element($('#studio-container')),
+                inputs: {
+                    nodes: $scope.nodes,
+                    onDrag: beginDragEvent,
+                    onDrop: $scope.onCreateBlock
+                }
+            }).then(function (popup) {
+
+                $scope.showLibrary = true;
+                $scope.libraryBrowser = popup;
+            });
+        };
+
+        // hide and destroy library browser
+        var libraryBrowserHide = function(){
+
+            $scope.libraryBrowser.controller.close();
+
+            $scope.showLibrary = false;
+            delete $scope.libraryBrowser;
+        };
+
+        /**
+         * Updates the offline diagram's evaluation status
+         * @param message
+         */
+        function updateDeploymentStatus(message){
+
+            // set offline diagram's state
+            switch(message.statusType){
+
+                case "STARTED":
+                    $scope.onlineState = evaluationState.running;
+                    break;
+                case "TERMINATED":
+                    $scope.onlineState = evaluationState.idle;
+                    break;
+                case "FAILED":
+                    $scope.onlineState = evaluationState.idle;
+
+                    toasterService.error("Diagram deployment failed.",
+                        message.message,
+                        toastContainerId);
+
+                    break;
+            }
 
             $scope.$$phase || $scope.$apply();
+        }
+
+        /**
+         * Updates the offline diagram's evaluation status
+         * @param message
+         */
+        function updateEvaluationStatus(message){
+
+            // set offline diagram's state
+            switch(message.statusType){
+
+                case "STARTED":
+                    $scope.offlineState = evaluationState.running;
+                    break;
+                case "OUTPUT":
+                    var stateChange = message.message.split(",");
+                    if (stateChange.length == 2) {
+                        var state = Number(stateChange[1]);
+                        if (!Number.isNaN(state))
+                            $scope.diagramViewModel.updateBlockState(stateChange[0], state);
+                    }
+                    break;
+
+                case "COMPLETED":
+                    $scope.offlineState = evaluationState.idle;
+                    break;
+                case "FAILED":
+                    $scope.offlineState = evaluationState.idle;
+
+                    toasterService.error("Diagram evaluation failed.",
+                        message.message,
+                        toastContainerId);
+
+                    break;
+            }
+
+            $scope.$$phase || $scope.$apply();
+        }
+
+        /**
+         * Subscribe to the specified diagram id
+         * @param id - diagram id
+         */
+        function subscribe(id){
+
+            console.log("subscribing to diagram: " + id);
+            $webSockets.send({ messageType: "subscribe", id: id });
+        }
+
+        /**
+         * Unsubscribe the current diagram
+         */
+        var unsubscribe = function(){
+
+            var diagramId = getDiagram().getId();
+            if (diagramId){
+                // terminate the diagram's analytics session
+                diagramService.terminate(diagramId, "OFFLINE");
+            }
+        };
+
+        /**
+         * Create block data for the coordinates and definition name
+         * @param x
+         * @param y
+         * @param definitionName
+         * @returns {*|BlockData}
+         */
+        function getBlockData(x, y, definitionName){
+
+            // reference the current diagram
+            var currentDiagram = getDiagram();
+
+            // get the definition view model
+            var definitionViewModel = new viewmodels.definitionViewModel(currentDiagram.mode(), $scope.library[definitionName]);
+
+            // translate diagram coordinates
+            var point = $scope.offlineDiagramMethods.translateCoordinates(x, y);
+
+            // get the block data
+            return currentDiagram.getBlockData(point.x, point.y, definitionViewModel);
         }
 
         /**
@@ -530,69 +780,97 @@ var analyticsApp = angular.module('analyticsApp',
             }
         }
 
-        /* Scope Level Methods */
+        /**
+         * Method to resolve deferred web socket callbacks
+         * @param message: web socket message that may be associated with a deferred callback
+         */
+        function resolveCallback(message){
 
-        $scope.compile = function(evt) {
+            if (angular.isDefined(callbacks[message.id])){
+                // a callback exists: pop from the callbacks dictionary and resolve
 
-            // retrieve the current diagram's data
-            var data = getDiagram().data;
+                var deferred = callbacks[message.id];
+                delete callbacks[message.id];
 
-            var position = {
-                width: 800,
-                centerX: evt.clientX,
-                centerY: evt.clientY
-            };
-
-            modalService.show({
-                templateUrl: '/assets/scripts/views/editor.html',
-                controller: 'debugController',
-                inputs: { data: data },
-                config: {
-                    name: "Compiled Source Code",
-                    showSave : true,
-                    showCancel: true
-                },
-                position: position
-            });
-
-            evt.stopPropagation();
-            evt.preventDefault();
-        };
-
-        function getConfigurationBlock(x, y, definitionName){
-
-            var currentDiagram = getDiagram();
-
-            // translate diagram coordinates
-            // todo: update to also support online diagram methods
-            var point = $scope.offlineDiagramMethods.translateCoordinates(x, y);
-
-            var definition = new viewmodels.definitionViewModel(currentDiagram.mode(),
-                $scope.library[definitionName]);
-
-            // create a block description
-            var block = currentDiagram.getBlockDescription(point.x, point.y, definition);
-
-            return new viewmodels.configuringBlockViewModel(definition, block);
+                var data = JSON.parse(message.message);
+                deferred.resolve(data);
+            }
         }
 
-        /*
-         *  Method that loads dynamic block parameter data
+        /**
+         * Terminate the analytics task for the current diagram
          */
-        $scope.loadSources = function(request, success){
+        function terminate(){
+            var diagram = getDiagram();
+            var mode = diagram.getMode();
+            diagramService.terminate(diagram.getId(), mode)
+                .then(
+                    function () {
 
-            // attach the diagram to the request
-            request.diagram = getDiagram().data;
+                        // todo: race condition with terminate task status message
+                        /*
+                        if(mode == "OFFLINE" && $scope.offlineState == evaluationState.running)
+                            $scope.offlineState = evaluationState.stopping;
+                        else if(mode == "ONLINE" && $scope.onlineState == evaluationState.running)
+                            $scope.onlineState = evaluationState.stopping;
 
-            diagramService.loadSources(request).then(
-                function (response) {
+                        $scope.$$phase || $scope.$apply();
+                        */
+                    },
+                    function (reason) {
 
-                    success(response);
+                        var message = 'Termination failed.';
+                        toasterService.error(message,
+                            message,
+                            toastContainerId);
+                    }
+                );
+        }
+
+        //
+        // public methods
+        //
+
+        /**
+         * Load the specified dynamic parameter source
+         * @param request: represents the parameter to be loaded
+         */
+        $scope.onLoadParameterSource = function(parameter){
+
+            var deferred = $q.defer();
+
+            var currentDiagram = getDiagram();
+            var request = {    // initialize dynamic source request
+                diagramId: currentDiagram.getId(),
+                sessionId: analyticsService.getSessionId(),
+                diagramName: currentDiagram.getName(),
+                mode: currentDiagram.getMode(),
+                targetEnvironment: currentDiagram.getTargetEnvironment(),
+                parameter: parameter
+            };
+
+            diagramService.resolveSource(request).then(
+                function(data){
+
+                    switch(parameter.source.parameterSourceType){
+                        case "JAR":
+                            deferred.resolve(data);
+                            break;
+                        case "PYTHONSCRIPT":
+
+                            console.log(data);
+
+                            // python script results are returned via websockets, store the promise as a callback
+                            callbacks[data] = deferred;
+                            break;
+                    }
                 },
-                function (code) {
-                    console.log(code); // TODO show exception
+                function(status){
+                    deferred.reject(status);
                 }
             );
+
+            return deferred.promise;
         };
 
         /*
@@ -600,71 +878,167 @@ var analyticsApp = angular.module('analyticsApp',
          */
         $scope.onBlockDisplay = function(position, block){
 
-            var modalPosition = {
-                centerX: (position.x + position.zoom * block.width() / 2),
-                centerY: (position.y + position.zoom * block.height() / 2)
-            };
+            var diagram = getDiagram();
+            if (!diagram.getId()){
 
-            switch(block.definitionType()){
+                // save the diagram first
+                save(
+                    function(){ // on success: recursively call this method again
+                        $scope.onBlockDisplay(position, block);
+                    },
+                    function() {
+                        var message = 'Diagram failed to save.';
+                        toasterService.error(message,
+                            message,
+                            toastContainerId);
+                    }
+                );
+            }
+            else{
 
-                case "CHART":
+                var modalPosition = {
+                    centerX: (position.x + position.zoom * block.width() / 2),
+                    centerY: (position.y + position.zoom * block.height() / 2)
+                };
 
-                    modalService.show({
-                        templateUrl: '/assets/scripts/views/explore.html',
-                        controller: 'exploreController',
-                        inputs: {
-                            block: block
-                        },
-                        config: {
-                            title: block.data.name,
-                            backdropClass: 'emr-modal-backdrop',
-                            showSave : false,
-                            showCancel: true
-                        },
-                        position: modalPosition
-                    }).then(function (modal) {
+                switch(block.definitionType()){
 
-                        modal.close.then(function (result) {
+                    case "CHART":
 
-                            if (result) {
+                        modalService.show({
+                            templateUrl: '/assets/scripts/views/explore.html',
+                            controller: 'exploreController',
+                            inputs: {
+                                diagram: diagram,
+                                block: block
+                            },
+                            config: {
+                                backdropClass: 'emr-modal-backdrop',
+                                showSave : false,
+                                showCancel: true
+                            },
+                            position: modalPosition
+                        }).then(function (modal) {
 
-                            }
+                            modal.close.then(function (result) {
+
+                                if (result) {
+
+                                }
+                            });
                         });
-                    });
 
-                    break;
-                default:
+                        break;
 
-                    var mode = getDiagram().mode();
+                    case "LOAD":
 
-                    var definition = new viewmodels.definitionViewModel(mode, $scope.library[block.definition()]);
+                        modalService.show({
+                            templateUrl: '/assets/scripts/views/loadData.html',
+                            controller: 'loadDataController',
+                            inputs: {
+                                diagram: diagram,
+                                block: block.data
+                            },
+                            config: {
+                                backdropClass: 'emr-modal-backdrop',
+                                showCancel: true,
+                                showNext: true
+                            },
+                            position: modalPosition
+                        }).then(function (modal) {
 
-                    modalService.show({
-                        templateUrl: '/assets/scripts/views/blockData.html',
-                        controller: 'blockDataController',
-                        inputs: {
-                            block: new viewmodels.configuringBlockViewModel(definition, block.data),
-                            loadSources: $scope.loadSources,
-                            diagram: getDiagram()
-                        },
-                        config: {
-                            // todo put this back when refactor results name: block.data.name,
-                            backdropClass: 'emr-modal-backdrop',
-                            showSave : false,
-                            showCancel: true
-                        },
-                        position: modalPosition
-                    }).then(function (modal) {
+                            modal.close.then(function (result) {
 
-                        modal.close.then(function (result) {
+                                if (result) {
 
-                            if (result) {
-
-                            }
+                                }
+                            });
                         });
-                    });
 
-                    break;
+                        break;
+
+                    case "STREAM":
+
+                        modalService.show({
+                            templateUrl: '/assets/scripts/views/setStream.html',
+                            controller: 'setStreamController',
+                            inputs: {
+                                diagram: diagram,
+                                block: block.data
+                            },
+                            config: {
+                                backdropClass: 'emr-modal-backdrop'
+                            },
+                            position: modalPosition
+                        }).then(function (modal) {
+
+                            modal.close.then(function (result) {
+
+                                if (result) {
+
+                                }
+                            });
+                        });
+
+                        break;
+
+                    case "OUTPUT":
+
+                        modalService.show({
+                            templateUrl: '/assets/scripts/views/setOutput.html',
+                            controller: 'setOutputController',
+                            inputs: {
+                                diagram: diagram,
+                                block: block.data
+                            },
+                            config: {
+                                backdropClass: 'emr-modal-backdrop'
+                            },
+                            position: modalPosition
+                        }).then(function (modal) {
+
+                            modal.close.then(function (result) {
+
+                                if (result) {
+
+                                }
+                            });
+                        });
+
+                        break;
+
+                    default:
+
+                        var mode = diagram.mode();
+                        var definition = new viewmodels.definitionViewModel(mode, $scope.library[block.definition()]);
+
+                        modalService.show({
+                            templateUrl: '/assets/scripts/views/blockData.html',
+                            controller: 'blockDataController',
+                            inputs: {
+                                block: new viewmodels.configuringBlockViewModel(definition, block.data),
+                                loadParameterSource: $scope.onLoadParameterSource,
+                                diagram: diagram
+                            },
+                            config: {
+                                // todo put this back when refactor results name: block.data.name,
+                                backdropClass: 'emr-modal-backdrop',
+                                showSave : false,
+                                showCancel: true
+                            },
+                            position: modalPosition
+                        }).then(function (modal) {
+
+                            modal.close.then(function (result) {
+
+                                if (result) {
+
+                                }
+                            });
+                        });
+
+                        break;
+                }
             }
         };
 
@@ -691,11 +1065,10 @@ var analyticsApp = angular.module('analyticsApp',
 
         $scope.onCreateBlock = function(x, y, evt, definitionName){
 
-            // get configuration block
-            var configBlock = getConfigurationBlock(x, y, definitionName);
+            var blockData = getBlockData(x, y, definitionName);
 
             // create the block
-            getDiagram().createBlock(configBlock);
+            getDiagram().addBlock(blockData);
         };
 
         /*
@@ -710,18 +1083,38 @@ var analyticsApp = angular.module('analyticsApp',
             var file = files[0];
             if (!file) return;
 
-            // todo: make this configurable
-            var definitionName = "LoadFile";
+            // retrieve the offline diagram's current zoom level
+            var zoomLevel = $scope.offlineDiagramMethods.getZoomLevel();
 
-            // todo: base the offset on the block dimensions
-            var x = evt.pageX - 100, y = evt.pageY - 20;
+            // identify the load definition and the position of the new block
+            var definitionName = "Load",
+                x = evt.pageX - zoomLevel * 100,
+                y = evt.pageY - zoomLevel * 40;
 
-            // get configuration block
-            var configBlock = getConfigurationBlock(x, y, definitionName);
-            configBlock.setParameter("Filename", file.path);
+            // create the block data
+            var blockData = getBlockData(x, y, definitionName);
 
-            // create the block
-            getDiagram().createBlock(configBlock);
+            // reference the load configuration
+            var config = blockData.parameters[0].value;
+
+            // set the file path
+            config.source.dataSources.push({
+                "dataSourceType": "FILE",
+                "name": file.name,
+                "progress": 100,
+                "contentType": file.contentType,
+                "path": file.path
+            });
+
+            // give this parse instance a guid
+            config.parse.id = analyticsService.guid();
+
+            // set the parse type
+            if (file.contentType.indexOf("spreadsheet") > -1)
+                config.parse.parseType = "SPREADSHEET";
+
+            // add the block to the current diagram
+            getDiagram().addBlock(blockData);
         };
 
         /**
@@ -814,23 +1207,34 @@ var analyticsApp = angular.module('analyticsApp',
             }
             else { // a valid diagram exists
 
+                // retrieve the offline diagram's current zoom level
                 var zoomLevel = $scope.offlineDiagramMethods.getZoomLevel();
 
                 // determine the position of the new block
                 var diagramContainer = angular.element(document.querySelector('#studio-container'));
+
+                // initialize the position variable - y is always in the same spot
                 var position = { centerX: 0, centerY: diagramContainer.offset().top + zoomLevel * 90};
 
+                // retrieve the diagram's boundary
                 var boundary = diagram.getBoundary();
-                if (boundary.x2 == Number.MIN_VALUE){
+                if (boundary.x2 == Number.MIN_VALUE){ // the diagram is currently empty, set x to the center of the diagram
 
-                    // the diagram is currently empty, set x to the center of the diagram
                     position.centerX = diagramContainer.offset().left + diagramContainer.width() / 2;
                 }
                 else{
+                    var coords = $scope.offlineDiagramMethods.inverseCoordinates(boundary.x2, 0);
 
                     // position the new block to the right of the diagram boundary
-                    position.centerX = diagramContainer.offset().left + boundary.x2 + zoomLevel * 120;
+                    position.centerX = coords.x + zoomLevel * 120;
                 }
+
+                // create block data
+                var definitionName = "Load",
+                    x = position.centerX - zoomLevel * 100,
+                    y = position.centerY - zoomLevel * 40;
+
+                var blockData = getBlockData(x, y, definitionName);
 
                 modalService.show({
                     templateUrl: '/assets/scripts/views/loadData.html',
@@ -840,8 +1244,8 @@ var analyticsApp = angular.module('analyticsApp',
                         durationIn: 600
                     },
                     inputs: {
-                        diagramId: diagramId,
-                        diagramName: $scope.diagramViewModel.getName()
+                        diagram: $scope.diagramViewModel,
+                        block: blockData
                     },
                     config: {
                         backdropClass: 'emr-modal-backdrop',
@@ -856,32 +1260,11 @@ var analyticsApp = angular.module('analyticsApp',
                     modal.close.then(function (result) {
 
                         if (result) {
-
-                            var definitionName = "Load";
-
-                            var x = position.centerX - zoomLevel * 100, y = position.centerY - zoomLevel * 40;
-
-                            // get configuration block
-                            var configBlock = getConfigurationBlock(x, y, definitionName);
-                            // configBlock.setParameter("Filename", file.path);
-
                             // create the block
-                            getDiagram().createBlock(configBlock);
+                            getDiagram().addBlock(result.block);
                         }
                     });
                 });
-            }
-        };
-
-        $scope.toggleDiagrams = function() {
-
-            $scope.diagrams.length = 0;
-
-            $scope.showSidebar = !$scope.showSidebar;
-
-            if ($scope.showSidebar === true) {
-
-                loadDiagrams();
             }
         };
 
@@ -894,12 +1277,11 @@ var analyticsApp = angular.module('analyticsApp',
                     $scope.toggleCanvas(false);
                     $scope.offlineState = 0;
                     $scope.onlineState = 0;
+                    $scope.terminalOutput = []; // clear the terminal 
 
                     subscribe($scope.diagramViewModel.getId());
 
                     $scope.tasks($scope.diagramViewModel.getId(), function(data){
-
-                            console.log(JSON.stringify(data));
 
                             data.tasks.forEach(function(item) {
 
@@ -952,16 +1334,21 @@ var analyticsApp = angular.module('analyticsApp',
 
             switch(id){
 
-                case 'c': // center - evaluate
-                    evaluate();
+                case 'c': // center - evaluate or deploy
+
+                    if($scope.onlineCanvas)
+                        deploy();
+                    else
+                        evaluate();
+
                     break;
 
                 case 'o1': // orbit 1 - load
                     loadData();
                     break;
 
-                case 'o2': // orbit 2 - add block
-
+                case 'o2': // orbit 2 - source code
+                    compile();
                     break;
 
                 case 'o3': // orbit 3 - save
@@ -979,53 +1366,92 @@ var analyticsApp = angular.module('analyticsApp',
                             toastContainerId);
                     });
                     break;
+
+                case 'x':
+                    terminate();
+
+                    break;
             }
         };
 
+        /**
+         * initiate deployment of the online diagram
+         */
+        var deploy = function(){
 
+            // put the client in a pending deployment state
+            $scope.onlineState = evaluationState.starting;
 
-        var evaluate = function() {
+            // capture the offline and online diagrams
+            var data = {
+                'offline': $scope.diagramViewModel.data,
+                'online': $scope.onlineViewModel.data
+            };
 
-            $scope.evaluating = true;
-            $scope.offlineState = 1;   // pending
+            // initiate deployment
+            diagramService.deploy(data).then(
+                function (taskId) {
 
-            var offlineDiagram = $scope.diagramViewModel.data;
-
-            var onlineDiagram = $scope.onlineViewModel.data;
-
-            var data = {'offline': offlineDiagram, 'online': onlineDiagram};
-
-            diagramService.evaluate(data).then(
-                function (data) {
-
+                    // capture the deployment id
+                    $scope.deploymentId = taskId;
                 },
-                function (code) {
+                function (reason) {
 
-                    console.log(code); // TODO show exception
-                });
-        };
-
-        $scope.deploy = function(evt) {
-
-            $scope.onlineState = 1;   // pending
-
-            var offlineDiagram = $scope.diagramViewModel.data;
-            var onlineDiagram = $scope.onlineViewModel.data;
-            var diagrams = {'offline': offlineDiagram, 'online': onlineDiagram};
-
-            diagramService.deploy(diagrams).then(
-                function (data) {
-
-
-                },
-                function (code) {
-
-                    console.log(code); // TODO show exception
+                    var message = 'Deployment failed.';
+                    toasterService.error(message,
+                        message,
+                        toastContainerId);
                 }
             );
+        };
 
-            evt.stopPropagation();
-            evt.preventDefault();
+        /**
+         * initiate evaluation of the offline diagram
+         */
+        var evaluate = function() {
+
+            var diagram = $scope.diagramViewModel;
+            if (!diagram.getId()){
+
+                // save the diagram first
+                save(
+                    function(){ // on success: recursively call this method again
+                        evaluate();
+                    },
+                    function(){
+                        var message = 'Diagram failed to save.';
+                        toasterService.error(message,
+                            message,
+                            toastContainerId);
+                    }
+                );
+            }
+            else{
+
+                // put the client in a pending evaluation state
+                $scope.offlineState = evaluationState.starting;
+
+                var data = {
+                    'offline': diagram.data,
+                    'online': $scope.onlineViewModel.data
+                };
+
+                diagramService.evaluate(data).then(
+                    function(taskId){
+
+                        // reference this evaluation's task id
+                        $scope.evaluationId = taskId;
+                    },
+                    function (reason) {
+
+                        $scope.offlineState = evaluationState.idle;
+
+                        var message = 'Diagram failed to evaluate.';
+                        toasterService.error(message,
+                            message,
+                            toastContainerId);
+                    });
+            }
         };
 
         $scope.tasks = function(diagramId, onSuccess, onFailure){
@@ -1064,6 +1490,7 @@ var analyticsApp = angular.module('analyticsApp',
                 // buid a task request including the interpreter source code
                 var request = {
                     diagramId: diagramId,
+                    sessionId: analyticsService.getSessionId(),
                     diagramName: $scope.diagramViewModel.getName(),
                     mode: "OFFLINE",
                     targetEnvironment: $scope.diagramViewModel.getTargetEnvironment(),
@@ -1198,216 +1625,49 @@ var analyticsApp = angular.module('analyticsApp',
             evt.preventDefault();
         };
 
-        $scope.toggleDiagramConfiguration = function(evt){
-
-            if ($scope.configuringDiagram){
-                endDiagramConfiguration();
-            }
-            else{
-                beginDiagramConfiguration();
-            }
-
-            evt.stopPropagation();
-            evt.preventDefault();
-        };
-
         $scope.toggleDiagramNavigation = function(evt){
 
-            if ($scope.navigatingDiagrams) {
-
+            if ($scope.navigatingDiagrams)
                 endDiagramNavigation();
-            }
-            else {
-
+            else
                 beginDiagramNavigation();
-            }
 
             evt.stopPropagation();
             evt.preventDefault();
         };
 
-        var beginDiagramNavigation = function(){
-
-            var result = popupService.show({
-                templateUrl: '/assets/scripts/components/diagram/diagramNavigation.html',
-                controller: 'diagramNavigationController',
-                backdropClass: 'emr-popup-backdrop-nav',
-                inputs: {
-                    diagService: diagramService,
-                    closeDialog: endDiagramNavigation,
-                    openDiagram: $scope.open,
-                    createNewDiagram: $scope.createDiagram,
-                    deleteExistingDiagram: $scope.deleteDiagram,
-                    currentDiagram: getDiagram()
-                }
-            }).then(function(popup) {
-
-                $scope.navigatingDiagrams = true;
-                $scope.diagramNavigation = popup;
-            });
-        };
-
-        var endDiagramNavigation = function(){
-
-            $scope.diagramNavigation.controller.close();
-
-            $scope.navigatingDiagrams = false;
-            delete $scope.diagramNavigation;
-        };
-
-        var beginDiagramConfiguration = function(){
-
-            var result = popupService.show({
-                templateUrl: '/assets/scripts/components/diagram/diagramProperties.html',
-                controller: 'diagramConfigController',
-                inputs: {
-                    diagram: $scope.diagramViewModel.data
-                }}).then(function(popup){
-
-                $scope.configuringDiagram = true;
-                $scope.diagramConfiguration = popup;
-            });
-        };
-
-        var endDiagramConfiguration = function(){
-
-            $scope.diagramConfiguration.controller.close();
-
-            $scope.configuringDiagram = false;
-            delete $scope.diagramConfiguration;
-        };
-
-        // fire the event to begin dragging an element
-        var beginDragEvent = function(x, y, config){
-
-            $scope.$root.$broadcast("beginDrag", {
-                x: x,
-                y: y,
-                config: config
-            });
-        };
-
-        /*
-         * Returns the diagram that is currently in view
-         * */
-        var getDiagram = function(){
-            if($scope.onlineCanvas)
-                return $scope.onlineViewModel;
-            else
-                return $scope.diagramViewModel;
-        };
-
-        // show library browser popup
-        var libraryBrowserShow = function(){
-
-            var result = popupService.show({
-                templateUrl: '/assets/scripts/views/libraryBrowser.html',
-                controller: 'libraryBrowserController',
-                appendElement: angular.element($('#studio-container')),
-                inputs: {
-                    nodes: $scope.nodes,
-                    onDrag: beginDragEvent,
-                    onDrop: $scope.onCreateBlock
-                }
-            }).then(function (popup) {
-
-                $scope.showLibrary = true;
-                $scope.libraryBrowser = popup;
-            });
-        };
-
-        // hide and destroy library browser
-        var libraryBrowserHide = function(){
-
-            $scope.libraryBrowser.controller.close();
-
-            $scope.showLibrary = false;
-            delete $scope.libraryBrowser;
-        };
-
         /**
-         * Update the online diagram's deployment status
-         * @param message
+         * Toggle between the online diagram and dashboard views
+         * @param evt
          */
-        function updateDeploymentStatus(message){
+        $scope.toggleOnlineView = function(evt){
 
-            // set online diagram's state
-            switch(message.state){
+            // transition duration (ms): amount of time to wait for the transition animation to unfold
+            var duration = 500;
 
-                case "CREATED":
-                    $scope.onlineState = 1;
-                    break;
-                case "RUNNING":
-                    $scope.onlineState = 2;
-                    break;
-                case "COMPLETED":
-                    $scope.onlineState = 0;
-                    break;
-                case "FAILED":
-                    $scope.onlineState = 0;
+            switch($scope.onlineViewState){
+                case viewState.diagram:
 
-                    // todo: create failure alert
+                    // switch to the dashboard view
+                    $scope.onlineViewState = viewState.transitionDashboard;
+                    $timeout(function() {
+                        $scope.onlineViewState = viewState.dashboard;
+                    }, duration);
                     break;
-                case "STOPPED":
-                    $scope.onlineState = 0;
 
-                    // todo: create stopped alert
+                case viewState.dashboard:
+
+                    // switch to the diagram view
+                    $scope.onlineViewState = viewState.transitionDiagram;
+                    $timeout(function() {
+                        $scope.onlineViewState = viewState.diagram;
+                    }, duration);
                     break;
             }
 
-            $scope.$$phase || $scope.$apply();
-        }
-
-        /**
-         * Updates the offline diagram's evaluation status
-         * @param message
-         */
-        function updateEvaluationStatus(message){
-
-            // set offline diagram's state
-            switch(message.state){
-
-                case "CREATED":
-                    $scope.offlineState = 1;
-                    break;
-                case "RUNNING":
-                    $scope.offlineState = 2;
-                    break;
-                case "COMPLETED":
-                    $scope.evaluating = false;
-                    $scope.offlineState = 0;
-                    break;
-                case "FAILED":
-                    $scope.evaluating = false;
-                    $scope.offlineState = 0;
-
-                    // todo: create failure alert
-                    break;
-                case "STOPPED":
-                    $scope.evaluating = false;
-                    $scope.offlineState = 0;
-
-                    // todo: create stopped alert
-                    break;
-            }
-
-            if (message.blockId != null && message.blockState != null){
-
-                $scope.diagramViewModel.updateBlockState(message.blockId, message.blockState);
-            }
-
-            $scope.$$phase || $scope.$apply();
-        }
-
-        /**
-         * Subscribe to the specified diagram id
-         * @param id - diagram id
-         */
-        function subscribe(id){
-
-            console.log("subscribing to diagram: " + id);
-            $webSockets.send({ messageType: "subscribe", id: id });
-        }
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
 
     }]);
 

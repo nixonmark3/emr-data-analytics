@@ -316,15 +316,16 @@ angular.module('emr.ui.grids', [])
                 $scope.rowHeaderPosition = 0;
                 $scope.columnWidth = 180;
                 $scope.rowHeaderWidth = 180;
+                $scope.histogramHeight = 150;
                 $scope.originX = $scope.rowHeaderWidth + 2 * $scope.padding;
                 $scope.originY = $scope.rowHeight + $scope.padding;
-                $scope.gridHeight = (10 * $scope.rowHeight + 3 * $scope.padding);
+                $scope.gridHeight = (7 * $scope.rowHeight + 3 * $scope.padding + $scope.histogramHeight);
 
                 $scope.$watch("features", function(){
                     render();
                 });
 
-                angular.element('#grid-content-container').bind('scroll', function(event) {
+                angular.element(element[0].querySelector('.grid-content-container')).bind('scroll', function(event) {
 
                     $scope.$apply(function() {
 
@@ -337,7 +338,7 @@ angular.module('emr.ui.grids', [])
                 function render(){
                     // set the gridwidth based on the total number of features
                     var featureCount = $scope.features.length;
-                    $scope.gridWidth = ((featureCount - 1) * ($scope.columnWidth + $scope.padding) + $scope.originX - $scope.padding);
+                    $scope.gridWidth = (featureCount * ($scope.columnWidth + $scope.padding) + $scope.originX - $scope.padding);
                 }
             }
         }

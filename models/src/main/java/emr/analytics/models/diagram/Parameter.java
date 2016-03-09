@@ -1,6 +1,8 @@
 package emr.analytics.models.diagram;
 
 import emr.analytics.models.definition.ParameterDefinition;
+import emr.analytics.models.definition.ParameterType;
+import emr.analytics.models.definition.ValueType;
 
 import java.io.Serializable;
 
@@ -8,17 +10,18 @@ import java.io.Serializable;
  * Jackson schema for Diagram Parameter.
  */
 public class Parameter implements Serializable {
-    private String name = "";
-    private Object value = null;
-    private String type = "";
-    private boolean collected = false;
+    private String name;
+    private Object value;
+    private ParameterType parameterType;
+    private ValueType valueType;
 
     private Parameter() {}
 
     public Parameter(ParameterDefinition parameterDefinition){
 
         this.name = parameterDefinition.getName();
-        this.type = parameterDefinition.getType();
+        this.parameterType = parameterDefinition.getParameterType();
+        this.valueType = parameterDefinition.getValueType();
         this.value = parameterDefinition.getValue();
     }
 
@@ -54,27 +57,17 @@ public class Parameter implements Serializable {
         this.value = value;
     }
 
-    public String getType() {
-        return type;
+    public ParameterType getParameterType() {
+        return parameterType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setParameterType(ParameterType parameterType) {
+        this.parameterType = parameterType;
     }
 
-    /**
-     * Determines if this parameter has been collected.
-     * @return boolean is collected
-     */
-    public boolean isCollected() {
-        return collected;
+    public ValueType getValueType() {
+        return valueType;
     }
 
-    /**
-     * Sets the collected field of a parameter.
-     * @param collected boolean is collected
-     */
-    public void setCollected(boolean collected) {
-        this.collected = collected;
-    }
+    public void setValueType(ValueType valueType) { this.valueType = valueType; }
 }

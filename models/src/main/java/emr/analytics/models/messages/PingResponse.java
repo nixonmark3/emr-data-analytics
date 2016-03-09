@@ -1,12 +1,14 @@
 package emr.analytics.models.messages;
 
+import java.util.UUID;
+
 public class PingResponse extends OutputMessage {
     private boolean value;
 
-    public PingResponse(){ this(false); }
+    public PingResponse(UUID id){ this(id, false); }
 
-    public PingResponse(boolean value) {
-        super("ping");
+    public PingResponse(UUID id, boolean value) {
+        super(id, null, "ping");
         this.value = value;
     }
 

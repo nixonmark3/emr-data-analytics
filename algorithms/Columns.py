@@ -32,7 +32,7 @@ class Columns(FunctionBlock):
 
             FunctionBlock.report_status_complete(self)
 
-            return {'{0}/{1}'.format(self.unique_name, 'out'): df}
+            return {FunctionBlock.getFullPath(self, 'out'): df}
 
         except Exception as err:
             FunctionBlock.save_results(self)

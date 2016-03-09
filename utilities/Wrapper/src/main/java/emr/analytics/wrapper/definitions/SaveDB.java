@@ -53,22 +53,25 @@ public class SaveDB extends BlockDefinition implements IExport {
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
 
         parameters.add(new ParameterDefinition("Brick",
-                DataType.LIST.toString(),
+                ParameterType.ENUMERATION,
+                ValueType.SCALAR,
                 "",
                 new ArrayList<String>(),
-                new ParameterSource("Jar",
+                new ParameterSource(ParameterSource.ParameterSourceTypes.JAR,
                         "plugins-1.0-SNAPSHOT.jar",
                         "Bricks",
                         new ArrayList<Argument>())));
 
         parameters.add(new ParameterDefinition("New Brick Name",
-                DataType.STRING.toString(),
+                ParameterType.STRING,
+                ValueType.SCALAR,
                 "",
                 new ArrayList<String>(),
                 null));
 
         parameters.add(new ParameterDefinition("Data Set Name",
-                DataType.STRING.toString(),
+                ParameterType.STRING,
+                ValueType.SCALAR,
                 "None",
                 new ArrayList<String>(),
                 null));

@@ -1,5 +1,7 @@
 package emr.analytics.service;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -13,25 +15,14 @@ public class TaskServiceHelper {
      * @return the value of environmental variable
      */
     public static String getEnvVariable(String name, String defaultValue){
-        String value = System.getenv(name);
+        String value = getEnvVariable(name);
         if (value == null)
             value = defaultValue;
 
         return value;
     }
 
-    public static Properties loadProperties(String name){
-
-        Properties properties = new Properties();
-
-        String fileName = String.format("conf/%s.properties", name);
-        try (InputStream stream = TaskServiceHelper.class.getClassLoader().getResourceAsStream(fileName)){
-            properties.load(stream);
-        }
-        catch(IOException ex){
-            throw new TaskServiceException(String.format("Unable to load specified properties: %s.", name));
-        }
-
-        return properties;
+    public static String getEnvVariable(String name){
+        return System.getenv(name);
     }
 }

@@ -16,9 +16,9 @@ public abstract class Interpreter {
      *
      * @param notificationHandler
      */
-    public Interpreter(InterpreterNotificationHandler notificationHandler){
-        this.properties = new Properties();
+    public Interpreter(InterpreterNotificationHandler notificationHandler, Properties properties){
         this.notificationHandler = notificationHandler;
+        this.properties = properties;
     }
 
     /**
@@ -26,21 +26,6 @@ public abstract class Interpreter {
      * @return
      */
     protected Properties getProperties(){ return this.properties; }
-
-    /**
-     *
-     * @param name
-     */
-    protected void loadProperties(String name){
-
-        String fileName = String.format("conf/%s.properties", name);
-        try (InputStream stream = getClass().getClassLoader().getResourceAsStream(fileName)){
-            properties.load(stream);
-        }
-        catch(IOException ex){
-            throw new InterpreterException(ex);
-        }
-    }
 
     /**
      *

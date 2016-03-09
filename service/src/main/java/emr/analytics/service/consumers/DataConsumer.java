@@ -1,6 +1,6 @@
 package emr.analytics.service.consumers;
 
-import emr.analytics.service.consumers.serializers.Consumer;
+import emr.analytics.models.messages.Consumer;
 
 public abstract class DataConsumer {
 

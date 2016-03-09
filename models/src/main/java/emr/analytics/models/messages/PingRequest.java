@@ -2,5 +2,5 @@ package emr.analytics.models.messages;
 
 public class PingRequest extends InputMessage {
 
-    public PingRequest(){ super("ping"); }
+    public PingRequest(){ super(null, "ping"); }
 }

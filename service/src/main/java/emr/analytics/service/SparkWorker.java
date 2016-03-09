@@ -6,201 +6,116 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import emr.analytics.models.definition.Mode;
 import emr.analytics.models.definition.TargetEnvironments;
-import emr.analytics.models.messages.AnalyticsTask;
-import emr.analytics.models.messages.TaskRequest;
+import emr.analytics.models.messages.*;
+import emr.analytics.service.interpreters.*;
+import scala.PartialFunction;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import scala.runtime.BoxedUnit;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.*;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Creates a new actor system in a separate process, associates with it remotely, and passes the spark job for execution
- */
-public class SparkWorker extends AbstractActor {
+import static java.util.concurrent.TimeUnit.SECONDS;
 
-    private ActorRef client = null;
-    private ActorRef spark = null;
+public class SparkWorker extends ExecutionActor implements InterpreterNotificationHandler {
 
-    private UUID diagramId;
-    private String diagramName;
-    private TargetEnvironments targetEnvironment;
-    private Mode mode;
+    private ActorRef parent;
+    private String parentPath;
+    private PartialFunction<Object, BoxedUnit> active;
 
-    private Queue<TaskRequest> requests;
-
-    public static Props props(ActorRef client, UUID id, UUID diagramId, String diagramName, TargetEnvironments targetEnvironment, Mode mode, String host, String port){
-
-        return Props.create(SparkWorker.class,
-                client,
-                id,
-                diagramId,
-                diagramName,
-                targetEnvironment,
-                mode,
-                host,
-                port);
+    public static Props props(String parentPath, UUID diagramId, String diagramName, TargetEnvironments targetEnvironment, Mode mode) {
+        return Props.create(SparkWorker.class, parentPath, diagramId, diagramName, targetEnvironment, mode);
     }
 
-    public SparkWorker(ActorRef client, UUID id, UUID diagramId, String diagramName, TargetEnvironments targetEnvironment, Mode mode, String host, String port) throws SparkProcessException {
-
-        this.client = client;
-        this.diagramId = diagramId;
-        this.diagramName = diagramName;
-        this.targetEnvironment = targetEnvironment;
-        this.mode = mode;
-
-        this.requests = new LinkedList<TaskRequest>();
+    public SparkWorker(String parentPath, UUID diagramId, String diagramName, TargetEnvironments targetEnvironment, Mode mode){
+        super(diagramId, diagramName, targetEnvironment, mode);
+        this.parentPath = parentPath;
 
         receive(ReceiveBuilder
 
-                /**
-                 * After the spark actor starts up, it will make contact by sending a reference to itself
-                 */
-                .match(ActorRef.class, actor -> {
+            // the remote spark process has responded to this actor's identify request
+            .match(ActorIdentity.class, identity -> {
 
-                    // reference spark actor
-                    spark = actor;
-                    context().watch(spark);
+                // capture service's actorRef
+                parent = identity.getRef();
 
-                    // send reference to client and job
-                    spark.tell(this.client, self());
+                if (parent != null) {
 
-                    while(this.requests.size() > 0)
-                        spark.tell(this.requests.remove(), self());
-                })
+                    // send self to parent
+                    parent.tell(self(), self());
 
-                /**
-                 * Receive new spark jobs - depending on state - either send or queue
-                 */
-                .match(TaskRequest.class, request -> {
+                    context().watch(parent);
+                    context().become(active, true);
+                }
+            })
 
-                    if (spark != null)
-                        spark.tell(request, self());
-                    else
-                        this.requests.add(request);
-                })
+            // the spark process did not respond - resend the identity request
+            .match(ReceiveTimeout.class, timeout -> {
 
-                /**
-                 * initiate the stopping of this job
-                 */
-                .match(String.class, s -> s.equals("stop"), s -> {
+                sendIdentifyRequest();
+            })
 
-                    // notify the job status actor that the job is being stopped
-                    spark.tell(s, self());
-                })
+            .matchAny(this::unhandled).build()
+        );
 
-                /**
-                 * forward the task request to the spark actor
-                 */
-                .match(String.class, s -> s.equals("task"), s -> {
+        active = ReceiveBuilder
 
-                    Timeout timeout = new Timeout(Duration.create(5, TimeUnit.SECONDS));
-                    Future<Object> future = Patterns.ask(spark, s, timeout);
-                    AnalyticsTask task = (AnalyticsTask) Await.result(future, timeout.duration());
+            /**
+             *
+             */
+            .match(ActorRef.class, this::createStatusManager)
 
-                    sender().tell(task, self());
-                })
+            /**
+             * Task request received
+             */
+            .match(TaskRequest.class, request -> {
 
-                .match(Terminated.class, terminated -> {
+                this.runTask(request, request.getSource());
+            })
 
-                    // the spark actor has been terminated - terminate self
-                    self().tell(PoisonPill.getInstance(), self());
-                })
+            /**
+             * synchronously forward a request to the spark status manager for a summary of the running task
+             */
+            .match(String.class, s -> s.equals("task"), s -> {
 
-                .matchAny(this::unhandled)
+                Timeout timeout = new Timeout(Duration.create(20, TimeUnit.SECONDS));
+                Future<Object> future = Patterns.ask(statusManager, s, timeout);
+                AnalyticsTask task = (AnalyticsTask) Await.result(future, timeout.duration());
 
-                .build());
+                sender().tell(task, self());
+            })
 
-        // create the spark process
-        this.runProcess(id.toString(),
-                context().system().name(),
-                host,
-                port);
+            /**
+             * stop interpreter and context
+             */
+            .match(String.class, s -> s.equals("finalize"), s -> {
+
+                interpreter.stop();
+                getContext().system().shutdown();
+            })
+
+            /**
+             * request to stop this worker, pass a Task Terinated message to the status manager
+             */
+            .match(String.class, s -> s.equals("stop"), s -> {
+                this.terminateTask();
+            })
+
+            .build();
+
+        // send an identify request to the new spark actor
+        sendIdentifyRequest();
     }
 
-    private void runProcess(String id, String system, String host, String port) throws SparkProcessException {
-
-        try {
-
-            String operatingSystemName = System.getProperty("os.name").toLowerCase();
-
-            StringBuilder pathBuilder = new StringBuilder();
-            URL[] urls = ((URLClassLoader)Thread.currentThread().getContextClassLoader()).getURLs();
-            for (URL url : urls) {
-
-                pathBuilder.append(url.toURI().toString().replace("file:", ""));
-
-                if (operatingSystemName.startsWith("windows")) {
-
-                    pathBuilder.append(";");
-                }
-                else {
-
-                    pathBuilder.append(":");
-                }
-            }
-
-            List<String> arguments = new ArrayList<String>();
-            arguments.add("java");
-            arguments.add("-classpath");
-            arguments.add(pathBuilder.substring(0, pathBuilder.length() - 1));
-            arguments.add(SparkProcess.class.getCanonicalName());
-            arguments.add(id);
-            arguments.add(system);
-            arguments.add(host);
-            arguments.add(port);
-            arguments.add(this.diagramId.toString());
-            arguments.add(this.diagramName);
-            arguments.add(this.targetEnvironment.toString());
-            arguments.add(this.mode.toString());
-
-            ProcessBuilder builder = new ProcessBuilder(arguments);
-            Process process = builder.start();
-
-            new Thread(() -> {
-
-                try {
-
-                    BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                    BufferedReader err = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-
-                    String lineRead;
-                    while ((lineRead = in.readLine()) != null) {
-
-                        System.out.println(lineRead);
-                    }
-
-                    int complete = process.waitFor();
-
-                    if (complete != 0) {
-
-                        StringBuilder stringBuilder = new StringBuilder();
-                        while ((lineRead = err.readLine()) != null) {
-
-                            stringBuilder.append(lineRead);
-                            stringBuilder.append(" ");
-                        }
-
-                        System.err.print(stringBuilder.toString());
-                    }
-                }
-                catch(Exception ex) {
-
-                    System.err.println(ex.toString());
-                }
-
-            }).start();
-        }
-        catch(Exception ex) {
-
-            System.err.println(ex.getMessage());
-            throw new SparkProcessException(String.format("Message: %s", ex.toString()));
-        }
+    /**
+     * Send an identity message to initialize contact with parent
+     */
+    private void sendIdentifyRequest() {
+        getContext().actorSelection(this.parentPath).tell(new Identify(this.parentPath), self());
+        getContext().system().scheduler()
+                .scheduleOnce(Duration.create(3, SECONDS), self(),
+                        ReceiveTimeout.getInstance(), getContext().dispatcher(), self());
     }
 }

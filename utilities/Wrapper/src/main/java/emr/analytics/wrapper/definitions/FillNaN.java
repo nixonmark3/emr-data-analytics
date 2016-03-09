@@ -71,7 +71,8 @@ public class FillNaN extends BlockDefinition implements IExport {
         opts.add("mean");
 
         parameters.add(new ParameterDefinition("Fill Method",
-                DataType.LIST.toString(),
+                ParameterType.ENUMERATION,
+                ValueType.SCALAR,
                 "ffill",
                 opts,
                 null));

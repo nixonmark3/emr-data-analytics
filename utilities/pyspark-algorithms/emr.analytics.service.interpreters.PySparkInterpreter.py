@@ -1,4 +1,7 @@
 import sys, getopt, traceback
+import json
+import numpy as np
+import pandas as pd
 
 from py4j.java_gateway import java_import, JavaGateway, GatewayClient
 from py4j.protocol import Py4JJavaError
@@ -36,17 +39,31 @@ conf = SparkConf(_jvm = gateway.jvm, _jconf = jconf)
 sc = SparkContext(jsc=jsc, gateway=gateway, conf=conf)
 sqlContext = SQLContext(sc, jsql)
 
-# collection of methods to pass data through the gateway
+# collection of methods
 class DataGateway(object):
 
     # sends a dataframe's schema and data to the interpreter
     def collect(self, dataFrame):
-        interpreter.collect(dataFrame.schema.json(), dataFrame.columns, dataFrame.collect())
+        # get schema
+        schema = json.dumps(self.schema(dataFrame))
+        interpreter.collect(schema, dataFrame.toPandas().to_json(orient='values'))
 
     # sends a dataframe's schema and describe statistics to the interpreter
     def describe(self, dataFrame):
-        stats = dataFrame.describe()
-        interpreter.describe(dataFrame.schema.json(), stats.columns, stats.collect())
+        # get schema
+        schema = json.dumps(self.schema(dataFrame))
+        # execute describe and convert to pandas dataframe
+        stats = dataFrame.describe().toPandas()
+        interpreter.describe(schema, stats.to_json(orient='split'))
+
+    def schema(self, dataFrame):
+        dataTypes = dataFrame.schema.fields
+        return [{'name': dataTypes[i].name, 'type': dataTypes[i].dataType.typeName()} for i in range(len(dataTypes))]
+
+    # select specified columns and collect
+    def select(self, columns, dataFrame):
+        features = dataFrame.select(columns)
+        self.collect(features)
 
 dataGateway = DataGateway()
 # notify the client that the python script has been initialized

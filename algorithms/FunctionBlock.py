@@ -12,6 +12,8 @@ import numpy as np
 
 from abc import ABCMeta, abstractmethod
 
+# mongo_path = "mongodb://10.4.0.4:27017/"
+mongo_path = "mongodb://localhost:27017/"
 studio_db_name = 'emr-data-analytics-studio'
 
 class FunctionBlock():
@@ -45,7 +47,7 @@ class FunctionBlock():
         sys.stdout.flush()
 
     def save_results(self, df=None, statistics=False, plot=False, results=None):
-        connection = pymongo.MongoClient()
+        connection = pymongo.MongoClient(mongo_path)
         db = connection[studio_db_name]
 
         block_results = collections.OrderedDict()
@@ -99,7 +101,7 @@ class FunctionBlock():
             return {'{0}'.format(self.unique_name): None}
 
     def getFullPath(self, parameter_name):
-        return '{0}/{1}'.format(self.unique_name, parameter_name)
+        return '{0}/{1}'.format(self.name, parameter_name)
 
     def add_persisted_connector_result(self, name, value):
         self.results['Results'][name] = value
@@ -111,7 +113,7 @@ class FunctionBlock():
         self.results['Results']['Statistics'] = generate_statistics(df)
 
     def add_plot_result(self, df):
-        connection = pymongo.MongoClient()
+        connection = pymongo.MongoClient(mongo_path)
         db = connection[studio_db_name]
 
         fs = gridfs.GridFS(db)
@@ -139,7 +141,7 @@ class FunctionBlock():
         connection.close()
 
     def save_all_results(self):
-        connection = pymongo.MongoClient()
+        connection = pymongo.MongoClient(mongo_path)
         db = connection[studio_db_name]
         results = db['results']
         results.update({'name': self.unique_name}, self.results, upsert=True)

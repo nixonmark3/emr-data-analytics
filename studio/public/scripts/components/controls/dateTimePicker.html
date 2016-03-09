@@ -1,0 +1,30 @@
+<div class="date-time-picker unselectable">
+    <div class="date-time-picker-row">
+        <span class="date-time-header">
+            {{header}}
+        </span>
+        <span class="time-header" style="vertical-align: bottom;">
+            <a ng-click="setNumber('increment', 'hours')"><i class="fa fa-caret-up"></i></a>
+        </span>
+        <span class="time-spacer"></span>
+        <span class="time-header" style="vertical-align: bottom;">
+            <a ng-click="setNumber('increment', 'minutes')"><i class="fa fa-caret-up"></i></a>
+        </span>
+    </div>
+    <div class="date-time-picker-row">
+        <input type="date" class="form-control" ng-model="date" ng-change="onUpdate('date')">
+        <input type="text" class="form-control" ng-model="hours" ng-keydown="onKey('hours', $event)" ng-change="onUpdate('hours')">
+        <span class="time-spacer">:</span>
+        <input type="text" class="form-control" ng-model="minutes" ng-keydown="onKey('minutes', $event)" ng-change="onUpdate('minutes')">
+    </div>
+    <div class="date-time-picker-row">
+        <span class="date-time-header"></span>
+        <span class="time-header">
+            <a ng-click="setNumber('decrement', 'hours')"><i class="fa fa-caret-down"></i></a>
+        </span>
+        <span class="time-spacer"></span>
+        <span class="time-header">
+            <a ng-click="setNumber('decrement', 'minutes')"><i class="fa fa-caret-down"></i></a>
+        </span>
+    </div>
+</div>

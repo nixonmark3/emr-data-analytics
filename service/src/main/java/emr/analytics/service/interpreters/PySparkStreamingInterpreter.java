@@ -5,16 +5,18 @@ import org.apache.commons.exec.ExecuteResultHandler;
 import org.apache.spark.streaming.Durations;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 
+import java.util.Properties;
+
 public class PySparkStreamingInterpreter extends PySparkInterpreter implements ExecuteResultHandler {
 
     protected JavaStreamingContext streamingContext;
 
-    public PySparkStreamingInterpreter(String name, InterpreterNotificationHandler notificationHandler){
-        super(name, notificationHandler);
+    public PySparkStreamingInterpreter(String name, InterpreterNotificationHandler notificationHandler, Properties properties){
+        super(name, notificationHandler, properties);
 
         String path = this.getWorkingDirectory().getAbsolutePath();
 
-        this.sparkContext.addJar("/usr/local/spark/external/kafka-assembly/spark-streaming-kafka-assembly_2.10-1.4.1.jar");
+        this.sparkContext.addJar("/usr/local/spark/external/kafka-assembly/spark-streaming-kafka-assembly_2.10-1.6.0.jar");
         this.sparkContext.addFile(String.format("%s/Filters.py", path));
         this.sparkContext.addFile(String.format("%s/StreamingSources.py", path));
         this.sparkContext.addFile(String.format("%s/Transformations.py", path));

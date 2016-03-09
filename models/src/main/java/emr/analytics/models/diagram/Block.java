@@ -15,8 +15,8 @@ public class Block implements Serializable {
     private UUID id;
     private String name;
     private String definition;
-    private boolean configured;             // unused, currently required for serialization, use jsonignore
-    private int state;
+    private boolean configured;
+    private boolean dirty;
     private int x;
     private int y;
     private int w;
@@ -26,11 +26,10 @@ public class Block implements Serializable {
 
     private Block() { }
 
-    public Block(UUID id, String name, int state, int x, int y, Mode mode, Definition definition){
+    public Block(UUID id, String name, int x, int y, Mode mode, Definition definition){
 
         this.id = id;
         this.name = name;
-        this.state = state;
         this.x = x;
         this.y = y;
         this.definitionType = definition.getDefinitionType();
@@ -45,8 +44,8 @@ public class Block implements Serializable {
         this.parameters = createParameters(modeDefinition.getParameters());
     }
 
-    public Block(String name, int state, int x, int y, Mode mode, Definition definition){
-        this(UUID.randomUUID(), name, state, x, y, mode, definition);
+    public Block(String name, int x, int y, Mode mode, Definition definition){
+        this(UUID.randomUUID(), name, x, y, mode, definition);
     }
 
     public DefinitionType getDefinitionType() { return definitionType; }
@@ -92,20 +91,22 @@ public class Block implements Serializable {
     }
 
     /**
-     * Returns the state of this Block.
-     * @return block state
+     * Get the property that represents whether all parameters have been configured
+     * @return boolean
      */
-    public int getState() {
-        return state;
-    }
+    public boolean getConfigured(){ return this.configured; }
 
     /**
-     * Sets the state of this Block.
-     * @param state block state
+     * Get the property that represents whether a parameter has been edited
+     * @return boolean
      */
-    public void setState(int state) {
-        this.state = state;
-    }
+    public boolean getDirty() { return this.dirty; }
+
+    /**
+     * Sets the property that represents whether a parameter has been edited
+     * @param dirty
+     */
+    public void setDirty(boolean dirty){ this.dirty = dirty; }
 
     /**
      * Sets the x position of this Block in Diagram.
@@ -240,17 +241,6 @@ public class Block implements Serializable {
         parameter.get().setValue(value);
 
         return true;
-    }
-
-    /**
-     * Verifies that this block has been configured
-     */
-    public boolean isConfigured(){
-
-        // todo: enhance configuration criteria
-        // configuration criteria is that all parameters have a value
-
-        return (!this.parameters.stream().anyMatch(p -> p.getValue().equals(null)));
     }
 
     /**

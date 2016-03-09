@@ -2,18 +2,22 @@
 
 analyticsApp
 
-    .controller('blockDataController', ['$scope', '$element', '$window', '$timeout', '$q', 'diagramService', 'block', 'loadSources', 'diagram', 'config', 'position', 'close', function($scope, $element, $window, $timeout, $q, diagramService, block, loadSources, diagram, config, position, close){
+    /**
+     *
+     */
+    .controller('blockDataController', ['$scope', '$element', '$window', '$timeout', '$q', 'diagramService', 'block', 'loadParameterSource', 'diagram', 'config', 'position', 'close', function($scope, $element, $window, $timeout, $q, diagramService, block, loadParameterSource, diagram, config, position, close){
 
         $scope.position = position;
-        $scope.block = block.block;
+        $scope.block = block.data;
+        $scope.diagram = diagram;
         $scope.config = config;
         $scope.config.icon = "fa-cube";
-        $scope.config.cancelLabel = "Close";
+        $scope.config.cancelLabel = "Ok";
         $scope.pages = [];
         $scope.currentPage = null;
         $scope.activePage = 0;
         $scope.blockProperties = block;
-        $scope.loadData = loadSources;
+        $scope.loadParameterSource = loadParameterSource;
         $scope.loading = true;
 
         $scope.savePropertiesChanges = function() {
@@ -179,6 +183,9 @@ analyticsApp
 
     }])
 
+    /**
+     *
+     */
     .controller('blockGroupController', ['$scope', '$element', '$timeout', 'diagramService', 'position', 'diagram', 'close',
         function($scope, $element, $timeout, diagramService, position, diagram, close){
 
@@ -227,28 +234,41 @@ analyticsApp
         }
     ])
 
+    /**
+     *
+     */
     .controller('debugController', ['$scope', '$element', '$timeout', 'diagramService', 'data', 'config', 'position', 'close',
         function($scope, $element, $timeout, diagramService, data, config, position, close){
 
             $scope.config = config;
             $scope.position = position;
+            $scope.config.icon = "fa-code";
+            $scope.config.subTitle = "Compiled Source Code";
+            $scope.config.cancelLabel = "Close";
+
+            $scope.methods = {
+                close: onClose
+            };
 
             diagramService.compile(data).then(
                 function (source) {
                     $scope.editor = { data: source };
                 },
                 function (code) {
-                    console.log(code); // TODO show exception
+                    console.log(code);
                 }
             );
 
-            $scope.close = function(transitionDelay){
+            function onClose(transitionDelay){
 
                 close(null, transitionDelay);
-            };
+            }
         }
     ])
 
+    /**
+     *
+     */
     .controller('blockConfigEditorController', ['$scope', '$element', '$timeout', 'diagramService', 'data', 'config', 'position', 'close',
         function($scope, $element, $timeout, diagramService, data, config, position, close){
 
@@ -268,6 +288,9 @@ analyticsApp
         }
     ])
 
+    /**
+     *
+     */
     .controller('editorController', ['$scope', '$element', '$timeout', 'config', 'position', 'close',
         function($scope, $element, $timeout, config, position, close){
 
@@ -306,434 +329,165 @@ analyticsApp
         }
     ])
 
-    .controller('exploreController', ['$scope', '$element', '$timeout', '$q', '$animate', 'diagramService', 'colorService', 'block', 'config', 'position', 'close',
-        function($scope, $element, $timeout, $q, $animate, diagramService, colorService, block, config, position, close){
+    /**
+     * Explore dialog
+     */
+    .controller('exploreController', ['$scope', '$element', '$q', '$webSockets', 'analyticsService', 'toasterService', 'diagramService', 'diagram', 'block', 'config', 'position', 'close', function($scope, $element, $q, $webSockets, analyticsService, toasterService, diagramService, diagram, block, config, position, close) {
 
-            $scope.block = block;
-            $scope.config = config;
-            $scope.position = position;
-            $scope.loading = true;
-            $scope.fetching = false;
-            $scope.rendering = false;
-            $scope.activeIndex = 0;
-            $scope.chartMethods = {};
-            $scope.hideChartMenus = false;
-            $scope.rangeSliderDisabled = false;
+        // add the position and config variables to the current scope so that they can be accessed by modal
+        $scope.position = position;
+        $scope.config = config;
+        $scope.config.title = block.name();
+        $scope.config.subTitle = "Explore";
 
-            $scope.config.subTitle = "Explore";
+        $scope.methods = {
+            close: onClose
+        };
 
-            $scope.methods = {
-                close: onClose
+        $scope.features = [];
+        $scope.activeIndex = 0;
+
+        var inputWire = "in",
+            toastContainerId = "modal-toaster",
+            callbacks = {};
+
+        //
+        // Internal methods
+        //
+
+        /**
+         * Initialize the explore block
+         */
+        function init() {
+
+            // listen for describe and data messages
+            $webSockets.listen("describe", function (msg) {
+                return msg.messageType == "describe";
+            }, onDescribe);
+            $webSockets.listen("data", function (msg) {
+                return msg.messageType == "data";
+            }, onMessage);
+
+            // build a list of input connections
+            var blockConnections = [];
+            var wires = diagram.findInputWires(block.id(), inputWire);
+            wires.forEach(function (wire) {
+
+                var blockName = diagram.findBlock(wire["from_node"]).name();
+                var blockConnection = blockName + "/" + wire["from_connector"];
+
+                blockConnections.push(blockConnection);
+            });
+
+            var request = {
+                diagramId: diagram.getId(),
+                sessionId: analyticsService.getSessionId(),
+                diagramName: diagram.getName(),
+                targetEnvironment: diagram.getTargetEnvironment(),
+                blockConnections: blockConnections
             };
 
-            // load the set of features after the modal animation has completed
-            $timeout(function() {
+            diagramService.describe(request).then(null,
+                function (data, status) {
 
-                diagramService.getFeatures($scope.block.id()).then(
-
-                    function (data) {
-
-                        $scope.features = data;
-                        $scope.loading = false;
-                    },
-                    function (code) {
-
-                        $scope.loading = false;
-                    }
-                );
-            }, 400);
-
-            // initialize the chart object
-            $scope.chartOptions = {
-                type: "line",
-                scaled: false,
-                override: false, 
-                colorSet: "default",
-                x: { min: null, max: null, minActual: null, maxActual: null },
-                y: { min: null, max: null, minActual: null, maxActual: null },
-                series: []
-            };
-
-            // initialize new series object
-            $scope.newSeries = {
-                x: {
-                    name: null, min: null, max: null
-                },
-                y: {
-                    name: null, min: null, max: null
-                },
-                flipToFront: false,
-                flipToBack: false
-            };
-
-            $scope.$watch(
-                function() {
-                    return $scope.chartOptions.y.minActual;
-                },
-                function() {
-                    if($scope.loading || $scope.fetching) {
-
-                        return;
-                    }
-
-                    if ($scope.chartOptions.y.minActual != null)
-                        $scope.render();
+                    toasterService.error(data,
+                        data,
+                        toastContainerId);
                 }
             );
-
-            $scope.$watch(
-                function() {
-                    return $scope.chartOptions.y.maxActual;
-                },
-                function() {
-                    if($scope.loading || $scope.fetching) {
-
-                        return;
-                    }
-
-                    if ($scope.chartOptions.y.maxActual != null)
-                        $scope.render();
-                }
-            );
-
-            /* general methods */
-
-            function onClose(transitionDelay) {
-
-                close(null, transitionDelay);
-            }
-
-            $scope.setActiveIndex = function(index) {
-
-                $scope.activeIndex = index;
-                $scope.hideChartMenus = false;
-            };
-
-            /* chart methods */
-
-            $scope.showClose = function(series) {
-
-                series.flipToBack = true;
-                series.flipToFront = false;
-            };
-
-            $scope.showCheck = function(series) {
-
-                series.flipToBack = false;
-                series.flipToFront = true;
-            };
-
-            $scope.collapseChartMenusClick = function() {
-
-                $scope.hideChartMenus = true;
-            };
-
-            $scope.addAllSeries = function() {
-
-                if ($scope.chartOptions.type == 'line') {
-
-                    resetSeries();
-
-                    var currentConfiguredSeries = getCurrentConfiguredSeries();
-
-                    for (var featureIndex in $scope.features) {
-
-                        if (featureIndex > 0) {
-
-                            var seriesName = $scope.features[featureIndex].column;
-
-                            if (currentConfiguredSeries.indexOf(seriesName) == -1) {
-
-                                var seriesToAdd = angular.copy($scope.newSeries);
-
-                                var feature = $scope.features[featureIndex];
-                                seriesToAdd.y.name = feature.column;
-                                seriesToAdd.y.min = feature.min;
-                                seriesToAdd.y.max = feature.max;
-
-                                $scope.chartOptions.series.push(seriesToAdd);
-                            }
-                        }
-                    }
-
-                    updateChartBounds();
-
-                    $scope.fetchData();
-                }
-            };
-
-            var getCurrentConfiguredSeries = function() {
-
-                var configuredSeries = [];
-
-                for (var series in $scope.chartOptions.series) {
-
-                    configuredSeries.push($scope.chartOptions.series[series].y.name);
-                }
-
-                return configuredSeries;
-
-            };
-
-            $scope.removeAllSeries = function() {
-
-                $scope.chartOptions.series.length = 0;
-
-                updateChartBounds();
-
-                $scope.render();
-            };
-
-            $scope.removeSeries = function(series) {
-
-                $scope.chartOptions.series.splice($scope.chartOptions.series.indexOf(series), 1);
-
-                updateChartBounds();
-
-                $scope.render();
-            };
-
-            $scope.addSeries = function() {
-
-                if ($scope.newSeries.y.name == null) return;
-
-                if ($scope.hasXCoordinate() && $scope.newSeries.x.name == null) return;
-
-                var seriesToAdd = angular.copy($scope.newSeries);
-
-                $scope.chartOptions.series.push(seriesToAdd);
-
-                updateChartBounds();
-
-                resetSeries();
-
-                $scope.fetchData();
-            };
-
-            /**
-             *  Configure
-             */
-            $scope.selectFeature = function(type){
-
-                var dimension;
-                if (type == 'y')
-                    dimension = $scope.newSeries.y;
-                else if (type == 'x')
-                    dimension = $scope.newSeries.x;
-
-                var feature = getFeatureStatistics(dimension.name);
-                dimension.min = feature.min;
-                dimension.max = feature.max;
-            };
-
-            // retrieve a color by configured color set and index
-            $scope.getColor = function(index) {
-
-                return colorService.getColor($scope.chartOptions.colorSet, index);
-            };
-
-            // determines whether currently selected chart type has a configurable x coordinate
-            $scope.hasXCoordinate = function() {
-
-                return ($scope.chartOptions.type == 'scatter');
-            };
-
-            $scope.onPage = function(){
-
-                var deferred = $q.defer();
-
-                diagramService.getFeatureGridData($scope.block.id()).then(
-                    function (data) {
-
-                        deferred.resolve(data);
-                    },
-                    function (code) {
-
-                        deferred.reject(code);
-                    }
-                );
-
-                return deferred.promise;
-            };
-
-            $scope.toggleScale = function(){
-
-                if($scope.chartOptions.scaled)
-                    $scope.rangeSliderDisabled = true;
-                else
-                    $scope.rangeSliderDisabled = false;
-
-                $scope.render();
-            };
-
-            // fetch data and render the chart
-            $scope.fetchData = function() {
-
-                $scope.fetching = true;
-
-                // assemble a distinct list of features
-                // todo: to maintain a dictionary of features as series and added and removed
-                var features = [];
-                for(var i = 0; i < $scope.chartOptions.series.length; i++){
-
-                    var series = $scope.chartOptions.series[i];
-                    if (series.x.name != null && features.indexOf(series.x.name) == -1)
-                        features.push(series.x.name);
-                    if (features.indexOf(series.y.name) == -1)
-                        features.push(series.y.name);
-                }
-
-                diagramService.getChartData($scope.block.id(), features).then(
-                    function (data) {
-
-                        $scope.fetching = false;
-
-                        $scope.render(data);
-                    },
-                    function (code) {
-
-                        $scope.rendering = false;
-                    }
-                );
-            };
-
-            $scope.render = function(data){
-
-                $scope.rendering = true;
-                $scope.chartMethods.render($scope.chartOptions, data);
-                $scope.rendering = false;
-            };
-
-            function resetSeries() {
-
-                $scope.newSeries.y = {
-                    name: null,
-                    min: null,
-                    max: null
-                };
-                $scope.newSeries.x = {
-                    name: null,
-                    min: null,
-                    max: null
-                };
-                $scope.newSeries.flipToFront = false;
-                $scope.newSeries.flipToBack = false;
-            }
-
-            function updateChartBounds() {
-
-                var count = 0;
-                var xMin = 0;
-                var xMax = 0;
-                var yMin = 0;
-                var yMax = 0;
-
-                for (var seriesIndex in $scope.chartOptions.series) {
-
-                    var yFeature = getFeatureStatistics($scope.chartOptions.series[seriesIndex].y.name);
-                    var xFeature = ($scope.chartOptions.series[seriesIndex].x.name) ? getFeatureStatistics($scope.chartOptions.series[seriesIndex].x.name) : null;
-
-                    var yFeatureMin = Number(yFeature.min);
-                    var yFeatureMax = Number(yFeature.max);
-
-                    if (xFeature != null) {
-
-                        var xFeatureMin = Number(xFeature.min);
-                        var xFeatureMax = Number(xFeature.max);
-                    }
-
-                    var yFeatureCount = Number(yFeature.count);
-
-                    if (count === 0) {
-
-                        count = 1;
-
-                        yMin = yFeatureMin;
-                        yMax = yFeatureMax;
-
-                        if (xFeature != null) {
-
-                            xMin = xFeatureMin;
-                            xMax = xFeatureMax;
-                        }
-                        else {
-
-                            xMin = 0;
-                            xMax = yFeatureCount;
-                        }
-                    }
-                    else {
-
-                        if (yFeatureMin < yMin) {
-
-                            yMin = yFeatureMin;
-                        }
-
-                        if (yFeatureMax > yMax) {
-
-                            yMax = yFeatureMax;
-                        }
-
-                        if (xFeature != null) {
-
-                            if (xFeatureMin < xMin) {
-
-                                xMin = xFeatureMin;
-                            }
-
-                            if (xFeatureMax > xMax) {
-
-                                xMax = xFeatureMax;
-                            }
-                        }
-                        else {
-
-                            if (xMin > 0) {
-
-                                xMin = 0;
-                            }
-
-                            if (yFeatureCount > xMax) {
-
-                                xMax = yFeatureCount;
-                            }
-                        }
-                    }
-                }
-
-                $scope.chartOptions.y.min = yMin;
-                $scope.chartOptions.y.max = yMax;
-                $scope.chartOptions.x.min = xMin;
-                $scope.chartOptions.x.max = xMax;
-            }
-
-            function getFeatureStatistics(selectedFeature) {
-
-                var statistics = null;
-
-                for (var i = 0; i < $scope.features.length; i++){
-
-                    var feature = $scope.features[i];
-                    if (feature.column === selectedFeature) {
-                        statistics =  feature.statistics;
-                        break;
-                    }
-                }
-
-                return statistics;
-            }
-
-            $scope.updateChartType = function(){
-
-                $scope.chartOptions.x = { min: null, max: null, minActual: null, maxActual: null };
-                $scope.chartOptions.y = { min: null, max: null, minActual: null, maxActual: null };
-                $scope.chartOptions.series = [];
-
-                resetSeries();
-            };
         }
-    ])
 
+        //
+        function onClose(transitionDelay) {
+            close(null, transitionDelay);
+        }
+
+        function onDescribe(describe) {
+            $scope.features = describe.describe.features;
+        }
+
+        function onMessage(msg) {
+
+            if (angular.isDefined(callbacks[msg.id])) {
+                var deferred = callbacks[msg.id];
+                delete callbacks[msg.id];
+
+                deferred.resolve(msg);
+            }
+            else {
+                toasterService.error("Web socket message without corresponding callback.",
+                    "Web socket message without corresponding callback.",
+                    toastContainerId);
+            }
+        }
+
+        //
+        // Public methods
+        //
+
+        /**
+         * Set the active view index
+         * @param index: new view index
+         */
+        $scope.setActiveIndex = function (index) {
+            $scope.activeIndex = index;
+        };
+
+        /**
+         * Fetch the specified set of features
+         * @param dataSourceName: name of data source that has the features
+         * @param featureNames: list of features to fetch
+         * @param onSuccess: method to call on success
+         */
+        $scope.onFetch = function (features, onSuccess) {
+
+            var deferred = $q.defer();
+
+            var featureSet = features.map(function(feature){
+                return { sourceName: feature.sourceName, name: feature.name };
+            });
+
+            var request = {
+                diagramId: diagram.getId(),
+                sessionId: analyticsService.getSessionId(),
+                diagramName: diagram.getName(),
+                targetEnvironment: diagram.getTargetEnvironment(),
+                features: featureSet
+            };
+
+            diagramService.collect(request).then(
+                function (guid) {
+
+                    callbacks[guid] = deferred;
+                },
+                function (data, status) {
+
+                    toasterService.error(data,
+                        data,
+                        toastContainerId);
+                }
+            );
+
+            deferred.promise.then(
+                function (data) {
+
+                    onSuccess(data);
+                },
+                function (data, status) {
+
+                    toasterService.error(data,
+                        data,
+                        toastContainerId);
+                }
+            );
+        };
+
+        init();
+    }])
+
+    /**
+     * Library browser popup
+     */
     .controller('libraryBrowserController', ['$scope', '$element', 'nodes', 'onDrag', 'onDrop', 'close',
         function($scope, $element, nodes, onDrag, onDrop, close) {
 
@@ -752,9 +506,11 @@ analyticsApp
         }
     ])
 
-    .controller('loadDataController', ['$scope', '$element', '$webSockets', 'toasterService', 'diagramService', 'diagramId', 'diagramName', 'config', 'position', 'close', function($scope, $element, $webSockets, toasterService, diagramService, diagramId, diagramName, config, position, close){
-
-
+    /**
+     * Load Data wizard
+     * Dialog that walks the user through loading, parsing, and cleaning data
+     */
+    .controller('loadDataController', ['$scope', '$element', '$q', '$webSockets', 'analyticsService', 'toasterService', 'diagramService', 'diagram', 'block', 'config', 'position', 'close', function($scope, $element, $q, $webSockets, analyticsService, toasterService, diagramService, diagram, block, config, position, close){
 
         // add the position and config variables to the current scope so that they can be accessed by modal
         $scope.position = position;
@@ -776,30 +532,19 @@ analyticsApp
         $scope.direction = 0;
         $scope.previewMode = 0;
         $scope.isEvaluating = false;
+        $scope.isTerminalInputOpen = false;
         $scope.menuWidth = 20;
-        $scope.chartMethods = {};
-
-        $webSockets.listen("describe", function(msg){ return msg.messageType == "describe"; }, onDescribe);
+        $scope.terminalPosition = 5000;
+        $scope.codeMirrorOptions = { mode: 'python' };
+        $scope.dateRange = { startTime: null, endTime: null };
 
         // a dictionary of file names and their associated index numbers
         $scope.fileDict = {};
 
-        $scope.source = {
-            sourceType: 'FILES',
-            dataSources: []
-        };
-
-        $scope.parse = {
-            parseType: 'SEPARATED_VALUES',
-            header: true,
-            delimiterType: 'COMMA',
-            delimiterChar: '',
-            missingValueMode: 'PERMISSIVE',
-            quoteChar: '"',
-            commentChar: '#'
-        };
-
-        $scope.transformations = [];
+        var loadConfig = block.parameters[0].value;
+        $scope.source = loadConfig.source;
+        $scope.parse = loadConfig.parse;
+        $scope.transformations = loadConfig.transformations;
 
         $scope.progressSteps = [
             { name: 'source', icon: 'fa-database' },
@@ -807,9 +552,13 @@ analyticsApp
             { name: 'clean', icon: 'fa-paint-brush' }
         ];
 
-        var toastContainerId = "load-data-toaster";
+        var toastContainerId = "load-data-toaster",
+            codeMirror,
+            callbacks = {};
 
+        //
         // internal methods
+        //
 
         function configureActiveStep(){
 
@@ -832,19 +581,49 @@ analyticsApp
                     $scope.config.showBack = true;
                     $scope.config.showNext = false;
                     $scope.config.showSave = true;
+
+                    $scope.onTerminalClose();
                     break;
             }
         }
 
         function getConfiguration(){
 
-            return {
-                diagramId: diagramId,
-                diagramName: diagramName,
+            block.parameters[0].value = {
                 source: $scope.source,
                 parse: $scope.parse,
                 transformations: $scope.transformations
             };
+
+            return {
+                diagramId: diagram.getId(),
+                sessionId: analyticsService.getSessionId(),
+                diagramName: diagram.getName(),
+                targetEnvironment: diagram.getTargetEnvironment(),
+                block: block
+            };
+        }
+
+        /**
+         * initialize the variables
+         */
+        function init(){
+
+            $webSockets.listen("describe", function(msg){ return msg.messageType == "describe"; }, onDescribe);
+            $webSockets.listen("data", function(msg){ return msg.messageType == "data"; }, onMessage);
+
+            // give the parse element a unique id so that it can be tracked
+            if ($scope.parse.id === null)
+                $scope.parse.id = analyticsService.guid();
+
+            // add file data sources
+            for(var i = 0; i < $scope.source.dataSources.length; i++) {
+                var source = $scope.source.dataSources[i];
+                if (source.dataSourceType === 'FILE')
+                    $scope.fileDict[source.name] = i;
+            }
+
+            configureActiveStep();
         }
 
         function onBack(){
@@ -855,12 +634,31 @@ analyticsApp
 
         function onClose(transitionDuration){
 
-            $webSockets.unlisten("describe");
+            // perform unload actions
+            onUnload();
+
             close(null, transitionDuration);
+        }
+
+
+        function onMessage(msg){
+
+            if (angular.isDefined(callbacks[msg.id])){
+                var deferred = callbacks[msg.id];
+                delete callbacks[msg.id];
+
+                deferred.resolve(msg);
+            }
+            else{
+                toasterService.error("Web socket message without corresponding callback.",
+                    "Web socket message without corresponding callback.",
+                    toastContainerId);
+            }
         }
 
         function onDescribe(describe){
             $scope.features = describe.describe.features;
+            $scope.isEvaluating = false;
         }
 
         function onNext(){
@@ -880,15 +678,27 @@ analyticsApp
 
         function onSave(transitionDuration){
 
+            // perform unload actions
+            onUnload();
+
             var data = getConfiguration();
             close(data, transitionDuration);
         }
 
+        function onUnload(){
+
+            $webSockets.unlisten("describe");
+            $webSockets.unlisten("data");
+        }
+
+        //
         // public methods
+        //
 
         $scope.addFiles = function(files){
 
-            $scope.onFileDropStart(files);
+            if (!$scope.onFileDropStart(files))
+                return;
 
             for(var index = 0; index < files.length; index++){
 
@@ -921,18 +731,44 @@ analyticsApp
             evt.preventDefault();
         };
 
-        $scope.onFetch = function(featureNames, onSuccess){
+        $scope.codemirrorLoaded = function(_editor){
+            codeMirror = _editor;
+        };
+
+        $scope.onFetch = function(features, onSuccess){
+
+            var deferred = $q.defer();
+
+            var featureSet = features.map(function(feature){
+                return { sourceName: feature.sourceName, name: feature.name };
+            });
 
             var request = {
-                diagramId: diagramId,
-                diagramName: diagramName,
-                dataFrameName: 'load_out',
-                features: featureNames
+                diagramId: diagram.getId(),
+                sessionId: analyticsService.getSessionId(),
+                diagramName: diagram.getName(),
+                targetEnvironment: diagram.getTargetEnvironment(),
+                features: featureSet
             };
 
             diagramService.collect(request).then(
-                function(result){
-                    onSuccess(result);
+                function(guid){
+
+                    callbacks[guid] = deferred;
+                },
+                function(data, status){
+
+                    toasterService.error(data,
+                        data,
+                        toastContainerId);
+                }
+            );
+
+            deferred.promise.then(
+
+                function(data){
+
+                    onSuccess(data);
                 },
                 function(data, status){
 
@@ -953,13 +789,37 @@ analyticsApp
                     var item = $scope.source.dataSources[fileIndex];
                     if(item !== undefined){
                         item.progress = 100;
+                        item.contentType = file.contentType;
                         item.path = file.path;
+
+                        // set the parse type
+                        if (item.contentType.indexOf("spreadsheet") > -1)
+                            $scope.parse.parseType = "SPREADSHEET";
+                        else if(item.contentType.indexOf("tab-separated-values") > -1){
+                            $scope.parse.parseType = "SEPARATED_VALUES";
+                            $scope.parse.delimiterType = "TAB";
+                        }
                     }
                 }
             }
         };
 
+        /**
+         * Initialize file drop.  Verify the file is valid and not a duplicate
+         * @param files: files to be dropped
+         * @returns {boolean}: success
+         */
         $scope.onFileDropStart = function(files){
+
+            // temporarily only allow a single file to be dropped
+            if (files.length > 1 || $scope.source.dataSources.length > 0) {
+
+                toasterService.error("Only one file can be added at this time.",
+                    "Only one file can be added at this time.",
+                    toastContainerId);
+
+                return false;
+            }
 
             for(var i = 0; i < files.length; i++){
 
@@ -972,14 +832,21 @@ analyticsApp
                         dataSourceType: 'FILE',
                         name: file.name,
                         progress: 0,
+                        contentType: '',
                         path: ''
                     });
                 }
                 else{
 
-                    // todo: notify user file already exists
+                    toasterService.error("Duplicate file detected.",
+                        "Duplicate file detected.",
+                        toastContainerId);
+
+                    return false;
                 }
             }
+
+            return true;
         };
 
         $scope.onFileDropNotification = function(file, complete){
@@ -1000,14 +867,18 @@ analyticsApp
 
         $scope.onLoad = function(onSuccess){
 
+            $scope.isEvaluating = true;
             var data = getConfiguration();
 
             diagramService.load(data).then(
                 function(result){
 
-                    onSuccess(result);
+                    if(onSuccess)
+                        onSuccess(result);
                 },
                 function(data, status){
+
+                    $scope.isEvaluating = false;
 
                     toasterService.error(data,
                         data,
@@ -1018,7 +889,8 @@ analyticsApp
 
         $scope.onResizeMenu = function(evt){
 
-            var containerWidth,
+            var container = angular.element(document.querySelector('#load-data-wrapper')),
+                containerWidth,
                 originX;
 
             $scope.$root.$broadcast("beginDrag", {
@@ -1029,7 +901,6 @@ analyticsApp
                     dragStarted: function (x, y) {
 
                         // create reference to dialog container
-                        var container = angular.element(document.querySelector('#load-data-wrapper'));
                         containerWidth = container.width();
                         originX = container.offset().left;
                     },
@@ -1044,8 +915,82 @@ analyticsApp
             });
         };
 
+        /**
+         * Set the data's source type
+         * @param sourceType: new data source type
+         */
         $scope.setSourceType = function(sourceType){
             $scope.source.sourceType = sourceType;
+
+            switch(sourceType) {
+                case "HBASE":
+
+                    // retrieve a new empty query object
+                    diagramService.query().then(
+                        function(data){
+                            $scope.query = data;
+                        },
+                        function(data){
+                            toasterService.error(data,
+                                data,
+                                toastContainerId);
+                        }
+                    );
+
+                    break;
+            }
+        };
+
+        /**
+         * Close the transformation terminal
+         */
+        $scope.onTerminalClose = function(){
+            $scope.isTerminalInputOpen = false;
+            // hide the transformation terminal by setting its position to the height of this control
+            var container = angular.element(document.querySelector('#load-data-wrapper'));
+            $scope.terminalPosition = container.height();
+        };
+
+        /**
+         * Open the transformation terminal
+         */
+        $scope.onTerminalOpen = function(){
+
+            $scope.newTransformation = {
+                id: analyticsService.guid(),
+                transformationType: 'FILTER',
+                source: ''
+            };
+
+            $scope.isTerminalInputOpen = true;
+            $scope.terminalPosition = 0;
+        };
+
+        /**
+         * Add the new transformation
+         */
+        $scope.onTransformationAdd = function(){
+
+            $scope.transformations.push($scope.newTransformation);
+            $scope.onLoad();
+            $scope.onTerminalClose();
+        };
+
+        $scope.onQuery = function(evt){
+
+            diagramService.query($scope.query).then(
+                function(data){
+
+                },
+                function(data){
+                    toasterService.error(data,
+                        data,
+                        toastContainerId);
+                }
+            );
+
+            evt.stopPropagation();
+            evt.preventDefault();
         };
 
         $scope.setParseType = function(parseType){
@@ -1057,9 +1002,14 @@ analyticsApp
             $scope.previewMode = mode;
         };
 
-        configureActiveStep();
+
+
+        init();
     }])
 
+    /**
+     * Create diagram dialog
+     */
     .controller('createDiagramController', ['$scope', 'diagramProperties', 'close', function($scope, diagramProperties, close){
 
         // add properties to the scope so that they accessible to the popup
@@ -1075,6 +1025,426 @@ analyticsApp
         $scope.onSave = function(){
             close($scope.diagramProperties, delay);
         };
+    }])
+
+    /**
+     * Set Online Output dialog
+     * Dialog to configure an online diagram's data output
+     */
+    .controller('setOutputController', ['$scope', '$element', '$q', '$webSockets', 'analyticsService', 'toasterService', 'diagramService', 'diagram', 'block', 'config', 'position', 'close', function($scope, $element, $q, $webSockets, analyticsService, toasterService, diagramService, diagram, block, config, position, close){
+
+        // add the position and config variables to the current scope so that they can be accessed by modal
+        $scope.position = position;
+        $scope.config = config;
+        $scope.config.icon = "fa-sign-out";
+        $scope.config.title = "Streaming Output Block";
+        $scope.config.subTitle = "Enable / Disable Online Streaming Outputs";
+        $scope.config.showCancel = true;
+        $scope.config.showSave = true;
+        $scope.config.saveLabel = "Ok";
+
+        // create modal method object
+        $scope.methods = {
+            close: onClose,
+            save: onSave
+        };
+
+        // capture block's output configuration parameter
+        $scope.outputConfig = block.parameters[0].value;
+
+        // setup view variables
+        $scope.menuWidth = 20;
+        $scope.optionState = {
+            disabled: 0,
+            editing: 1,
+            enabled: 2
+        };
+
+        // initialize list of output options
+        $scope.outputOptions = [
+            { consumerType: "LOG", name: "Log File", enabled: false, path: "", key: "", state: $scope.optionState.disabled },
+            { consumerType: "DATABASE", name: "Database", enabled: false, path: "", key: "", state: $scope.optionState.disabled },
+            { consumerType: "OPC", name: "OPC Tag", enabled: false, path: "", key: "", state: $scope.optionState.disabled },
+            { consumerType: "PI", name: "PI Tag", enabled: false, path: "", key: "", state: $scope.optionState.disabled },
+            { consumerType: "OUT", name: "Command Line", enabled: false, path: "", key: "", state: $scope.optionState.disabled }
+        ];
+
+        // initialize the active consumer
+        $scope.activeConsumer = $scope.outputOptions[0];
+
+        /* internal variables */
+        var toastContainerId = "modal-toaster",
+            startingConfig = angular.copy($scope.outputConfig),
+            activeCopy = null;
+
+        /* public methods */
+
+        /**
+         * Cancel editing the active consumer output
+         * @param evt: click event
+         */
+        $scope.onOutputCancel = function(evt){
+            $scope.activeConsumer.enabled = activeCopy.enabled;
+            $scope.activeConsumer.path = activeCopy.path;
+            $scope.activeConsumer.key = activeCopy.key;
+            $scope.activeConsumer.state = activeCopy.state;
+            $scope.config.saveDisabled = false; // enable modal save button
+        };
+
+        /**
+         * Begin editing the active consumer output
+         * @param evt: click event
+         */
+        $scope.onOutputEdit = function(evt){
+            activeCopy = angular.copy($scope.activeConsumer);
+            $scope.activeConsumer.state = $scope.optionState.editing;
+            $scope.config.saveDisabled = true; // disable modal save button
+        };
+
+        /**
+         * Save and complete edit of the active consumer output
+         * @param evt: cleck event
+         */
+        $scope.onOutputSave = function(evt){
+
+            if($scope.activeConsumer.enabled){
+
+                // a consumer is being enabled - either add or edit the specified consumer type
+                var consumer = $scope.outputConfig.consumers.find(function(option){ return option.consumerType === $scope.activeConsumer.consumerType; });
+                if (consumer === undefined){ // the consumer does not exist - add
+                    consumer = {
+                        consumerType: $scope.activeConsumer.consumerType,
+                        path: $scope.activeConsumer.path,
+                        key: $scope.activeConsumer.key
+                    };
+                    $scope.outputConfig.consumers.push(consumer);
+                }
+                else{ // the consumer exists - edit
+                    consumer.path = $scope.activeConsumer.path;
+                    consumer.key = $scope.activeConsumer.key;
+                }
+                $scope.activeConsumer.state = $scope.optionState.enabled;
+            }
+            else{
+
+                // a consumer is being removed - clear active fields and remove if necessary
+                var index = $scope.outputConfig.consumers.findIndex(function(option){ return option.consumerType === $scope.activeConsumer.consumerType; });
+                if (index > -1)
+                    $scope.outputConfig.consumers.splice(index, 1);
+
+                $scope.activeConsumer.path = "";
+                $scope.activeConsumer.key = "";
+                $scope.activeConsumer.state = $scope.optionState.disabled;
+            }
+
+            $scope.config.saveDisabled = false; // enable modal save button
+        };
+
+        /**
+         * drag to resize the menu
+         * @param evt
+         */
+        $scope.onResizeMenu = function(evt){
+
+            var container = angular.element(document.querySelector('#modal-content-container')),
+                containerWidth,
+                originX;
+
+            $scope.$root.$broadcast("beginDrag", {
+                x: evt.pageX,
+                y: evt.pageY,
+                config: {
+
+                    dragStarted: function (x, y) {
+
+                        // create reference to dialog container
+                        containerWidth = container.width();
+                        originX = container.offset().left;
+                    },
+
+                    dragging: function (x, y) {
+
+                        var width = (x - originX) * 100.0 / containerWidth;
+                        if (width > 5 && width < 95)
+                            $scope.menuWidth = width;
+                    }
+                }
+            });
+        };
+
+        /**
+         * validate and set the active consumer type
+         * @param consumerType
+         */
+        $scope.setActiveConsumerType = function(consumer){
+
+            // todo: verify that it is ok to leave the current consumer
+            if ($scope.activeConsumer !== null){
+
+            }
+
+            $scope.activeConsumer = consumer;
+        };
+
+        /* private methods */
+
+        /**
+         * Cancel configuration
+         * @param transitionDuration
+         */
+        function onClose(transitionDuration){
+
+            // revert back to original configuration
+            block.parameters[0].value = startingConfig;
+
+            // execute the close event
+            close(null, transitionDuration);
+        }
+
+        /**
+         * Initialize this controller
+         */
+        function onInit(){
+
+            // set the state of each output option type
+            $scope.outputConfig.consumers.forEach(function(output) {
+                var outputOption = $scope.outputOptions.find(function(option){ return option.consumerType === output.consumerType; })
+                if (outputOption !== undefined)
+                    outputOption.state = $scope.optionState.enabled;
+            });
+        }
+
+        /**
+         * End configuation
+         * @param transitionDuration
+         */
+        function onSave(transitionDuration){
+
+            // execute the close event
+            close(null, transitionDuration);
+        }
+
+        onInit();
+    }])
+
+    /**
+     * Set Data Stream dialog
+     * Dialog to configure an online diagram's data stream
+     */
+    .controller('setStreamController', ['$scope', '$element', '$q', '$webSockets', 'analyticsService', 'toasterService', 'diagramService', 'diagram', 'block', 'config', 'position', 'close', function($scope, $element, $q, $webSockets, analyticsService, toasterService, diagramService, diagram, block, config, position, close){
+
+        // add the position and config variables to the current scope so that they can be accessed by modal
+        $scope.position = position;
+        $scope.config = config;
+        $scope.config.icon = "fa-rss";
+        $scope.config.title = "Configure";
+        $scope.config.subTitle = "Streaming Source";
+        $scope.config.showCancel = true;
+        $scope.config.showSave = true;
+        $scope.config.saveLabel = "Ok";
+
+        // create modal method object
+        $scope.methods = {
+            close: onClose,
+            save: onSave
+        };
+
+        // setup view
+        $scope.menuWidth = 20;
+        $scope.isWorking = false;
+        $scope.isConfigured = false;
+
+        // capture block's stream configuration parameter
+        $scope.streamConfig = block.parameters[0].value;
+
+        // use the isConfigured flag to control the save button
+        $scope.$watch("isConfigured", function(newValue, oldValue){
+            $scope.config.saveDisabled = !newValue;
+        });
+
+        /* internal variables */
+        var toastContainerId = "load-data-toaster",
+            startingConfig = angular.copy($scope.streamConfig);
+
+        /* public methods */
+
+        /**
+         * initiate upload of specified files
+         * @param files: set of files to be uploaded
+         */
+        $scope.addFiles = function(files){
+
+            if (!$scope.onFileDropStart(files))
+                return;
+
+            for(var index = 0; index < files.length; index++){
+
+                var file = files[index];
+                diagramService.upload(file).then(
+                    function(result){   // on success
+
+                        $scope.onFileDrop(result);
+                    },
+                    function(message){     // on error
+
+                        $scope.onFileDropError(message);
+                    },
+                    function(evt){      // on notification
+
+                        if (evt.lengthComputable) {
+
+                            var complete = (evt.loaded / evt.total * 100 | 0);
+                            $scope.onFileDropNotification(file, complete);
+                        }
+                    }
+                );
+            }
+        };
+
+        /**
+         * Browse local file system
+         * @param evt
+         */
+        $scope.onBrowse = function(evt){
+            document.getElementById("fileBrowser").click();
+
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
+
+        $scope.onClearFile = function(evt){
+            $scope.streamConfig.dataSource = { name: null, progress: 0, contentType: null, path: null };
+
+            setConfigState();
+
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
+
+        /**
+         * Executed on completion of successful file drop
+         * @param files: files successfully dropped
+         * @param evt
+         */
+        $scope.onFileDrop = function(files, evt){
+            var file = files[0];
+            var item = $scope.streamConfig.dataSource;
+            item.progress = 100;
+            item.contentType = file.contentType;
+            item.path = file.path;
+
+            $scope.isWorking = false;
+            setConfigState();
+        };
+
+        /**
+         * Initialize file drop.  Verify the file is valid and not a duplicate
+         * @param files: files to be dropped
+         * @returns {boolean}: success
+         */
+        $scope.onFileDropStart = function(files){
+
+            // only allow a single file to be dropped
+            if (files.length > 1) {
+                toasterService.error("Only one file can be added at this time.",
+                    "Only one file can be added at this time.",
+                    toastContainerId);
+
+                return false;
+            }
+
+            var file = files[0];
+
+            if($scope.streamConfig.dataSource.name != file.name){
+
+                $scope.streamConfig.dataSource = {
+                        dataSourceType: 'FILE',
+                        name: file.name,
+                        progress: 0,
+                        contentType: '',
+                        path: ''
+                    };
+
+                $scope.isWorking = true;
+            }
+            else{
+
+                toasterService.error("Duplicate file detected.",
+                    "Duplicate file detected.",
+                    toastContainerId);
+
+                return false;
+            }
+
+            return true;
+        };
+
+        /**
+         * Update file drop progress
+         * @param file: the file being dropped
+         * @param complete: % complete
+         */
+        $scope.onFileDropNotification = function(file, complete){
+            $scope.streamConfig.dataSource.progress = complete;
+        };
+
+        /**
+         * Set the stream source type
+         * @param sourceType: new stream source type
+         */
+        $scope.setSourceType = function(sourceType){
+            $scope.streamConfig.sourceType = sourceType;
+
+            switch(sourceType) {
+                case "FILES":
+
+
+                    break;
+            }
+        };
+
+        /* private methods */
+
+        /**
+         * Determine configuration state
+         */
+        function setConfigState(){
+
+            // abort if currently working
+            if($scope.isWorking)
+                return;
+
+            switch($scope.streamConfig.sourceType){
+                case "FILES":
+                    $scope.isConfigured = ($scope.streamConfig.dataSource.progress == 100);
+                    break;
+            }
+        }
+
+        /**
+         * Cancel configuration
+         * @param transitionDuration
+         */
+        function onClose(transitionDuration){
+
+            // revert back to original configuration
+            block.parameters[0].value = startingConfig;
+
+            // execute the close event
+            close(null, transitionDuration);
+        }
+
+        /**
+         * End configuation
+         * @param transitionDuration
+         */
+        function onSave(transitionDuration){
+
+            // execute the close event
+            close(null, transitionDuration);
+        }
+
+        setConfigState();
     }])
 
     /**

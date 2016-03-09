@@ -6,6 +6,7 @@ import com.typesafe.config.ConfigFactory;
 import emr.analytics.models.definition.Mode;
 import emr.analytics.models.definition.TargetEnvironments;
 
+import java.util.Properties;
 import java.util.UUID;
 
 public class SparkProcess {
@@ -23,6 +24,6 @@ public class SparkProcess {
         String path = String.format("akka.tcp://%s@%s:%s/user/task-service/%s", system, host, port, id);
 
         final ActorSystem actorSystem = ActorSystem.create("spark-process-system", ConfigFactory.load("spark"));
-        actorSystem.actorOf(Props.create(SparkExecutor.class, path, diagramId, diagramName, targetEnvironment, mode), "spark-executor");
+        actorSystem.actorOf(Props.create(SparkWorker.class, path, diagramId, diagramName, targetEnvironment, mode), "spark-worker");
     }
 }

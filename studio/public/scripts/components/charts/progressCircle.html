@@ -12,7 +12,8 @@
               ng-attr-stroke="{{foregroundColor}}"
               ng-attr-stroke-dashoffset="{{strokeOffset}}">
         </path>
-        <text class="progress-txt"
+        <text ng-show="showValue"
+              class="progress-txt"
               ng-attr-x="{{centerX}}"
               ng-attr-y="{{centerY}}"
               text-anchor="middle"

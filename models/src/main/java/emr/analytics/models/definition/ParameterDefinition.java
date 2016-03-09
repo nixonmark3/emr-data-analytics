@@ -1,20 +1,21 @@
 package emr.analytics.models.definition;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ParameterDefinition {
-    private String name = "";
-    private String type = "";
-    private Object value = null;
-    private List<String> fieldOptions = new ArrayList<String>();
-    private ParameterSource source = null;
+    private String name;
+    private ParameterType parameterType;
+    private ValueType valueType;
+    private Object value;
+    private List<String> fieldOptions;
+    private ParameterSource source;
 
     private ParameterDefinition() {}
 
-    public ParameterDefinition(String name, String type, Object value, List<String> fieldOptions, ParameterSource source) {
+    public ParameterDefinition(String name, ParameterType parameterType, ValueType valueType, Object value, List<String> fieldOptions, ParameterSource source) {
         this.name = name;
-        this.type = type;
+        this.parameterType = parameterType;
+        this.valueType = valueType;
         this.value = value;
         this.fieldOptions = fieldOptions;
         this.source = source;
@@ -28,12 +29,20 @@ public class ParameterDefinition {
         this.name = name;
     }
 
-    public String getType() {
-        return type;
+    public ParameterType getParameterType() {
+        return parameterType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setParameterType(ParameterType parameterType) {
+        this.parameterType = parameterType;
+    }
+
+    public ValueType getValueType() {
+        return valueType;
+    }
+
+    public void setValueType(ValueType valueType) {
+        this.valueType = valueType;
     }
 
     public Object getValue() {

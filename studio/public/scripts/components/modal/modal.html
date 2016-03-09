@@ -18,10 +18,10 @@
     </div>
 
     <div class="emr-modal-footer">
-        <button type="button" class="btn btn-default" ng-click="onClose()" ng-show="config.showCancel">{{::config.cancelLabel || 'Cancel'}}</button>
-        <button type="button" class="btn btn-default" ng-click="onBack()" ng-show="config.showBack"><i class="fa fa-chevron-left" style="padding-right:10px;"></i>{{::config.backLabel || 'Back'}}</button>
-        <button type="button" class="btn btn-default" ng-click="onNext()" ng-show="config.showNext">{{::config.nextLabel || 'Next'}}<i class="fa fa-chevron-right" style="padding-left:10px;"></i></button>
-        <button type="button" class="btn btn-success" ng-click="onSave()" ng-show="config.showSave">{{::config.saveLabel || 'Save'}}</button>
+        <button type="button" class="btn btn-default" ng-click="onClose()" ng-show="config.showCancel" ng-disabled="config.cancelDisabled">{{::config.cancelLabel || 'Cancel'}}</button>
+        <button type="button" class="btn btn-default" ng-click="onBack()" ng-show="config.showBack" ng-disabled="config.backDisabled"><i class="fa fa-chevron-left" style="padding-right:10px;"></i>{{::config.backLabel || 'Back'}}</button>
+        <button type="button" class="btn btn-default" ng-click="onNext()" ng-show="config.showNext" ng-disabled="config.nextDisabled">{{::config.nextLabel || 'Next'}}<i class="fa fa-chevron-right" style="padding-left:10px;"></i></button>
+        <button type="button" class="btn btn-success" ng-click="onSave()" ng-show="config.showSave" ng-disabled="config.saveDisabled">{{::config.saveLabel || 'Save'}}</button>
     </div>
 
 </div>

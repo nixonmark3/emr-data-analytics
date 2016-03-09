@@ -30,9 +30,9 @@ public class SessionManager {
     }
 
     /**
-     *
-     * @param id
-     * @param actor
+     * Add new session
+     * @param id unique websocket session id generated on client
+     * @param actor websocket reference to client
      */
     public void addSession(UUID id, ActorRef actor){
 
@@ -40,8 +40,8 @@ public class SessionManager {
     }
 
     /**
-     *
-     * @param id
+     * Remove a session
+     * @param id websocket session id
      */
     public void removeSession(UUID id) {
 
@@ -49,52 +49,68 @@ public class SessionManager {
     }
 
     /**
-     *
-     * @param message
-     * @param excludedId
+     * Notify all sessions
+     * @param message message to send
+     * @param excludedId session id to exclude
      */
     public void notifyAll(OutputMessage message, UUID excludedId){
 
         JsonNode node = Json.toJson(message);
-        for(Session session : _sessions.values()){
+        for(UUID sessionId : _sessions.keySet()){
 
-            if (excludedId != null && session.getId().equals(excludedId))
+            if (excludedId != null && sessionId.equals(excludedId))
                 continue;
 
-            session.getActor().tell(node, null);
+            notifySession(sessionId, node);
         }
     }
 
     /**
-     *
-     * @param message
+     * Notify all sessions
+     * @param message message to send
      */
     public void notifyAll(OutputMessage message) {
         notifyAll(message, null);
     }
 
     /**
-     *
-     * @param message
+     * Notify a specific session
+     * @param id session id
+     * @param message message to send
+     */
+    public void notifySession(UUID id, OutputMessage message){
+        this.notifySession(id, Json.toJson(message));
+    }
+
+    /**
+     * Notify a specific session
+     * @param id session id
+     * @param node message to send converted to Json
+     */
+    private void notifySession(UUID id, JsonNode node){
+        Session session = this.getSession(id);
+        if (session != null)
+            session.getActor().tell(node, null);
+    }
+
+    /**
+     * Notify all sessions subscribed to dashboard
+     * @param message message to send
      */
     public void notifyDashboards(OutputMessage message) {
 
         JsonNode node = Json.toJson(message);
 
         Subscriptions subscriptions = this._dashboardSubscriptions;
-        for(UUID id : subscriptions.get()){
-
-            Session session = this.getSession(id);
-            if (session != null)
-                session.getActor().tell(node, null);
-        }
+        for(UUID sessionId : subscriptions.get())
+            notifySession(sessionId, node);
     }
 
     /**
-     *
-     * @param diagramId
-     * @param excludedId
-     * @param message
+     * Notify subscribers of a diagram
+     * @param diagramId The diagram
+     * @param excludedId The session id to exclude
+     * @param message message to send
      */
     public void notifySubscribers(UUID diagramId, UUID excludedId, OutputMessage message){
 
@@ -103,23 +119,21 @@ public class SessionManager {
 
         // iterate over the diagram's subscriptions
         Subscriptions subscriptions = this.getDiagramSubscriptions(diagramId);
-        for(UUID id : subscriptions.get()){
+        for(UUID sessionId : subscriptions.get()){
 
-            if (excludedId != null && excludedId == id)
+            if (excludedId != null && excludedId == sessionId)
                 continue;
 
-            Session session = this.getSession(id);
-            if (session != null)
-                session.getActor().tell(node, null);
+            this.notifySession(sessionId, node);
         }
 
         this.notifyDashboards(message);
     }
 
     /**
-     *
-     * @param diagramId
-     * @param message
+     * Notify subscribers of a diagram
+     * @param diagramId The diagram
+     * @param message message to send
      */
     public void notifySubscribers(UUID diagramId, OutputMessage message){
 
@@ -127,9 +141,9 @@ public class SessionManager {
     }
 
     /**
-     * Subscribe a session to diagram
-     * @param id
-     * @param diagramId
+     * Subscribe a session to a diagram
+     * @param id session id
+     * @param diagramId the diagram
      */
     public void subscribe(UUID id, UUID diagramId){
 
@@ -143,7 +157,7 @@ public class SessionManager {
                 return;
 
             // clear the session's current subscription
-            this.clearSubscriptions(id, session);
+            this.clearSubscriptions(session);
 
             session.setDiagramSubscription(diagramId);
             Subscriptions subscriptions = this.getDiagramSubscriptions(diagramId);
@@ -151,6 +165,10 @@ public class SessionManager {
         }
     }
 
+    /**
+     * Subscribe a session to a dashboard
+     * @param id session id
+     */
     public void subscribeToDashboard(UUID id){
 
         Session session = this.getSession(id);
@@ -162,21 +180,25 @@ public class SessionManager {
                 return;
 
             // clear the session's current subscription
-            this.clearSubscriptions(id, session);
+            this.clearSubscriptions(session);
 
             session.setDashboardSubscription(true);
             _dashboardSubscriptions.add(id);
         }
     }
 
-    private void clearSubscriptions(UUID id, Session session){
+    /**
+     * Clear all of the subscriptions for a specific session
+     * @param session the session
+     */
+    private void clearSubscriptions(Session session){
 
         // todo: add locking
 
         if (session.getDashboardSubscription()){
             // if the session is currently subscribed to dashboard - clear
 
-            _dashboardSubscriptions.remove(id);
+            _dashboardSubscriptions.remove(session.getId());
             session.setDashboardSubscription(false);
         }
         else if(session.hasDiagramSubscription()){
@@ -186,13 +208,18 @@ public class SessionManager {
             if (_diagramSubscriptions.containsKey(diagramId)){
 
                 Subscriptions subscriptions = _diagramSubscriptions.get(diagramId);
-                subscriptions.remove(id);
+                subscriptions.remove(session.getId());
             }
 
             session.setDiagramSubscription(null);
         }
     }
 
+    /**
+     * retrieve a specific diagram's subscriptions
+     * @param diagramId
+     * @return
+     */
     private Subscriptions getDiagramSubscriptions(UUID diagramId){
 
         // todo: add locking
@@ -209,6 +236,11 @@ public class SessionManager {
         return subscriptions;
     }
 
+    /**
+     * Get a specific session
+     * @param id the session id
+     * @return
+     */
     private Session getSession(UUID id){
 
         Session session = null;

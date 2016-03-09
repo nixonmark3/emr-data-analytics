@@ -3,13 +3,14 @@ package emr.analytics.models.messages;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class StreamingTasks extends OutputMessage implements Serializable {
 
     private List<StreamingTask> items;
 
     public StreamingTasks(){
-        super("streaming-tasks");
+        super(null, null, "streaming-tasks");
 
         this.items = new ArrayList<>();
     }

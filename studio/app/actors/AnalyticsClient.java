@@ -6,8 +6,6 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import emr.analytics.models.definition.Mode;
 import emr.analytics.models.messages.*;
-import models.DeploymentStatus;
-import models.EvaluationStatus;
 import play.Configuration;
 import scala.PartialFunction;
 import scala.concurrent.Await;
@@ -15,6 +13,7 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.runtime.BoxedUnit;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -35,6 +34,9 @@ public class AnalyticsClient extends AbstractActor {
         String host = this.getAnalyticsConfig(ANALYTICS_HOST_NAME);
         remotePath = String.format("akka.tcp://task-service-system@%s:2552/user/task-service", host);
 
+        /**
+         * initial receiver; manages the connection to the analytics server
+         */
         receive(ReceiveBuilder
 
             // the analytics service has responded to this actor's identify request
@@ -49,7 +51,7 @@ public class AnalyticsClient extends AbstractActor {
                     this.service.tell(self(), self());
 
                     // send a successful ping message to all clients
-                    SessionManager.getInstance().notifyAll(new PingResponse(true));
+                    SessionManager.getInstance().notifyAll(new PingResponse(null, true));
 
                     context().watch(this.service);
                     context().become(active, true);
@@ -62,30 +64,13 @@ public class AnalyticsClient extends AbstractActor {
 
                     // ping request fails
             .match(PingRequest.class, ping -> {
-                sender().tell(new PingResponse(false), self());
+                sender().tell(new PingResponse(ping.getId(), false), self());
             })
 
             .matchAny(this::unhandled).build()
         );
 
         active = ReceiveBuilder
-
-            // received job information from the server
-            /*.match(JobInfo.class, info -> {
-
-                if (info.getMode() == Mode.OFFLINE){
-                    // for offline diagrams - send evaluation status updates
-                    SessionManager.getInstance().notifySubscribers(
-                            info.getDiagramId(),
-                            new EvaluationStatus(info));
-                }
-                else{
-                    // online diagrams - send deployment status updates
-                    SessionManager.getInstance().notifySubscribers(
-                            info.getDiagramId(),
-                            new DeploymentStatus(info));
-                }
-            })*/
 
             // received streaming information from the server
 /*
@@ -95,11 +80,12 @@ public class AnalyticsClient extends AbstractActor {
             })
 */
 
-            // send job variable to all dashboards
-            /*.match(JobVariable.class, variable -> {
-
-                SessionManager.getInstance().notifyDashboards(variable);
-            })*/
+            /**
+             * Forward TaskVariables to the associated diagram subscribers
+             */
+            .match(TaskVariable.class, variable -> {
+                SessionManager.getInstance().notifySubscribers(variable.getDiagramId(), variable);
+            })
 
             /**
              * Forward the task request to the analytics service
@@ -110,6 +96,14 @@ public class AnalyticsClient extends AbstractActor {
             })
 
             /**
+             * Forward the task data to the session that requested it
+             */
+            .match(TaskData.class, status -> {
+
+                SessionManager.getInstance().notifySession(status.getSessionId(), status);
+            })
+
+            /**
              * Forward the task status to all subscribers
              */
             .match(TaskStatus.class, status -> {
@@ -117,24 +111,30 @@ public class AnalyticsClient extends AbstractActor {
                 SessionManager.getInstance().notifySubscribers(status.getDiagramId(), status);
             })
 
+            /**
+             * Forward the analytics data to the session that requested it
+             */
             .match(AnalyticsData.class, data -> {
 
-                SessionManager.getInstance().notifySubscribers(data.getDiagramId(), data);
+                SessionManager.getInstance().notifySession(data.getSessionId(), data);
             })
 
+            /**
+             * Forward the analytics description to the session that requested it
+             */
             .match(AnalyticsDescribe.class, describe -> {
 
-                SessionManager.getInstance().notifySubscribers(describe.getDiagramId(), describe);
+                SessionManager.getInstance().notifySession(describe.getSessionId(), describe);
             })
 
-            // forward job kill request to the analytics service
-/*            .match(JobKillRequest.class, request -> {
+            // forward the termination request to the analytics service
+            .match(TerminationRequest.class, request -> {
 
                 this.service.tell(request, self());
             })
 
             // forward streaming source request to the analytics service
-            .match(StreamingSourceRequest.class, request -> {
+/*            .match(StreamingSourceRequest.class, request -> {
 
                 this.service.tell(request, self());
             })
@@ -147,7 +147,7 @@ public class AnalyticsClient extends AbstractActor {
 
             // ping request succeeds
             .match(PingRequest.class, ping -> {
-                sender().tell(new PingResponse(true), self());
+                sender().tell(new PingResponse(ping.getId(), true), self());
             })
 
             // job summary from the analytics server
@@ -169,7 +169,7 @@ public class AnalyticsClient extends AbstractActor {
             .match(Terminated.class, terminated -> {
 
                 // send an unsuccessful ping message to all clients
-                SessionManager.getInstance().notifyAll(new PingResponse(false));
+                SessionManager.getInstance().notifyAll(new PingResponse(null, false));
 
                 sendIdentifyRequest();
                 getContext().unbecome();

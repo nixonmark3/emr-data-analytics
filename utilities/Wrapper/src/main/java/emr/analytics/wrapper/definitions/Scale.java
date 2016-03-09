@@ -53,13 +53,15 @@ public class Scale extends BlockDefinition  implements IExport {
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
 
         parameters.add(new ParameterDefinition("Scale_Factor",
-                DataType.FLOAT.toString().toString(),
+                ParameterType.FLOAT,
+                ValueType.SCALAR,
                 1,
                 new ArrayList<String>(),
                 null));
 
         parameters.add(new ParameterDefinition("Scale_0to1",
-                DataType.STRING.toString().toString(),
+                ParameterType.STRING,
+                ValueType.SCALAR,
                 "True",
                 new ArrayList<String>(),
                 null));

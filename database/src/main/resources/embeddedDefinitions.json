@@ -1,0 +1,127 @@
+[
+  {
+    "definitionType": "LOAD",
+    "mode": "OFFLINE",
+    "name": "Load",
+    "description": "",
+    "category": "Data Sources",
+    "friendlyName": "Load",
+    "complement": "Stream",
+    "w": 200,
+    "offlineDefinition": {
+      "signature": null,
+      "parameters": [
+        {
+          "name": "loadConfig",
+          "parameterType": "JSON",
+          "valueType": "OBJECT",
+          "value": {
+            "source": {
+              "sourceType": "FILES",
+              "dataSources": []
+            },
+            "parse": {
+              "id": null,
+              "parseType": "SEPARATED_VALUES",
+              "isDirty": false,
+              "delimiterType": "COMMA",
+              "delimiterChar": "",
+              "page": "0",
+              "header": "0",
+              "skip": "None",
+              "quoteChar": "\"",
+              "commentChar": "#",
+              "naValues": ""
+            },
+            "transformations": []
+          },
+          "fieldOptions": [],
+          "source": null
+        }
+      ],
+      "inputs": [],
+      "outputs": [ { "name": "out", "type": "frame", "visible": true, "persisted": false } ]
+    },
+    "onlineDefinition": null
+  },
+  {
+    "definitionType": "STREAM",
+    "mode": "ONLINE",
+    "name": "Stream",
+    "description": "",
+    "category": "Data Sources",
+    "friendlyName": "Stream",
+    "complement": "Load",
+    "w": 200,
+    "offlineDefinition": null,
+    "onlineDefinition": {
+      "signature": null,
+      "parameters": [
+        {
+          "name": "streamConfig",
+          "parameterType": "JSON",
+          "valueType": "OBJECT",
+          "value": {
+            "sourceType": "FILES",
+            "dataSource": {
+              "dataSourceType": "FILE",
+              "name": null,
+              "progress": 0,
+              "contentType": null,
+              "path": null
+            }
+          },
+          "fieldOptions": [],
+          "source": null
+        }
+      ],
+      "inputs": [],
+      "outputs": [ { "name": "out", "type": "frame", "visible": true, "persisted": false } ]
+    }
+  },
+  {
+    "definitionType": "OUTPUT",
+    "mode": "ONLINE",
+    "name": "Output",
+    "description": "",
+    "category": "Report",
+    "friendlyName": "Output",
+    "complement": null,
+    "w": 200,
+    "offlineDefinition": null,
+    "onlineDefinition": {
+      "signature": null,
+      "parameters": [
+        {
+          "name": "outputConfig",
+          "parameterType": "JSON",
+          "valueType": "OBJECT",
+          "value": {
+            "consumers": []
+          },
+          "fieldOptions": [],
+          "source": null
+        }
+      ],
+      "inputs": [ { "name": "in", "type": "frame", "visible": true, "persisted": false } ],
+      "outputs": []
+    }
+  },
+  {
+    "definitionType": "CHART",
+    "mode": "OFFLINE",
+    "name": "Explore",
+    "description": "Explore datasets.",
+    "category": "Visualizations",
+    "friendlyName": "Explore",
+    "complement": null,
+    "w": 200,
+    "offlineDefinition": {
+      "signature": null,
+      "parameters": [],
+      "inputs": [ { "name": "in", "type": "frame", "visible": true, "persisted": false } ],
+      "outputs": []
+    },
+    "onlineDefinition": null
+  }
+]

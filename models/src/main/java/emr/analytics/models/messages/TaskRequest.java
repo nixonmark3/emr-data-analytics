@@ -9,25 +9,23 @@ import java.util.UUID;
 public class TaskRequest extends InputMessage implements Serializable {
 
     private UUID diagramId;
+
     private Mode mode;
     private TargetEnvironments targetEnvironment;
     private String diagramName;
     private String source;
-    private String metaData;
 
-    public TaskRequest(UUID diagramId, Mode mode, TargetEnvironments targetEnvironment, String diagramName, String source, String metaData){
-        this();
+    public TaskRequest(UUID sessionId, UUID diagramId, Mode mode, TargetEnvironments targetEnvironment, String diagramName, String source){
+        this(sessionId);
+
+        if (diagramId == null)
+            throw new AnalyticsException("Invalid diagram id specified.");
 
         this.diagramId = diagramId;
         this.mode = mode;
         this.targetEnvironment = targetEnvironment;
         this.diagramName = diagramName;
         this.source = source;
-        this.metaData = metaData;
-    }
-
-    public TaskRequest(UUID diagramId, Mode mode, TargetEnvironments targetEnvironment, String diagramName, String source){
-        this(diagramId, mode, targetEnvironment, diagramName, source, "");
     }
 
     public UUID getDiagramId(){ return this.diagramId; }
@@ -40,7 +38,9 @@ public class TaskRequest extends InputMessage implements Serializable {
 
     public String getSource(){ return this.source; }
 
-    public String getMetaData() { return this.metaData; }
+    public void setSource(String source){ this.source = source; }
 
-    private TaskRequest(){ super("task-request"); }
+    public TaskRequest(UUID sessionId){ super(sessionId, "task-request"); }
+
+    private TaskRequest(){ this(null); }
 }

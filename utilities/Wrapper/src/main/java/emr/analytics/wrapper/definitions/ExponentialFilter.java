@@ -53,12 +53,14 @@ public class ExponentialFilter extends BlockDefinition implements IExport {
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
 
         parameters.add(new ParameterDefinition("Alpha",
-                DataType.FLOAT.toString(),
+                ParameterType.FLOAT,
+                ValueType.SCALAR,
                 0.8,
                 new ArrayList<String>(),
                 null));
         parameters.add(new ParameterDefinition("Order",
-                DataType.INT.toString().toString(),
+                ParameterType.INT,
+                ValueType.SCALAR,
                 1,
                 new ArrayList<String>(),
                 null));

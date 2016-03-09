@@ -52,12 +52,14 @@ public class ThreeSigma extends BlockDefinition implements IExport {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
         parameters.add(new ParameterDefinition("MovingWindow",
-                DataType.INT.toString().toString(),
+                ParameterType.INT,
+                ValueType.SCALAR,
                 20,
                 new ArrayList<String>(),
                 null));
         parameters.add(new ParameterDefinition("g-Sigma",
-                DataType.FLOAT.toString(),
+                ParameterType.FLOAT,
+                ValueType.SCALAR,
                 3.0,
                 new ArrayList<String>(),
                 null));

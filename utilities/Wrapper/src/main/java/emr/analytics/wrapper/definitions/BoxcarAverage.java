@@ -52,7 +52,8 @@ public class BoxcarAverage extends BlockDefinition implements IExport {
 
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
         parameters.add(new ParameterDefinition("WindowSize",
-                DataType.INT.toString().toString(),
+                ParameterType.INT,
+                ValueType.SCALAR,
                 20,
                 new ArrayList<String>(),
                 null));

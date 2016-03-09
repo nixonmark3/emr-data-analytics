@@ -1,5 +1,7 @@
 <div id="explore-wrapper">
 
+    <div id="modal-toaster"></div>
+
     <div id="explore-tabs">
 
         <ul class="vertical-tabs">
@@ -19,113 +21,13 @@
 
         <div class="explore-content ng-class:{active: (activeIndex==0)}">
 
-            <div id="chart-menu-container" class="chart-content chart-fade ng-class:{ expand: hideChartMenus }" ng-show="!hideChartMenus">
-
-                <div class="explore-toolbar">
-                    <div class="pull-right">
-                        <i class="hide-chart-menu fa fa-times" ng-click="collapseChartMenusClick()"></i>
-                    </div>
-                </div>
-                <div id="chart-menu">
-
-                    <div class="chart-menu-header">
-                        <div class="pull-left">Layout</div>
-                    </div>
-
-                    <select class="form-control chart-menu-item" ng-model="chartOptions.type" ng-change="updateChartType()">
-                        <option value="line">Line</option>
-                        <option value="scatter">XY Scatter</option>
-                    </select>
-
-                    <div id="chart-axes-controls">
-
-                        <div class="chart-menu-header">
-                            <div class="pull-left">Axes</div>
-                        </div>
-
-                        <div class="radio-inline">
-                            <span><input type="radio" name="radioScale" ng-model="chartOptions.scaled" ng-change="toggleScale()" ng-value="false">Actual</span>
-                        </div>
-
-                        <div class="radio-inline">
-                            <span><input type="radio" name="radioScale" ng-model="chartOptions.scaled" ng-change="toggleScale()" ng-value="true">Scaled</span>
-                        </div>
-
-                        <range-slider min-limit="chartOptions.y.min" min-value="chartOptions.y.minActual" max-limit="chartOptions.y.max" max-value="chartOptions.y.maxActual" disabled="rangeSliderDisabled"></range-slider>
-                    </div>
-
-                    <div class="chart-menu-header">
-                        <div class="pull-left">Series</div>
-                        <div class="pull-right">
-                            <i class="series-expand fa fa-plus" ng-click="addAllSeries()" ng-show="!hasXCoordinate()"></i>
-                            <i class="series-expand fa fa-minus" ng-click="removeAllSeries()"></i>
-                        </div>
-                    </div>
-
-                    <div class="chart-series" ng-repeat="item in chartOptions.series">
-                        <div class="series-selector ng-class:{'series-front-to-back': item.flipToBack,'series-back-to-front': item.flipToFront}"
-                             ng-mouseenter="showClose(item)"
-                             ng-mouseleave="showCheck(item)"
-                             ng-click="removeSeries(item)">
-                            <div class="series-face series-front" ng-style="{'background-color':getColor($index)}">
-                                <i class="fa fa-check"></i>
-                            </div>
-                            <div class="series-face series-back" ng-style="{'background-color':getColor($index)}">
-                                <i class="fa fa-close"></i>
-                            </div>
-                        </div>
-                        <div class="series-coords">
-                            <div class="x-y-coord-container" ng-show="hasXCoordinate()">
-                                <div class="x-y-coord">{{item.x.name}}</div>
-                                <div class="x-y-coord">{{item.y.name}}</div>
-                            </div>
-                            <div class="y-coord" ng-show="!hasXCoordinate()">
-                                {{item.y.name}}
-                            </div>
-                        </div>
-                        <div style="clear: both;"></div>
-                    </div>
-
-                    <div class="add-series chart-menu-item">
-
-                        <div ng-show="hasXCoordinate()" class="add-series-item input-group">
-                            <span class="input-group-addon">X</span>
-                            <select class="form-control" ng-model="newSeries.x.name" ng-change="selectFeature('x')">
-                                <option ng-repeat="feature in features" ng-selected="feature==newSeries.x.name" value="{{feature.column}}" ng-if="$index > 0">{{feature.column}}</option>
-                            </select>
-                        </div>
-
-                        <div class="add-series-item input-group">
-                            <span class="input-group-addon">Y</span>
-                            <select class="form-control" ng-model="newSeries.y.name" ng-change="selectFeature('y')">
-                                <option ng-repeat="feature in features" ng-selected="feature.column==newSeries.y.name" value="{{feature.column}}" ng-if="$index > 0">{{feature.column}}</option>
-                            </select>
-                        </div>
-
-                        <div class="add-series-footer">
-                            <button type="button" class="btn btn-success pull-right" ng-click="addSeries()">Add</button>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div id="chart-container" class="chart-content">
-                <div id="loader-overlay" ng-if="fetching || rendering" style="background-color: #fff">
-                    <div class="loader"></div>
-                </div>
-
-                <chart2d ng-if="!loading" id="explore-chart" methods="chartMethods"></chart2d>
-
-            </div>
+            <explore-chart features="features" on-fetch="onFetch"></explore-chart>
 
         </div>
 
         <div class="explore-content ng-class:{active: (activeIndex==1)}">
 
-            <features-grid ng-if="!loading" features="features" column-width="200" row-header-width="200" on-page="onPage" show-data="true"></features-grid>
+            <explore-grid features="features"></explore-grid>
 
         </div>
 

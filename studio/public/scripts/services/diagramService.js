@@ -81,16 +81,31 @@ analyticsApp
             return deferred.promise;
         },
 
-        transform: function (data) {
+        describe: function(request){
 
             var deferred = $q.defer();
 
-            $http.post('/transform', data)
+            $http.post('/analytics/describe', request)
                 .success(function (data, status, headers, config) {
                     deferred.resolve(data);
                 })
                 .error(function (data, status, headers, config){
                     deferred.reject(status);
+                });
+
+            return deferred.promise;
+        },
+
+        transform: function (data) {
+
+            var deferred = $q.defer();
+
+            $http.post('/diagrams/transform', data).then(
+                function (response) {
+                    deferred.resolve(response.data);
+                },
+                function (response){
+                    deferred.reject(response.data);
                 });
 
             return deferred.promise;
@@ -100,12 +115,12 @@ analyticsApp
 
             var deferred = $q.defer();
 
-            $http.post('/diagrams/compile', data)
-                .success(function (data, status, headers, config) {
-                    deferred.resolve(data);
-                })
-                .error(function (data, status, headers, config){
-                    deferred.reject(status);
+            $http.post('/diagrams/compile', data).then(
+                function (response) {
+                    deferred.resolve(response.data);
+                },
+                function (response){
+                    deferred.reject(response.data);
                 });
 
             return deferred.promise;
@@ -115,12 +130,12 @@ analyticsApp
 
             var deferred = $q.defer();
 
-            $http.post('/analytics/deploy', data)
-                .success(function (data, status, headers, config) {
-                    deferred.resolve(data);
-                })
-                .error(function (data, status, headers, config){
-                    deferred.reject(status);
+            $http.post('/analytics/deploy', data).then(
+                function (response) {
+                    deferred.resolve(response.data);
+                },
+                function (response){
+                    deferred.reject(response.data);
                 });
 
             return deferred.promise;
@@ -130,12 +145,12 @@ analyticsApp
 
             var deferred = $q.defer();
 
-            $http.post('/analytics/evaluate', data)
-                .success(function (data, status, headers, config) {
-                    deferred.resolve(data);
-                })
-                .error(function (data, status, headers, config){
-                    deferred.reject(status);
+            $http.post('/analytics/evaluate', data).then(
+                function (response) {
+                    deferred.resolve(response.data);
+                },
+                function (response){
+                    deferred.reject(response.data);
                 });
 
             return deferred.promise;
@@ -203,11 +218,11 @@ analyticsApp
             return deferred.promise;
         },
 
-        kill: function (id, mode) {
+        terminate: function (id, mode) {
 
             var deferred = $q.defer();
 
-            $http.get('/analytics/kill/' + id + '/' + mode)
+            $http.get('/analytics/terminate/' + id + '/' + mode)
                 .success(function (data, status, headers, config) {
                     deferred.resolve(data);
                 })
@@ -251,14 +266,14 @@ analyticsApp
 
             var deferred = $q.defer();
 
-            $http.post('/analytics/load', request)
-                .success(function (data, status, headers, config) {
+            $http.post('/analytics/load', request).then(
+                function (response) {
 
-                    deferred.resolve(data);
-                })
-                .error(function (data, status, headers, config){
+                    deferred.resolve(response.data);
+                },
+                function (response){
 
-                    deferred.reject(data, status);
+                    deferred.reject(response.data);
                 });
 
             return deferred.promise;
@@ -280,18 +295,16 @@ analyticsApp
             return deferred.promise;
         },
 
-        loadSources: function(request){
+        resolveSource: function(request){
 
             var deferred = $q.defer();
 
-            $http.post('/loadSources', request)
-                .success(function (data, status, headers, config) {
-
-                    deferred.resolve(data);
-                })
-                .error(function (data, status, headers, config){
-
-                    deferred.reject(status);
+            $http.post('/sources/resolve', request).then(
+                function (response) {
+                    deferred.resolve(response.data);
+                },
+                function (response){
+                    deferred.reject(response.status);
                 });
 
             return deferred.promise;
@@ -451,7 +464,32 @@ analyticsApp
                 });
 
             return deferred.promise;
-        }
+        },
 
+        query: function(request){
+
+            var deferred = $q.defer();
+
+            if (request === undefined){
+                $http.get('/data/hbase/query').then(
+                    function (response) {
+                        deferred.resolve(response.data);
+                    },
+                    function (response){
+                        deferred.reject(response.data);
+                    });
+            }
+            else{
+                $http.post('/data/hbase/query', request).then(
+                    function (response) {
+                        deferred.resolve(response.data);
+                    },
+                    function (response){
+                        deferred.reject(response.data);
+                    });
+            }
+
+            return deferred.promise;
+        }
     };
 });

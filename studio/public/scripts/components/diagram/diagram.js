@@ -147,11 +147,16 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                     };
                 };
 
+                /**
+                 * Get the diagram's current zoom level
+                 * @returns {*}
+                 */
                 $scope.internalMethods.getZoomLevel = function(){
                     return $scope.canvasMatrix[0];
                 };
 
-                var inverseCoordinates = function (x, y) {
+
+                $scope.internalMethods.inverseCoordinates = function (x, y) {
 
                     var diagram = element[0].querySelector('svg');
                     var transX =  $scope.canvasMatrix[0] * x + $scope.canvasMatrix[4];
@@ -163,24 +168,6 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                         x: matrix.e, y: matrix.f
                     };
                 };
-
-                //
-                // create a block configuration viewmodel
-                //
-                var getConfigBlock = function (x, y, definitionName) {
-
-                    // using the current diagram's mode and specified definition -
-                    // create a definition view model
-                    var definition = new viewmodels.definitionViewModel($scope.diagram.mode(),
-                        $scope.library[definitionName]);
-
-                    // create a block description
-                    var block = $scope.diagram.getBlockDescription(x, y, definition);
-
-                    // create config block
-                    return new viewmodels.configuringBlockViewModel(definition, block);
-                };
-
 
                 $scope.mouseMove = function (evt) {
 
@@ -439,7 +426,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                     if ($scope.onDisplay){
 
                         // capture the block's coordinates and set the popup's width and height
-                        var position = inverseCoordinates(block.x(), block.y());
+                        var position = $scope.internalMethods.inverseCoordinates(block.x(), block.y());
                         position.zoom = $scope.canvasMatrix[0];
 
                         $scope.onDisplay(position, block);
@@ -544,7 +531,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                     return mode;
                 };
 
-                $scope.renameBlockClick = function(block) {
+                $scope.onRename = function(block) {
 
                     $scope.renameBlock = {
 
@@ -561,12 +548,10 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                     setInterval(function() { $('#rename-input').focus() }, 10);
                 };
 
-                $scope.endRenameOnEnter = function() {
+                $scope.onRenameComplete = function() {
 
-                    if(event.keyCode === 13) {
-
+                    if(event.keyCode === 13)
                         clearRename();
-                    }
                 };
 
                 $scope.diagramClick = function() {
@@ -581,7 +566,7 @@ var diagramApp = angular.module('diagramApp', ['emr.ui.interact', 'emr.ui.popup'
                         $scope.renamingBlock = false;
                         delete $scope.renameBlock;
                     }
-                };
+                }
 
             }
         }

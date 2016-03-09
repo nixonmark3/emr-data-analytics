@@ -4,9 +4,12 @@ import akka.actor.*;
 import akka.japi.pf.ReceiveBuilder;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
+import emr.analytics.diagram.interpreter.DiagramOperations;
+import emr.analytics.models.diagram.Diagram;
 import emr.analytics.models.messages.*;
 import emr.analytics.models.definition.Mode;
-import emr.analytics.service.messages.ConsumeJob;
+import emr.analytics.service.messages.ConsumerStart;
+import emr.analytics.service.messages.ConsumerStop;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -15,15 +18,15 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Serves as the primary entry point for executing analytic jobs.  Accepts requests and manages the lifecycle of various
- * job types.
+ * TaskService Listener: serves as the entry point for execution of analytic tasks
+ * Accepts requests and manages the lifecycle of various task types.
  */
 public class TaskService extends AbstractActor {
 
-    // each job is assigned a surrogate uuid (to prevent overlapping actor names)
-    private Map<UUID, JobKey> jobKeys = new HashMap<UUID, JobKey>();
+    // each task is assigned a surrogate uuid (to prevent overlapping actor names)
+    private Map<UUID, TaskKey> taskKeys = new HashMap<UUID, TaskKey>();
 
-    // cache actors by mode {offline, online} and diagram id
+    // cache working actors by mode {offline, online} and diagram id
     private Map<UUID, ActorRef> offlineWorkers = new HashMap<UUID, ActorRef>();
     private Map<UUID, ActorRef> onlineWorkers = new HashMap<UUID, ActorRef>();
 
@@ -33,16 +36,23 @@ public class TaskService extends AbstractActor {
     // keep a reference to the remote akka actor client
     private ActorRef client = null;
 
-    // reference to the kafka consumer
+    // kafka consuming actor (listens for updates to online task topic)
     private ActorRef kafkaConsumer;
 
     public static Props props(String host, String port){ return Props.create(TaskService.class, host, port); }
 
+    /**
+     * TaskService constructor
+     * @param host: the server's host
+     * @param port: the server's port
+     */
     public TaskService(String host, String port){
 
         receive(ReceiveBuilder
 
-            // on remote association the client will pass a reference to itself for reference
+            /**
+             * on remote association, the client will pass a reference to itself for reference
+             */
             .match(ActorRef.class, actor -> {
 
                 // capture the client reference
@@ -52,92 +62,114 @@ public class TaskService extends AbstractActor {
                 kafkaConsumer.tell(this.client, self());
             })
 
-            // job request sent from client
+            /**
+             * task request sent from client
+             */
             .match(TaskRequest.class, request -> {
 
-                // for online jobs that are already running - return
+                // for online tasks that are already running - return
                 if (request.getMode() == Mode.ONLINE && this.onlineWorkers.containsKey(request.getDiagramId())) {
 
-                    // notify the sender that this job is already running
+                    // notify the sender that this task is already running
                     sender().tell(createFailedMessage(request,
-                                    String.format("An online job for diagram, %s, is already running.", request.getDiagramName())),
+                                    String.format("An online task for diagram, %s, is already running.", request.getDiagramName())),
                             self());
                     return;
                 }
 
-                // retrieve / create the job actor
+                // retrieve / create the appropriate worker
                 ActorRef worker;
                 if (request.getMode() == Mode.OFFLINE && this.offlineWorkers.containsKey(request.getDiagramId())) {
-                    // the offline job is already running - retrieve
 
+                    // the offline task is already running - retrieve
                     worker = this.offlineWorkers.get(request.getDiagramId());
                 }
-                else { // create the job actor based on the target environment specified in the request
+                else { // create the working actor based on the target environment specified in the request
 
-                    JobKey jobKey = new JobKey(request.getDiagramId(), request.getMode());
+                    TaskKey taskKey = new TaskKey(request.getDiagramId(), request.getMode());
 
                     switch (request.getTargetEnvironment()) {
                         case PYSPARK:
 
-                            worker = context().actorOf(SparkWorker.props(sender(),
-                                            jobKey.getId(),
+                            worker = context().actorOf(SparkService.props(sender(),
+                                            taskKey.getId(),
                                             request.getDiagramId(),
                                             request.getDiagramName(),
                                             request.getTargetEnvironment(),
                                             request.getMode(),
                                             host,
                                             port),
-                                    jobKey.getId().toString());
+                                    taskKey.getId().toString());
+
+                            break;
+
+                        case PYTHON:
+
+                            worker = context().actorOf(PythonWorker.props(this.client,
+                                    request.getDiagramId(),
+                                    request.getDiagramName()),
+                                    taskKey.getId().toString());
 
                             break;
                         default:
 
-                            // todo: add support for python
-
-                            // notify the sender that the specified job type is not support
-                            sender().tell(createFailedMessage(request, "The job type specified is not currently supported."), self());
+                            // notify the sender that the specified task type is not support
+                            sender().tell(createFailedMessage(request, "The task type specified is not currently supported."), self());
                             return;
                     }
 
-                    // store job actor in the appropriate hashmap
+                    // store working actor in the appropriate hashmap
                     if (request.getMode() == Mode.OFFLINE) {
+
                         offlineWorkers.put(request.getDiagramId(), worker);
-                    } else if (request.getMode() == Mode.ONLINE) {
+                    }
+                    else if (request.getMode() == Mode.ONLINE) {
+
                         onlineWorkers.put(request.getDiagramId(), worker);
-                        // tell the kafka consumer that a spark job is starting
-                        kafkaConsumer.tell(new ConsumeJob(request.getDiagramId(),
-                                request.getMetaData(),
-                                ConsumeJob.ConsumeState.START), self());
+
+                        if(request instanceof DiagramTaskRequest){
+                            // for Online DiagramTaskRequests retrieve the configured consumers
+                            // and notify the KafkaConsumer
+
+                            Diagram diagram = ((DiagramTaskRequest)request).getDiagram();
+                            // Retrieve the output consumer configuration
+                            Consumers consumers = DiagramOperations.getOnlineConsumers(diagram);
+                            // Pass to the KafkaConsumer
+                            kafkaConsumer.tell(new ConsumerStart(request.getId(),
+                                    request.getDiagramId(),
+                                    consumers), self());
+                        }
                     }
 
-                    // add new jobkey to the hashmap
-                    jobKeys.put(jobKey.getId(), jobKey);
+                    // add new taskKey to the hash map
+                    taskKeys.put(taskKey.getId(), taskKey);
 
-                    // watch for the job actor's termination
+                    // watch for the task actor's termination
                     context().watch(worker);
-
-                    // proactively send an update jobs summary
-                    sendTaskCounts(sender());
                 }
 
                 // send this job to the job actor
                 worker.tell(request, self());
             })
 
-/*            .match(JobKillRequest.class, request -> {
+            /**
+             * Task termination request
+             */
+            .match(TerminationRequest.class, request -> {
 
                 if (request.getMode() == Mode.OFFLINE && this.offlineWorkers.containsKey(request.getDiagramId())) {
 
-                    // send kill message
-                    ActorRef jobActor = this.offlineWorkers.get(request.getDiagramId());
-                    jobActor.tell("stop", self());
-                } else if (request.getMode() == Mode.ONLINE && this.onlineWorkers.containsKey(request.getDiagramId())) {
-
-                    // send kill message
-                    ActorRef jobActor = this.onlineWorkers.get(request.getDiagramId());
-                    jobActor.tell("stop", self());
+                    // send termination message
+                    ActorRef worker = this.offlineWorkers.get(request.getDiagramId());
+                    worker.tell("stop", self());
                 }
-            })*/
+                else if (request.getMode() == Mode.ONLINE && this.onlineWorkers.containsKey(request.getDiagramId())) {
+
+                    // send termination message
+                    ActorRef worker = this.onlineWorkers.get(request.getDiagramId());
+                    worker.tell("stop", self());
+                }
+            })
 
 /*            .match(StreamingSourceRequest.class, request -> {
 
@@ -170,9 +202,12 @@ public class TaskService extends AbstractActor {
                 }
             })*/
 
+            /**
+             *
+             */
             .match(TaskSummaryRequest.class, request -> {
 
-                AnalyticsTasks tasks = new AnalyticsTasks();
+                AnalyticsTasks tasks = new AnalyticsTasks(request.getSessionId());
 
                 if (this.offlineWorkers.containsKey(request.getDiagramId())) {
 
@@ -239,6 +274,9 @@ public class TaskService extends AbstractActor {
                 sendJobsSummary(sender());
             })*/
 
+            /**
+             * A watched actor has been terminated - clean it up
+             */
             .match(Terminated.class, t -> {
 
                 // clean up terminated actors
@@ -248,30 +286,30 @@ public class TaskService extends AbstractActor {
                 if (isUUID(actorName)) {
                     // if the job name is a uuid - clean up completed jobs
 
+                    System.out.println(String.format("Actor terminated: %s.", actorName));
+
                     UUID jobId = UUID.fromString(actorName);
-                    JobKey jobKey = jobKeys.get(jobId);
-                    if (jobKey.getMode() == Mode.OFFLINE && this.offlineWorkers.containsKey(jobKey.getDiagramId())) {
-                        this.offlineWorkers.remove(jobKey.getDiagramId());
-                    } else if (jobKey.getMode() == Mode.ONLINE && this.onlineWorkers.containsKey(jobKey.getDiagramId())) {
-                        this.onlineWorkers.remove(jobKey.getDiagramId());
+                    TaskKey taskKey = taskKeys.get(jobId);
+                    if (taskKey.getMode() == Mode.OFFLINE && this.offlineWorkers.containsKey(taskKey.getDiagramId())) {
+                        this.offlineWorkers.remove(taskKey.getDiagramId());
+                    } else if (taskKey.getMode() == Mode.ONLINE && this.onlineWorkers.containsKey(taskKey.getDiagramId())) {
+                        this.onlineWorkers.remove(taskKey.getDiagramId());
 
                         // tell the kafka consumer that a spark job has been terminated
-                        kafkaConsumer.tell(new ConsumeJob(jobKey.getDiagramId(), "", ConsumeJob.ConsumeState.END), self());
+                        kafkaConsumer.tell(new ConsumerStop(taskKey.getDiagramId()), self());
                     }
 
-                    jobKeys.remove(jobId);
+                    taskKeys.remove(jobId);
                 } else if (this.streamingSources.containsKey(actorName)) {
 
                     // clean up the streaming source data actor
                     this.streamingSources.remove(actorName);
                 }
 
-                if (this.client != null)
-                    sendTaskCounts(this.client);
-
             }).build()
         );
 
+        // create the kafka consumer
         kafkaConsumer = context().actorOf(KafkaConsumer.props());
     }
 
@@ -280,14 +318,17 @@ public class TaskService extends AbstractActor {
     //
 
     /**
-     *
-     * @param request
-     * @param message
-     * @return
+     * Create a failed task message
+     * @param request: the failed request
+     * @param message: the error message
+     * @return: Failed task message
      */
     private TaskFailed createFailedMessage(TaskRequest request, String message){
 
-        TaskFailed status = new TaskFailed(request.getDiagramId(),
+        TaskFailed status = new TaskFailed(
+                request.getId(),
+                request.getSessionId(),
+                request.getDiagramId(),
                 request.getDiagramName(),
                 request.getMode(),
                 message);
@@ -324,28 +365,15 @@ public class TaskService extends AbstractActor {
     }
 
     /**
-     * Send the current jobs summary to the specified client
-     * @param client
+     * class that summarizes the essential details of a task
      */
-    private void sendTaskCounts(ActorRef client){
-
-        TaskCounts counts = new TaskCounts(this.offlineWorkers.size(),
-                this.onlineWorkers.size(),
-                this.streamingSources.size());
-
-        client.tell(counts, self());
-    }
-
-    /**
-     * class that tracks the essential details of a job
-     */
-    private class JobKey{
+    private class TaskKey{
 
         private UUID id;
         private UUID diagramId;
         private Mode mode;
 
-        public JobKey(UUID diagramId, Mode mode){
+        public TaskKey(UUID diagramId, Mode mode){
             this.id = UUID.randomUUID();
             this.diagramId = diagramId;
             this.mode = mode;

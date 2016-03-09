@@ -53,7 +53,8 @@ public class SaveCSV extends BlockDefinition implements IExport {
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
 
         parameters.add(new ParameterDefinition("Filename",
-                DataType.STRING.toString(),
+                ParameterType.STRING,
+                ValueType.SCALAR,
                 "None",
                 new ArrayList<String>(),
                 null));

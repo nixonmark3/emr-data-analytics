@@ -53,7 +53,8 @@ public class DownSample extends BlockDefinition implements IExport {
         List<ParameterDefinition> parameters = new ArrayList<ParameterDefinition>();
 
         parameters.add(new ParameterDefinition("SampleSize",
-                DataType.INT.toString(),
+                ParameterType.INT,
+                ValueType.SCALAR,
                 100,
                 new ArrayList<String>(),
                 null));
@@ -64,7 +65,8 @@ public class DownSample extends BlockDefinition implements IExport {
         opts.add("Mean");
 
         parameters.add(new ParameterDefinition("Interpolation",
-                DataType.LIST.toString(),
+                ParameterType.ENUMERATION,
+                ValueType.SCALAR,
                 "Last",
                 opts,
                 null));

@@ -9,7 +9,6 @@ import emr.analytics.models.messages.*;
 import play.libs.Json;
 import services.AnalyticsService;
 
-import java.util.List;
 import java.util.UUID;
 
 public class SessionActor extends AbstractActor {
@@ -49,25 +48,25 @@ public class SessionActor extends AbstractActor {
             // jobs summary request from client
             .match(JsonNode.class, node -> (node.get("messageType").asText().equals("jobs-summary")), node -> {
 
-                AnalyticsService.getInstance().send(new InputMessage("jobs-summary"), self());
+                AnalyticsService.getInstance().send(new InputMessage(null, "jobs-summary"), self());
             })
 
             //
             .match(JsonNode.class, node -> (node.get("messageType").asText().equals("offline-jobs")), node -> {
 
-                AnalyticsService.getInstance().send(new InputMessage("offline-jobs"), self());
+                AnalyticsService.getInstance().send(new InputMessage(null, "offline-jobs"), self());
             })
 
             //
             .match(JsonNode.class, node -> (node.get("messageType").asText().equals("online-jobs")), node -> {
 
-                AnalyticsService.getInstance().send(new InputMessage("online-jobs"), self());
+                AnalyticsService.getInstance().send(new InputMessage(null, "online-jobs"), self());
             })
 
             //
             .match(JsonNode.class, node -> (node.get("messageType").asText().equals("streaming-jobs")), node -> {
 
-                AnalyticsService.getInstance().send(new InputMessage("streaming-jobs"), self());
+                AnalyticsService.getInstance().send(new InputMessage(null, "streaming-jobs"), self());
             })
 
 /*            .match(JobInfos.class, infos -> {

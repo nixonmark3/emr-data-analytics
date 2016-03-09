@@ -11,7 +11,7 @@ public class TerminationRequest extends InputMessage implements Serializable {
     private Mode mode;
 
     public TerminationRequest(UUID diagramId, Mode mode){
-        super("terminationRequest");
+        super(null, "terminationRequest");
 
         this.diagramId = diagramId;
         this.mode = mode;

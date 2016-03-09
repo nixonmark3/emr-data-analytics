@@ -3,16 +3,15 @@ package emr.analytics.models.definition;
 public class Argument {
 
     private String name;
-    private int type;
+    private String path;
     private String value;
 
     private Argument() {}
 
-    public Argument(String name, int type, String value){
+    public Argument(String name, String path){
 
         this.name = name;
-        this.type = type;
-        this.value = value;
+        this.path = path;
     }
 
     public String getName(){ return this.name; }
@@ -21,11 +20,9 @@ public class Argument {
         this.name = name;
     }
 
-    public int getType(){ return this.type; }
+    public String getPath(){ return this.path; }
 
-    public void setType(int type) {
-        this.type = type;
-    }
+    public void setPath(String path) { this.path = path; }
 
     public String getValue(){ return this.value; }
 
