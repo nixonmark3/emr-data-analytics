@@ -31,8 +31,9 @@ POST        /getChartData/:name               controllers.BlockResults.getChartD
 GET         /analytics/terminate/:id/:mode    controllers.Analytics.terminate(id: String, mode: String)
 GET         /analytics/tasks/:id              controllers.Analytics.tasks(id: String)
 POST        /upload                           controllers.Data.upload()
-#POST        /streaming/start                  controllers.Streaming.start()
-#GET         /streaming/stop/:topic            controllers.Streaming.stop(topic: String)
+POST        /streaming/start                  controllers.Streaming.start()
+GET         /streaming/stop/:topic            controllers.Streaming.stop(topic: String)
+POST        /streaming/summary                controllers.Streaming.summary()
 
 GET         /data/hbase/query                 controllers.Data.emptyQuery()
 POST        /data/hbase/query                 controllers.Data.hbaseQuery()

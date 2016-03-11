@@ -1249,22 +1249,39 @@ analyticsApp
             save: onSave
         };
 
+        $scope.dataStreamTypes = [
+            { name: "OPC", value: "OPC" },
+            { name: "OSI PI", value: "PI" },
+            { name: "Simulated", value: "Simulated" }
+        ];
+
+        $scope.configStates = {
+            configuring: 0,
+            configured: 1,
+            creating: 2
+        };
+
         // setup view
         $scope.menuWidth = 20;
         $scope.isWorking = false;
-        $scope.isConfigured = false;
+        $scope.loadingDataStreams = false;
+        $scope.configState = $scope.configStates.configuring;
+        $scope.streams = { selected: {} };
+        $scope.dataStreams = [];
 
         // capture block's stream configuration parameter
         $scope.streamConfig = block.parameters[0].value;
 
-        // use the isConfigured flag to control the save button
-        $scope.$watch("isConfigured", function(newValue, oldValue){
-            $scope.config.saveDisabled = !newValue;
-        });
-
         /* internal variables */
         var toastContainerId = "load-data-toaster",
-            startingConfig = angular.copy($scope.streamConfig);
+            defaultTopicName = "New Stream",
+            startingConfig = angular.copy($scope.streamConfig),
+            lastDataSource = {};
+
+        // use the configState flag to control the save button
+        $scope.$watch("configState", function(newValue, oldValue){
+            $scope.config.saveDisabled = (newValue!=$scope.configStates.configured);
+        });
 
         /* public methods */
 
@@ -1312,10 +1329,147 @@ analyticsApp
             evt.preventDefault();
         };
 
+        /**
+         * clear the configured file
+         * @param evt
+         */
         $scope.onClearFile = function(evt){
-            $scope.streamConfig.dataSource = { name: null, progress: 0, contentType: null, path: null };
+            resetDataSource();
+            setConfigState();
+
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
+
+        /**
+         * begin data stream creation
+         * @param evt
+         */
+        $scope.onCreateStreamBegin = function(evt){
+
+            if($scope.configState == $scope.configStates.creating)
+                return;
+
+            $scope.newStream = { topic: defaultTopicName, sourceType: "OPC", path: "", frequency: 1, keys: "", started: null };
+            $scope.dataStreams.push($scope.newStream);
+
+            $scope.streams.selected = $scope.newStream;
+            $scope.configState = $scope.configStates.creating;
+
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
+
+        /**
+         * cancel creation of the new data stream
+         * @param evt
+         */
+        $scope.onCreateStreamCancel = function(evt){
+
+            // remove the new stream from the list of data streams
+            var index = $scope.dataStreams.indexOf($scope.newStream);
+            if (index > -1)
+                $scope.dataStreams.splice(index, 1);
+
+            // delete the new stream
+            delete $scope.newStream;
+
+            // reset the data source
+            resetDataSource();
 
             setConfigState();
+
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
+
+        /**
+         * Complete stream creation
+         * @param evt: click event
+         */
+        $scope.onCreateStreamComplete = function(evt){
+
+            if ($scope.newStream.topic==defaultTopicName){
+                toasterService.error("Invalid topic.",
+                    "Invalid topic.",
+                    toastContainerId);
+                return;
+            }
+
+            var distinctCount = $scope.dataStreams.filter(function(item) { return item.topic == $scope.newStream.topic; })
+            if (distinctCount > 1){
+                toasterService.error("Topic already exists.",
+                    "Topic already exists.",
+                    toastContainerId);
+                return;
+            }
+
+            if($scope.newStream.keys.length == 0){
+                toasterService.error("Specify a valid set of tags.",
+                    "Specify a valid set of tags.",
+                    toastContainerId);
+                return;
+            }
+
+            // set datasource name to new topic name
+            $scope.streams.selected = $scope.newStream;
+            $scope.streamConfig.dataSource.name = $scope.streams.selected.topic;
+
+            // create request
+            var keys = $scope.newStream.keys.split(",").map(function(key) { return key.trim(); });
+            var request = {
+                topic: $scope.newStream.topic,
+                sourceType: $scope.newStream.sourceType,
+                path: $scope.newStream.path,
+                frequency: $scope.newStream.frequency,
+                keys: keys
+            };
+
+            diagramService.streamingStart(request).then(
+                function(taskId){
+                    delete $scope.newStream;
+                    setConfigState();
+                },
+                function(reason){
+                    toasterService.error(reason,
+                        reason,
+                        toastContainerId);
+                });
+
+            evt.stopPropagation();
+            evt.preventDefault();
+        };
+
+        /**
+         * Delete stream
+         * @param evt: click event
+         */
+        $scope.onDeleteStream = function(evt){
+
+            // capture selected topic
+            var selectedTopic = $scope.streams.selected.topic;
+
+            // get the index of the selected stream
+            var index = $scope.dataStreams.indexOf($scope.streams.selected);
+            //
+            $scope.streams.selected = {};
+            // remove the selected stream from the list of data streams
+            if (index > -1)
+                $scope.dataStreams.splice(index, 1);
+
+            // reset the data source
+            resetDataSource();
+
+            // set configuration state
+            setConfigState();
+
+            // make a request to terminate data stream
+            diagramService.streamingStop(selectedTopic).then(null,
+                function(reason){
+                    toasterService.error(reason,
+                        reason,
+                        toastContainerId);
+                });
 
             evt.stopPropagation();
             evt.preventDefault();
@@ -1389,21 +1543,67 @@ analyticsApp
         };
 
         /**
-         * Set the stream source type
+         * Set the stream source type (cache current setting, restore last)
          * @param sourceType: new stream source type
          */
         $scope.setSourceType = function(sourceType){
+
+            // capture last configuration
+            lastDataSource[$scope.streamConfig.sourceType] = $scope.streamConfig.dataSource;
+
+            // set new data source
             $scope.streamConfig.sourceType = sourceType;
 
-            switch(sourceType) {
-                case "FILES":
+            if(lastDataSource[sourceType] !== undefined && lastDataSource[sourceType] !== null)
+                $scope.streamConfig.dataSource = lastDataSource[sourceType];
+            else
+                resetDataSource();
 
+            setConfigState();
+        };
 
-                    break;
-            }
+        /**
+         * Set data stream
+         */
+        $scope.onSetStream = function(){
+            $scope.streamConfig.dataSource.name = $scope.streams.selected.topic;
+            setConfigState();
         };
 
         /* private methods */
+
+        /**
+         * initialize this view
+         */
+        function init(){
+
+            // listen for streaming task updates
+            $webSockets.listen("streaming-tasks", function (msg) {
+                return msg.messageType == "streaming-tasks";
+            }, onStreamingSummary);
+
+            loadStreams();
+            setConfigState();
+        }
+
+        /**
+         * initiate loading a data stream
+         */
+        function loadStreams(){
+
+            // request a list of active data streams
+            var request = { sessionId: analyticsService.getSessionId() };
+            diagramService.streamingSummary(request).then(
+                function(taskId){
+                    $scope.loadingDataStreams = true;
+                },
+                function(reason){
+                    toasterService.error(reason,
+                        reason,
+                        toastContainerId);
+                }
+            );
+        }
 
         /**
          * Determine configuration state
@@ -1416,9 +1616,33 @@ analyticsApp
 
             switch($scope.streamConfig.sourceType){
                 case "FILES":
-                    $scope.isConfigured = ($scope.streamConfig.dataSource.progress == 100);
+                    if($scope.streamConfig.dataSource.progress===100)
+                        $scope.configState = $scope.configStates.configured;
+                    else
+                        $scope.configState = $scope.configStates.configuring;
+                    break;
+                case "STREAM":
+                    if($scope.streamConfig.dataSource.name!==null && $scope.streamConfig.dataSource.name.length > 0)
+                        $scope.configState = $scope.configStates.configured;
+                    else
+                        $scope.configState = $scope.configStates.configuring;
                     break;
             }
+        }
+
+        /**
+         * retrieve an empty stream template
+         * @returns {{topic: string, sourceType: string, path: string, frequency: number, keys: string, started: null}}
+         */
+        function getEmptyStream(){
+            return { topic: defaultTopicName, sourceType: "OPC", path: "", frequency: 1, keys: "", started: null };
+        }
+
+        /**
+         * reset the stream configuration data source
+         */
+        function resetDataSource(){
+            $scope.streamConfig.dataSource = { name: null, progress: 0, contentType: null, path: null };
         }
 
         /**
@@ -1440,11 +1664,42 @@ analyticsApp
          */
         function onSave(transitionDuration){
 
+            // capture new stream configuration
+            block.parameters[0].value = $scope.streamConfig;
+
             // execute the close event
             close(null, transitionDuration);
         }
 
-        setConfigState();
+        /**
+         * handle streaming summary messages
+         * @param message
+         */
+        function onStreamingSummary(message){
+
+            // transform into streams representation
+            var temp = message.items.map(function(item){
+                return {
+                    topic: item.topic,
+                    sourceType: item.sourceType,
+                    path: item.path,
+                    frequency: item.frequency,
+                    keys: item.keys.join(", "),
+                    started: item.started
+                };
+            });
+
+            $scope.dataStreams = temp;
+
+            var selectedStream = $scope.dataStreams.find(function(item){ return item.topic == $scope.streamConfig.dataSource.name; })
+            if(selectedStream)
+                $scope.streams.selected = selectedStream;
+
+            $scope.loadingDataStreams = false;
+        }
+
+        // call initialization
+        init();
     }])
 
     /**

@@ -24,8 +24,8 @@ public class PiPollingSource extends DataSource implements StreamingSource {
 
     public PiPollingSource(StreamingRequest request) {
 
-        this.url = request.getStreamingSource().getUrl();
-        this.keys = request.getStreamingSource().getKeys();
+        this.url = request.getPath();
+        this.keys = request.getKeys();
     }
 
     public SourceValues<Double> read() {

@@ -171,7 +171,10 @@ public class TaskService extends AbstractActor {
                 }
             })
 
-/*            .match(StreamingSourceRequest.class, request -> {
+            /**
+             * start a streaming source
+             */
+            .match(StreamingRequest.class, request -> {
 
                 if (this.streamingSources.containsKey(request.getTopic())) {
 
@@ -188,19 +191,22 @@ public class TaskService extends AbstractActor {
 
                 kafkaActor.tell("start", self());
 
+                // todo: send list of streaming
                 // proactively send an update jobs summary
-                sendJobsSummary(sender());
+                // sendJobsSummary(sender());
             })
 
-            .match(StreamingSourceKillRequest.class, request -> {
+            /**
+             * terminate a streaming source
+             */
+            .match(StreamingTerminationRequest.class, request -> {
 
                 if (this.streamingSources.containsKey(request.getTopic())) {
-
                     // send kill message
-                    ActorRef jobActor = this.streamingSources.get(request.getTopic());
-                    jobActor.tell("stop", self());
+                    ActorRef streamingActor = this.streamingSources.get(request.getTopic());
+                    streamingActor.tell("stop", self());
                 }
-            })*/
+            })
 
             /**
              *
@@ -211,16 +217,29 @@ public class TaskService extends AbstractActor {
 
                 if (this.offlineWorkers.containsKey(request.getDiagramId())) {
 
-                    ActorRef jobActor = this.offlineWorkers.get(request.getDiagramId());
-                    AnalyticsTask task = (AnalyticsTask) getTask(jobActor);
+                    ActorRef taskActor = this.offlineWorkers.get(request.getDiagramId());
+                    AnalyticsTask task = (AnalyticsTask) getTask(taskActor);
                     if (task != null)
                         tasks.add(task);
                 }
 
                 if (this.onlineWorkers.containsKey(request.getDiagramId())) {
 
-                    ActorRef jobActor = this.onlineWorkers.get(request.getDiagramId());
-                    AnalyticsTask task = (AnalyticsTask) getTask(jobActor);
+                    ActorRef taskActor = this.onlineWorkers.get(request.getDiagramId());
+                    AnalyticsTask task = (AnalyticsTask) getTask(taskActor);
+                    if (task != null)
+                        tasks.add(task);
+                }
+
+                sender().tell(tasks, self());
+            })
+
+            .match(StreamingSummaryRequest.class, request -> {
+
+                // build list of current streaming tasks
+                StreamingTasks tasks = new StreamingTasks(request.getSessionId());
+                for (ActorRef taskActor : this.streamingSources.values()) {
+                    StreamingTask task = (StreamingTask)getTask(taskActor);
                     if (task != null)
                         tasks.add(task);
                 }
@@ -249,20 +268,6 @@ public class TaskService extends AbstractActor {
                 for (ActorRef worker : this.onlineWorkers.values()) {
 
                     JobInfo job = (JobInfo)getInfo(worker);
-                    if (job != null)
-                        jobs.add(job);
-                }
-
-                sender().tell(jobs, self());
-            })
-
-            .match(BaseMessage.class, message -> message.getType().equals("streaming-jobs"), message -> {
-
-                // build a list of current jobs
-                StreamingInfos jobs = new StreamingInfos();
-                for (ActorRef worker : this.streamingSources.values()) {
-
-                    StreamingInfo job = (StreamingInfo)getInfo(worker);
                     if (job != null)
                         jobs.add(job);
                 }

@@ -38,7 +38,7 @@ public class PySparkOutputBlock extends SourceBlock {
         String topic = properties.getProperty("kafka.online.topic", "ONLINE");
 
         String output = "\nfrom kafka import KeyedProducer, KafkaClient\n"
-
+                + String.format("broker = \"%s\"\n", broker)
                 + String.format("kafka = KafkaClient(\"%s\")\n", broker)
                 + "producer = KeyedProducer(kafka)\n\n"
                 + String.format("def %s(rdd):\n", functionName)

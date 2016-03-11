@@ -7,11 +7,7 @@ public class SourceFactory {
     public static StreamingSource get(StreamingRequest request) throws SourceException {
 
         StreamingSource source;
-        switch(request.getStreamingSource().getPollingSourceType()){
-
-            case File:
-                source = new FileSource(request);
-                break;
+        switch(request.getSourceType()){
 
             case OPC:
                 source = new OpcPollingSource(request);
@@ -27,7 +23,7 @@ public class SourceFactory {
 
             default:
                 throw new SourceException(String.format("The specified streaming source type, %s, is not supported.",
-                        request.getStreamingSource().getPollingSourceType().toString()));
+                        request.getSourceType().toString()));
         }
 
         return source;

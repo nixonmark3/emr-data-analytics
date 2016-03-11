@@ -6,8 +6,8 @@
         <div class="resizable-handle resizable-e" ng-mousedown="onResizeMenu($event)"></div>
 
         <ul class="select-data-menu">
-            <li ng-class="{'active': streamConfig.sourceType==='DELTAV_STREAM'}">
-                <a ng-click="setSourceType('DELTAV_STREAM')">DeltaV Stream</a>
+            <li ng-class="{'active': streamConfig.sourceType==='STREAM'}">
+                <a ng-click="setSourceType('STREAM')">Data Stream</a>
             </li>
             <li ng-class="{'active': streamConfig.sourceType==='FILES'}">
                 <a ng-click="setSourceType('FILES')">Local File System</a>
@@ -15,9 +15,120 @@
         </ul>
     </div>
 
-    <div class="load-data-content" ng-switch on="streamConfig.sourceType" ng-style="{ 'width': (100 - menuWidth) + '%' }">
+    <div class="modal-main-content-container set-stream-container" ng-switch on="streamConfig.sourceType" ng-style="{ 'width': (100 - menuWidth) + '%' }">
 
-        <div class="load-data-source-container" ng-switch-when="FILES">
+        <div class="modal-main-content" ng-switch-when="STREAM">
+
+            <div class="block-config-header">
+                <div class="input-group">
+                    <span class="input-group-addon" style="width: 40px;">
+                        <i class="fa ng-class: { 'fa-rss':!loadingDataStreams, 'fa-spinner fa-spin':loadingDataStreams } "></i>
+                    </span>
+                    <select class="form-control input-group-select"
+                            ng-options="stream as stream.topic for stream in dataStreams"
+                            ng-model="streams.selected"
+                            ng-change="onSetStream()"
+                            ng-disabled="configState==configStates.creating">
+                    </select>
+
+                    <span class="input-group-btn">
+                        <a class="file-input-link pull-right" ng-click="onCreateStreamBegin($event)">
+                            <i class="fa fa-plus"></i>
+                        </a>
+                    </span>
+                </div>
+                <div class="arrow-down" style="top: 16px; right: 60px;"></div>
+            </div>
+            <div class="block-config-body">
+
+                <!-- selected data stream -->
+                <div ng-if="configState==configStates.configured" class="block-config-card">
+                    <div class="container-fluid block-config-card-body">
+                        <div class="row modal-grid-header">Data Stream</div>
+                        <div class="row modal-grid-row">
+                            <div class="col-sm-3 modal-grid-label">Topic</div>
+                            <div class="col-sm-7 modal-grid-value">{{streams.selected.topic}}</div>
+                        </div>
+                        <div class="row modal-grid-row">
+                            <div class="col-sm-3 modal-grid-label">Type</div>
+                            <div class="col-sm-7 modal-grid-value">{{streams.selected.sourceType}}</div>
+                        </div>
+                        <div class="row modal-grid-row">
+                            <div class="col-sm-3 modal-grid-label">Path</div>
+                            <div class="col-sm-7 modal-grid-value">{{streams.selected.path}}</div>
+                        </div>
+                        <div class="row modal-grid-row">
+                            <div class="col-sm-3 modal-grid-label">Frequency</div>
+                            <div class="col-sm-7 modal-grid-value">{{streams.selected.frequency}} sec</div>
+                        </div>
+                        <div class="row modal-grid-row">
+                            <div class="col-sm-3 modal-grid-label">Tags</div>
+                            <div class="col-sm-7 modal-grid-value">{{streams.selected.keys}}</div>
+                        </div>
+                        <div class="row modal-grid-row">
+                            <div class="col-sm-3 modal-grid-label">Started</div>
+                            <div class="col-sm-7 modal-grid-value">{{streams.selected.started | date:'yyyy-MM-dd HH:mm:ss'}}</div>
+                        </div>
+                    </div>
+                    <div class="block-config-card-footer">
+                        <div class="pull-right">
+                            <button type="button" class="btn btn-danger" ng-click="onDeleteStream($event)">Delete</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- new data stream -->
+                <div ng-if="configState==configStates.creating" class="block-config-card">
+                    <div class="container-fluid block-config-card-body">
+                        <div class="row modal-grid-header">New Data Stream</div>
+                        <div class="row modal-grid-row">
+                            <div class="col-sm-3 modal-grid-label">Topic</div>
+                            <div class="col-sm-7">
+                                <input class="form-control" type="text" ng-model="newStream.topic">
+                            </div>
+                        </div>
+                        <div class="row modal-grid-row">
+                            <div class="col-sm-3 modal-grid-label">Type</div>
+                            <div class="col-sm-7">
+                                <select class="form-control" ng-model="newStream.sourceType">
+                                    <option ng-repeat="option in dataStreamTypes" ng-selected="{{option.value==newStream.sourceType}}" value="{{option.value}}">{{option.name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row modal-grid-row">
+                            <div class="col-sm-3 modal-grid-label">Path</div>
+                            <div class="col-sm-7">
+                                <input class="form-control" type="text" ng-model="newStream.path">
+                            </div>
+                        </div>
+                        <div class="row modal-grid-row">
+                            <div class="col-sm-3 modal-grid-label">Frequency</div>
+                            <div class="col-sm-7">
+                                <div class="input-group">
+                                    <input class="form-control" type="number" ng-model="newStream.frequency">
+                                    <span class="input-group-addon">secs</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row modal-grid-row">
+                            <div class="col-sm-3 modal-grid-label">Tags</div>
+                            <div class="col-sm-7">
+                                <input class="form-control" type="text" ng-model="newStream.keys">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="block-config-card-footer">
+                        <div class="pull-right">
+                            <button type="button" class="btn btn-default" ng-click="onCreateStreamCancel($event)">Cancel</button>
+                            <button type="button" class="btn btn-success" ng-click="onCreateStreamComplete($event)">Create</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-main-content" ng-switch-when="FILES">
+
             <div class="load-data-navbar">
                 <input type="file" id="fileBrowser" onchange="angular.element(this).scope().addFiles(this.files)" value="Browse" multiple style="display:none;">
                 <div class="file-input-container" file-drop>
@@ -28,16 +139,17 @@
                             show-value="false"
                             progress="streamConfig.dataSource.progress">
                     </progress-circle>
-                    <div class="file-input-label pull-left ng-class:{ 'configured': (isWorking || isConfigured) }">{{streamConfig.dataSource.name || "Browse or drag and drop a data file here"}}</div>
+                    <div class="file-input-label pull-left ng-class:{ 'configured': (isWorking || configState==configStates.configured) }">{{streamConfig.dataSource.name || "Browse or drag and drop a data file here"}}</div>
                     <a ng-if="streamConfig.dataSource.progress==100" class="file-input-clear pull-right" ng-click="onClearFile($event)">
                         <i class="fa fa-times"></i>
                     </a>
                 </div>
-                <a class="file-input-search pull-right" ng-click="onBrowse($event)">
+                <a class="file-input-link pull-right" ng-click="onBrowse($event)">
                     <i class="fa fa-search"></i>
                 </a>
             </div>
         </div>
+
         <div class="load-data-source-container" ng-switch-default>
             This features has not been implemented.
         </div>

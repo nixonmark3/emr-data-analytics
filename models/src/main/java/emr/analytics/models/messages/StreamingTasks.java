@@ -9,8 +9,8 @@ public class StreamingTasks extends OutputMessage implements Serializable {
 
     private List<StreamingTask> items;
 
-    public StreamingTasks(){
-        super(null, null, "streaming-tasks");
+    public StreamingTasks(UUID sessionId){
+        super(UUID.randomUUID(), sessionId, "streaming-tasks");
 
         this.items = new ArrayList<>();
     }

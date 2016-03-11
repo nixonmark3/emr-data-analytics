@@ -37,6 +37,13 @@ public class PySparkStreamBlock extends StreamBlock {
                         functionName,
                         path);
                 break;
+            case STREAM:
+                String topic = this.config.getDataSource().getName();
+                code = String.format("%s = %s.kafkaStream(ssc, \"%s\", broker)\n",
+                        variableName,
+                        packageName,
+                        topic);
+                break;
             default:
                 throw new RuntimeException("Streaming source type specified is not supported.");
         }
@@ -50,6 +57,7 @@ public class PySparkStreamBlock extends StreamBlock {
         Package[] packages;
         switch(this.config.getSourceType()){
             case FILES:
+            case STREAM:
                 packages = new Package[] {
                         new Package(Package.PackageType.IMPORT, packageName, packageName)
                 };

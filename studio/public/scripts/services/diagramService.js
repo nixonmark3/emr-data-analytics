@@ -360,12 +360,12 @@ analyticsApp
         streamingStart: function(data){
 
             var deferred = $q.defer();
-            $http.post('/streaming/start', data)
-                .success(function (data, status, headers, config) {
-                    deferred.resolve(data);
-                })
-                .error(function (data, status, headers, config){
-                    deferred.reject(status);
+            $http.post('/streaming/start', data).then(
+                function (response) {
+                    deferred.resolve(response.data);
+                },
+                function (response){
+                    deferred.reject(response.data);
                 });
 
             return deferred.promise;
@@ -374,12 +374,26 @@ analyticsApp
         streamingStop: function (topic) {
 
             var deferred = $q.defer();
-            $http.get('/streaming/stop/' + topic)
-                .success(function (data, status, headers, config) {
-                    deferred.resolve(data);
-                })
-                .error(function (data, status, headers, config){
-                    deferred.reject(status);
+            $http.get('/streaming/stop/' + topic).then(
+                function (response) {
+                    deferred.resolve(response.data);
+                },
+                function (response){
+                    deferred.reject(response.data);
+                });
+
+            return deferred.promise;
+        },
+
+        streamingSummary: function(request){
+
+            var deferred = $q.defer();
+            $http.post('/streaming/summary', request).then(
+                function (response) {
+                    deferred.resolve(response.data);
+                },
+                function (response){
+                    deferred.reject(response.data);
                 });
 
             return deferred.promise;

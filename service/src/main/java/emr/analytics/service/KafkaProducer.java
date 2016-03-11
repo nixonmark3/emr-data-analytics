@@ -29,7 +29,7 @@ public class KafkaProducer extends AbstractActor {
     private org.apache.kafka.clients.producer.KafkaProducer producer;
     private final ActorRef client;
     private final StreamingRequest request;
-    private final StreamingTask info;
+    private final StreamingTask streamingTask;
 
     public static Props props(StreamingRequest request, ActorRef client) { return Props.create(KafkaProducer.class, request, client); }
 
@@ -45,17 +45,14 @@ public class KafkaProducer extends AbstractActor {
         this.client = client;
 
         // retrieve the analytics host name stored as an environmental variable
-        String host = TaskServiceHelper.getEnvVariable("ANALYTICS_HOST", "127.0.0.1");
+        Properties properties = TaskProperties.getInstance().getProperties();
 
-        info = new StreamingTask(request.getId(),
-                request.getTopic(),
-                request.getStreamingSource().getPollingSourceType(),
-                request.getStreamingSource().getFrequency());
+        streamingTask = new StreamingTask(request);
 
         try {
             // instantiate a kafka producer
             Properties props = new Properties();
-            props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, String.format("%s:9092", host));
+            props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getProperty("kafka.producer"));
             props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
             props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class.getName());
             this.producer = new org.apache.kafka.clients.producer.KafkaProducer(props);
@@ -69,9 +66,8 @@ public class KafkaProducer extends AbstractActor {
             /**
              *
              */
-            .match(String.class, s -> s.equals("info"), s -> {
-
-                sender().tell(info, self());
+            .match(String.class, s -> s.equals("task"), s -> {
+                sender().tell(streamingTask, self());
             })
 
             /**
@@ -79,7 +75,7 @@ public class KafkaProducer extends AbstractActor {
              */
             .match(String.class, s -> s.equals("start"), s -> {
 
-                this.client.tell(new StreamingTask(info), self());
+                this.client.tell(new StreamingTask(streamingTask), self());
                 run();
             })
 
@@ -91,7 +87,7 @@ public class KafkaProducer extends AbstractActor {
                 // set running flag to false and close producer
                 this.running = false;
 
-                this.client.tell(new StreamingTask(info), self());
+                this.client.tell(new StreamingTask(streamingTask), self());
 
                 this.producer.close();
 
@@ -116,7 +112,7 @@ public class KafkaProducer extends AbstractActor {
         String topic = this.request.getTopic();
 
         // using the configured frequency - calculate the number of milliseconds to wait between reads
-        int interval = 1000 / this.request.getStreamingSource().getFrequency();
+        int interval = 1000 * this.request.getFrequency();
 
         // spawn a thread to produce kafka record at defined interval
         new Thread(() -> {

@@ -30,8 +30,8 @@
 
         <div class="modal-main-content" ng-switch-when="LOG">
 
-            <div class="set-output-header">
-                <span class="pull-left">Stream Output to a Log File</span>
+            <div class="block-config-header">
+                <span class="set-output-header-label pull-left">Stream Output to a Log File</span>
                 <div class="pull-right" ng-switch on="activeConsumer.state">
 
                     <div class="set-output-buttons" ng-switch-when="1">
@@ -44,29 +44,31 @@
 
                 </div>
             </div>
-            <div class="container-fluid">
-                <div class="row modal-grid-row">
-                    <div class="col-sm-3 modal-grid-label">Enabled</div>
-                    <div class="col-sm-7">
-                        <toggle-slider class="set-output-enable" disabled="activeConsumer.state!==optionState.editing" value="activeConsumer.enabled"></toggle-slider>
+            <div class="block-config-body">
+                <div class="container-fluid">
+                    <div class="row modal-grid-row">
+                        <div class="col-sm-3 modal-grid-label">Enabled</div>
+                        <div class="col-sm-7">
+                            <toggle-slider class="set-output-enable" disabled="activeConsumer.state!==optionState.editing" value="activeConsumer.enabled"></toggle-slider>
+                        </div>
                     </div>
-                </div>
-                <div class="row modal-grid-row">
-                    <div class="col-sm-3 modal-grid-label">Path to File</div>
-                    <div class="col-sm-7">
-                        <input class="form-control" type="text"
-                               ng-model="activeConsumer.path"
-                               ng-disabled="activeConsumer.state!==optionState.editing"
-                               placeholder="path/to/log/file.log">
+                    <div class="row modal-grid-row">
+                        <div class="col-sm-3 modal-grid-label">Path to File</div>
+                        <div class="col-sm-7">
+                            <input class="form-control" type="text"
+                                   ng-model="activeConsumer.path"
+                                   ng-disabled="activeConsumer.state!==optionState.editing"
+                                   placeholder="path/to/log/file.log">
+                        </div>
                     </div>
-                </div>
-                <div class="row modal-grid-row">
-                    <div class="col-sm-3 modal-grid-label">Key</div>
-                    <div class="col-sm-7">
-                        <input class="form-control" type="text"
-                               ng-model="activeConsumer.key"
-                               ng-disabled="activeConsumer.state!==optionState.editing"
-                               placeholder="key">
+                    <div class="row modal-grid-row">
+                        <div class="col-sm-3 modal-grid-label">Key</div>
+                        <div class="col-sm-7">
+                            <input class="form-control" type="text"
+                                   ng-model="activeConsumer.key"
+                                   ng-disabled="activeConsumer.state!==optionState.editing"
+                                   placeholder="key">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -75,8 +77,8 @@
 
         <div class="modal-main-content" ng-switch-when="OUT">
 
-            <div class="set-output-header">
-                <span class="pull-left">Stream Output to a Standard Out (Debugging)</span>
+            <div class="block-config-header">
+                <span class="set-output-header-label pull-left">Stream Output to a Standard Out (Debugging)</span>
                 <div class="pull-right" ng-switch on="activeConsumer.state">
 
                     <div class="set-output-buttons" ng-switch-when="1">
@@ -89,20 +91,22 @@
 
                 </div>
             </div>
-            <div class="container-fluid">
-                <div class="row modal-grid-row">
-                    <div class="col-sm-3 modal-grid-label">Enabled</div>
-                    <div class="col-sm-7">
-                        <toggle-slider class="set-output-enable" disabled="activeConsumer.state!==optionState.editing" value="activeConsumer.enabled"></toggle-slider>
+            <div class="block-config-body">
+                <div class="container-fluid">
+                    <div class="row modal-grid-row">
+                        <div class="col-sm-3 modal-grid-label">Enabled</div>
+                        <div class="col-sm-7">
+                            <toggle-slider class="set-output-enable" disabled="activeConsumer.state!==optionState.editing" value="activeConsumer.enabled"></toggle-slider>
+                        </div>
                     </div>
-                </div>
-                <div class="row modal-grid-row">
-                    <div class="col-sm-3 modal-grid-label">Key</div>
-                    <div class="col-sm-7">
-                        <input class="form-control" type="text"
-                               ng-model="activeConsumer.key"
-                               ng-disabled="activeConsumer.state!==optionState.editing"
-                               placeholder="key">
+                    <div class="row modal-grid-row">
+                        <div class="col-sm-3 modal-grid-label">Key</div>
+                        <div class="col-sm-7">
+                            <input class="form-control" type="text"
+                                   ng-model="activeConsumer.key"
+                                   ng-disabled="activeConsumer.state!==optionState.editing"
+                                   placeholder="key">
+                        </div>
                     </div>
                 </div>
             </div>

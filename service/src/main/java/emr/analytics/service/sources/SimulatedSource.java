@@ -10,7 +10,7 @@ public class SimulatedSource implements StreamingSource {
     private List<String> keys;
 
     public SimulatedSource(StreamingRequest request){
-        keys = request.getStreamingSource().getKeys();
+        keys = request.getKeys();
     }
 
     public SourceValues<Double> read(){

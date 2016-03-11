@@ -14,8 +14,8 @@ public class OpcPollingSource extends DataSource implements StreamingSource {
 
     public OpcPollingSource(StreamingRequest request) {
 
-        this.url = request.getStreamingSource().getUrl();
-        this.keys = request.getStreamingSource().getKeys();
+        this.url = request.getPath();
+        this.keys = request.getKeys();
     }
 
     public SourceValues<Double> read() {

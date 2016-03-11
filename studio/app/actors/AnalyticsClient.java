@@ -73,12 +73,9 @@ public class AnalyticsClient extends AbstractActor {
         active = ReceiveBuilder
 
             // received streaming information from the server
-/*
-            .match(StreamingInfo.class, info -> {
-
-                SessionManager.getInstance().notifyDashboards(info);
+            .match(StreamingTasks.class, tasks -> {
+                SessionManager.getInstance().notifySession(tasks.getSessionId(), tasks);
             })
-*/
 
             /**
              * Forward TaskVariables to the associated diagram subscribers
@@ -134,16 +131,22 @@ public class AnalyticsClient extends AbstractActor {
             })
 
             // forward streaming source request to the analytics service
-/*            .match(StreamingSourceRequest.class, request -> {
+            .match(StreamingRequest.class, request -> {
 
                 this.service.tell(request, self());
             })
 
             // forward request to kill a streaming source to the analytics service
-            .match(StreamingSourceKillRequest.class, request -> {
+            .match(StreamingTerminationRequest.class, request -> {
 
                 this.service.tell(request, self());
-            })*/
+            })
+
+            // forward streaming summary request
+            .match(StreamingSummaryRequest.class, request -> {
+
+                this.service.tell(request, self());
+            })
 
             // ping request succeeds
             .match(PingRequest.class, ping -> {

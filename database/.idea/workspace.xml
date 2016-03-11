@@ -2,256 +2,30 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4d064dcd-1bb4-4983-a232-24e026e5d921" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/CompileHelper.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/DataSource.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/DataSourceTypes.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/LoadBlock.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/Package.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PySparkBlock.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PySparkLoadBlock.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PySparkOutputBlock.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PySparkStreamBlock.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PythonBlock.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PythonLoadBlock.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/Source.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/SourceBlock.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/SourceTypes.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/StreamBlock.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../compiler/src/main/resources/conf/pyspark.properties" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_fasterxml_jackson_core_jackson_annotations_2_4_1.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_fasterxml_jackson_core_jackson_core_2_4_1.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_fasterxml_jackson_core_jackson_databind_2_4_1.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__de_undercouch_bson4jackson_2_4_0.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__emr_analytics_models_analytics_models_1_0_SNAPSHOT.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_jongo_jongo_1_1.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_mongodb_mongo_java_driver_2_13_0.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/database.iml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pom.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/emr/analytics/database/DataSet.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/emr/analytics/database/DatabaseException.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/emr/analytics/database/DefinitionsRepository.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/emr/analytics/database/DiagramsRepository.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/emr/analytics/database/MongoConnection.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/emr/analytics/database/ProjectsRepository.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/emr/analytics/database/ResultsRepository.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/resources/embeddedDefinitions.json" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/definition/ParameterType.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/definition/ValueType.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/diagram/WireSummary.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/BlockTaskRequest.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/Consumer.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/Consumers.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/DiagramTaskRequest.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskData.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskTerminated.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/ExecutionActor.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/MongoService.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/PythonWorker.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/TaskProperties.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/consumers/OutConsumer.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/messages/ConsumerStop.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/models/Histogram.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/models/RawStatistics.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/models/Schema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../service/src/main/resources/analytics.properties" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../service/src/main/resources/python/pyspark_methods.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../service/src/main/resources/python/python_methods.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../studio/app/models/DescribeRequest.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../studio/app/models/DiagramException.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../studio/app/models/DynamicSourceRequest.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../studio/app/models/Query.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../studio/app/plugins/MongoPlugin.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../studio/app/services/CompilerService.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../studio/app/services/FileService.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../studio/app/services/WebClient.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../studio/conf/hbase.json" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/controls/dateTimePicker.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/controls/toggleSlider.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/selector/selector.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/selector/selector.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../studio/public/scripts/views/setOutput.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../studio/public/scripts/views/setStream.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/PLSPredict.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/CompiledDiagram.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/DiagramCompiler.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/SparkCompiler.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../compiler/src/main/resources/python_driver.mustache" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../compiler/src/main/resources/sparkstreaming_driver.mustache" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/definition/ParameterSourceRequest.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/state/BlockState.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/state/DiagramState.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/consumers/SimulatedDataConsumer.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/consumers/serializers/Consumer.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/consumers/serializers/Consumers.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../service/src/main/resources/conf/pyspark.properties" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../service/src/main/resources/conf/python.properties" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../service/src/main/resources/conf/spark.properties" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../studio/app/controllers/ControllerBase.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../studio/app/controllers/DiagramStates.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../studio/app/models/DataSet.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../studio/app/models/DeploymentStatus.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../studio/app/models/EvaluationStatus.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../studio/app/plugins/MongoDBPlugin.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../studio/app/services/BlockResultsService.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../studio/app/services/DefinitionsService.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../studio/app/services/DiagramsService.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../studio/conf/embeddedDefinitions.json" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/Explore.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/LoadDB.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/LoadDVCH.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/LoadFile.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/LoadPi.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/LoadSeeq.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/Model.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/WebServicePost.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/Write.java" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/diagram/BasicDiagram.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/diagram/DiagramRoot.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/JobVariable.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskVariable.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/SparkExecutor.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/SparkWorker.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/SparkProcessException.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/SparkServiceException.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/SparkWorker.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/SparkService.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/consumers/FileDataConsumer.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/consumers/LogConsumer.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/kafka/ConsumerJob.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/kafka/ConsumerTask.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/messages/ConsumeJob.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/messages/ConsumerStart.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../algorithms/Columns.py" afterPath="$PROJECT_DIR$/../algorithms/Columns.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../algorithms/FunctionBlock.py" afterPath="$PROJECT_DIR$/../algorithms/FunctionBlock.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../compiler/pom.xml" afterPath="$PROJECT_DIR$/../compiler/pom.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/CompilerException.java" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/CompilerException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/DiagramOperations.java" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/DiagramOperations.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/DiagramTransformer.java" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/DiagramTransformer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PySparkCompiler.java" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PySparkCompiler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PythonCompiler.java" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PythonCompiler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/TargetCompiler.java" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/TargetCompiler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/definition/Argument.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/definition/Argument.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/definition/Definition.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/definition/Definition.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/definition/DefinitionType.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/definition/DefinitionType.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/definition/Mode.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/definition/Mode.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/definition/ParameterDefinition.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/definition/ParameterDefinition.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/definition/ParameterSource.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/definition/ParameterSource.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/diagram/Block.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/diagram/Block.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/diagram/Diagram.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/diagram/Diagram.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/diagram/Parameter.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/diagram/Parameter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/diagram/PersistedOutput.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/diagram/PersistedOutput.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/diagram/Wire.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/diagram/Wire.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/AnalyticsData.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/AnalyticsData.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/AnalyticsDescribe.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/AnalyticsDescribe.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/AnalyticsTasks.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/AnalyticsTasks.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/Describe.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/Describe.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/Feature.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/Feature.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/Features.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/Features.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/InputMessage.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/InputMessage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/OutputMessage.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/OutputMessage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/PingRequest.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/PingRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/PingResponse.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/PingResponse.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingSourceType.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingSummaryRequest.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/sources/PollingSource.java" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PySparkOutputBlock.java" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PySparkOutputBlock.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PySparkStreamBlock.java" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PySparkStreamBlock.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/SourceTypes.java" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/SourceTypes.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingRequest.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingRequest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingTask.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingTask.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingTasks.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingTasks.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingTerminationRequest.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingTerminationRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskCompleted.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskCompleted.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskCounts.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskCounts.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskError.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskError.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskFailed.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskFailed.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskNotification.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskNotification.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskOutput.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskOutput.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskRequest.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskStarted.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskStarted.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskStatus.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskStatus.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskSummaryRequest.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TaskSummaryRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TerminationRequest.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/TerminationRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/pom.xml" afterPath="$PROJECT_DIR$/../service/pom.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/KafkaConsumer.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/KafkaConsumer.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/KafkaProducer.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/KafkaProducer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/SparkProcess.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/SparkProcess.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/TaskService.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/TaskService.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/TaskServiceHelper.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/TaskServiceHelper.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/TaskStatusManager.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/TaskStatusManager.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/consumers/ConsumerDispatcher.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/consumers/ConsumerDispatcher.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/consumers/ConsumerFactory.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/consumers/ConsumerFactory.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/consumers/DataConsumer.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/consumers/DataConsumer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/consumers/OpcDataConsumer.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/consumers/OpcDataConsumer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/consumers/PiDataConsumer.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/consumers/PiDataConsumer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/interpreters/Interpreter.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/interpreters/Interpreter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/interpreters/InterpreterFactory.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/interpreters/InterpreterFactory.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/interpreters/PySparkInterpreter.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/interpreters/PySparkInterpreter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/interpreters/PySparkStreamingInterpreter.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/interpreters/PySparkStreamingInterpreter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/interpreters/PythonInterpreter.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/interpreters/PythonInterpreter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/resources/python/pyspark_init.py" afterPath="$PROJECT_DIR$/../service/src/main/resources/python/pyspark_init.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/resources/python/python_init.py" afterPath="$PROJECT_DIR$/../service/src/main/resources/python/python_init.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/resources/service.conf" afterPath="$PROJECT_DIR$/../service/src/main/resources/service.conf" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/resources/spark.conf" afterPath="$PROJECT_DIR$/../service/src/main/resources/spark.conf" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/test/java/emr/analytics/service/interpreters/PySparkInterpreterTest.java" afterPath="$PROJECT_DIR$/../service/src/test/java/emr/analytics/service/interpreters/PySparkInterpreterTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/test/java/emr/analytics/service/interpreters/PySparkStreamingInterpreterTest.java" afterPath="$PROJECT_DIR$/../service/src/test/java/emr/analytics/service/interpreters/PySparkStreamingInterpreterTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/test/java/emr/analytics/service/interpreters/PythonInterpreterTest.java" afterPath="$PROJECT_DIR$/../service/src/test/java/emr/analytics/service/interpreters/PythonInterpreterTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/sources/OpcPollingSource.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/sources/OpcPollingSource.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/sources/PiPollingSource.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/sources/PiPollingSource.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/sources/SimulatedSource.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/sources/SimulatedSource.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/sources/SourceFactory.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/sources/SourceFactory.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/app/actors/AnalyticsClient.java" afterPath="$PROJECT_DIR$/../studio/app/actors/AnalyticsClient.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/app/actors/SessionActor.java" afterPath="$PROJECT_DIR$/../studio/app/actors/SessionActor.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/app/actors/SessionManager.java" afterPath="$PROJECT_DIR$/../studio/app/actors/SessionManager.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/app/controllers/Analytics.java" afterPath="$PROJECT_DIR$/../studio/app/controllers/Analytics.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/app/controllers/BlockResults.java" afterPath="$PROJECT_DIR$/../studio/app/controllers/BlockResults.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/app/controllers/Data.java" afterPath="$PROJECT_DIR$/../studio/app/controllers/Data.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/app/controllers/Definitions.java" afterPath="$PROJECT_DIR$/../studio/app/controllers/Definitions.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/app/controllers/Diagrams.java" afterPath="$PROJECT_DIR$/../studio/app/controllers/Diagrams.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/app/controllers/Projects.java" afterPath="$PROJECT_DIR$/../studio/app/controllers/Projects.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/app/controllers/Sources.java" afterPath="$PROJECT_DIR$/../studio/app/controllers/Sources.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/app/models/CollectRequest.java" afterPath="$PROJECT_DIR$/../studio/app/models/CollectRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/app/models/LoadRequest.java" afterPath="$PROJECT_DIR$/../studio/app/models/LoadRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/app/services/SourcesService.java" afterPath="$PROJECT_DIR$/../studio/app/services/SourcesService.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/app/views/index.scala.html" afterPath="$PROJECT_DIR$/../studio/app/views/index.scala.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/build.sbt" afterPath="$PROJECT_DIR$/../studio/build.sbt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/conf/analytics.conf" afterPath="$PROJECT_DIR$/../studio/conf/analytics.conf" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/conf/application.conf" afterPath="$PROJECT_DIR$/../studio/conf/application.conf" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/conf/play.plugins" afterPath="$PROJECT_DIR$/../studio/conf/play.plugins" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/app/controllers/Streaming.java" afterPath="$PROJECT_DIR$/../studio/app/controllers/Streaming.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/conf/routes" afterPath="$PROJECT_DIR$/../studio/conf/routes" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/app.js" afterPath="$PROJECT_DIR$/../studio/public/scripts/app.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/components/browser/blockConfig.html" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/browser/blockConfig.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/components/browser/browser.js" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/browser/browser.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/components/charts/charts.js" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/charts/charts.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/components/charts/exploreChart.html" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/charts/exploreChart.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/components/charts/progressCircle.html" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/charts/progressCircle.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/components/controls/controls.js" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/controls/controls.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/components/diagram/diagram.html" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/diagram/diagram.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/components/diagram/diagram.js" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/diagram/diagram.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/components/diagram/diagramControls.html" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/diagram/diagramControls.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/components/diagram/diagramControls.js" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/diagram/diagramControls.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/components/diagram/diagramViewModel.js" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/diagram/diagramViewModel.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/components/grids/exploreGrid.html" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/grids/exploreGrid.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/components/grids/grids.js" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/grids/grids.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/components/modal/modal.html" afterPath="$PROJECT_DIR$/../studio/public/scripts/components/modal/modal.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/services/diagramService.js" afterPath="$PROJECT_DIR$/../studio/public/scripts/services/diagramService.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/views/analyticControllers.js" afterPath="$PROJECT_DIR$/../studio/public/scripts/views/analyticControllers.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/views/blockData.html" afterPath="$PROJECT_DIR$/../studio/public/scripts/views/blockData.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/views/explore.html" afterPath="$PROJECT_DIR$/../studio/public/scripts/views/explore.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/views/loadData.html" afterPath="$PROJECT_DIR$/../studio/public/scripts/views/loadData.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/stylesheets/diagram.css" afterPath="$PROJECT_DIR$/../studio/public/stylesheets/diagram.css" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/views/setOutput.html" afterPath="$PROJECT_DIR$/../studio/public/scripts/views/setOutput.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/views/setStream.html" afterPath="$PROJECT_DIR$/../studio/public/scripts/views/setStream.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/stylesheets/site.css" afterPath="$PROJECT_DIR$/../studio/public/stylesheets/site.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/templates/studio.html" afterPath="$PROJECT_DIR$/../studio/public/templates/studio.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/BoxcarAverage.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/BoxcarAverage.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/CenterNormal.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/CenterNormal.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/Columns.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/Columns.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/DownSample.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/DownSample.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/EWMA.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/EWMA.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/EWMStdDev.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/EWMStdDev.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/ExponentialFilter.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/ExponentialFilter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/FillNaN.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/FillNaN.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/LagCorrelate.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/LagCorrelate.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/Normalize.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/Normalize.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/PCA_NIPALS.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/PCA_NIPALS.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/PLS.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/PLS.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/Query.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/Query.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/RollingAve.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/RollingAve.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/RollingStdDev.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/RollingStdDev.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/SavGolay.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/SavGolay.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/SaveCSV.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/SaveCSV.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/SaveDB.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/SaveDB.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/Scale.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/Scale.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/Split.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/Split.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/ThreeSigma.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/ThreeSigma.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/TimeDelay.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/definitions/TimeDelay.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/resources/app.properties" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/resources/app.properties" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/pyspark-algorithms/StreamingSources.py" afterPath="$PROJECT_DIR$/../utilities/pyspark-algorithms/StreamingSources.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/pyspark-algorithms/emr.analytics.service.interpreters.PySparkInterpreter.py" afterPath="$PROJECT_DIR$/../utilities/pyspark-algorithms/emr.analytics.service.interpreters.PySparkInterpreter.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/pyspark-algorithms/emr.analytics.service.interpreters.PySparkStreamingInterpreter.py" afterPath="$PROJECT_DIR$/../utilities/pyspark-algorithms/emr.analytics.service.interpreters.PySparkStreamingInterpreter.py" />
     </list>
     <ignored path="database.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -275,70 +49,12 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="ResultsRepository.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/emr/analytics/database/ResultsRepository.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="26" column="5" selection-start-line="26" selection-start-column="5" selection-end-line="26" selection-end-column="5" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="method#getAvailableResults#0;class#ResultsRepository#0" expanded="false" />
-                <element signature="method#getChartData#0;class#ResultsRepository#0" expanded="false" />
-                <element signature="method#getFeatureGridData#0;class#ResultsRepository#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ProjectsRepository.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/emr/analytics/database/ProjectsRepository.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-              <folding>
-                <element signature="e#635#636#0" expanded="false" />
-                <element signature="e#679#680#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="DiagramsRepository.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/emr/analytics/database/DiagramsRepository.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="14" column="13" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
-              <folding>
-                <element signature="imports" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="embeddedDefinitions.json" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/resources/embeddedDefinitions.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.36346865">
-              <caret line="109" column="3" selection-start-line="109" selection-start-column="3" selection-end-line="109" selection-end-column="3" />
+            <state vertical-scroll-proportion="2.6291513">
+              <caret line="95" column="33" selection-start-line="95" selection-start-column="33" selection-end-line="95" selection-end-column="33" />
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="MongoConnection.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/emr/analytics/database/MongoConnection.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="74" column="56" selection-start-line="74" selection-start-column="56" selection-end-line="74" selection-end-column="56" />
-              <folding>
-                <element signature="imports" expanded="false" />
-                <element signature="e#756#757#0" expanded="false" />
-                <element signature="e#804#805#0" expanded="false" />
-                <element signature="e#1978#1979#0" expanded="false" />
-                <element signature="e#2041#2042#0" expanded="false" />
-                <element signature="e#2191#2192#0" expanded="false" />
-                <element signature="e#2243#2244#0" expanded="false" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -523,8 +239,8 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="Scratches" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -546,6 +262,7 @@
     <property name="aspect.path.notification.shown" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="js-jscs-nodeInterpreter" value="/usr/local/bin/node" />
+    <property name="HbShouldOpenHtmlAsHb" value="" />
   </component>
   <component name="RunManager">
     <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
@@ -1238,11 +955,12 @@
       <workItem from="1456582427984" duration="3337000" />
       <workItem from="1456784269406" duration="436000" />
       <workItem from="1457061331501" duration="1268000" />
+      <workItem from="1457645142607" duration="609000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="42057000" />
+    <option name="totallyTimeSpent" value="42666000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="30" y="25" width="1340" height="835" extended-state="0" />
@@ -1254,7 +972,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.20053835" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.20053835" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.27657935" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1297,9 +1015,9 @@
     <entry file="file://$PROJECT_DIR$/src/main/java/emr/analytics/database/ResultsRepository.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <caret line="26" column="5" selection-start-line="26" selection-start-column="5" selection-end-line="26" selection-end-column="5" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="imports" expanded="false" />
             <element signature="method#getAvailableResults#0;class#ResultsRepository#0" expanded="false" />
             <element signature="method#getChartData#0;class#ResultsRepository#0" expanded="false" />
             <element signature="method#getFeatureGridData#0;class#ResultsRepository#0" expanded="false" />
@@ -1311,10 +1029,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-          <folding>
-            <element signature="e#635#636#0" expanded="false" />
-            <element signature="e#679#680#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1322,9 +1037,52 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="14" column="13" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/resources/embeddedDefinitions.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/emr/analytics/database/MongoConnection.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="74" column="56" selection-start-line="74" selection-start-column="56" selection-end-line="74" selection-end-column="56" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/emr/analytics/database/ResultsRepository.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="false" />
+            <element signature="method#getAvailableResults#0;class#ResultsRepository#0" expanded="false" />
+            <element signature="method#getChartData#0;class#ResultsRepository#0" expanded="false" />
+            <element signature="method#getFeatureGridData#0;class#ResultsRepository#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/emr/analytics/database/ProjectsRepository.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/emr/analytics/database/DiagramsRepository.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="14" column="13" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1340,15 +1098,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="74" column="56" selection-start-line="74" selection-start-column="56" selection-end-line="74" selection-end-column="56" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#756#757#0" expanded="false" />
-            <element signature="e#804#805#0" expanded="false" />
-            <element signature="e#1978#1979#0" expanded="false" />
-            <element signature="e#2041#2042#0" expanded="false" />
-            <element signature="e#2191#2192#0" expanded="false" />
-            <element signature="e#2243#2244#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1357,7 +1107,7 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="26" column="5" selection-start-line="26" selection-start-column="5" selection-end-line="26" selection-end-column="5" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="imports" expanded="false" />
             <element signature="method#getAvailableResults#0;class#ResultsRepository#0" expanded="false" />
             <element signature="method#getChartData#0;class#ResultsRepository#0" expanded="false" />
             <element signature="method#getFeatureGridData#0;class#ResultsRepository#0" expanded="false" />
@@ -1369,10 +1119,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#635#636#0" expanded="false" />
-            <element signature="e#679#680#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1380,15 +1127,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="74" column="56" selection-start-line="74" selection-start-column="56" selection-end-line="74" selection-end-column="56" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#756#757#0" expanded="false" />
-            <element signature="e#804#805#0" expanded="false" />
-            <element signature="e#1978#1979#0" expanded="false" />
-            <element signature="e#2041#2042#0" expanded="false" />
-            <element signature="e#2191#2192#0" expanded="false" />
-            <element signature="e#2243#2244#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1403,10 +1142,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="47" column="0" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
-          <folding>
-            <element signature="e#635#636#0" expanded="false" />
-            <element signature="e#679#680#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1414,9 +1150,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="100" column="39" selection-start-line="100" selection-start-column="39" selection-end-line="100" selection-end-column="39" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1425,7 +1159,7 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="17" column="59" selection-start-line="17" selection-start-column="59" selection-end-line="17" selection-end-column="59" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="imports" expanded="false" />
             <element signature="method#getAvailableResults#0;class#ResultsRepository#0" expanded="false" />
             <element signature="method#getChartData#0;class#ResultsRepository#0" expanded="false" />
             <element signature="method#getFeatureGridData#0;class#ResultsRepository#0" expanded="false" />
@@ -1437,15 +1171,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#756#757#0" expanded="false" />
-            <element signature="e#804#805#0" expanded="false" />
-            <element signature="e#1978#1979#0" expanded="false" />
-            <element signature="e#2041#2042#0" expanded="false" />
-            <element signature="e#2191#2192#0" expanded="false" />
-            <element signature="e#2243#2244#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1460,10 +1186,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="47" column="0" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
-          <folding>
-            <element signature="e#635#636#0" expanded="false" />
-            <element signature="e#679#680#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1471,9 +1194,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="100" column="39" selection-start-line="100" selection-start-column="39" selection-end-line="100" selection-end-column="39" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1482,7 +1203,7 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="imports" expanded="false" />
             <element signature="method#getAvailableResults#0;class#ResultsRepository#0" expanded="false" />
             <element signature="method#getChartData#0;class#ResultsRepository#0" expanded="false" />
             <element signature="method#getFeatureGridData#0;class#ResultsRepository#0" expanded="false" />
@@ -1532,7 +1253,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.21164021">
           <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1563,7 +1283,7 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="26" column="5" selection-start-line="26" selection-start-column="5" selection-end-line="26" selection-end-column="5" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="imports" expanded="false" />
             <element signature="method#getAvailableResults#0;class#ResultsRepository#0" expanded="false" />
             <element signature="method#getChartData#0;class#ResultsRepository#0" expanded="false" />
             <element signature="method#getFeatureGridData#0;class#ResultsRepository#0" expanded="false" />
@@ -1575,10 +1295,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-          <folding>
-            <element signature="e#635#636#0" expanded="false" />
-            <element signature="e#679#680#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1586,9 +1303,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="14" column="13" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1596,22 +1311,14 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="74" column="56" selection-start-line="74" selection-start-column="56" selection-end-line="74" selection-end-column="56" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#756#757#0" expanded="false" />
-            <element signature="e#804#805#0" expanded="false" />
-            <element signature="e#1978#1979#0" expanded="false" />
-            <element signature="e#2041#2042#0" expanded="false" />
-            <element signature="e#2191#2192#0" expanded="false" />
-            <element signature="e#2243#2244#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/resources/embeddedDefinitions.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.36346865">
-          <caret line="109" column="3" selection-start-line="109" selection-start-column="3" selection-end-line="109" selection-end-column="3" />
+        <state vertical-scroll-proportion="2.6291513">
+          <caret line="95" column="33" selection-start-line="95" selection-start-column="33" selection-end-line="95" selection-end-column="33" />
           <folding />
         </state>
       </provider>
