@@ -37,7 +37,8 @@ public class Main {
         MongoClient connection = null;
 
         try {
-            Properties properties = loadProperties("app");
+
+            Properties properties = PropertiesManager.getInstance().getProperties();
             String host = properties.getProperty("mongo.host");
             int port = Integer.parseInt(properties.getProperty("mongo.port"));
 
@@ -57,36 +58,17 @@ public class Main {
             generator.generate();
 
         }
-        catch (java.net.UnknownHostException exception) {
+        catch (Exception ex) {
 
             status = false;
-            exception.printStackTrace();
-        }
-        catch (Exception exception) {
-
-            status = false;
-            exception.printStackTrace();
+            ex.printStackTrace();
         }
         finally {
 
-            connection.close();
+            if (connection != null)
+                connection.close();
         }
 
         return status;
-    }
-
-    private static Properties loadProperties(String name){
-
-        String fileName = String.format("%s.properties", name);
-
-        try (InputStream stream = Main.class.getClassLoader().getResourceAsStream(fileName)){
-            Properties properties = new Properties();
-            properties.load(stream);
-            return properties;
-        }
-        catch(Exception ex){
-            ex.printStackTrace();
-            return null;
-        }
     }
 }

@@ -37,8 +37,14 @@ public class PySparkInterpreter extends PythonInterpreter implements ExecuteResu
         sparkConf = new SparkConf()
                 .setMaster("local[*]")
                 .setAppName(name);
+
+        String pythonPath = this.getProperties().getProperty("PYTHONPATH");
+        if (pythonPath != null)
+            sparkConf.setExecutorEnv("PYTHONPATH", pythonPath);
+
         sparkContext = new JavaSparkContext(sparkConf);
         sqlContext = new SQLContext(sparkContext);
+
 
         this.sparkContext.addFile(String.format("%s/PySparkCSV.py", this.getWorkingDirectory().getAbsolutePath()));
     }

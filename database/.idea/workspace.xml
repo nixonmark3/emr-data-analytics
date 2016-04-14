@@ -2,30 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4d064dcd-1bb4-4983-a232-24e026e5d921" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingSourceType.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingSummaryRequest.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/sources/PollingSource.java" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PySparkOutputBlock.java" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PySparkOutputBlock.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PySparkStreamBlock.java" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/PySparkStreamBlock.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/SourceTypes.java" afterPath="$PROJECT_DIR$/../compiler/src/main/java/emr/analytics/diagram/interpreter/SourceTypes.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/PropertiesManager.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../algorithms/PLS.py" afterPath="$PROJECT_DIR$/../algorithms/PLS.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingRequest.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingRequest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingTask.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingTask.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingTasks.java" afterPath="$PROJECT_DIR$/../models/src/main/java/emr/analytics/models/messages/StreamingTasks.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/KafkaProducer.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/KafkaProducer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/TaskService.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/TaskService.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/sources/OpcPollingSource.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/sources/OpcPollingSource.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/sources/PiPollingSource.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/sources/PiPollingSource.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/sources/SimulatedSource.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/sources/SimulatedSource.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/sources/SourceFactory.java" afterPath="$PROJECT_DIR$/../service/src/main/java/emr/analytics/service/sources/SourceFactory.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/app/actors/AnalyticsClient.java" afterPath="$PROJECT_DIR$/../studio/app/actors/AnalyticsClient.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/app/controllers/Streaming.java" afterPath="$PROJECT_DIR$/../studio/app/controllers/Streaming.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/conf/routes" afterPath="$PROJECT_DIR$/../studio/conf/routes" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/services/diagramService.js" afterPath="$PROJECT_DIR$/../studio/public/scripts/services/diagramService.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/views/analyticControllers.js" afterPath="$PROJECT_DIR$/../studio/public/scripts/views/analyticControllers.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/views/setOutput.html" afterPath="$PROJECT_DIR$/../studio/public/scripts/views/setOutput.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/scripts/views/setStream.html" afterPath="$PROJECT_DIR$/../studio/public/scripts/views/setStream.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../studio/public/stylesheets/site.css" afterPath="$PROJECT_DIR$/../studio/public/stylesheets/site.css" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/Main.java" afterPath="$PROJECT_DIR$/../utilities/Wrapper/src/main/java/emr/analytics/wrapper/Main.java" />
     </list>
     <ignored path="database.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -49,11 +30,21 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="embeddedDefinitions.json" pinned="false" current-in-tab="true">
+      <file leaf-file-name="embeddedDefinitions.json" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/resources/embeddedDefinitions.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="2.6291513">
+            <state vertical-scroll-proportion="-59.375">
               <caret line="95" column="33" selection-start-line="95" selection-start-column="33" selection-end-line="95" selection-end-column="33" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/pom.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.546875">
+              <caret line="21" column="42" selection-start-line="21" selection-start-column="42" selection-end-line="21" selection-end-column="42" />
               <folding />
             </state>
           </provider>
@@ -118,10 +109,9 @@
     <option name="jreName" value="1.8" />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="30" />
-    <option name="y" value="25" />
-    <option name="width" value="1340" />
-    <option name="height" value="835" />
+    <option name="y" value="23" />
+    <option name="width" value="1401" />
+    <option name="height" value="877" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <OptionsSetting value="true" id="Add" />
@@ -956,14 +946,15 @@
       <workItem from="1456784269406" duration="436000" />
       <workItem from="1457061331501" duration="1268000" />
       <workItem from="1457645142607" duration="609000" />
+      <workItem from="1460512096844" duration="54000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="42666000" />
+    <option name="totallyTimeSpent" value="42720000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="30" y="25" width="1340" height="835" extended-state="0" />
+    <frame x="0" y="23" width="1401" height="877" extended-state="6" />
     <editor active="false" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -972,9 +963,9 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.20053835" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.27657935" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.27593818" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -1012,16 +1003,18 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/src/main/resources/embeddedDefinitions.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/emr/analytics/database/ResultsRepository.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="26" column="5" selection-start-line="26" selection-start-column="5" selection-end-line="26" selection-end-column="5" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="method#getAvailableResults#0;class#ResultsRepository#0" expanded="false" />
-            <element signature="method#getChartData#0;class#ResultsRepository#0" expanded="false" />
-            <element signature="method#getFeatureGridData#0;class#ResultsRepository#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1029,7 +1022,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1037,7 +1029,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="14" column="13" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1053,7 +1044,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="74" column="56" selection-start-line="74" selection-start-column="56" selection-end-line="74" selection-end-column="56" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1061,12 +1051,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="method#getAvailableResults#0;class#ResultsRepository#0" expanded="false" />
-            <element signature="method#getChartData#0;class#ResultsRepository#0" expanded="false" />
-            <element signature="method#getFeatureGridData#0;class#ResultsRepository#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1074,7 +1058,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1082,7 +1065,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="14" column="13" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1098,7 +1080,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="74" column="56" selection-start-line="74" selection-start-column="56" selection-end-line="74" selection-end-column="56" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1106,12 +1087,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="26" column="5" selection-start-line="26" selection-start-column="5" selection-end-line="26" selection-end-column="5" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="method#getAvailableResults#0;class#ResultsRepository#0" expanded="false" />
-            <element signature="method#getChartData#0;class#ResultsRepository#0" expanded="false" />
-            <element signature="method#getFeatureGridData#0;class#ResultsRepository#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1119,7 +1094,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1127,7 +1101,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="74" column="56" selection-start-line="74" selection-start-column="56" selection-end-line="74" selection-end-column="56" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1142,7 +1115,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="47" column="0" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1150,7 +1122,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="100" column="39" selection-start-line="100" selection-start-column="39" selection-end-line="100" selection-end-column="39" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1158,12 +1129,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="17" column="59" selection-start-line="17" selection-start-column="59" selection-end-line="17" selection-end-column="59" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="method#getAvailableResults#0;class#ResultsRepository#0" expanded="false" />
-            <element signature="method#getChartData#0;class#ResultsRepository#0" expanded="false" />
-            <element signature="method#getFeatureGridData#0;class#ResultsRepository#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1171,7 +1136,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1186,7 +1150,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="47" column="0" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1194,7 +1157,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="100" column="39" selection-start-line="100" selection-start-column="39" selection-end-line="100" selection-end-column="39" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1202,12 +1164,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="method#getAvailableResults#0;class#ResultsRepository#0" expanded="false" />
-            <element signature="method#getChartData#0;class#ResultsRepository#0" expanded="false" />
-            <element signature="method#getFeatureGridData#0;class#ResultsRepository#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1256,14 +1212,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.30442804">
-          <caret line="21" column="42" selection-start-line="21" selection-start-column="42" selection-end-line="21" selection-end-column="42" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/emr/analytics/database/DataSet.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1282,12 +1230,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="26" column="5" selection-start-line="26" selection-start-column="5" selection-end-line="26" selection-end-column="5" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="method#getAvailableResults#0;class#ResultsRepository#0" expanded="false" />
-            <element signature="method#getChartData#0;class#ResultsRepository#0" expanded="false" />
-            <element signature="method#getFeatureGridData#0;class#ResultsRepository#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1295,7 +1237,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1303,7 +1244,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="14" column="13" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1311,14 +1251,21 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="74" column="56" selection-start-line="74" selection-start-column="56" selection-end-line="74" selection-end-column="56" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/resources/embeddedDefinitions.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="2.6291513">
+        <state vertical-scroll-proportion="-59.375">
           <caret line="95" column="33" selection-start-line="95" selection-start-column="33" selection-end-line="95" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.546875">
+          <caret line="21" column="42" selection-start-line="21" selection-start-column="42" selection-end-line="21" selection-end-column="42" />
           <folding />
         </state>
       </provider>

@@ -1691,7 +1691,7 @@ analyticsApp
 
             $scope.dataStreams = temp;
 
-            var selectedStream = $scope.dataStreams.find(function(item){ return item.topic == $scope.streamConfig.dataSource.name; })
+            var selectedStream = $scope.dataStreams.find(function(item){ return item.topic == $scope.streamConfig.dataSource.name; });
             if(selectedStream)
                 $scope.streams.selected = selectedStream;
 

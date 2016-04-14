@@ -206,6 +206,13 @@ public class SparkService extends AbstractActor {
 
             List<String> arguments = new ArrayList<String>();
             arguments.add("java");
+
+            // if it exists - add the analytics configuration file path
+            String propertiesFilePath = TaskProperties.getInstance().getProperties().getProperty("analytics.configuration");
+            if (propertiesFilePath != null)
+                arguments.add("-Danalytics.configuration=" + propertiesFilePath);
+
+            // add class path and arguments
             arguments.add("-classpath");
             arguments.add(pathBuilder.substring(0, pathBuilder.length() - 1));
             arguments.add(SparkProcess.class.getCanonicalName());

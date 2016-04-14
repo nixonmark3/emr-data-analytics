@@ -53,7 +53,7 @@ class PLS(FunctionBlock):
 
             r2 = 1 - ss_error_residual/ss_error_total
 
-            coefficients = [x[0] for x in pls_model.coefs]
+            coefficients = [x[0] for x in pls_model.coef_]
 
             pls_coefficient = coll.OrderedDict(zip(x_df.columns.values, coefficients))
 
