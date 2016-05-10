@@ -24,6 +24,7 @@ class PCA_NIPALS(FunctionBlock):
             raw = df.values
 
             N, K = raw.shape
+            #print('size of raw = ', N, K)
 
             # Pre-processing: mean center and scale the data columns to unit variance
             X = raw - raw.mean(axis=0)
@@ -63,6 +64,7 @@ class PCA_NIPALS(FunctionBlock):
                     # 1: Regress the scores, t_a, onto every column in X; compute the
                     #    regression coefficient and store it in the loadings, p_a
                     #    i.e. p_a = (X' * t_a)/(t_a' * t_a)
+                    ##print('....in PCA NIPALS..... X.T* t_a and t_a.T * T_a', shape(np.dot(X.T, t_a)))
                     p_a = np.dot(X.T, t_a) / np.dot(t_a.T, t_a)
 
                     # 2: Normalize loadings p_a to unit length
@@ -92,8 +94,11 @@ class PCA_NIPALS(FunctionBlock):
 
             # Calculate variance captured
             eig_value, eig_vector = np.linalg.eig(np.cov(original_data.T))
+            #print('eig_value in PCA before argsort........\n', eig_value)
             eig_value_idx = eig_value.argsort()[::-1]
+            #print('eig_value_idx in PCA......\n', eig_value_idx)
             eig_value = eig_value[eig_value_idx]
+            #print('eig_value in PCA after argsort........\n', eig_value)
             eig_vector = eig_vector[:, eig_value_idx]
 
             # Calculate the variable contributions to score
@@ -110,6 +115,10 @@ class PCA_NIPALS(FunctionBlock):
                 for j in range(K):
                     # Calculate the variable contributions to T2
                     temp_x_score = original_data[i, j] * loadings[j, 0:A]
+                    # #print(' temp_x_score in PCA..======\n', temp_x_score)
+                    # #print('scores in varContrib=====\n', scores[i, 0:A])
+                    #print('eigen values in PCA ========XXxxxxxxxxXXXXXXXXXXXXXXX=\n', eig_value[0:A], type(eig_value))
+                    # #print('t2_lim========\n', t2_lim)
                     varContribT2[i, j] = np.dot(scores[i, 0:A] / eig_value[0:A], temp_x_score.T) / t2_lim
 
                     # Continue calculation of variable contributions to score
@@ -210,6 +219,10 @@ class PCA_NIPALS(FunctionBlock):
             FunctionBlock.save_all_results(self)
 
             FunctionBlock.report_status_complete(self)
+
+            # print(' before return call....PCA_Nipals..........')
+            # print('scores type in PCA NIPALs = ', type(scores))
+            # print('scores in PCA Nipals..................\n', scores)
 
             return {FunctionBlock.getFullPath(self, 'Loadings'): loadings_df,
                     FunctionBlock.getFullPath(self, 'Scores'): scores,

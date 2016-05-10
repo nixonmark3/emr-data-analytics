@@ -34,13 +34,15 @@ public class PLS extends BlockDefinition implements IExport {
         List<ConnectorDefinition> inputConnectors = new ArrayList<ConnectorDefinition>();
         inputConnectors.add(new ConnectorDefinition("x", DataType.FRAME.toString()));
         inputConnectors.add(new ConnectorDefinition("y", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("x_test", DataType.FRAME.toString()));
+        inputConnectors.add(new ConnectorDefinition("y_test", DataType.FRAME.toString()));
         return inputConnectors;
     }
 
     public List<ConnectorDefinition> createOutputConnectors() {
 
         List<ConnectorDefinition> outputConnectors = new ArrayList<ConnectorDefinition>();
-        outputConnectors.add(new ConnectorDefinition("model", DataType.LIST.toString(), true, true));
+        outputConnectors.add(new ConnectorDefinition("model", DataType.FRAME.toString()));
         outputConnectors.add(new ConnectorDefinition("x_mean", DataType.LIST.toString(), false, true));
         outputConnectors.add(new ConnectorDefinition("x_std", DataType.LIST.toString(), false, true));
         outputConnectors.add(new ConnectorDefinition("y_mean", DataType.LIST.toString(), false, true));

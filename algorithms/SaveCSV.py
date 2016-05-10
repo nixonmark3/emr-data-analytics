@@ -15,16 +15,18 @@ class SaveCSV(FunctionBlock):
 
             FunctionBlock.check_connector_has_one_wire(self, 'in')
 
-            df = results_table[self.input_connectors['in'][0]]
+            df1 = results_table[self.input_connectors['in'][0]]
+
+            #print('df in save csv......\n', df1)
 
             filename = self.parameters['Filename']
 
-            df.to_csv(filename)
+            df1.to_csv(filename)
 
-            FunctionBlock.save_results(self, df=df, statistics=True, plot=True)
+            FunctionBlock.save_results(self, df=df1, statistics=True, plot=True)
             FunctionBlock.report_status_complete(self)
 
-            return {FunctionBlock.getFullPath(self, 'out'): df}
+            return {FunctionBlock.getFullPath(self, 'out'): df1}
 
         except Exception as err:
             FunctionBlock.save_results(self)
